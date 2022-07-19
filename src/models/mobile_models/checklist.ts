@@ -8,8 +8,8 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const ProfileMobile = sequelize.define(
-    "profile-mobile",
+const Checklist = sequelize.define(
+    "checklist",
     {
         id: {
             type: Sequelize.INTEGER,
@@ -18,18 +18,17 @@ const ProfileMobile = sequelize.define(
             unique: true
 
         },
-        profile_name:{
+        description:{
             type:Sequelize.STRING,
-            primaryKey: true,
-            unique: true,
+            unique:true,
         },
-        profile_valid_date: Sequelize.DATEONLY,
-        profile_exp_date: Sequelize.DATEONLY,
+
         
-        ...base,
+        
+        // ...base,
     },
     {
-        tableName: "profileMobile",
+        tableName: "aa_checklist",
     }
 )
-export default  ProfileMobile ;
+export default  Checklist ;

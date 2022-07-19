@@ -1,10 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-import controller from "../controllers/itinerary"
+import controller from "../controllers/role-itinerary"
 const route = Router()
 
 export default (app: Router) => {
-    app.use("/itinerary", route)
+    app.use("/role-itinerary", route)
 
     route.get("/", controller.findAll)
     route.post("/", controller.create)

@@ -120,33 +120,84 @@ export default async ({ expressApp }) => {
       {name:'costsubModel',model: require('../models/costsub').default},
       {name:'costaccountModel',model: require('../models/costaccount').default},
       // mobile models
-      {name:'profileMobileModel',model: require('../models/mobile-models/profile-mobile').default},
-      {name:'userMobileModel',model: require('../models/mobile-models/user-mobile').default},
-      {name:'roleModel',model: require('../models/mobile-models/role').default},
-      {name:'customerMobileModel',model: require('../models/mobile-models/customer').default},
-      {name:'itineraryModel',model: require('../models/mobile-models/itinerary').default},
-      {name:'codeMobileModel',model: require('../models/mobile-models/codes').default},
-      {name:'addresseModel',model: require('../models/mobile-models/addresse').default},
+      // MOBILE DATABASE MODELS
+      {name:'userMobileModel',model: require('../models/mobile_models/userMobile').default},
+      {name:'roleModel',model: require('../models/mobile_models/role').default},
+      {name:'profileMobileModel',model: require('../models/mobile_models/profile').default},
+      {name:'menuModel',model: require('../models/mobile_models/menu').default},
+      {name:'itineraryModel',model: require('../models/mobile_models/itinerary').default},
+      {name:'serviceModel',model: require('../models/mobile_models/service').default},
+      {name:'customerMobileModel',model: require('../models/mobile_models/customer').default},
+      {name:'checklistModel',model: require('../models/mobile_models/checklist').default},
+      {name:'addresseModel',model: require('../models/mobile_models/addresse').default},
+      {name:'codeMobileModel',model: require('../models/mobile_models/codes').default},
+      //
+      {name:'profile_menuModel',model: require('../models/mobile_models/profile_menu').default},
+      {name:'role_itineraryModel',model: require('../models/mobile_models/role_itinerary').default},
+      {name:'itinerary_CustomerModel',model: require('../models/mobile_models/itinerary_customer').default},
+      {name:'parameterModel',model: require('../models/mobile_models/parameter').default},
+      
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
 
-  require('../models/address').default.hasOne(require('../models/provider').default,{foreignKey: 'vd_addr',sourceKey: 'ad_addr'})
-  require('../models/provider').default.belongsTo(require('../models/address').default,{  foreignKey: 'vd_addr', targetKey: 'ad_addr'})
+
   
   //associations between mobile models
-  require('../models/mobile-models/profile-mobile').default.hasOne(require('../models/mobile-models/user-mobile').default,{foreignKey: 'username', sourceKey:'profile_name'})
-  require('../models/mobile-models/user-mobile').default.belongsTo(require('../models/mobile-models/profile-mobile').default,{ foreignKey: 'username', targetKey:'profile_name'})
+   // profile - menu 
+   require('../models/mobile_models/profile').default.belongsToMany(require('../models/mobile_models/menu').default ,{through :require('../models/mobile_models/profile_menu').default})  
+   require('../models/mobile_models/menu').default.belongsToMany( require('../models/mobile_models/profile').default ,{through :require('../models/mobile_models/profile_menu').default})  
+   
+   // profile-menu - menu
+   require('../models/mobile_models/profile_menu').default.belongsToMany(require('../models/mobile_models/menu').default ,
+   {through :require('../models/mobile_models/profile_menu').default},
+     {foreignKey: 'menuId',sourceKey: 'id'}
+     )  
+   
+   require('../models/mobile_models/menu').default.hasOne(require('../models/mobile_models/profile_menu').default,
+    {foreignKey: 'menuId',sourceKey: 'id'})
+ 
+    // itinerary - customer 
+    require('../models/mobile_models/itinerary').default.belongsToMany(require('../models/mobile_models/customer').default,{through :require('../models/mobile_models/itinerary_customer').default})  
+    require('../models/mobile_models/customer').default.belongsToMany( require('../models/mobile_models/itinerary').default,{through :require('../models/mobile_models/itinerary_customer').default})  
+ 
+   // customer - itinerary-customer
+   require('../models/mobile_models/customer').default.belongsToMany(
+     require('../models/mobile_models/itinerary_customer').default ,
+     {through :require('../models/mobile_models/itinerary_customer').default},
+     {foreignKey: 'customer_id',sourceKey: 'id'}
+     )  
+     
+     require('../models/mobile_models/itinerary_customer').default.hasOne(
+       require('../models/mobile_models/customer').default,
+       {foreignKey: 'customer_id',sourceKey: 'id' ,constraints: false},
+       
+       )
+    // role - itinerary 
+    require('../models/mobile_models/role').default.belongsToMany(require('../models/mobile_models/itinerary').default
+    ,{through :require('../models/mobile_models/role_itinerary').default})
 
-  require('../models/mobile-models/customer').default.hasOne(require('../models/mobile-models/addresse').default,{foreignKey: 'customer_id',sourceKey: 'customer_name'})
-  require('../models/mobile-models/addresse').default.belongsTo(require('../models/mobile-models/customer').default,{  foreignKey: 'customer_id', targetKey: 'customer_name'})
+  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/userMobile').default,{foreignKey: 'username', sourceKey:'id'})
+  require('../models/mobile_models/userMobile').default.belongsTo(require('../models/mobile_models/profile').default,{ foreignKey: 'username', targetKey:'id'})
 
-  require('../models/mobile-models/user-mobile').default.hasOne(require('../models/mobile-models/role').default,{foreignKey: 'role_userMobileId',sourceKey: 'username'})
-  require('../models/mobile-models/role').default.belongsTo(require('../models/mobile-models/user-mobile').default,{  foreignKey: 'role_userMobileId', targetKey: 'username'})
+  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/addresse').default,{foreignKey: 'customer_id',sourceKey: 'id'})
+  require('../models/mobile_models/addresse').default.belongsTo(require('../models/mobile_models/customer').default,{  foreignKey: 'customer_id', targetKey: 'id'})
 
+  require('../models/mobile_models/userMobile').default.hasOne(require('../models/mobile_models/role').default,{foreignKey: 'role_userMobileId',sourceKey: 'id'})
+  require('../models/mobile_models/role').default.belongsTo(require('../models/mobile_models/userMobile').default,{  foreignKey: 'role_userMobileId', targetKey: 'id'})
+
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/service').default,{  foreignKey: 'service_roleId', sourceKey: 'id'})
+  require('../models/mobile_models/service').default.belongsTo(require('../models/mobile_models/role').default,{foreignKey: 'service_roleId',targetKey: 'id'})
+ 
+  require('../models/mobile_models/itinerary').default.hasOne(require('../models/mobile_models/service').default,{  foreignKey: 'service_itineraryId', sourceKey: 'id'})
+  require('../models/mobile_models/service').default.belongsTo(require('../models/mobile_models/itinerary').default,{  foreignKey: 'service_itineraryIdid', targetKey: 'id'})
+  
+  // associtations erp back office
   require('../models/profile').default.hasOne(require('../models/user').default,{foreignKey: 'usrd_profile',sourceKey: 'usrg_code'})
   require('../models/user').default.belongsTo(require('../models/profile').default,{  foreignKey: 'usrd_profile', targetKey: 'usrg_code'})
-
+  
+  require('../models/address').default.hasOne(require('../models/provider').default,{foreignKey: 'vd_addr',sourceKey: 'ad_addr'})
+  require('../models/provider').default.belongsTo(require('../models/address').default,{  foreignKey: 'vd_addr', targetKey: 'ad_addr'})
 
 
   require('../models/address').default.hasOne(require('../models/customer').default,{foreignKey: 'cm_addr',sourceKey: 'ad_addr'})

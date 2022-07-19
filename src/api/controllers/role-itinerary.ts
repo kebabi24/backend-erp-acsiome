@@ -1,25 +1,18 @@
-import ItineraryService from "../../services/itinerary"
-import CustomerItineraryService from "../../services/customer-itinerary"
+import RoleItineraryService from "../../services/role-itinerary"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
-    const {customers, itinerary} = req.body
-    //console.log(customers)
+
     logger.debug("Calling Create itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
-        const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService)
-        const itn = await ItineraryServiceInstance.create({...itinerary, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
-        for (let entry of customers) {
-            entry = { customerId: entry, itineraryId: itn.id }
-            await CustomerItineraryServiceInstance.create(entry)
-        }
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
+        const itn = await RoleItineraryServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
-            .json({ message: "created succesfully", data: { itn } })
+            .json({ message: "created succesfully", data:  itn })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -30,9 +23,9 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
         const {id} = req.params
-        const itn = await ItineraryServiceInstance.findOne({id})
+        const itn = await RoleItineraryServiceInstance.findOne({id})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: itn  })
@@ -46,9 +39,9 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
-        const itn = await ItineraryServiceInstance.find({})
-        //console.log(itn)
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
+        const itn = await RoleItineraryServiceInstance.find({})
+        console.log(itn)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: itn })
@@ -62,8 +55,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
-        const itn = await ItineraryServiceInstance.find({...req.body})
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
+        const itn = await RoleItineraryServiceInstance.find({...req.body})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: itn })
@@ -79,9 +72,9 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
     logger.debug("Calling update one  itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
         const {id} = req.params
-        const itn = await ItineraryServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        const itn = await RoleItineraryServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: itn  })
@@ -95,9 +88,9 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling update one  itn endpoint")
     try {
-        const ItineraryServiceInstance = Container.get(ItineraryService)
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
         const {id} = req.params
-        const itn = await ItineraryServiceInstance.delete({id})
+        const itn = await RoleItineraryServiceInstance.delete({id})
         return res
             .status(200)
             .json({ message: "deleted succesfully", data: id  })

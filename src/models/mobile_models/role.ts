@@ -23,18 +23,18 @@ const Role = sequelize.define(
             primaryKey: true,
             unique: true
         },
-        role_userMobileId :{
-            type: Sequelize.STRING,
+        role_userMobileId:{
+            type: Sequelize.INTEGER,
             references: {
-                model: "userMobile",
-                key: "username",
+                model: "aa_userMobile",
+                key: "id",
             },
         },
 
-         ...base,
+         //...base,
     },
     {
-        tableName: "role",
+        tableName: "aa_role",
     }
 )
 export default  Role;

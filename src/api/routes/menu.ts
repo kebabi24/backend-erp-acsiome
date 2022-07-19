@@ -1,15 +1,16 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-import controller from "../controllers/itinerary"
+import controller from "../controllers/menu"
 const route = Router()
 
 export default (app: Router) => {
-    app.use("/itinerary", route)
+    app.use("/mobile-menu", route)
 
     route.get("/", controller.findAll)
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
+    route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
 }

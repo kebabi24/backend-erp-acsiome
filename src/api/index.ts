@@ -62,7 +62,9 @@ import affectEmploye from "./routes/affect-employe"
 import role from "./routes/role"
 import codeMobile from "./routes/code-mobile"
 import addresseMobile from "./routes/addresse-mobile"
-//import addReport from "./routes/add-Report"
+import menu from "./routes/menu"
+import service from "./routes/mobile-service"
+import addReport from "./routes/add-report"
 import config from "./routes/config"
 import payMeth from "./routes/pay-meth"
 import invoiceOrderTemp  from'./routes/invoice-order-temp'
@@ -70,6 +72,8 @@ import worouting from "./routes/worouting"
 import bomPart from "./routes//bom-part"
 import costcenter from "./routes/costcenter"
 import generalLedger from "./routes/general-ledger"
+import itinerary from "./routes/itinerary"
+import roleItinerary from "./routes/role-itinerary"
 
 // guaranteed to get dependencies
 export default () => {
@@ -145,6 +149,10 @@ export default () => {
     role(app)
     codeMobile(app)
     addresseMobile(app)
-   
+    itinerary(app)
+    roleItinerary(app)
+    menu(app)
+    service(app)
+    addReport(app)
     return app
 }

@@ -9,6 +9,7 @@ export default class RoleService {
     ) {}
 
     public async create(data: any): Promise<any> {
+        console.log(data)
         try {
             const role = await this.roleModel.create({ ...data })
             this.logger.silly("create role mstr")

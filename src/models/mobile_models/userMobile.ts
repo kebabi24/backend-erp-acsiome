@@ -8,7 +8,7 @@ import base from "./base"
 const sequelize = Container.get("sequelize")
 
 const UserMobile = sequelize.define(
-    "user-mobile",
+    "userMobile",
     {
         id: {
             type: Sequelize.INTEGER,
@@ -25,12 +25,12 @@ const UserMobile = sequelize.define(
         },
         fullname: {type: Sequelize.STRING },
         email: {type: Sequelize.STRING },
-        user_password : {type : Sequelize.STRING},
-        profile_name :{
-            type: Sequelize.STRING,
+        password : {type : Sequelize.STRING},
+        profileId :{
+            type: Sequelize.INTEGER,
             references: {
-                model: "profileMobile",
-                key: "profile_name",
+                model: "aa_profile",
+                key: "id",
             },
         },
         language : {type: Sequelize.STRING},
@@ -38,7 +38,7 @@ const UserMobile = sequelize.define(
          ...base,
     },
     {
-        tableName: "userMobile",
+        tableName: "aa_userMobile",
     }
 )
 export default  UserMobile;

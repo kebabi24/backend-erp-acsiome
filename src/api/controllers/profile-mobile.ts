@@ -1,18 +1,31 @@
 import ProfileMobileService from "../../services/profile-mobile"
+import ProfileMenuService from "../../services/profile-menu"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{profile_name} = req.headers
-
+    const {profile, menus} = req.body
     logger.debug("Calling Create profile endpoint")
     try {
+       
         const profileMobileServiceInstance = Container.get(ProfileMobileService)
-        const profile = await profileMobileServiceInstance.create({...req.body, created_by:profile_name,created_ip_adr: req.headers.origin, last_modified_by:profile_name,last_modified_ip_adr: req.headers.origin})
+        const ProfileMenuServiceInstance = Container.get(ProfileMenuService)
+        const profiles = await profileMobileServiceInstance.create({...profile, created_by:profile.profile_name,created_ip_adr: req.headers.origin, last_modified_by:profile.profile_name,last_modified_ip_adr: req.headers.origin})
+        for (let entry of menus) {
+            if(entry > 100 ){
+                
+            }else{
+                entry = { profileId: profiles.dataValues.id, menuId: entry }
+                
+                await ProfileMenuServiceInstance.create(entry)
+            }
+            
+        }
         return res
             .status(201)
-            .json({ message: "created succesfully", data:  profile })
+            .json({ message: "created succesfully", data:  profiles })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

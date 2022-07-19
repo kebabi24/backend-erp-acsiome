@@ -2,7 +2,7 @@ import { Service, Inject } from "typedi"
 
 
 @Service()
-export default class customersSercice {
+export default class customersMobileSercice {
     constructor(
         @Inject("customerMobileModel") private customerMobileModel: Models.CustomerMobileModel,
 
@@ -34,9 +34,9 @@ export default class customersSercice {
 
     public async find(query: any): Promise<any> {
         try {
-            const roles = await this.customerMobileModel.findAll({where : query})
+            const customers = await this.customerMobileModel.findAll({where : query})
             this.logger.silly("find All custmers mstr")
-            return roles
+            return customers
         } catch (e) {
             this.logger.error(e)
             throw e

@@ -1,5 +1,8 @@
 import { Service, Inject } from "typedi"
-import argon2 from 'argon2'
+import customer from "../../api/controllers/customer";
+
+
+
 @Service()
 export default class UserMobileService {
     constructor(
@@ -18,74 +21,7 @@ export default class UserMobileService {
         @Inject("logger") private logger
     ) {}
 
-    public async create(data: any): Promise<any> {
-        try {
-            const password = await argon2.hash(data.password)
-            const user = await this.userMobileModel.create({ ...data, password })
-            this.logger.silly("create user mstr")
-            return user
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async findOne(query: any): Promise<any> {
-        try {
-            console.log( typeof query.username)
-            const user = await this.userMobileModel.findOne({ where: query })
-            this.logger.silly("find one user mstr")
-            return user
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async find(query: any): Promise<any> {
-        try {
-            const users = await this.userMobileModel.findAll({ where: query })
-            this.logger.silly("find All users mstr")
-            return users
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async update(data: any, query: any): Promise<any> {
-        const usrd_pwd = await argon2.hash(data.usrd_pwd)
-        try {
-            const user = await this.userMobileModel.update({ ...data, usrd_pwd }, { where: query })
-            this.logger.silly("update one user mstr")
-            return user
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-    public async updated(data: any, query: any): Promise<any> {
-        try {
-            const user = await this.userMobileModel.update(data, {
-                where: query,
-            })
-            this.logger.silly("update one tool mstr")
-            return user
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-    public async delete(query: any): Promise<any> {
-        try {
-            const user = await this.userMobileModel.destroy({ where: query })
-            this.logger.silly("delete one user mstr")
-            return user
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
+   
 
     public async getRole(query: any): Promise<any> {
         try {
@@ -172,7 +108,7 @@ export default class UserMobileService {
             });
 
             const menus = await this.menuModel.findAll({
-                where: { id : menusIDs}
+                where: { menu_id : menusIDs}
             })
 
             const menusFinal =[]
@@ -217,7 +153,7 @@ export default class UserMobileService {
         try{
             const it = await this.role_itineraryModel.findOne({where : query})
             const itineraryId = it.dataValues.itineraryId
-            const itinerary = await this.itineraryModel.findOne({ where: {id :itineraryId }})
+            const itinerary = await this.itineraryModel.findOne({ where: {itinerary_id :itineraryId }})
             // console.log(itinerary.dataValues)
             return itinerary.dataValues;
         }catch(e){
@@ -242,7 +178,7 @@ export default class UserMobileService {
             });
 
             const customers = await this.customerMobileModel.findAll({
-                where: { id : customersIDs}
+                where: { customer_id : customersIDs}
             })
 
             const customersFinal =[]
@@ -293,7 +229,7 @@ export default class UserMobileService {
            
             const itinerariesData = await this.itineraryModel.findAll({
                 where :{
-                    id : itinerariesIds
+                    itinerary_id : itinerariesIds
                 }
             })
             
@@ -305,7 +241,7 @@ export default class UserMobileService {
             const customers = []
             
             for(const itinerary of itineraries ){
-                const customer = await this.getCustomers({itineraryId:itinerary.id})
+                const customer = await this.getCustomers({itineraryId:itinerary.itinerary_id})
                 
                 customers.push( customer)
             }
@@ -330,4 +266,3 @@ export default class UserMobileService {
         }
     }
 }
-

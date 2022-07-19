@@ -93,13 +93,26 @@ declare global {
     export type CostcenterModel = S.Model;
     export type CostsubModel = S.Model;
     export type CostaccountModel = S.Model;
-    export type ProfileMobileModel = S.Model;
+    //
     export type UserMobileModel = S.Model;
+    export type ProfileMobileModel = S.Model;
     export type RoleModel = S.Model;
-    export type CustomerMobileModel = S.Model;
+    export type MenuModel = S.Model;
+    export type Profile_menuModel = S.Model;
+    export type ServiceModel = S.Model;
     export type ItineraryModel = S.Model;
+    export type Itinerary_CustomerModel = S.Model;
+    export type CustomerMobileModel = S.Model;
+    export type ChecklistModel = S.Model;
+    export type Role_itineraryModel = S.Model;
+    export type ParameterModel =S.Model;
     export type CodeMobileModel = S.Model;
     export type AddresseMobileModel = S.Model;
+   
+
+   
+
+
   }
   
 }

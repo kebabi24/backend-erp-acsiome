@@ -1,17 +1,25 @@
 import RoleService from "../../services/role"
+import RoleItineraryService from "../../services/role-itinerary"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{role_name} = req.headers
+    const {role, itinerary} = req.body
+    //console.log(role.role_name)
     logger.debug("Calling Create role endpoint")
     try {
         const RoleServiceInstance = Container.get(RoleService)
-        const role = await RoleServiceInstance.create({...req.body, created_by:role_name,created_ip_adr: req.headers.origin,last_modified_by:role_name,last_modified_ip_adr: req.headers.origin})
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
+        const new_role = await RoleServiceInstance.create({...role, created_by:role.role_name,created_ip_adr: req.headers.origin,last_modified_by:role.role_name,last_modified_ip_adr: req.headers.origin})
+        for (let entry of itinerary) {
+            entry = { itineraryId: entry, roleId: new_role.id }
+            await RoleItineraryServiceInstance.create(entry)
+        }
         return res
             .status(201)
-            .json({ message: "created succesfully", data:  role })
+            .json({ message: "created succesfully", data:  new_role })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

@@ -68,11 +68,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
+    console.log(typeof req.body.username)
     logger.debug("Calling find one by  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
         const users = await userMobileServiceInstance.findOne({...req.body})
-        console.log(users)
+        //console.log(users)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: users })
@@ -149,6 +150,83 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const signin = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling user mobile login endpoint")
+
+    const userMobileServiceInstanse = Container.get(UserMobileService)
+
+    try{
+        const role_id = req.body.id;
+        const role = await userMobileServiceInstanse.getRole({id : role_id})
+
+        // if the role id doesn't exist 
+        if(!role){
+            return res.status(404).json({message:'No role exist with such an id '})
+        }
+        else { 
+
+            // these data is the same for both response cases
+            const userMobile_id = role.role_userMobileId; 
+            const userMobile =  await userMobileServiceInstanse.getUser({id : userMobile_id})
+            const profile = await userMobileServiceInstanse.getProfile({id: userMobile.profileId })
+            const menus = await userMobileServiceInstanse.getMenus({ profileId:userMobile.profileId})
+            const parameter = await userMobileServiceInstanse.getParameter({})
+            const checklist = await userMobileServiceInstanse.getChecklist()
+            
+            // service created on backend 
+            if(parameter.hold === true){
+                const service  = await userMobileServiceInstanse.getService({service_roleId : role.id }, true)
+                const itinerary = await userMobileServiceInstanse.getItinerary({id :service.service_itineraryId })
+                const itinerary2 = await userMobileServiceInstanse.getItineraryV2({roleId : role.id})
+                const customers = await userMobileServiceInstanse.getCustomers({itineraryId:itinerary.id })
+
+                return res
+                    .status(202)
+                    .json({
+                        message:'Data correct !', 
+                        service_creation:'Service creation handled by the admin/ test service_mode=1',
+                        service_mode:'1',
+                        userMobile : userMobile,
+                        parameter:parameter,
+                        role :role ,
+                        profile: profile,
+                        menus : menus,
+                        service : service,
+                        itinerary : itinerary2,
+                        customers:customers,
+                        checklist: checklist,
+                    })
+            }
+            else{
+                const iitineraries = await userMobileServiceInstanse.getItineraries({roleId : role.id })
+                return res
+                    .status(202)
+                    .json({
+                        message:'Data correct !', 
+                        service_creation:'Service creation handled by the user / test service_mode = 0',
+                        service_mode:'0',
+                        userMobile : userMobile,
+                        parameter:parameter,
+                        role :role ,
+                        profile: profile,
+                        menus : menus,
+                        checklist: checklist,
+                        iitineraries:iitineraries,
+                    })
+            }
+        }      
+    }
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+
+
+
 export default {
     create,
     findOne,
@@ -158,5 +236,6 @@ export default {
     findAllwithDetails,
     update,
     updated,
-    deleteOne
+    deleteOne,
+    signin
 }

@@ -8,8 +8,8 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const Customer = sequelize.define(
-    "customer",
+const CustomerMobile = sequelize.define(
+    "customerMobile",
     {
         id: {
             type: Sequelize.INTEGER,
@@ -41,4 +41,4 @@ const Customer = sequelize.define(
         tableName: "aa_customer",
     }
 )
-export default  Customer ;
+export default  CustomerMobile ;

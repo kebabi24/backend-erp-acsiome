@@ -7,8 +7,8 @@ import base from "./base"
 
 const sequelize = Container.get("sequelize")
 
-const Itinerary = sequelize.define(
-    "itinerary",
+const Menu = sequelize.define(
+    "menu",
     {
         id: {
             type: Sequelize.INTEGER,
@@ -18,22 +18,31 @@ const Itinerary = sequelize.define(
 
         },
        
-        itinerary_name: {
+        name: {
             type: Sequelize.STRING,
             primaryKey: true,
             unique: true
         },
-        itinerary_type :{
+        menu_description :{
             type: Sequelize.STRING,
         },
-        itinerary_day :{
+        menu_active :{
+            type: Sequelize.BOOLEAN,
+        },
+        menu_goto :{
+            type: Sequelize.STRING,
+        },
+        menu_type :{
+            type: Sequelize.STRING,
+        },
+        menu_image :{
             type: Sequelize.STRING,
         },
 
-         ...base,
+        // ...base,
     },
     {
-        tableName: "itinerary",
+        tableName: "aa_menu",
     }
 )
-export default  Itinerary;
+export default  Menu;

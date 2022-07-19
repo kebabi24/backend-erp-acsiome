@@ -13,10 +13,10 @@ const Addresses = sequelize.define(
             unique: true
         },
         customer_id :{
-            type: Sequelize.STRING,
+            type: Sequelize.INTEGER,
             references: {
                 model: "aa_customer",
-                key: "customer_name",
+                key: "id",
             },
         },
         addresse_one:{type:Sequelize.STRING,},
