@@ -3,11 +3,12 @@ import { Container } from "typedi"
 
 import Sequelize from "sequelize"
 
-import base from "./base"
+import base from "../base"
+
 
 const sequelize = Container.get("sequelize")
 
-const Profile_Menu  = sequelize.define(
+const Profile_Menu = sequelize.define(
     "profile_menu",
     {
         id: {
@@ -17,24 +18,22 @@ const Profile_Menu  = sequelize.define(
             unique: true
 
         },
-       
-        profileId:{
-            type: Sequelize.INTEGER,
+        profile_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_profile",
-                key: "id",
+                key: "profile_code",
             },
         },
-        menuId:{
-            type: Sequelize.INTEGER,
+        menu_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_menu",
-                key: "id",
+                key: "menu_code",
             },
         },
-       
-
         // ...base,
+        
     },
     {
         tableName: "aa_profile_menu",

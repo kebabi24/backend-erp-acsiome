@@ -15,9 +15,12 @@ export default class UserMobileService {
         @Inject("checklistModel") private checklistModel: Models.ChecklistModel,
         @Inject("role_itineraryModel") private role_itineraryModel: Models.Role_itineraryModel,
         @Inject("parameterModel") private parameterModel: Models.ParameterModel,
+        @Inject("tokenSerieModel") private tokenSerieModel: Models.TokenSerieModel,
         @Inject("logger") private logger
     ) {}
 
+
+    // ******************** CREATE **************************
     public async create(data: any): Promise<any> {
         try {
             const password = await argon2.hash(data.password)
@@ -30,6 +33,7 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** FIND ONE  **************************
     public async findOne(query: any): Promise<any> {
         try {
             console.log( typeof query.username)
@@ -42,6 +46,7 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** FIND **************************
     public async find(query: any): Promise<any> {
         try {
             const users = await this.userMobileModel.findAll({ where: query })
@@ -53,6 +58,7 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** UPDATE **************************
     public async update(data: any, query: any): Promise<any> {
         const usrd_pwd = await argon2.hash(data.usrd_pwd)
         try {
@@ -64,6 +70,8 @@ export default class UserMobileService {
             throw e
         }
     }
+
+    // ******************** UPDATED **************************
     public async updated(data: any, query: any): Promise<any> {
         try {
             const user = await this.userMobileModel.update(data, {
@@ -76,6 +84,8 @@ export default class UserMobileService {
             throw e
         }
     }
+
+    // ******************** DELETE **************************
     public async delete(query: any): Promise<any> {
         try {
             const user = await this.userMobileModel.destroy({ where: query })
@@ -87,92 +97,74 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** GET ROLE **************************
     public async getRole(query: any): Promise<any> {
         try {
             const role = await this.roleModel.findOne({ where: query})
             return role.dataValues;
         } catch (e) {
+            console.log('Error from service-getRole')
             this.logger.error(e)
             throw e
         }
         // this.logger.silly("find one user mstr")
     }
 
+
+    // ******************** GET PARAMETER **************************
     public async getParameter(query: any): Promise<any> {
         try {
-            const parameter = await this.parameterModel.findOne({ where: {profileId : 1}})
+            const parameter = await this.parameterModel.findOne({ where: query})
             return parameter.dataValues;
         } catch (e) {
+            console.log('Error from service-getParameter')
             this.logger.error(e)
             throw e
         }
         // this.logger.silly("find one user mstr")
     }
 
+    // ******************** GET USER **************************
     public async getUser(query: any): Promise<any> {
         try {
             const user = await this.userMobileModel.findOne({ where: query})
 
             return user.dataValues;
         } catch (e) {
+            console.log('Error from service-getUser')
             this.logger.error(e)
             throw e
         }
         // this.logger.silly("find one user mstr")
     }
 
+
+    // ******************** GET PROFILE **************************
     public async getProfile(query: any): Promise<any> {
         try {
             const profile = await this.profileMobileModel.findOne({ where: query})
             return profile.dataValues;
         } catch (e) {
+            console.log('Error from service-getProfile')
             this.logger.error(e)
             throw e
         }
         // this.logger.silly("find one user mstr")
     }
 
+    // ******************** GET MENUS **************************
     public async getMenus(query: any): Promise<any> {
-        try {
-            // const menus = await this.menuModel.findAll({ 
-            //     where:{ profileId : 1 },
-            //     include:{
-            //         model: this.profileMobileModel,
-            //     }
-               
-            // })
-            // const menus = await this.profile_menuModel.findAll({
-            //     where:{profile_id :1},
-            //     include: {
-            //         model: this.menuModel,
-            //         where:{
-                        
-            //         }
-            //       }
-            // })
-            // const menus = await this.menuModel.findAll({
-            //     where:{},
-            //     include:{
-            //         model : this.profile_menuModel,
-            //          where :{
-            //             profile_menu_id : 1
-            //          },
-            //         //  through: { attributes: [] }
-            //     },
-            // })
+        try {    
             const menusData = await this.profile_menuModel.findAll({
-                where: query ,
-                include:{
-                    model : this.menuModel,
-                }
+                where: query ,  
             })
-            var menusIDs = []
+            var menusCodes = []
             menusData.forEach(menu => {
-               menusIDs.push(menu.dataValues.menuId);
+                menusCodes.push(menu.dataValues.menu_code);
             });
 
             const menus = await this.menuModel.findAll({
-                where: { id : menusIDs}
+                where: { menu_code : menusCodes}
             })
 
             const menusFinal =[]
@@ -183,66 +175,71 @@ export default class UserMobileService {
 
             return menusFinal;
         } catch (e) {
+            console.log('Error from service-getMenus')
             this.logger.error(e)
             throw e
         }
         this.logger.silly("find one user mstr")
     }
 
-    public async getService(query: any, hold: Boolean): Promise<any> {
+
+    // ******************** GET SERVICE **************************
+    public async getService(query: any): Promise<any> {
         try {
             
                 const service = await this.serviceModel.findOne({ where: query})
                 return service.dataValues;
              
         } catch (e) {
+            console.log('Error from service-getService')
             this.logger.error(e)
             throw e
         }
     }
 
-    // from service 
-    public async getItinerary(query: any): Promise<any> {
+    // ******************** GET ITINERARY FROM SERVICE **************************
+    public async getItineraryFromService(query: any): Promise<any> {
         try {
             const itinerary = await this.itineraryModel.findOne({ where: query})
             return itinerary.dataValues;
         } catch (e) {
+            console.log('Error from service-getItinerary')
             this.logger.error(e)
             throw e
         }
     }
 
-    // from role_itinerary
-    public async getItineraryV2(query: any): Promise<any>{
+    // ******************** GET ITINEREARY FROM ROLE_ITINERARY **************************
+    public async getItineraryFromRoleItinerary(query: any): Promise<any>{
         try{
             const it = await this.role_itineraryModel.findOne({where : query})
-            const itineraryId = it.dataValues.itineraryId
-            const itinerary = await this.itineraryModel.findOne({ where: {id :itineraryId }})
-            // console.log(itinerary.dataValues)
+            const itinerary_code = it.dataValues.itinerary_code
+            const itinerary = await this.itineraryModel.findOne({ where: {itinerary_code  :itinerary_code }})
+            
             return itinerary.dataValues;
         }catch(e){
+            console.log('Error from service-getInineraryV2')
             this.logger.error(e)
             throw e
         }
     }
 
+
+    // ******************** GET CUSTOMERS **************************
     public async getCustomers(query: any): Promise<any> {
         try {
             
-            const customersIdsData = await this.itineraryCustomerModel.findAll({
-                where: query,
-                include:{
-                    model : this.customerMobileModel,
-                }
+            const customersCodesData = await this.itineraryCustomerModel.findAll({
+                where: query,  
             })  
 
-             var customersIDs = []
-            customersIdsData.forEach(customer => {
-               customersIDs.push(customer.dataValues.customerId);
+             var customersCodes = []
+             customersCodesData.forEach(customer => {
+                customersCodes.push(customer.dataValues.customer_code);
             });
 
             const customers = await this.customerMobileModel.findAll({
-                where: { id : customersIDs}
+                where: { customer_code : customersCodes}
             })
 
             const customersFinal =[]
@@ -253,12 +250,15 @@ export default class UserMobileService {
 
             return customersFinal;
         } catch (e) {
+            console.log('Error from service-getCustomers')
             this.logger.error(e)
             throw e
         }
         this.logger.silly("find one user mstr")
     }
 
+
+    // ******************** GET CHECKLIST **************************
     public async getChecklist(): Promise<any> {
         try {
             const checklistData = await this.checklistModel.findAll()
@@ -271,11 +271,13 @@ export default class UserMobileService {
             
             return checklist
         } catch (e) {
+            console.log('Error from service-getChecklist')
             this.logger.error(e)
             throw e
         }
     }
 
+    // ******************** GET ITINERARIES **************************
     public async getItineraries(query: any): Promise<any>{
         try{
 
@@ -285,15 +287,15 @@ export default class UserMobileService {
             })
 
             // getting pure data
-            const itinerariesIds = []
+            const itinerariesCodes = []
             itinerariesIdsData.forEach(element => {
-                itinerariesIds.push(element.dataValues.itineraryId)
+                itinerariesCodes.push(element.dataValues.itinerary_code, )
             });
 
            
             const itinerariesData = await this.itineraryModel.findAll({
                 where :{
-                    id : itinerariesIds
+                    itinerary_code : itinerariesCodes
                 }
             })
             
@@ -305,12 +307,11 @@ export default class UserMobileService {
             const customers = []
             
             for(const itinerary of itineraries ){
-                const customer = await this.getCustomers({itineraryId:itinerary.id})
+                const customer = await this.getCustomers({itinerary_code:itinerary.itinerary_code})
                 
                 customers.push( customer)
             }
 
-            console.log(customers)
 
             const response = []
 
@@ -325,9 +326,28 @@ export default class UserMobileService {
             return response
 
         } catch (e) {
+            console.log('Error from service-getItineraries')
             this.logger.error(e)
             throw e
         }
     }
+
+
+    // ******************** GET TOKENSERIE **************************
+    public async getTokenSerie(query: any): Promise<any> {
+        try {
+            
+                const tokenSerie = await this.tokenSerieModel.findOne({ where: query})
+
+                return tokenSerie.dataValues;
+             
+        } catch (e) {
+            console.log('Error from service-getTokenSerie')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
 }
 

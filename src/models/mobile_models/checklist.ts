@@ -18,9 +18,13 @@ const Checklist = sequelize.define(
             unique: true
 
         },
-        description:{
+        checklist_code:{
             type:Sequelize.STRING,
+            primaryKey:true,
             unique:true,
+        },
+        description:{
+            type:Sequelize.STRING
         },
 
         

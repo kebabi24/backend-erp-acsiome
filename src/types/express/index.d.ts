@@ -108,6 +108,7 @@ declare global {
     export type ParameterModel =S.Model;
     export type CodeMobileModel = S.Model;
     export type AddresseMobileModel = S.Model;
+    export type TokenSerieModel = S.Model;
    
 
    

@@ -3,11 +3,13 @@ import { Container } from "typedi"
 
 import Sequelize from "sequelize"
 
-import base from "./base"
+import base from "../base"
+import { truncateSync } from "fs"
+
 
 const sequelize = Container.get("sequelize")
 
-const Itinerary_Customer  = sequelize.define(
+const Itinerary_Customer = sequelize.define(
     "itinerary_customer",
     {
         id: {
@@ -15,27 +17,26 @@ const Itinerary_Customer  = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
             unique: true
-
         },
-       
-        itineraryId:{
-            type: Sequelize.INTEGER,
+        itinerary_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_itinerary",
-                key: "id",
+                key: "itinerary_code",
             },
         },
-        customerId:{
-            type: Sequelize.INTEGER,
+        customer_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_customer",
-                key: "id",
+                key: "customer_code",
             },
         },
-         //...base,
+        
+        // ...base,
     },
     {
         tableName: "aa_itinerary_customer",
     }
 )
-export default  Itinerary_Customer ;
+export default   Itinerary_Customer ;

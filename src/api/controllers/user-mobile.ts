@@ -116,6 +116,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
 const updated = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
@@ -157,8 +158,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
     const userMobileServiceInstanse = Container.get(UserMobileService)
 
     try{
-        const role_id = req.body.id;
-        const role = await userMobileServiceInstanse.getRole({id : role_id})
+        const role_code = req.body.role_code;
+        const role = await userMobileServiceInstanse.getRole({role_code : role_code})
 
         // if the role id doesn't exist 
         if(!role){
@@ -167,27 +168,28 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         else { 
 
             // these data is the same for both response cases
-            const userMobile_id = role.role_userMobileId; 
-            const userMobile =  await userMobileServiceInstanse.getUser({id : userMobile_id})
-            const profile = await userMobileServiceInstanse.getProfile({id: userMobile.profileId })
-            const menus = await userMobileServiceInstanse.getMenus({ profileId:userMobile.profileId})
-            const parameter = await userMobileServiceInstanse.getParameter({})
+
+            const user_mobile_code = role.user_mobile_code; 
+            const userMobile =  await userMobileServiceInstanse.getUser({user_mobile_code : user_mobile_code})
+            const profile = await userMobileServiceInstanse.getProfile({profile_code: userMobile.profile_code })
+            const menus = await userMobileServiceInstanse.getMenus({ profile_code:userMobile.profile_code})
+            const parameter = await userMobileServiceInstanse.getParameter({profile_code:userMobile.profile_code})
             const checklist = await userMobileServiceInstanse.getChecklist()
             
             // service created on backend 
             if(parameter.hold === true){
-                const service  = await userMobileServiceInstanse.getService({service_roleId : role.id }, true)
-                const itinerary = await userMobileServiceInstanse.getItinerary({id :service.service_itineraryId })
-                const itinerary2 = await userMobileServiceInstanse.getItineraryV2({roleId : role.id})
-                const customers = await userMobileServiceInstanse.getCustomers({itineraryId:itinerary.id })
+
+                const service  = await userMobileServiceInstanse.getService({role_code :role.role_code })
+                // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
+                const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({role_code : role.role_code})
+                const customers = await userMobileServiceInstanse.getCustomers({itinerary_code: itinerary2.itinerary_code })
+                const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
 
                 return res
                     .status(202)
                     .json({
-                        message:'Data correct !', 
-                        service_creation:'Service creation handled by the admin/ test service_mode=1',
-                        service_mode:'1',
-                        userMobile : userMobile,
+                        service_creation:'Service creation handled by the admin',
+                        user_mobile : userMobile,
                         parameter:parameter,
                         role :role ,
                         profile: profile,
@@ -196,23 +198,26 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         itinerary : itinerary2,
                         customers:customers,
                         checklist: checklist,
+                        token_serie:tokenSerie,
                     })
             }
+            // service created by mobile user
             else{
-                const iitineraries = await userMobileServiceInstanse.getItineraries({roleId : role.id })
+                const iitineraries = await userMobileServiceInstanse.getItineraries({role_code : role.role_code })
+                const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
+                
                 return res
                     .status(202)
                     .json({
-                        message:'Data correct !', 
-                        service_creation:'Service creation handled by the user / test service_mode = 0',
-                        service_mode:'0',
-                        userMobile : userMobile,
+                        service_creation:'Service creation handled by the user',
+                        user_mobile : userMobile,
                         parameter:parameter,
                         role :role ,
                         profile: profile,
                         menus : menus,
                         checklist: checklist,
                         iitineraries:iitineraries,
+                        token_serie:tokenSerie,
                     })
             }
         }      

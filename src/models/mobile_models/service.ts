@@ -3,54 +3,49 @@ import { Container } from "typedi"
 
 import Sequelize from "sequelize"
 
-import base from "./base"
+import base from "../base"
+
 
 const sequelize = Container.get("sequelize")
 
 const Service = sequelize.define(
     "service",
-    {
-        id: {
+    {   
+        id:{
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
-            unique: true
-
+            unique: true  
         },
-       
-        service_period_activate_date: {
+        service_code: {
             type: Sequelize.STRING,
+            primaryKey: true,
+            unique: true
         },
-        service_creation_date :{
-            type: Sequelize.DATEONLY,
-        },
-        service_closing_date :{
-            type: Sequelize.DATEONLY,
-        },
-        service_roleId :{
-            type: Sequelize.INTEGER,
+        service_period_activate_date:{type:Sequelize.DATE},
+        service_creation_date:{type:Sequelize.DATE},
+        service_closing_date:{type:Sequelize.DATE},
+        role_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_role",
-                key: "id",
+                key: "role_code",
             },
         },
-        service_itineraryId :{
-            type: Sequelize.INTEGER,
+        itinerary_code:{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_itinerary",
-                key: "id",
+                key: "itinerary_code",
             },
         },
-        service_open :{
-            type: Sequelize.BOOLEAN,
-        },
+        service_open:{type:Sequelize.BOOLEAN},
         service_kmdep:{type:Sequelize.STRING},
         service_kmarr:{type:Sequelize.STRING}
-
         // ...base,
     },
     {
         tableName: "aa_service",
     }
 )
-export default  Service;
+export default  Service ;

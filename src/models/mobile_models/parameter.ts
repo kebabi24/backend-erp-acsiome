@@ -4,19 +4,24 @@ import { Container } from "typedi"
 import Sequelize from "sequelize"
 
 import base from "../base"
+import { truncateSync } from "fs"
 
 
 const sequelize = Container.get("sequelize")
 
 const Parameter = sequelize.define(
     "parameter",
-    {
-        id: {
+    {   
+        id:{
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             unique: true
-
+        },
+        parameter_code: {
+            type: Sequelize.STRING, 
+            primaryKey: true,
+            unique: true
         },
         parameter_name:{
             type:Sequelize.STRING,
@@ -29,11 +34,12 @@ const Parameter = sequelize.define(
         hold:{
             type: Sequelize.BOOLEAN,
         },
-        profileId:{
-            type: Sequelize.INTEGER,
+        profile_code:{
+            type: Sequelize.STRING,
+            unique: true,
             references: {
                 model: "aa_profile",
-                key: "id",
+                key: "profile_code",
             },
         }
 

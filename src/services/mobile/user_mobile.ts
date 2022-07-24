@@ -18,6 +18,7 @@ export default class UserMobileService {
         @Inject("checklistModel") private checklistModel: Models.ChecklistModel,
         @Inject("role_itineraryModel") private role_itineraryModel: Models.Role_itineraryModel,
         @Inject("parameterModel") private parameterModel: Models.ParameterModel,
+        @Inject("tokenSerieModel") private tokenSerieModel: Models.TokenSerieModel,
         @Inject("logger") private logger
     ) {}
 

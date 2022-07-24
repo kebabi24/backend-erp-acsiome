@@ -8,28 +8,29 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const Profile  = sequelize.define(
+const Profile = sequelize.define(
     "profile",
-    {
-        id: {
+    {   
+        id:{
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             unique: true
-
+        },
+        profile_code: {
+            type: Sequelize.STRING,
+            primaryKey: true,
+            unique: true
         },
         profile_name:{
             type:Sequelize.STRING,
-            primaryKey: true,
-            unique: true,
+            unique:true,
         },
-        profile_valid_date: Sequelize.DATEONLY,
-        profile_exp_date: Sequelize.DATEONLY,
         
-        //...base,
+        // ...base,
     },
     {
         tableName: "aa_profile",
     }
 )
-export default  Profile  ;
+export default  Profile ;

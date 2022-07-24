@@ -2,40 +2,40 @@ import { Container } from "typedi"
 
 
 import Sequelize from "sequelize"
-
-import base from "./base"
+import base from "../base"
+import { truncateSync } from "fs"
 
 const sequelize = Container.get("sequelize")
 
 const UserMobile = sequelize.define(
     "userMobile",
-    {
-        id: {
+    {   
+        id:{
             type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             unique: true
-
         },
-       
-        username: {
+        user_mobile_code: {
             type: Sequelize.STRING,
             primaryKey: true,
             unique: true
         },
-        fullname: {type: Sequelize.STRING },
-        email: {type: Sequelize.STRING },
+       
+        username: {type: Sequelize.STRING },
         password : {type : Sequelize.STRING},
-        profileId :{
-            type: Sequelize.INTEGER,
+        profile_code :{
+            type: Sequelize.STRING,
+            primaryKey: true,
+            unique: true,
             references: {
                 model: "aa_profile",
-                key: "id",
+                key: "profile_code",
             },
         },
         language : {type: Sequelize.STRING},
         hold :   {type:Sequelize.BOOLEAN},
-         ...base,
+        // ...base,
     },
     {
         tableName: "aa_userMobile",
