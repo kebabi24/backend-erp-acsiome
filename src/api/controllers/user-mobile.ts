@@ -219,7 +219,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
             }
             // service created by mobile user
             else{
-                const iitineraries = await userMobileServiceInstanse.getItineraries({role_code : role.role_code })
+                // const iitineraries = await userMobileServiceInstanse.getItineraries({role_code : role.role_code })
+                const iitineraries = await userMobileServiceInstanse.getItinerariesOnly({role_code : role.role_code })
+                const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({role_code : role.role_code })
+                const customers = await userMobileServiceInstanse.getCustomersOnly({role_code : role.role_code })
                 const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
                 
                 return res
@@ -233,7 +236,9 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         profile: profile,
                         menus : menus,
                         checklist: checklist,
-                        iitineraries:iitineraries,
+                        itinerary:iitineraries,
+                        iitineraries_customers:iitineraries_customers,
+                        customers:customers,
                         token_serie:tokenSerie,
                     })
             }

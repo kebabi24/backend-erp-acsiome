@@ -25,7 +25,7 @@ export default class UserMobileService {
         try {
             const password = await argon2.hash(data.password)
             const user = await this.userMobileModel.create({ ...data, password })
-            this.logger.silly("create user mstr")
+            this.logger.silly("user mobile created")
             return user
         } catch (e) {
             this.logger.error(e)
@@ -110,7 +110,6 @@ export default class UserMobileService {
         // this.logger.silly("find one user mstr")
     }
 
-
     // ******************** GET PARAMETER **************************
     public async getParameter(query: any): Promise<any> {
         try {
@@ -137,7 +136,6 @@ export default class UserMobileService {
         }
         // this.logger.silly("find one user mstr")
     }
-
 
     // ******************** GET PROFILE **************************
     public async getProfile(query: any): Promise<any> {
@@ -182,7 +180,6 @@ export default class UserMobileService {
         this.logger.silly("find one user mstr")
     }
 
-
     // ******************** GET SERVICE **************************
     public async getService(query: any): Promise<any> {
         try {
@@ -224,7 +221,6 @@ export default class UserMobileService {
         }
     }
 
-
     // ******************** GET CUSTOMERS **************************
     public async getCustomers(query: any): Promise<any> {
         try {
@@ -256,7 +252,6 @@ export default class UserMobileService {
         }
         this.logger.silly("find one user mstr")
     }
-
 
     // ******************** GET CHECKLIST **************************
     public async getChecklist(): Promise<any> {
@@ -348,6 +343,119 @@ export default class UserMobileService {
         }
     }
 
+    
+    // ******************** GET ITINERARIES ONLY**************************
+    public async getItinerariesOnly(query: any): Promise<any>{
+        try{
+
+            // getting itineraries data from role-itinerary table
+            const itinerariesIdsData= await this.role_itineraryModel.findAll({
+                where: query
+            })
+
+            // getting pure data
+            const itinerariesCodes = []
+            itinerariesIdsData.forEach(element => {
+                itinerariesCodes.push(element.dataValues.itinerary_code, )
+            });
+
+           
+            const itinerariesData = await this.itineraryModel.findAll({
+                where :{
+                    itinerary_code : itinerariesCodes
+                }
+            })
+            
+            const itineraries =  []
+            itinerariesData.forEach(itinerary => {
+                itineraries.push(itinerary.dataValues)
+            });
+
+            return itineraries
+
+        } catch (e) {
+            console.log('Error from service-getItineraries')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET ITINERARIES CUSTOMERS **************************
+    public async getItinerariesCustomers(query: any): Promise<any>{
+        try{
+
+            // getting itineraries data from role-itinerary table
+            const itinerariesIdsData= await this.role_itineraryModel.findAll({
+                where: query
+            })
+
+            // getting pure data
+            const itinerariesCodes = []
+            itinerariesIdsData.forEach(element => {
+                itinerariesCodes.push(element.dataValues.itinerary_code)
+            });
+
+            const customersCodesData = await this.itineraryCustomerModel.findAll({
+                where: {itinerary_code: itinerariesCodes},  
+            })  
+
+             var customersCodes = []
+             customersCodesData.forEach(customer => {
+                customersCodes.push(customer.dataValues);
+            });
+
+            return customersCodes
+
+        } catch (e) {
+            console.log('Error from service-getItineraries')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CUSTOMERS ONLY **************************
+    public async getCustomersOnly(query: any): Promise<any>{
+        try{
+
+            // getting itineraries data from role-itinerary table
+            const itinerariesIdsData= await this.role_itineraryModel.findAll({
+                where: query
+            })
+
+            // getting pure data
+            const itinerariesCodes = []
+            itinerariesIdsData.forEach(element => {
+                itinerariesCodes.push(element.dataValues.itinerary_code)
+            });
+
+           
+            const itinerariesData = await this.itineraryModel.findAll({
+                where :{
+                    itinerary_code : itinerariesCodes
+                }
+            })
+            
+            const itineraries =  []
+            itinerariesData.forEach(itinerary => {
+                itineraries.push(itinerary.dataValues)
+            });
+
+            const customers = []
+            
+            for(const itinerary of itineraries ){
+                const customer = await this.getCustomers({itinerary_code:itinerary.itinerary_code})
+                
+                customers.push( customer)
+            }
+
+            return customers
+
+        } catch (e) {
+            console.log('Error from service-getItineraries')
+            this.logger.error(e)
+            throw e
+        }
+    }
 
 }
 
