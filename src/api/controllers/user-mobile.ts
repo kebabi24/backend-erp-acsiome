@@ -4,13 +4,23 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { QueryTypes } from 'sequelize'
 
+
+
+// ********************** CREATE NEW USER MOBILE *************
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{username} = req.headers
     logger.debug("Calling Create user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const user = await userMobileServiceInstance.create({...req.body, created_by:username,created_ip_adr: req.headers.origin,last_modified_by:username,last_modified_ip_adr: req.headers.origin})
+        const user = await userMobileServiceInstance.create({
+            ...req.body, 
+            created_by:username,
+            created_ip_adr: req.headers.origin,
+            last_modified_by:username,
+            last_modified_ip_adr: req.headers.origin
+        })
         return res
             .status(201)
             .json({ message: "created succesfully", data:  user })
@@ -20,6 +30,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+
+
+// ********************** FIND ONE USER MOBILE BY ID *************
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  user endpoint")
@@ -36,6 +49,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+
+// ********************** FIND ALL USERS *************
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all user endpoint")
@@ -188,6 +203,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 return res
                     .status(202)
                     .json({
+                        message: "Data correct !",
                         service_creation:'Service creation handled by the admin',
                         user_mobile : userMobile,
                         parameter:parameter,
@@ -209,6 +225,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 return res
                     .status(202)
                     .json({
+                        message: "Data correct !",
                         service_creation:'Service creation handled by the user',
                         user_mobile : userMobile,
                         parameter:parameter,
