@@ -26,8 +26,6 @@ const UserMobile = sequelize.define(
         password : {type : Sequelize.STRING},
         profile_code :{
             type: Sequelize.STRING,
-            primaryKey: true,
-            unique: true,
             references: {
                 model: "aa_profile",
                 key: "profile_code",

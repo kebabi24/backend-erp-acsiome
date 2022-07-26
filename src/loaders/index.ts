@@ -169,8 +169,8 @@ export default async ({ expressApp }) => {
    
 
   // check it later
-  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/addresse').default,{foreignKey: 'customer_id',sourceKey: 'id'})
-  require('../models/mobile_models/addresse').default.belongsTo(require('../models/mobile_models/customer').default,{  foreignKey: 'customer_id', targetKey: 'id'})
+  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/addresse').default,{foreignKey: 'customer_code',sourceKey: 'customer_code'})
+  require('../models/mobile_models/addresse').default.belongsTo(require('../models/mobile_models/customer').default,{  foreignKey: 'customer_code', targetKey: 'customer_code'})
 
  
   
@@ -324,7 +324,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // await sequelizeConnection.sync()
+   await sequelizeConnection.sync()
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

@@ -12,11 +12,11 @@ const Addresses = sequelize.define(
             autoIncrement: true,
             unique: true
         },
-        customer_id :{
-            type: Sequelize.INTEGER,
+        customer_code :{
+            type: Sequelize.STRING,
             references: {
                 model: "aa_customer",
-                key: "id",
+                key: "customer_code",
             },
         },
         addresse_one:{type:Sequelize.STRING,},
