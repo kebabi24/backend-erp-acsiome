@@ -14,6 +14,8 @@ export default (app: Router) => {
     route.post("/findone", controller.findByOne)
     route.put("/up:id", controller.updated)
     route.put("/:id", controller.update)
-    route.delete("/:id", controller.deleteOne)
+    route.delete("/:user_mobile_code", controller.deleteOne)
     route.post("/signin", controller.signin)
+
+    route.put("/up:id", controller.updated)
 }

@@ -98,6 +98,24 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const updated = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+
+
+    logger.debug("Calling update one  profile endpoint")
+    try {
+        const profileMobileServiceInstance = Container.get(ProfileMobileService)
+        const {id} = req.params
+        const profile = await profileMobileServiceInstance .updated({...req.body,last_modified_ip_adr: req.headers.origin},{id})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: profile  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling update one  profile endpoint")
@@ -119,5 +137,6 @@ export default {
     findAll,
     findBy,
     update,
+    updated,
     deleteOne
 }

@@ -51,6 +51,21 @@ export default class ProfileMobileService {
             throw e
         }
     }
+
+    public async updated(data: any, query: any): Promise<any> {
+        try {
+            const profile = await this.profileMobileModel.update(data, {
+                where: query,
+            })
+            this.logger.silly("update one tool mstr")
+            return profile
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
     public async delete(query: any): Promise<any> {
         try {
             const profile = await this.profileMobileModel.destroy({ where: query })

@@ -154,16 +154,18 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+
+//****************** DELETE USER BY CODE ************************
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling update one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {id} = req.params
-        const user = await userMobileServiceInstance.delete({id})
+        const {user_mobile_code} = req.params
+        const user = await userMobileServiceInstance.delete({user_mobile_code:user_mobile_code})
         return res
             .status(200)
-            .json({ message: "deleted succesfully", data: id  })
+            .json({ message: "deleted succesfully", data: user_mobile_code  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
