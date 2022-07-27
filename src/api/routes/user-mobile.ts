@@ -16,6 +16,4 @@ export default (app: Router) => {
     route.put("/:id", controller.update)
     route.delete("/:user_mobile_code", controller.deleteOne)
     route.post("/signin", controller.signin)
-
-    route.put("/up:id", controller.updated)
 }

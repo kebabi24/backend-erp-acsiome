@@ -131,6 +131,23 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
+const findByOne = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+
+    logger.debug("Calling find one by  profile endpoint")
+    try {
+        const profileMobileServiceInstance= Container.get(ProfileMobileService)
+        const profile= await profileMobileServiceInstance.findOne({...req.body})
+        //console.log(profile)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: profile})
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     findOne,
@@ -138,5 +155,6 @@ export default {
     findBy,
     update,
     updated,
-    deleteOne
+    deleteOne,
+    findByOne
 }
