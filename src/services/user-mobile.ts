@@ -38,7 +38,7 @@ export default class UserMobileService {
         try {
             console.log( typeof query.username)
             const user = await this.userMobileModel.findOne({ where: query })
-            this.logger.silly("find one user mstr")
+            this.logger.silly("find one user mobile")
             return user
         } catch (e) {
             this.logger.error(e)
@@ -445,7 +445,7 @@ export default class UserMobileService {
             for(const itinerary of itineraries ){
                 const customer = await this.getCustomers({itinerary_code:itinerary.itinerary_code})
                 
-                customers.push( customer)
+                customers.push( ...customer)
             }
 
             return customers

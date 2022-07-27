@@ -16,10 +16,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const userMobileServiceInstance = Container.get(UserMobileService)
         const user = await userMobileServiceInstance.create({
             ...req.body, 
-            created_by:username,
-            created_ip_adr: req.headers.origin,
-            last_modified_by:username,
-            last_modified_ip_adr: req.headers.origin
+            // created_by:username,
+            // created_ip_adr: req.headers.origin,
+            // last_modified_by:username,
+            // last_modified_ip_adr: req.headers.origin
         })
         return res
             .status(201)
@@ -30,16 +30,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-
-
-// ********************** FIND ONE USER MOBILE BY ID *************
+// ********************** FIND ONE USER MOBILE BY CODE *************
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {id} = req.params
-        const user = await userMobileServiceInstance.findOne({id})
+        const {user_mobile_code} = req.params
+        const user = await userMobileServiceInstance.findOne({user_mobile_code:user_mobile_code})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: user  })
@@ -66,6 +64,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+
+// ***************************************************
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all user endpoint")
@@ -81,6 +81,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+// ***************************************************
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(typeof req.body.username)
@@ -98,6 +99,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+// ***************************************************
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all user endpoint")
@@ -114,6 +116,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
+// *********************** UPDATE ONE FIELD  ********************
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
@@ -132,6 +135,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+//****************** UPDATE EVERYTHING ************************
 const updated = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
