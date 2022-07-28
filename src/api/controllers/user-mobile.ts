@@ -36,8 +36,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {user_mobile_code} = req.params
-        const user = await userMobileServiceInstance.findOne({user_mobile_code:user_mobile_code})
+        const {id} = req.params
+        // const {user_mobile_code} = req.params
+        // const user = await userMobileServiceInstance.findOne({user_mobile_code:user_mobile_code})
+        const user = await userMobileServiceInstance.findOne({id})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: user  })

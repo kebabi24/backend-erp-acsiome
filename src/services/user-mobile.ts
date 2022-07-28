@@ -60,9 +60,9 @@ export default class UserMobileService {
 
     // ******************** UPDATE **************************
     public async update(data: any, query: any): Promise<any> {
-        const usrd_pwd = await argon2.hash(data.usrd_pwd)
+        const password = await argon2.hash(data.password.value)
         try {
-            const user = await this.userMobileModel.update({ ...data, usrd_pwd }, { where: query })
+            const user = await this.userMobileModel.update({ ...data, password }, { where: query })
             this.logger.silly("update one user mstr")
             return user
         } catch (e) {
