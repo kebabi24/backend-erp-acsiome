@@ -36,10 +36,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {id} = req.params
-        // const {user_mobile_code} = req.params
-        // const user = await userMobileServiceInstance.findOne({user_mobile_code:user_mobile_code})
-        const user = await userMobileServiceInstance.findOne({id})
+        
+        const {user_mobile_code} = req.params
+        const user = await userMobileServiceInstance.findOne({user_mobile_code:user_mobile_code})
+       
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: user  })
@@ -126,8 +126,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling update one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {id} = req.params
-        const user = await userMobileServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        const {user_mobile_code} = req.params
+        const user = await userMobileServiceInstance.update({
+            ...req.body,
+             //last_modified_by:user_code,
+            // last_modified_ip_adr: req.headers.origin
+            }
+             ,{user_mobile_code:user_mobile_code})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: user  })
@@ -145,8 +150,12 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling update one  user endpoint")
     try {
         const userMobileServiceInstance = Container.get(UserMobileService)
-        const {id} = req.params
-        const user = await userMobileServiceInstance.updated({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        const {user_mobile_code} = req.params
+        const user = await userMobileServiceInstance.updated({
+            ...req.body,
+            //  last_modified_by:user_code,
+            //  last_modified_ip_adr: req.headers.origin
+            },{user_mobile_code:user_mobile_code})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: user  })
@@ -259,6 +268,27 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
 }
 
+const getDataBack = async (req: Request, res: Response, next: NextFunction) =>{
+    const logger = Container.get("logger")
+    logger.debug("Calling user mobile login endpoint")
+
+    const userMobileServiceInstanse = Container.get(UserMobileService)
+
+    try{
+
+        const data = req.body.data;
+        console.log(data)
+        return res
+                    .status(202)
+                    .json({
+                        'message': ' Data has been recieved'
+                    })
+    } catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 
 
 
@@ -272,5 +302,6 @@ export default {
     update,
     updated,
     deleteOne,
-    signin
+    signin,
+    getDataBack
 }
