@@ -37,8 +37,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find one  profile endpoint")
     try {
         const profileMobileServiceInstance = Container.get(ProfileMobileService)
-        const {profile_id} = req.params
-        const profile = await profileMobileServiceInstance.findOne({profile_id})
+        const {id} = req.params
+        const profile = await profileMobileServiceInstance.findOne({id})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: profile  })
