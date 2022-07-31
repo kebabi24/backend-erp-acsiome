@@ -33,6 +33,54 @@ const CustomerMobile = sequelize.define(
         customer_contact:{type: Sequelize.STRING},
         customer_branch_code:{type: Sequelize.STRING},
         customer_barcode:{type: Sequelize.STRING},
+
+        // addresse data 
+        address_one:{type:Sequelize.STRING,},
+        address_two:{type:Sequelize.STRING},
+        address_extended:{type:Sequelize.STRING},
+        city: {type: Sequelize.STRING}, 
+        postal_code: {type: Sequelize.STRING},
+        state: {type: Sequelize.STRING},
+        country: {type: Sequelize.STRING},
+        geoarea_code: {type: Sequelize.STRING}, 
+        longitude: {type: Sequelize.STRING},
+        latitude: {type: Sequelize.STRING},
+
+        // category and cluster 
+        category_code:{
+            type: Sequelize.STRING,
+            references: {
+                model: "aa_category",
+                key: "category_code",
+            },
+        },
+
+        category_type_code:{
+            type: Sequelize.STRING,
+            references: {
+                model: "aa_categoryType",
+                key: "category_type_code",
+            },
+        },
+
+        cluster_code:{
+            type:Sequelize.STRING,
+            references: {
+                model: "aa_cluster",
+                key: "cluster_code",
+            },
+        },
+
+        sub_cluster_code:{
+            type:Sequelize.STRING,
+            references: {
+                model: "aa_subCluster",
+                key: "sub_cluster_code",
+            },
+        }
+
+
+
         
         
         // ...base,

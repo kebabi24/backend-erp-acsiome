@@ -129,14 +129,19 @@ export default async ({ expressApp }) => {
       {name:'serviceModel',model: require('../models/mobile_models/service').default},
       {name:'customerMobileModel',model: require('../models/mobile_models/customer').default},
       {name:'checklistModel',model: require('../models/mobile_models/checklist').default},
-      {name:'addresseModel',model: require('../models/mobile_models/addresse').default},
       {name:'codeMobileModel',model: require('../models/mobile_models/codes').default},
       {name:'tokenSerieModel',model: require('../models/mobile_models/token').default},
+      {name:'parameterModel',model: require('../models/mobile_models/parameter').default},
+      {name:'categoryModel',model: require('../models/mobile_models/category').default},
+      {name:'categoryTypeModel',model: require('../models/mobile_models/category_type').default},
+      {name:'clusterModel',model: require('../models/mobile_models/cluster').default},
+      {name:'subClusterModel',model: require('../models/mobile_models/cluster_sub').default},
+      
+     
       //
       {name:'profile_menuModel',model: require('../models/mobile_models/profile_menu').default},
       {name:'role_itineraryModel',model: require('../models/mobile_models/role_itinerary').default},
       {name:'itinerary_CustomerModel',model: require('../models/mobile_models/itinerary_customer').default},
-      {name:'parameterModel',model: require('../models/mobile_models/parameter').default},
       
     ],
   });
@@ -168,9 +173,7 @@ export default async ({ expressApp }) => {
  
    
 
-  // check it later
-  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/addresse').default,{foreignKey: 'customer_code',sourceKey: 'customer_code'})
-  require('../models/mobile_models/addresse').default.belongsTo(require('../models/mobile_models/customer').default,{  foreignKey: 'customer_code', targetKey: 'customer_code'})
+  
 
  
   
@@ -324,7 +327,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-   await sequelizeConnection.sync()
+  //  await sequelizeConnection.sync()
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

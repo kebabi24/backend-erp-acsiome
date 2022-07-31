@@ -107,9 +107,11 @@ declare global {
     export type Role_itineraryModel = S.Model;
     export type ParameterModel =S.Model;
     export type CodeMobileModel = S.Model;
-    export type AddresseMobileModel = S.Model;
     export type TokenSerieModel = S.Model;
-   
+    export type CategoryModel = S.Model;
+    export type ClusterModel = S.Model;
+    export type CategoryTypeModel = S.Model;
+    export type subClusterModel = S.Model;
 
    
 

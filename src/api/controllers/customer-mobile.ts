@@ -1,5 +1,4 @@
 import CustomerMobileService from "../../services/customer-mobile"
-import AddresseMobileService from "../../services/addresse-mobile"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { DATE, Op } from 'sequelize';
@@ -8,7 +7,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
     const customerMobileData = req.body.customer_mobile
-    const addressData = req.body.addresse
     console.log(customerMobileData)
     console.log(req.body)
     logger.debug("Calling Create customer endpoint with body: %o", req.body)
@@ -20,12 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             //  created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin
         })
        
-        const AddresseMobileServiceInstance = Container.get(AddresseMobileService)
-        
-        const addresseMobile = await AddresseMobileServiceInstance.create({
-            ...addressData, 
-            customer_code: customerMobile.dataValues.customer_code
-        })
+       
         return res
             .status(201)
             .json({ message: "created succesfully", data: { customerMobile } })

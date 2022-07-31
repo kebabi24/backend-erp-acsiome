@@ -216,6 +216,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({role_code : role.role_code})
                 const customers = await userMobileServiceInstanse.getCustomers({itinerary_code: itinerary2.itinerary_code })
                 const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
+                const categories = await userMobileServiceInstanse.getCategories( customers )
+                const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
+                const clusters = await userMobileServiceInstanse.getClusters( customers )
+                const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+                
 
                 return res
                     .status(202)
@@ -232,6 +237,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         customers:customers,
                         checklist: checklist,
                         token_serie:tokenSerie,
+                        categories: categories,
+                        categoriesTypes:categoriesTypes,
+                        clusters:clusters,
+                        subClusters:subClusters
                     })
             }
             // service created by mobile user
@@ -241,7 +250,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({role_code : role.role_code })
                 const customers = await userMobileServiceInstanse.getCustomersOnly({role_code : role.role_code })
                 const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
-                
+                const categories = await userMobileServiceInstanse.getCategories( customers )
+                const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
+                const clusters = await userMobileServiceInstanse.getClusters( customers )
+                const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+
+
                 return res
                     .status(202)
                     .json({
@@ -257,6 +271,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         iitineraries_customers:iitineraries_customers,
                         customers:customers,
                         token_serie:tokenSerie,
+                        categories: categories,
+                        categoriesTypes:categoriesTypes,
+                        clusters:clusters,
+                        subClusters:subClusters
                     })
             }
         }      

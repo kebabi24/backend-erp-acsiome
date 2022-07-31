@@ -16,6 +16,10 @@ export default class UserMobileService {
         @Inject("role_itineraryModel") private role_itineraryModel: Models.Role_itineraryModel,
         @Inject("parameterModel") private parameterModel: Models.ParameterModel,
         @Inject("tokenSerieModel") private tokenSerieModel: Models.TokenSerieModel,
+        @Inject("categoryModel") private categoryModel: Models.CategoryModel,
+        @Inject("categoryTypeModel") private categoryTypeModel: Models.CategoryTypeModel,
+        @Inject("clusterModel") private clusterModel: Models.ClusterModel,
+        @Inject("subClusterModel") private subClusterModel: Models.SubClusterModel,
         @Inject("logger") private logger
     ) {}
 
@@ -457,5 +461,100 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** GET CATEGORIES  **************************
+    public async getCategories(customers : any): Promise<any> {
+        try {
+            const categoriesCodes = []
+
+            customers.forEach(customer => {
+                if(categoriesCodes.indexOf(customer.category_code) === -1 ){
+                    categoriesCodes.push(customer.category_code) 
+                }
+            });
+
+            const categories = await this.categoryModel.findAll({
+                where :{ category_code : categoriesCodes}
+            })
+        
+            return categories
+        } catch (e) {
+            console.log('Error from controller : usermobile : getCAtegories')
+            console.log('Error from service-getChecklist')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CATEGORIES TYPES  **************************
+    public async getCategoriesTypes(customers : any): Promise<any> {
+        try {
+            const categoriesTypesCodes = []
+
+            customers.forEach(customer => {
+                if(categoriesTypesCodes.indexOf(customer.category_type_code) === -1 ){
+                    categoriesTypesCodes.push(customer.category_type_code) 
+                }
+            });
+
+            const categoriesTypes = await this.categoryTypeModel.findAll({
+                where :{ category_type_code : categoriesTypesCodes}
+            })
+        
+            return categoriesTypes
+        } catch (e) {
+            console.log('Error from controller : usermobile : getCategoriesTypes')
+            console.log('Error from service-getChecklist')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CLUSTERS   **************************
+     public async getClusters(customers : any): Promise<any> {
+        try {
+            const clustersCodes = []
+
+            customers.forEach(customer => {
+                if(clustersCodes.indexOf(customer.cluster_code) === -1 ){
+                    clustersCodes.push(customer.cluster_code) 
+                }
+            });
+
+            const clusters = await this.clusterModel.findAll({
+                where :{ cluster_code : clustersCodes}
+            })
+        
+            return clusters
+        } catch (e) {
+            console.log('Error from controller : usermobile : getCategoriesTypes')
+            console.log('Error from service-getChecklist')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET SUB CLUSTERS   **************************
+    public async getSubClusters(customers : any): Promise<any> {
+        try {
+            const subClustersCode = []
+
+            customers.forEach(customer => {
+                if(subClustersCode.indexOf(customer.sub_cluster_code) === -1 ){
+                    subClustersCode.push(customer.sub_cluster_code) 
+                }
+            });
+
+            const subClusters = await this.subClusterModel.findAll({
+                where :{ sub_cluster_code : subClustersCode}
+            })
+        
+            return subClusters
+        } catch (e) {
+            console.log('Error from controller : usermobile : getCategoriesTypes')
+            console.log('Error from service-getChecklist')
+            this.logger.error(e)
+            throw e
+        }
+    }
 }
 
