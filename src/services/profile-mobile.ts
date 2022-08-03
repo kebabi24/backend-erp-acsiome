@@ -4,6 +4,7 @@ import { Service, Inject } from "typedi"
 export default class ProfileMobileService {
     constructor(
         @Inject("profileMobileModel") private profileMobileModel: Models.ProfileMobileModel,
+        @Inject("profile_menuModel") private profile_menuModel: Models.Profile_menuModel,
         @Inject("logger") private logger
     ) {}
 
@@ -33,6 +34,20 @@ export default class ProfileMobileService {
         try {
             const profiles = await this.profileMobileModel.findAll({ where: query })
             this.logger.silly("find All profiles mobile mstr")
+            //console.log(profiles)
+            return profiles
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findMenuProfile(query: any): Promise<any> {
+        //console.log(query)
+        try {
+            const profiles = await this.profile_menuModel.findAll({ where: query, attributes: ["menu_code"]})
+            //console.log(profiles)
+            this.logger.silly("find All menu profile mobile mstr")
             //console.log(profiles)
             return profiles
         } catch (e) {

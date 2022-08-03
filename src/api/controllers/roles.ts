@@ -14,7 +14,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
         const new_role = await RoleServiceInstance.create({...role, created_by:role.role_name,created_ip_adr: req.headers.origin,last_modified_by:role.role_name,last_modified_ip_adr: req.headers.origin})
         for (let entry of itinerary) {
-            entry = { itineraryId: entry, roleId: new_role.id }
+            entry = { itinerary_code: entry, role_code: new_role.role_code }
             await RoleItineraryServiceInstance.create(entry)
         }
         return res

@@ -43,7 +43,26 @@ export default class ProfileMenuService {
 
     public async update(data: any, query: any): Promise<any> {
         try {
-            const profile_menu = await this.profileMenuModel.update(data, { where: query })
+            // const profile_menu = await this.profileMenuModel.findAll({ where: query })
+            const profile_menu = await this.profileMenuModel.destroy({ where: query })
+            for (let entry of data.menus) {
+                entry = { profile_code: data.profile.profile_code, menu_code: entry }
+                await this.profileMenuModel.create(entry)
+           
+            
+            }
+            // tab.forEach(element => {
+            //     if(profileMenuBeforeUpdate.includes(element)){
+            //         console.log(element, " il existe dans le menu déjà")
+            //     }else{
+            //         console.log(element, " on doit l'ajouter a la base")
+            //     }
+
+            //     console.log(element, " on doit le supprimer de la base ")
+            // })
+            // console.log(profileMenuBeforeUpdate)
+            // console.log(data.menus)
+            // const profile_menu = await this.profileMenuModel.update(data, { where: query })
             this.logger.silly("update one profile mobile mstr")
             return profile_menu
         } catch (e) {

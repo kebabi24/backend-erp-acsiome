@@ -14,4 +14,5 @@ export default (app: Router) => {
     route.delete("/:id", controller.deleteOne)
     route.post("/findone", controller.findByOne)
     route.put("/up:id", controller.updated)
+    route.post("/findmenu", controller.findMenuBy)
 }

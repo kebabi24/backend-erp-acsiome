@@ -22,7 +22,7 @@ export default class RoleService {
 
     public async findOne(query: any): Promise<any> {
         try {
-            const role = await this.roleModel.findOne({ where: query,include: this.userMobileModel })
+            const role = await this.roleModel.findOne({ where: query })
             this.logger.silly("find one role mstr")
             return role
         } catch (e) {
