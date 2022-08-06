@@ -2,11 +2,14 @@ import CustomerMobileService from "../../services/customer-mobile"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { DATE, Op } from 'sequelize';
+import * as os from 'os';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
+    const hostname = os.networkInterfaces()['Wi-Fi 2']
+    console.log(hostname)
     const logger = Container.get("logger")
     const{user_code} = req.headers
-    const customerMobileData = req.body.customer_mobile
+    const customerMobileData = req.body
     console.log(customerMobileData)
     console.log(req.body)
     logger.debug("Calling Create customer endpoint with body: %o", req.body)
