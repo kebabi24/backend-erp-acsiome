@@ -5,7 +5,7 @@ import { DATE, Op } from 'sequelize';
 import * as os from 'os';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
-    const hostname = os.networkInterfaces()['Wi-Fi 2']
+    const hostname = os.networkInterfaces()
     console.log(hostname)
     const logger = Container.get("logger")
     const{user_code} = req.headers
