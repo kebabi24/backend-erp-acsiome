@@ -6,6 +6,7 @@ import InvoiceOrderService from "../../services/invoice-order"
 import AccountReceivableService from "../../services/account-receivable"
 import accountShiperService from "../../services/account-shiper"
 import costSimulationService from '../../services/cost-simulation';
+import AddressService from "../../services/address"
 import itemService from '../../services/item';
 import locationDetailService from '../../services/location-details';
 import inventoryTransactionService from '../../services/inventory-transaction';
@@ -13,6 +14,8 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
 import { DATE, Op } from 'sequelize';
+
+import { generatePdf } from "../../reporting/generator";
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -30,9 +33,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             entry = { ...entry, sod_nbr: so.so_nbr,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await saleOrderDetailServiceInstance.create(entry)
         }
+        const addressServiceInstance = Container.get(AddressService)
+        const addr = await addressServiceInstance.findOne({ ad_addr: saleOrder.so_cust });
+
+        const pdfData = {
+            so : so,
+            sod : saleOrderDetail,
+            adr : addr
+        }
+
+        let pdf = await generatePdf(pdfData, 'so');
+
+        
         return res
             .status(201)
-            .json({ message: "created succesfully", data: so })
+            .json({ message: "created succesfully", data: so, pdf : pdf.content})
     } catch (e) {
         //#
         logger.error("🔥 error: %o", e)
