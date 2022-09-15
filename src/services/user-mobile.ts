@@ -20,6 +20,8 @@ export default class UserMobileService {
         @Inject("categoryTypeModel") private categoryTypeModel: Models.CategoryTypeModel,
         @Inject("clusterModel") private clusterModel: Models.ClusterModel,
         @Inject("subClusterModel") private subClusterModel: Models.SubClusterModel,
+        @Inject("visitresultModel") private visitresultModel: Models.visitresultModel,
+        @Inject("salesChannelModel") private salesChannelModel: Models.salesChannelModel,
         @Inject("logger") private logger
     ) {}
 
@@ -556,5 +558,83 @@ export default class UserMobileService {
             throw e
         }
     }
+
+  
+
+    public async findAllClusters(query: any): Promise<any> {
+        try {
+            const clusters = await this.clusterModel.findAll({})
+            this.logger.silly("clusters", clusters)
+            return clusters
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findAllCategories(query: any): Promise<any> {
+        try {
+            const categories = await this.categoryModel.findAll({})
+            this.logger.silly("categories", categories)
+            return categories
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findAllSubClusters(query: any): Promise<any> {
+        try {
+            const subClusters = await this.subClusterModel.findAll({})
+            this.logger.silly("sub clusters", subClusters)
+            return subClusters
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findAllGategoryTypes(query: any): Promise<any> {
+        try {
+            const categoryTypes = await this.categoryTypeModel.findAll({})
+            this.logger.silly("category types", categoryTypes)
+            return categoryTypes
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getSalesChannels(query: any): Promise<any> {
+        try {
+            const salesChannel = await this.salesChannelModel.findAll({})
+            this.logger.silly("sales channel", salesChannel)
+            return salesChannel
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** GET VISITLIST  **************************
+     public async getVisitList(): Promise<any> {
+        try {
+            const visitresultData = await this.visitresultModel.findAll()
+            
+            const visititresult = []
+            visitresultData.forEach(element => {
+                visititresult.push(element.dataValues)
+            });
+            
+            // console.log(visititresult)
+            return visititresult
+        } catch (e) {
+            console.log('Error from service-getVisitlist')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+   
 }
 

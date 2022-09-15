@@ -77,7 +77,17 @@ const CustomerMobile = sequelize.define(
                 model: "aa_subCluster",
                 key: "sub_cluster_code",
             },
+        },
+
+        // sale chanel 
+        sales_channel_code:{
+            type:Sequelize.STRING,
+            references: {
+                model: "aa_salesChannel",
+                key: "sales_channel_code",
+            },
         }
+
 
 
 

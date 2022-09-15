@@ -28,6 +28,12 @@ const TokenSerie = sequelize.define(
         service_prefix : { type: Sequelize.STRING ,unique:true},
         service_next_number : { type: Sequelize.INTEGER},
 
+        visit_prefix :{type: Sequelize.STRING ,unique:true},
+        visit_next_number :{type : Sequelize.INTEGER},
+
+        customer_prefix :{type: Sequelize.STRING ,unique:true},
+        customer_next_number :{type : Sequelize.INTEGER},
+        
         // squote_prefix: { type: Sequelize.STRING ,unique:true},
         // squote_next_number :{type : Sequelize.INTEGER},
 
@@ -37,8 +43,6 @@ const TokenSerie = sequelize.define(
         // sinvoice_prefix :{type: Sequelize.STRING ,unique:true},
         // sinvoice_next_number :{type : Sequelize.INTEGER},
 
-        // visit_prefix :{type: Sequelize.STRING ,unique:true},
-        // visit_next_number :{type : Sequelize.INTEGER},
 
         
         // inventory_prefix :{type: Sequelize.STRING ,unique:true},

@@ -34,6 +34,9 @@ const Parameter = sequelize.define(
         hold:{
             type: Sequelize.BOOLEAN,
         },
+        creation_customer:{
+            type: Sequelize.BOOLEAN,
+        },
         profile_code:{
             type: Sequelize.STRING,
             unique: true,
@@ -47,7 +50,7 @@ const Parameter = sequelize.define(
 
         
         
-        // ...base,
+        // ...base
     },
     {
         tableName: "aa_parameter",

@@ -74,6 +74,7 @@ import costcenter from "./routes/costcenter"
 import generalLedger from "./routes/general-ledger"
 import itinerary from "./routes/itinerary"
 import roleItinerary from "./routes/role-itinerary"
+import mobileSettings from "./routes/mobile-settings"
 
 // guaranteed to get dependencies
 export default () => {
@@ -154,5 +155,7 @@ export default () => {
     menu(app)
     service(app)
     addReport(app)
+    mobileSettings(app)
+    
     return app
 }

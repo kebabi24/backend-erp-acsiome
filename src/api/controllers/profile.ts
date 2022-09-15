@@ -26,6 +26,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
         const profileServiceInstance = Container.get(ProfileService)
         const {id} = req.params
         const profile = await profileServiceInstance.findOne({id})
+        console.log(profile)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: profile  })

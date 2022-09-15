@@ -5,6 +5,10 @@ import config from './config';
 import express from 'express';
 
 import Logger from './loaders/logger';
+import { setTimeout } from 'timers';
+import { emit } from 'process';
+
+import userMobileController from './api/controllers/user-mobile';
 
 async function startServer() {
   
@@ -18,18 +22,23 @@ async function startServer() {
    **/
   await require('./loaders').default({ expressApp: app });
 
-  app.listen(config.port, err => {
+  const server = app.listen(config.port, err => {
     if (err) {
       Logger.error(err);
+      
       process.exit(1);
       return;
     }
     Logger.info(`
-      ################################################
+      ################################################ 
       🛡️  Server listening on port: ${config.port} 🛡️ 
       ################################################
     `);
   });
+
+  const io = require('socket.io')(server);  
+  io.on('connection',userMobileController.getDataBack)
+
 }
 
 startServer();

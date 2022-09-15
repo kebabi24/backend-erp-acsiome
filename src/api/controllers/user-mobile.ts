@@ -1,9 +1,8 @@
 import UserMobileService from "../../services/user-mobile"
 import RoleService from "../../services/role"
-import { Router, Request, Response, NextFunction } from "express"
+import { Router, Request, ponse, NextFunction } from "express"
 import { Container } from "typedi"
 import { QueryTypes } from 'sequelize'
-
 
 
 // ********************** CREATE NEW USER MOBILE *************
@@ -183,6 +182,8 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+
+//****************** SYNC ************************
 const signin = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling user mobile login endpoint")
@@ -207,6 +208,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
             const menus = await userMobileServiceInstanse.getMenus({ profile_code:userMobile.profile_code})
             const parameter = await userMobileServiceInstanse.getParameter({profile_code:userMobile.profile_code})
             const checklist = await userMobileServiceInstanse.getChecklist()
+            const visitList = await userMobileServiceInstanse.getVisitList()
             
             // service created on backend 
             if(parameter.hold === true){
@@ -216,11 +218,15 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({role_code : role.role_code})
                 const customers = await userMobileServiceInstanse.getCustomers({itinerary_code: itinerary2.itinerary_code })
                 const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
-                const categories = await userMobileServiceInstanse.getCategories( customers )
-                const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-                const clusters = await userMobileServiceInstanse.getClusters( customers )
-                const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
-                
+                // const categories = await userMobileServiceInstanse.getCategories( customers )
+                // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
+                // const clusters = await userMobileServiceInstanse.getClusters( customers )
+                // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+                const categories = await userMobileServiceInstanse.findAllCategories({})
+                const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({})
+                const clusters = await userMobileServiceInstanse.findAllClusters({})
+                const subClusters = await userMobileServiceInstanse.findAllSubClusters({})
+                const salesChannels = await userMobileServiceInstanse.getSalesChannels({})
 
                 return res
                     .status(202)
@@ -240,7 +246,9 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         categories: categories,
                         categoriesTypes:categoriesTypes,
                         clusters:clusters,
-                        subClusters:subClusters
+                        subClusters:subClusters,
+                        visitList:visitList,
+                        salesChannels : salesChannels
                     })
             }
             // service created by mobile user
@@ -250,11 +258,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                 const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({role_code : role.role_code })
                 const customers = await userMobileServiceInstanse.getCustomersOnly({role_code : role.role_code })
                 const tokenSerie = await userMobileServiceInstanse.getTokenSerie({token_code : role.token_serie_code})
-                const categories = await userMobileServiceInstanse.getCategories( customers )
-                const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-                const clusters = await userMobileServiceInstanse.getClusters( customers )
-                const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
-
+                // const categories = await userMobileServiceInstanse.getCategories( customers )
+                // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
+                // const clusters = await userMobileServiceInstanse.getClusters( customers )
+                // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+                
+                const categories = await userMobileServiceInstanse.findAllCategories({})
+                const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({})
+                const clusters = await userMobileServiceInstanse.findAllClusters({})
+                const subClusters = await userMobileServiceInstanse.findAllSubClusters({})
+                const salesChannels = await userMobileServiceInstanse.getSalesChannels({})
 
                 return res
                     .status(202)
@@ -274,7 +287,9 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         categories: categories,
                         categoriesTypes:categoriesTypes,
                         clusters:clusters,
-                        subClusters:subClusters
+                        subClusters:subClusters,
+                        visitList:visitList,
+                        salesChannels : salesChannels
                     })
             }
         }      
@@ -286,26 +301,35 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
 }
 
-const getDataBack = async (req: Request, res: Response, next: NextFunction) =>{
+//****************** GET DATA BACK ************************
+const getDataBack = async function (socket){
     const logger = Container.get("logger")
-    logger.debug("Calling user mobile login endpoint")
+    // logger.debug("Calling user mobile login endpoint")
 
     const userMobileServiceInstanse = Container.get(UserMobileService)
 
-    try{
+    console.log('socket connected');
+    
+   
+    socket.emit('readyToRecieve')
 
-        const data = req.body.data;
-        console.log(data)
-        return res
-                    .status(202)
-                    .json({
-                        'message': ' Data has been recieved'
-                    })
-    } catch(e){
-        logger.error("🔥 error: %o", e)
-        return next(e)
-    }
+    socket.on('sendData',(data)=>{
+      console.log(data.data.customers)
+
+
+      // updated database
+
+      setTimeout(()=>{
+        socket.emit('dataUpdated')
+      },4000)
+    })
+
 }
+
+
+
+
+
 
 
 
@@ -321,5 +345,5 @@ export default {
     updated,
     deleteOne,
     signin,
-    getDataBack
+    getDataBack,
 }

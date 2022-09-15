@@ -136,6 +136,8 @@ export default async ({ expressApp }) => {
       {name:'categoryTypeModel',model: require('../models/mobile_models/category_type').default},
       {name:'clusterModel',model: require('../models/mobile_models/cluster').default},
       {name:'subClusterModel',model: require('../models/mobile_models/cluster_sub').default},
+      {name:'visitresultModel',model: require('../models/mobile_models/visitresult').default},
+      {name:'salesChannelModel',model: require('../models/mobile_models/sales_channel').default},
       
      
       //
@@ -327,8 +329,15 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //  await sequelizeConnection.sync()
+  //await sequelizeConnection.sync()
+
+  // await sequelizeConnection.sync({alter:true}).then(()=>{
+  //    console.log('database updated');
+  //  }).catch((err)=>{
+  //     console.log(err);
+  //  })
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');
 };
+

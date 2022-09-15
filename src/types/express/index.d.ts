@@ -111,7 +111,9 @@ declare global {
     export type CategoryModel = S.Model;
     export type ClusterModel = S.Model;
     export type CategoryTypeModel = S.Model;
-    export type subClusterModel = S.Model;
+    export type SubClusterModel = S.Model;
+    export type visitresultModel = S.Model;
+    export type salesChannelModel = S.Model;
 
    
 
