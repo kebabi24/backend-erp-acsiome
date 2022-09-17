@@ -35,12 +35,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         }
         const addressServiceInstance = Container.get(AddressService)
         const addr = await addressServiceInstance.findOne({ ad_addr: saleOrder.so_cust });
-
+        
         const pdfData = {
             so : so,
             sod : saleOrderDetail,
             adr : addr
         }
+
+        console.log("pdfData", pdfData)
 
         let pdf = await generatePdf(pdfData, 'so');
 

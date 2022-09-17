@@ -1,14 +1,13 @@
 import JsReport from 'jsreport';
 import * as fs from 'fs';
 import * as path from 'path';
-import { footer, header_so, body_so } from './templates';
-import { prepareSoData } from './helpers';
+import * as template from './templates';
+import * as prep from './helpers';
 
+export const generatePdf = async (rawData : any , name : string) => {
+    let data = getData(rawData, name)
+    //console.log("\n\n FROM GEN", data)
 
-export const generatePdf = async (rawData, template) => {
-    let data;
-    if(template == 'so')
-    { data = prepareSoData(rawData) }
 
         let reportGenerator= JsReport({
             configFile: path.resolve('jsreport.config.json')
@@ -18,15 +17,15 @@ export const generatePdf = async (rawData, template) => {
         //initialisation du jsreport + création du fichier pdf
         const result = await reportGenerator.render({
                 template: {
-                    content: getTemplate(template),
+                    content: getTemplate(name),
                     engine: 'handlebars',
                     recipe: 'chrome-pdf', 
                     //to add header & footer 
                     chrome: {
                         "scale": 1,
                         "displayHeaderFooter": true,
-                        "headerTemplate": getHeader(template),
-                        "footerTemplate": footer,
+                        "headerTemplate": getHeader(name),
+                        "footerTemplate": template.footer,
                         "printBackground": true,
                         "pageRanges": "",
                         "format": "A4",
@@ -44,24 +43,47 @@ export const generatePdf = async (rawData, template) => {
                 //données so 
                 data: data,
             })
-            const filePath = "/pdf/" + data.titre + ".pdf";
-            await fs.writeFileSync(__dirname + filePath, result.content)
+
+            reportGenerator.close()
+            if (!fs.existsSync("/Users/bchahrazed/desktop/acsiome/commandes")) {
+                fs.mkdir("/Users/bchahrazed/desktop/acsiome/commandes", err => {
+                    if(err) return err;
+                })
+            }
+            const filePath = "/Users/bchahrazed/desktop/acsiome/commandes/" + data.titre + ".pdf";
+            await fs.writeFileSync(filePath, result.content)
             return result
 }
 
 
-const getTemplate = (template_name) => {
-	switch (template_name)
+const getTemplate = (name : string) => {
+	switch (name)
 	{
-		case 'so' : return body_so
+		case 'so' : return template.body;
+        case 'psh' : return template.body;
+        case 'po' : return template.body;
+        case 'ih' : return template.body;
 	}
 }
 
 
 
-const getHeader = (template_name) => {
-	switch (template_name)
+const getHeader = (name) => {
+	switch (name)
 	{
-		case 'so' : return header_so
+		case 'so' : return template.header_so;
+        case 'psh' : return template.header_psh;
+        case 'po' : return template.header_po;
+        case 'ih' : return template.header_ih;
 	}
+}
+
+const getData = (rawData, name) => {
+    switch (name)
+    {
+        case 'so' : return  prep.prepareSoData(rawData);
+        case 'po' : return  prep.preparePoData(rawData);
+        case 'psh' : return  prep.preparePshData(rawData);
+        case 'ih' : return prep.prepareIhData(rawData);
+    }
 }

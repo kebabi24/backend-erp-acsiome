@@ -1,5 +1,5 @@
 {
-  "httpPort": 5488,
+  "httpPort": 6759,
   "store": {
     "provider": "fs"
   },
@@ -40,7 +40,7 @@
       "createSamples": true
     },
     "assets": {
-      "allowedFiles": "**/assets/*.*", "publicAccessEnabled": true, "searchOnDiskIfNotFoundInStore": true, "rootUrlForLinks": "http://localhost:5489"
+      "allowedFiles": "**/assets/*.*", "publicAccessEnabled": true, "searchOnDiskIfNotFoundInStore": true, "rootUrlForLinks": "http://localhost:6759"
       }
   }
 }

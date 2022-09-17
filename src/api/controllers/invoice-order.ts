@@ -34,6 +34,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             const sh = await saleShiperServiceInstance.findOne({psh_shiper: entry.idh_ship, psh_part:entry.idh_part, psh_nbr: entry.idh_nbr,psh_line: entry.idh_sad_line })
             if(sh) await saleShiperServiceInstance.update({psh_invoiced : true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
         }
+
         
         await accountReceivableServiceInstance.create({
          ar_nbr : ih.ih_inv_nbr,

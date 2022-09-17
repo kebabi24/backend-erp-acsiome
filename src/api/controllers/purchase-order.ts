@@ -4,11 +4,13 @@ import PurchaseReceiveService from '../../services/purchase-receive'
 import VoucherOrderService from "../../services/voucher-order"
 import AccountPayableService from "../../services/account-payable"
 import ProviderService from "../../services/provider"
+import AddressService from "../../services/address"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
 import { DATE, Op } from 'sequelize';
 import ItemService from "../../services/item"
+import { generatePdf } from "../../reporting/generator";
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -26,9 +28,25 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             entry = { ...entry, pod_nbr: po.po_nbr }
             await purchaseOrderDetailServiceInstance.create(entry)
         }
+
+        const addressServiceInstance = Container.get(AddressService)
+        const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+
+        /*console.log("\n purchaseOrderDetail", purchaseOrderDetail);
+        console.log("\n\n po", po);
+        console.log("\n\n adr", addr);*/
+        const pdfData = {
+            pod : purchaseOrderDetail,
+            po : po,
+            adr : addr
+        }
+        console.log("\n\n", pdfData)
+
+        let pdf = await generatePdf(pdfData, 'po');
+
         return res
             .status(201)
-            .json({ message: "created succesfully", data: po })
+            .json({ message: "created succesfully", data: po, pdf : pdf.content})
     } catch (e) {
         //#
         logger.error("🔥 error: %o", e)
