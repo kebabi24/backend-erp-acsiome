@@ -22,6 +22,13 @@ export default class UserMobileService {
         @Inject("subClusterModel") private subClusterModel: Models.SubClusterModel,
         @Inject("visitresultModel") private visitresultModel: Models.visitresultModel,
         @Inject("salesChannelModel") private salesChannelModel: Models.salesChannelModel,
+        @Inject("profileProductPageModel") private profileProductPageModel: Models.profileProductPageModel,
+        @Inject("productPageModel") private productPageModel: Models.productPageModel,
+        @Inject("productPageDetailsModel") private productPageDetailsModel: Models.productPageDetailsModel,
+        @Inject("itemModel") private itemModel: Models.ItemModel,
+        @Inject("loadRequestModel") private loadRequestModel: Models.loadRequestModel,
+        @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
+        @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
         @Inject("logger") private logger
     ) {}
 
@@ -630,6 +637,126 @@ export default class UserMobileService {
             return visititresult
         } catch (e) {
             console.log('Error from service-getVisitlist')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ****************************************************
+    // ******** PHASE 2 ***********************************
+    // ****************************************************
+
+    // ******************** GET PRODUCT PAGES OF THE PROFILE **************************
+    public async getProfileProductPages(query: any): Promise<any> {
+        try {
+            const productPagesCodes = []
+            const profileProductPages = await this.profileProductPageModel.findAll({where: query})  
+            profileProductPages.forEach(page => {
+                productPagesCodes.push(page.product_page_code)
+            });
+            const productPages =   await this.productPageModel.findAll({where : {product_page_code :productPagesCodes}})
+            productPages.forEach(productPage => {
+                const product_page_code = productPage.product_page_code
+                const index = profileProductPages.findIndex(object =>{
+                    return object.product_page_code === product_page_code
+                })
+                // productPage.push(profileProductPages[index].rank)
+                productPage.dataValues.rank = profileProductPages[index].rank 
+                console.log(productPage)
+            });
+            return productPages;
+        } catch (e) {
+            console.log('Error from get profile product pages - service ')
+            this.logger.error(e)
+            throw e
+        }
+        // this.logger.silly("find one user mstr")
+    }
+
+    // ******************** GET PRODUCT PAGES DETAILS  **************************
+    public async getProductPagesDetails(productPages: any): Promise<any> {
+        try {
+            const productPagesCodes = []
+            productPages.forEach(productPage => {
+                productPagesCodes.push(productPage.product_page_code)
+            });
+            const productPagesDetails = await this.productPageDetailsModel.findAll({ where: {product_page_code:productPagesCodes}})  
+            return productPagesDetails;
+        } catch (e) {
+            console.log('Error from get getProductPagesDetails - service ')
+            this.logger.error(e)
+            throw e
+        }
+        // this.logger.silly("find one user mstr")
+    }
+
+    // ******************** GET PRODUCT PAGES DETAILS  **************************
+    public async getProducts(productPagesDetails: any): Promise<any> {
+        try {
+            const productsCodes = []
+            productPagesDetails.forEach(productPage => {
+                productsCodes.push(productPage.product_code)
+            });
+            const products = await this.itemModel.findAll(
+                
+                { where: {pt_part : productsCodes},
+                    attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
+                    'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
+                    'pt_net_wt','pt_net_wt_um','pt_article']
+                    },
+                )  
+            return products;
+        } catch (e) {
+            console.log('Error from getProducts - service ')
+            this.logger.error(e)
+            throw e
+        }
+        // this.logger.silly("find one user mstr")
+    }
+
+     // ******************** GET LOAD REQUEST **************************
+     public async getLoadRequest(query: any): Promise<any> {
+        try {
+            const loadRequests = await this.loadRequestModel.findAll({ where: query})
+
+            return loadRequests;
+        } catch (e) {
+            console.log('Error from service user mobile- load request')
+            this.logger.error(e)
+            throw e
+        }
+        this.logger.silly("find load requests ")
+    }
+
+    // ******************** GET LOAD REQUEST LINES **************************
+    public async getLoadRequestLines(loadRequests: any): Promise<any> {
+        try {
+            const loadRequestsCodes = []
+            loadRequests.forEach(loadReuquest => {
+                loadRequestsCodes.push(loadReuquest.load_request_code)
+            });
+            const loadRequestsLines = await this.loadRequestLineModel.findAll({ where: {load_request_code:loadRequestsCodes}})
+
+            return loadRequestsLines;
+        } catch (e) {
+            console.log('Error from service user mobile- load request lines')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET LOAD REQUEST DETAILS **************************
+    public async getLoadRequestDetails(loadRequests: any): Promise<any> {
+        try {
+            const loadRequestsCodes = []
+            loadRequests.forEach(loadReuquest => {
+                loadRequestsCodes.push(loadReuquest.load_request_code)
+            });
+            const loadRequestsDetails = await this.loadRequestDetailsModel.findAll({ where: {load_request_code:loadRequestsCodes}})
+
+            return loadRequestsDetails;
+        } catch (e) {
+            console.log('Error from service user mobile- load request details')
             this.logger.error(e)
             throw e
         }

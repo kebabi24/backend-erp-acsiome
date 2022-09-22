@@ -209,7 +209,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
             const parameter = await userMobileServiceInstanse.getParameter({profile_code:userMobile.profile_code})
             const checklist = await userMobileServiceInstanse.getChecklist()
             const visitList = await userMobileServiceInstanse.getVisitList()
-            
+            const productPages = await userMobileServiceInstanse.getProfileProductPages({profile_code:userMobile.profile_code})
+            const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages)
+            const products = await userMobileServiceInstanse.getProducts(productPagesDetails)
+            const loadRequest = await userMobileServiceInstanse.getLoadRequest({user_mobile_code : user_mobile_code , status : 40})
+            const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest)
+            const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest)
+
             // service created on backend 
             if(parameter.hold === true){
 
@@ -248,7 +254,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         clusters:clusters,
                         subClusters:subClusters,
                         visitList:visitList,
-                        salesChannels : salesChannels
+                        salesChannels : salesChannels,
+                        productPages:productPages,
+                        productPagesDetails :productPagesDetails,
+                        products:products,
+                        loadRequest:loadRequest,
+                        loadRequestsLines:loadRequestsLines,
+                        loadRequestsDetails:loadRequestsDetails,
                     })
             }
             // service created by mobile user
@@ -289,7 +301,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         clusters:clusters,
                         subClusters:subClusters,
                         visitList:visitList,
-                        salesChannels : salesChannels
+                        salesChannels : salesChannels,
+                        productPages:productPages,
+                        productPagesDetails :productPagesDetails,
+                        products:products,
+                        loadRequest:loadRequest,
+                        loadRequestsLines:loadRequestsLines,
+                        loadRequestsDetails:loadRequestsDetails,
                     })
             }
         }      

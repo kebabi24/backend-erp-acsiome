@@ -114,7 +114,13 @@ declare global {
     export type SubClusterModel = S.Model;
     export type visitresultModel = S.Model;
     export type salesChannelModel = S.Model;
-
+    // phase 2
+    export type productPageModel = S.Model;
+    export type productPageDetailsModel = S.Model;
+    export type profileProductPageModel = S.Model;
+    export type loadRequestModel = S.Model;
+    export type loadRequestLineModel = S.Model;
+    export type loadRequestDetailsModel = S.Model;
    
 
 
