@@ -4,6 +4,7 @@ import { Container } from "typedi"
 import argon2 from "argon2"
 import jwt from "jsonwebtoken"
 const login = async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body, "hhhhhhhhhhhhhhhhhhhhhh")
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
     console.log(req.body)
@@ -20,15 +21,16 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
                 .json({ message: "user not found", data: null })
 
         if (await argon2.verify(user.usrd_pwd, password)) {
-           
+           console.log("here1")
             const token = jwt.sign({ user: user.id }, "acsiome")
             return res
                 .status(200)
                 .json({ message: "succesfully", data: { user, token } })
-        } else
+        } else{
+        console.log("here2")
             return res
                 .status(401)
-                .json({ message: "error password", data: null })
+                .json({ message: "error password", data: null })}
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
