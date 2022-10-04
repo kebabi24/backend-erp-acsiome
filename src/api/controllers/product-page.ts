@@ -66,6 +66,21 @@ const findOneByCode = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
+const findAllProductPages = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  code endpoint")
+    try {
+        const productPageService = Container.get(ProductPageService)
+        const productPages = await productPageService.findAll()
+        return res
+            .status(200)
+            .json({ message: "found all product page", data: productPages  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 
 
 
@@ -93,4 +108,5 @@ const findOneByCode = async (req: Request, res: Response, next: NextFunction) =>
 export default {
     createProductPage,
     findOneByCode,
+    findAllProductPages,
 }

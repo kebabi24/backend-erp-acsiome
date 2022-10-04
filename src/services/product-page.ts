@@ -56,6 +56,17 @@ export default class ProductPageService {
         }
     }
 
+    public async findAll(): Promise<any> {
+        try {
+            const productPages = await this.productPageModel.findAll()
+            this.logger.silly("find all productPages")
+            return productPages
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
     
 
     // public async update(data: any, query: any): Promise<any> {
