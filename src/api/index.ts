@@ -75,6 +75,7 @@ import generalLedger from "./routes/general-ledger"
 import itinerary from "./routes/itinerary"
 import roleItinerary from "./routes/role-itinerary"
 import mobileSettings from "./routes/mobile-settings"
+import productPage from "./routes/product-page"
 
 // guaranteed to get dependencies
 export default () => {
@@ -156,6 +157,7 @@ export default () => {
     service(app)
     addReport(app)
     mobileSettings(app)
+    productPage(app)
     
     return app
 }
