@@ -215,7 +215,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
             const loadRequest = await userMobileServiceInstanse.getLoadRequest({user_mobile_code : user_mobile_code , status : 40})
             const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest)
             const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest)
-            const locationDetail = await userMobileServiceInstanse.getLocationDetail(role.role_loc, role.role_site)
 
             // service created on backend 
             if(parameter.hold === true){
@@ -262,7 +261,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         loadRequest:loadRequest,
                         loadRequestsLines:loadRequestsLines,
                         loadRequestsDetails:loadRequestsDetails,
-                        locationDetail:locationDetail
                     })
             }
             // service created by mobile user
@@ -310,7 +308,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         loadRequest:loadRequest,
                         loadRequestsLines:loadRequestsLines,
                         loadRequestsDetails:loadRequestsDetails,
-                        locationDetail:locationDetail
                     })
             }
         }      

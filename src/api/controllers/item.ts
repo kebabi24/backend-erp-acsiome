@@ -5,7 +5,6 @@ import { Container } from "typedi"
 import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from "lodash";
-
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
@@ -22,7 +21,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all item endpoint")
@@ -37,7 +35,6 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all item endpoint")
@@ -144,7 +141,6 @@ const findAllwithstk = async (req: Request, res: Response, next: NextFunction) =
         return next(e)
     }
 }
-
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers

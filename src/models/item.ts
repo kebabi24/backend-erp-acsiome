@@ -19,13 +19,6 @@ const Item = sequelize.define(
             primaryKey: true,
             unique: true
         },
-
-        // NEW FIELDS 
-        pt_loadpacking:Sequelize.INTEGER,
-        pt_salepacking:Sequelize.INTEGER,
-        
-        // 
-        
         pt_desc1: Sequelize.STRING,
         pt_desc2: Sequelize.STRING,
         pt_um: Sequelize.STRING,
@@ -53,7 +46,6 @@ const Item = sequelize.define(
 
         },
         pt_abc_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
-        
         pt_avg_int: Sequelize.INTEGER,
         pt_cyc_int: Sequelize.INTEGER,
         pt_ms: {type: Sequelize.BOOLEAN, defaultValue : false  },
