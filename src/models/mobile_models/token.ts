@@ -36,6 +36,11 @@ const TokenSerie = sequelize.define(
 
         load_request_prefix :{type: Sequelize.STRING ,unique:true},
         load_request_next_number :{type : Sequelize.INTEGER},
+
+    
+        
+
+        
         
         // squote_prefix: { type: Sequelize.STRING ,unique:true},
         // squote_next_number :{type : Sequelize.INTEGER},
