@@ -32,6 +32,8 @@ const User = sequelize.define(
                 key: "usrg_code",
             },
         },
+        usrd_site:  Sequelize.STRING,
+             
         oid_usrd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },
