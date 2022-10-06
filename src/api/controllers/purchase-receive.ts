@@ -4,10 +4,12 @@ import inventoryTransactionService from '../../services/inventory-transaction';
 import inventoryStatusService from '../../services/inventory-status';
 import costSimulationService from '../../services/cost-simulation';
 import purchaseOrderDetailService from '../../services/purchase-order-detail';
+import AddressService from "../../services/address";
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { round } from 'lodash';
 import {QueryTypes} from 'sequelize';
+import { generatePdf } from "../../reporting/generator";
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -78,6 +80,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         else await locationDetailServiceInstance.create({ld_part: remain.prh_part,ld_date: new Date(), ld_lot:remain.prh_serial, ld_site: req.body.pr.prh_site,ld_loc: remain.prh_loc, ld_qty_oh :Number(remain.prh_rcvd), ld_expire: tr_expire, ld_status: tr_status, ld__log01: status.is_nettable, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
        
     }
+
+    const addressServiceInstance = Container.get(AddressService)
+    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend});
+    //console.log("\n\n req body : ", req.body)
+
+    const {detail, pr, prhnbr} = req.body;
+    const pdfData = {
+      pr : pr,
+      detail : detail,
+      prhnbr : prhnbr,
+      adr : addr
+    }
+
+    //Console.log("\n\n pdf data", pdfData)
+    const pdf = await generatePdf(pdfData, "prh")
     // const devise = await purchaseReceiveServiceInstance.create(req.body)
     return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
   } catch (e) {

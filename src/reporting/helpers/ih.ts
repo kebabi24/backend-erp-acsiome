@@ -28,7 +28,7 @@ export const prepareIhData = (rawData : any) => {
             ttc : mt.toFixed(2)
         },
 
-       // mt : numberToLetters(mt, rawData.ih.ith_curr),
+       mt : numberToLetters(mt, rawData.ih.ith_curr),
     };
     return data_ih
 }
@@ -36,24 +36,31 @@ export const prepareIhData = (rawData : any) => {
 
 const group = (arr : Array<any>, line : any) => {
     //compare each element of arr with line product and price
+    console.log("Original : ", line)
     const index = arr.findIndex((element) => {
         return (element.itdh_part == line.itdh_part && element.itdh_price == line.itdh_price)
     })
 
+    console.log("index = ", index)
     //if no element has the same product and price : add the element to arr
     if (index == -1)
     {
-        if (line.itdh_line == 1 ) arr.push(line)
+        if (arr.length == 0)
+        {
+            line.idth_line = 1;
+            arr.push(line) //in case it starts 
+            console.log("arr after line : ", arr)
+        }
         else arr.push(
             {
                 itdh_line : arr[arr.length - 1].itdh_line + 1,
                 itdh_part : line.itdh_part, 
                 desc : line.desc,
-                d_qty_ord : line.itdh_qty_inv,
-                d_um : line.sod_um,
-                d_price : line.itdh_price,
-                d_taxc : line.itdh_taxc,
-                d_disc_pct : line.itdh_disc_pct
+                itdh_qty_ord : line.itdh_qty_inv,
+                itdh_um : line.itdh_um,
+                itdh_price : line.itdh_price,
+                itdh_taxc : line.itdh_taxc,
+                itdh_disc_pct : line.itdh_disc_pct
             })
     }
     //if an element has the same product and price : sum qty
@@ -61,9 +68,12 @@ const group = (arr : Array<any>, line : any) => {
         arr[index].itdh_qty_inv += line.itdh_qty_inv
     }
 
-    return arr
+    console.log("arr : ", arr)
+
+    return arr 
     
 }
+
 //preparer le tableau des lignes groupés de la commande
 const prepareCmdData = (rawArr : Array<any>) => {
     let grArr = rawArr.reduce(group, [])
@@ -75,7 +85,7 @@ const prepareCmdData = (rawArr : Array<any>) => {
             d_part : grArr[i].itdh_part,
             desc : grArr[i].desc,
             d_qty_ord : Number(grArr[i].itdh_qty_inv).toFixed(2),
-            d_um : grArr[i].sod_um,
+            d_um : grArr[i].itdh_um,
             d_price : Number(grArr[i].itdh_price).toFixed(2),
             d_taxc : grArr[i].itdh_taxc,
             d_disc_pct : grArr[i].itdh_disc_pct,

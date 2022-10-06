@@ -32,9 +32,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const addressServiceInstance = Container.get(AddressService)
         const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
 
-        /*console.log("\n purchaseOrderDetail", purchaseOrderDetail);
-        console.log("\n\n po", po);
-        console.log("\n\n adr", addr);*/
         const pdfData = {
             pod : purchaseOrderDetail,
             po : po,

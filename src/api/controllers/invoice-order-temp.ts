@@ -98,8 +98,6 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
         console.log("\n\n Detail " , pdfData.detail)
         let pdf = await generatePdf(pdfData, 'ih');
         
-
-
         return res
             .status(201)
             .json({ message: "created succesfully", data: ih.ith_inv_nbr, pdf : pdf.content})
