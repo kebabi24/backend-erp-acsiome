@@ -217,8 +217,6 @@ const Item = sequelize.define(
       defaultValue: 'zima',
     },
     oid_pt_mstr: Sequelize.STRING,
-    pt_page: Sequelize.INTEGER,
-    pt_formule: { type: Sequelize.BOOLEAN, defaultValue: false },
     ...base,
   },
   {

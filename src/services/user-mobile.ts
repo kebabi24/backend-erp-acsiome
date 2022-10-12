@@ -29,6 +29,7 @@ export default class UserMobileService {
         @Inject("loadRequestModel") private loadRequestModel: Models.loadRequestModel,
         @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
         @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
+        @Inject("locationDetailModel") private locationDetailModel: Models.LocationDetailModel,
         @Inject("logger") private logger
     ) {}
 
@@ -662,7 +663,6 @@ export default class UserMobileService {
                 })
                 // productPage.push(profileProductPages[index].rank)
                 productPage.dataValues.rank = profileProductPages[index].rank 
-                console.log(productPage)
             });
             return productPages;
         } catch (e) {
@@ -702,7 +702,7 @@ export default class UserMobileService {
                 { where: {pt_part : productsCodes},
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
-                    'pt_net_wt','pt_net_wt_um','pt_article']
+                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking']
                     },
                 )  
             return products;
@@ -711,7 +711,6 @@ export default class UserMobileService {
             this.logger.error(e)
             throw e
         }
-        // this.logger.silly("find one user mstr")
     }
 
      // ******************** GET LOAD REQUEST **************************
@@ -760,6 +759,28 @@ export default class UserMobileService {
             this.logger.error(e)
             throw e
         }
+    }
+
+    // ******************** GET PRODUCT PAGES DETAILS  **************************
+    public async getLocationDetail(ld_loc: any, ld_site): Promise<any> {
+        try {
+           
+            const locationDetail = await this.locationDetailModel.findAll(
+                
+                { 
+                    where: {
+                        ld_loc : ld_loc , ld_site : ld_site
+                    },
+                    attributes: ['id','ld_loc','ld_site', 'ld_part' ,'ld_qty_oh','ld_lot','ld_expire']  
+                },
+                )  
+            return locationDetail;
+        } catch (e) {
+            console.log('Error from getLocationDetail - service ')
+            this.logger.error(e)
+            throw e
+        }
+        // this.logger.silly("find one user mstr")
     }
 
    

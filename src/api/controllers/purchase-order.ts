@@ -446,6 +446,33 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all purchaseOrder endpoint")
+    try {
+        let result = []
+        console.log(req.body)
+        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
+        const purchaseOrderDetailServiceInstance = Container.get(
+            PurchaseOrderDetailService
+        )
+        const pos = await purchaseOrderServiceInstance.find({})
+        for(const po of pos){
+            const details = await purchaseOrderDetailServiceInstance.find({
+                pod_nbr: po.po_nbr, pod_site: req.body.site
+            })
+            if (details.length != 0)
+           { result.push({id:po.id, po, details}) }
+    
+        }
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
@@ -472,7 +499,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
 
-    logger.debug("Calling find all purchaseOrder endpoint")
+    logger.debug("Calling find all purchaseOrder with all site endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
@@ -489,15 +516,39 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
         return next(e)
     } 
 }
+const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const sequelize = Container.get("sequelize")
 
+    logger.debug("Calling find all purchaseOrder with site endpoint")
+    try {
+        let result = []
+        console.log(req.body)
+        var site = req.body.site
+        //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
+
+        const pos =await sequelize.query("SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part  and PUBLIC.pod_det.pod_site = ? ORDER BY PUBLIC.pod_det.id DESC", { replacements: [ site], type: QueryTypes.SELECT });
+       
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: pos })
+            
+            
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    } 
+}
 export default {
     create,
     findBy,
     findByAll,
     findOne,
     findAll,
+    findAllSite,
     update,
     findAllwithDetails,
+    findAllwithDetailsite,
     findByrange,
     getProviderActivity,
     getProviderBalance,

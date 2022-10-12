@@ -42,7 +42,9 @@ const Role = sequelize.define(
                 model: "aa_tokenSerie",
                 key: "token_code",
             },
-        }
+        },
+        role_loc:{ type:Sequelize.STRING},
+        role_site:{ type:Sequelize.STRING}
         // ...base,
     },
     {
