@@ -1,17 +1,15 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import controller from '../controllers/work-order';
+import controller from '../controllers/pos-category';
 const route = Router();
 
 export default (app: Router) => {
-  app.use('/work-orders', route);
+  app.use('/pos-category', route);
 
   route.get('/', controller.findAll);
   route.post('/', controller.create);
-  route.post('/createwopos', controller.createPosWorkOrder);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
-  route.post('/findOne', controller.findByOne);
-  route.put('/:id', controller.update);
+  route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
 };

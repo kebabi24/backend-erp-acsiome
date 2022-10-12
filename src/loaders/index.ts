@@ -1,7 +1,7 @@
 import expressLoader from './express';
 import { Container } from 'typedi';
 import dependencyInjectorLoader from './dependencyInjector';
-import sequelizeLoader from './sequelize'
+import sequelizeLoader from './sequelize';
 import Logger from './logger';
 //We have to import at least all the events once so they can be triggered
 import './events';
@@ -10,10 +10,9 @@ export default async ({ expressApp }) => {
   // const mongoConnection = await mongooseLoader();
   // Logger.info('✌️ DB loaded and connected!');
 
-  const sequelizeConnection = await sequelizeLoader()
+  const sequelizeConnection = await sequelizeLoader();
   Logger.info('✌️ DB loaded and connected!');
-  Container.set('sequelize', sequelizeConnection)
-
+  Container.set('sequelize', sequelizeConnection);
 
   /**
    * WTF is going on here?
@@ -38,7 +37,7 @@ export default async ({ expressApp }) => {
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
       { name: 'productLineModel', model: require('../models/product-line').default },
-      { name: 'itemModel', model: require('../models/item').default },
+
       { name: 'codeModel', model: require('../models/code').default },
       { name: 'accountModel', model: require('../models/account').default },
       { name: 'subaccountModel', model: require('../models/subaccount').default },
@@ -119,6 +118,7 @@ export default async ({ expressApp }) => {
       { name: 'costcenterModel', model: require('../models/costcenter').default },
       { name: 'costsubModel', model: require('../models/costsub').default },
       { name: 'costaccountModel', model: require('../models/costaccount').default },
+
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -143,224 +143,602 @@ export default async ({ expressApp }) => {
       { name: 'loadRequestLineModel', model: require('../models/mobile_models/load_request_line').default },
       { name: 'loadRequestDetailsModel', model: require('../models/mobile_models/load_request_details').default },
 
-
       //
       { name: 'profile_menuModel', model: require('../models/mobile_models/profile_menu').default },
       { name: 'role_itineraryModel', model: require('../models/mobile_models/role_itinerary').default },
       { name: 'itinerary_CustomerModel', model: require('../models/mobile_models/itinerary_customer').default },
       { name: 'productPageDetailsModel', model: require('../models/mobile_models/product_page_details').default },
       { name: 'profileProductPageModel', model: require('../models/mobile_models/profile_product_page').default },
-
+      { name: 'posCategoryModel', model: require('../models/pos-categories').default },
+      { name: 'posCategoryProductModel', model: require('../models/pos-category-product').default },
+      { name: 'posProductModel', model: require('../models/pos-product').default },
+      { name: 'itemModel', model: require('../models/item').default },
+      { name: 'posOrderModel', model: require('../models/pos-order').default },
+      { name: 'posOrderDetailModel', model: require('../models/pos-order-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
 
-
-
   //associations between mobile models
 
-  //////// 
-  require('../models/mobile_models/product_page').default.hasOne(require('../models/mobile_models/profile_product_page').default, { foreignKey: 'product_page_code', sourceKey: 'product_page_code' })
-  require('../models/mobile_models/profile_product_page').default.belongsTo(require('../models/mobile_models/product_page').default, { foreignKey: 'product_page_code', sourceKey: 'product_page_code' })
+  ////////
+  require('../models/mobile_models/product_page').default.hasOne(
+    require('../models/mobile_models/profile_product_page').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+  );
+  require('../models/mobile_models/profile_product_page').default.belongsTo(
+    require('../models/mobile_models/product_page').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+  );
 
-  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/profile_product_page').default, { foreignKey: 'profile_code', sourceKey: 'profile_code' })
-  require('../models/mobile_models/profile_product_page').default.belongsTo(require('../models/mobile_models/profile').default, { foreignKey: 'profile_code', sourceKey: 'profile_code' })
-  //////// 
+  require('../models/mobile_models/profile').default.hasOne(
+    require('../models/mobile_models/profile_product_page').default,
+    { foreignKey: 'profile_code', sourceKey: 'profile_code' },
+  );
+  require('../models/mobile_models/profile_product_page').default.belongsTo(
+    require('../models/mobile_models/profile').default,
+    { foreignKey: 'profile_code', sourceKey: 'profile_code' },
+  );
+  ////////
 
-  //////// 
-  require('../models/mobile_models/product_page').default.hasOne(require('../models/mobile_models/product_page_details').default, { foreignKey: 'product_page_code', sourceKey: 'product_page_code' })
-  require('../models/mobile_models/product_page_details').default.belongsTo(require('../models/mobile_models/product_page').default, { foreignKey: 'product_page_code', sourceKey: 'product_page_code' })
+  ////////
+  require('../models/mobile_models/product_page').default.hasOne(
+    require('../models/mobile_models/product_page_details').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+  );
+  require('../models/mobile_models/product_page_details').default.belongsTo(
+    require('../models/mobile_models/product_page').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+  );
 
-  require('../models/item').default.hasOne(require('../models/mobile_models/product_page_details').default, { foreignKey: 'product_code', sourceKey: 'pt_part' })
-  require('../models/mobile_models/product_page_details').default.belongsTo(require('../models/item').default, { foreignKey: 'product_code', sourceKey: 'pt_part' })
-  //////// 
+  require('../models/item').default.hasOne(require('../models/mobile_models/product_page_details').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  require('../models/mobile_models/product_page_details').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  ////////
 
+  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/profile_menu').default, {
+    foreignKey: 'profile_code',
+    sourceKey: 'profile_code',
+  });
+  require('../models/mobile_models/profile_menu').default.belongsTo(
+    require('../models/mobile_models/profile').default,
+    { foreignKey: 'profile_code', sourceKey: 'profile_code' },
+  );
 
-  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/profile_menu').default, { foreignKey: 'profile_code', sourceKey: 'profile_code' })
-  require('../models/mobile_models/profile_menu').default.belongsTo(require('../models/mobile_models/profile').default, { foreignKey: 'profile_code', sourceKey: 'profile_code' })
+  require('../models/mobile_models/menu').default.hasOne(require('../models/mobile_models/profile_menu').default, {
+    foreignKey: 'menu_code',
+    sourceKey: 'menu_code',
+  });
+  require('../models/mobile_models/profile_menu').default.belongsTo(require('../models/mobile_models/menu').default, {
+    foreignKey: 'menu_code',
+    targetKey: 'menu_code',
+  });
 
-  require('../models/mobile_models/menu').default.hasOne(require('../models/mobile_models/profile_menu').default, { foreignKey: 'menu_code', sourceKey: 'menu_code' })
-  require('../models/mobile_models/profile_menu').default.belongsTo(require('../models/mobile_models/menu').default, { foreignKey: 'menu_code', targetKey: 'menu_code' })
+  require('../models/mobile_models/customer').default.hasOne(
+    require('../models/mobile_models/itinerary_customer').default,
+    { foreignKey: 'customer_code', sourceKey: 'customer_code' },
+  );
+  require('../models/mobile_models/itinerary_customer').default.belongsTo(
+    require('../models/mobile_models/customer').default,
+    { foreignKey: 'customer_code', targetKey: 'customer_code' },
+  );
 
-  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/itinerary_customer').default, { foreignKey: 'customer_code', sourceKey: 'customer_code' })
-  require('../models/mobile_models/itinerary_customer').default.belongsTo(require('../models/mobile_models/customer').default, { foreignKey: 'customer_code', targetKey: 'customer_code' })
+  require('../models/mobile_models/itinerary').default.hasOne(
+    require('../models/mobile_models/itinerary_customer').default,
+    { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' },
+  );
+  require('../models/mobile_models/itinerary_customer').default.belongsTo(
+    require('../models/mobile_models/itinerary').default,
+    { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
+  );
 
-  require('../models/mobile_models/itinerary').default.hasOne(require('../models/mobile_models/itinerary_customer').default, { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' })
-  require('../models/mobile_models/itinerary_customer').default.belongsTo(require('../models/mobile_models/itinerary').default, { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' })
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/role_itinerary').default, {
+    foreignKey: 'role_code',
+    sourceKey: 'role_code',
+  });
+  require('../models/mobile_models/role_itinerary').default.belongsTo(require('../models/mobile_models/role').default, {
+    foreignKey: 'role_code',
+    targetKey: 'role_code',
+  });
 
-  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/role_itinerary').default, { foreignKey: 'role_code', sourceKey: 'role_code' })
-  require('../models/mobile_models/role_itinerary').default.belongsTo(require('../models/mobile_models/role').default, { foreignKey: 'role_code', targetKey: 'role_code' })
+  require('../models/mobile_models/itinerary').default.hasOne(
+    require('../models/mobile_models/role_itinerary').default,
+    { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' },
+  );
+  require('../models/mobile_models/role_itinerary').default.belongsTo(
+    require('../models/mobile_models/itinerary').default,
+    { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
+  );
 
-  require('../models/mobile_models/itinerary').default.hasOne(require('../models/mobile_models/role_itinerary').default, { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' })
-  require('../models/mobile_models/role_itinerary').default.belongsTo(require('../models/mobile_models/itinerary').default, { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' })
+  // associtations pos
 
-
-
-
-
-
-
-
+  require('../models/pos-categories').default.hasMany(require('../models/item').default, { foreignKey: 'pt_page' });
+  require('../models/item').default.belongsTo(require('../models/pos-categories').default, { foreignKey: 'pt_page' });
 
   // associtations erp back office
-  require('../models/profile').default.hasOne(require('../models/user').default, { foreignKey: 'usrd_profile', sourceKey: 'usrg_code' })
-  require('../models/user').default.belongsTo(require('../models/profile').default, { foreignKey: 'usrd_profile', targetKey: 'usrg_code' })
+  require('../models/profile').default.hasOne(require('../models/user').default, {
+    foreignKey: 'usrd_profile',
+    sourceKey: 'usrg_code',
+  });
+  require('../models/user').default.belongsTo(require('../models/profile').default, {
+    foreignKey: 'usrd_profile',
+    targetKey: 'usrg_code',
+  });
 
-  require('../models/address').default.hasOne(require('../models/provider').default, { foreignKey: 'vd_addr', sourceKey: 'ad_addr' })
-  require('../models/provider').default.belongsTo(require('../models/address').default, { foreignKey: 'vd_addr', targetKey: 'ad_addr' })
+  require('../models/address').default.hasOne(require('../models/provider').default, {
+    foreignKey: 'vd_addr',
+    sourceKey: 'ad_addr',
+  });
+  require('../models/provider').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'vd_addr',
+    targetKey: 'ad_addr',
+  });
 
+  require('../models/address').default.hasOne(require('../models/customer').default, {
+    foreignKey: 'cm_addr',
+    sourceKey: 'ad_addr',
+  });
+  require('../models/customer').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'cm_addr',
+    targetKey: 'ad_addr',
+  });
 
-  require('../models/address').default.hasOne(require('../models/customer').default, { foreignKey: 'cm_addr', sourceKey: 'ad_addr' })
-  require('../models/customer').default.belongsTo(require('../models/address').default, { foreignKey: 'cm_addr', targetKey: 'ad_addr' })
+  require('../models/bom').default.hasOne(require('../models/bom-part').default, {
+    foreignKey: 'ptb_bom',
+    sourceKey: 'bom_parent',
+  });
+  require('../models/bom-part').default.belongsTo(require('../models/bom').default, {
+    foreignKey: 'ptb_bom',
+    targetKey: 'bom_parent',
+  });
 
-  require('../models/bom').default.hasOne(require('../models/bom-part').default, { foreignKey: 'ptb_bom', sourceKey: 'bom_parent' })
-  require('../models/bom-part').default.belongsTo(require('../models/bom').default, { foreignKey: 'ptb_bom', targetKey: 'bom_parent' })
+  require('../models/sequence').default.hasOne(require('../models/requisition').default, {
+    foreignKey: 'rqm_category',
+    sourceKey: 'seq_seq',
+  });
+  require('../models/requisition').default.belongsTo(require('../models/sequence').default, {
+    foreignKey: 'rqm_category',
+    targetKey: 'seq_seq',
+  });
+  require('../models/provider').default.hasOne(require('../models/requisition').default, {
+    foreignKey: 'rqm_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/requisition').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'rqm_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/requisition-detail').default, {
+    foreignKey: 'rqd_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/requisition-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'rqd_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/provider').default.hasOne(require('../models/vendor-proposal').default, {
+    foreignKey: 'vp_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/vendor-proposal').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'vp_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/requisition').default.hasOne(require('../models/vendor-proposal').default, {
+    foreignKey: 'vp_rqm_nbr',
+    sourceKey: 'rqm_nbr',
+  });
+  require('../models/vendor-proposal').default.belongsTo(require('../models/requisition').default, {
+    foreignKey: 'vp_rqm_nbr',
+    targetKey: 'rqm_nbr',
+  });
+  require('../models/item').default.hasOne(require('../models/vendor-proposal-detail').default, {
+    foreignKey: 'vpd_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/vendor-proposal-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'vpd_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/provider').default.hasOne(require('../models/purchase-order').default, {
+    foreignKey: 'po_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/purchase-order').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'po_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/purchase-order-detail').default, {
+    foreignKey: 'pod_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/purchase-order-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'pod_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/item').default.hasOne(require('../models/cost-simulation').default, {
+    foreignKey: 'sct_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/cost-simulation').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'sct_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/item').default.hasOne(require('../models/tag').default, {
+    foreignKey: 'tag_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/tag').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'tag_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/quote').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'qo_cust',
+    targetKey: 'cm_addr',
+  });
+  require('../models/quote-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'qod_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/taxe').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_taxc',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/item').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'pt_taxc',
+    targetKey: 'tx2_tax_code',
+  });
+  require('../models/item').default.hasOne(require('../models/location-detail').default, {
+    foreignKey: 'ld_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/location-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'ld_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
+    foreignKey: 'tr_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/inventory-transaction').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'tr_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/item').default.hasOne(require('../models/purchase-receive').default, {
+    foreignKey: 'prh_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/purchase-receive').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'prh_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/purchase-order').default.hasOne(require('../models/purchase-receive').default, {
+    foreignKey: 'prh_nbr',
+    sourceKey: 'po_nbr',
+  });
+  require('../models/purchase-receive').default.belongsTo(require('../models/purchase-order').default, {
+    foreignKey: 'prh_nbr',
+    targetKey: 'po_nbr',
+  });
 
-  require('../models/sequence').default.hasOne(require('../models/requisition').default, { foreignKey: 'rqm_category', sourceKey: 'seq_seq' })
-  require('../models/requisition').default.belongsTo(require('../models/sequence').default, { foreignKey: 'rqm_category', targetKey: 'seq_seq' })
-  require('../models/provider').default.hasOne(require('../models/requisition').default, { foreignKey: 'rqm_vend', sourceKey: 'vd_addr' })
-  require('../models/requisition').default.belongsTo(require('../models/provider').default, { foreignKey: 'rqm_vend', targetKey: 'vd_addr' })
-  require('../models/item').default.hasOne(require('../models/requisition-detail').default, { foreignKey: 'rqd_part', sourceKey: 'pt_part' })
-  require('../models/requisition-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'rqd_part', targetKey: 'pt_part' })
-  require('../models/provider').default.hasOne(require('../models/vendor-proposal').default, { foreignKey: 'vp_vend', sourceKey: 'vd_addr' })
-  require('../models/vendor-proposal').default.belongsTo(require('../models/provider').default, { foreignKey: 'vp_vend', targetKey: 'vd_addr' })
-  require('../models/requisition').default.hasOne(require('../models/vendor-proposal').default, { foreignKey: 'vp_rqm_nbr', sourceKey: 'rqm_nbr' })
-  require('../models/vendor-proposal').default.belongsTo(require('../models/requisition').default, { foreignKey: 'vp_rqm_nbr', targetKey: 'rqm_nbr' })
-  require('../models/item').default.hasOne(require('../models/vendor-proposal-detail').default, { foreignKey: 'vpd_part', sourceKey: 'pt_part' })
-  require('../models/vendor-proposal-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'vpd_part', targetKey: 'pt_part' })
-  require('../models/provider').default.hasOne(require('../models/purchase-order').default, { foreignKey: 'po_vend', sourceKey: 'vd_addr' })
-  require('../models/purchase-order').default.belongsTo(require('../models/provider').default, { foreignKey: 'po_vend', targetKey: 'vd_addr' })
-  require('../models/item').default.hasOne(require('../models/purchase-order-detail').default, { foreignKey: 'pod_part', sourceKey: 'pt_part' })
-  require('../models/purchase-order-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'pod_part', targetKey: 'pt_part' })
-  require('../models/item').default.hasOne(require('../models/cost-simulation').default, { foreignKey: 'sct_part', sourceKey: 'pt_part' })
-  require('../models/cost-simulation').default.belongsTo(require('../models/item').default, { foreignKey: 'sct_part', targetKey: 'pt_part' })
-  require('../models/item').default.hasOne(require('../models/tag').default, { foreignKey: 'tag_part', sourceKey: 'pt_part' })
-  require('../models/tag').default.belongsTo(require('../models/item').default, { foreignKey: 'tag_part', targetKey: 'pt_part' })
-  require('../models/quote').default.belongsTo(require('../models/customer').default, { foreignKey: 'qo_cust', targetKey: 'cm_addr' })
-  require('../models/quote-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'qod_part', targetKey: 'pt_part' })
-  require('../models/taxe').default.hasOne(require('../models/item').default, { foreignKey: 'pt_taxc', sourceKey: 'tx2_tax_code' })
-  require('../models/item').default.belongsTo(require('../models/taxe').default, { foreignKey: 'pt_taxc', targetKey: 'tx2_tax_code' })
-  require('../models/item').default.hasOne(require('../models/location-detail').default, { foreignKey: 'ld_part', sourceKey: 'pt_part' })
-  require('../models/location-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'ld_part', targetKey: 'pt_part' })
-  require('../models/item').default.hasOne(require('../models/inventory-transaction').default, { foreignKey: 'tr_part', sourceKey: 'pt_part' })
-  require('../models/inventory-transaction').default.belongsTo(require('../models/item').default, { foreignKey: 'tr_part', targetKey: 'pt_part' })
-  require('../models/item').default.hasOne(require('../models/purchase-receive').default, { foreignKey: 'prh_part', sourceKey: 'pt_part' })
-  require('../models/purchase-receive').default.belongsTo(require('../models/item').default, { foreignKey: 'prh_part', targetKey: 'pt_part' })
-  require('../models/purchase-order').default.hasOne(require('../models/purchase-receive').default, { foreignKey: 'prh_nbr', sourceKey: 'po_nbr' })
-  require('../models/purchase-receive').default.belongsTo(require('../models/purchase-order').default, { foreignKey: 'prh_nbr', targetKey: 'po_nbr' })
-
-  require('../models/location').default.hasOne(require('../models/item').default, { foreignKey: 'pt_loc', sourceKey: 'loc_loc' })
-  require('../models/item').default.belongsTo(require('../models/location').default, { foreignKey: 'pt_loc', targetKey: 'loc_loc' })
+  require('../models/location').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_loc',
+    sourceKey: 'loc_loc',
+  });
+  require('../models/item').default.belongsTo(require('../models/location').default, {
+    foreignKey: 'pt_loc',
+    targetKey: 'loc_loc',
+  });
   // require('../models/exchange-rate').default.hasOne(require('../models/currency').default,{foreignKey: 'cu_curr',sourceKey: 'exr_curr1'})
   // require('../models/currency').default.belongsTo(require('../models/exchange-rate').default,{  foreignKey: 'cu_curr', targetKey: 'exr_curr1'})
 
   // require('../models/exchange-rate').default.hasOne(require('../models/currency').default,{foreignKey: 'cu_curr',sourceKey: 'exr_curr2'})
   // require('../models/currency').default.belongsTo(require('../models/exchange-rate').default,{  foreignKey: 'cu_curr', targetKey: 'exr_curr2'})
-  require('../models/sale-shiper').default.belongsTo(require('../models/item').default, { foreignKey: 'psh_part', targetKey: 'pt_part' })
-  require('../models/saleorder').default.hasOne(require('../models/sale-shiper').default, { foreignKey: 'psh_nbr', sourceKey: 'so_nbr' })
-  require('../models/sale-shiper').default.belongsTo(require('../models/saleorder').default, { foreignKey: 'psh_nbr', targetKey: 'so_nbr' })
+  require('../models/sale-shiper').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'psh_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/saleorder').default.hasOne(require('../models/sale-shiper').default, {
+    foreignKey: 'psh_nbr',
+    sourceKey: 'so_nbr',
+  });
+  require('../models/sale-shiper').default.belongsTo(require('../models/saleorder').default, {
+    foreignKey: 'psh_nbr',
+    targetKey: 'so_nbr',
+  });
 
-  require('../models/item').default.hasOne(require('../models/quote-detail').default, { foreignKey: 'qod_part', sourceKey: 'pt_part' })
-  require('../models/sequence').default.hasOne(require('../models/saleorder').default, { foreignKey: 'so_category', sourceKey: 'seq_seq' })
-  require('../models/saleorder').default.belongsTo(require('../models/sequence').default, { foreignKey: 'so_category', targetKey: 'seq_seq' })
-  require('../models/customer').default.hasOne(require('../models/saleorder').default, { foreignKey: 'so_cust', sourceKey: 'cm_addr' })
-  require('../models/saleorder').default.belongsTo(require('../models/customer').default, { foreignKey: 'so_cust', targetKey: 'cm_addr' })
-  require('../models/item').default.hasOne(require('../models/saleorder-detail').default, { foreignKey: 'sod_part', sourceKey: 'pt_part' })
-  require('../models/saleorder-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'sod_part', targetKey: 'pt_part' })
-  require('../models/customer').default.hasOne(require('../models/invoice-order').default, { foreignKey: 'ih_bill', sourceKey: 'cm_addr' })
-  require('../models/invoice-order').default.belongsTo(require('../models/customer').default, { foreignKey: 'ih_bill', targetKey: 'cm_addr' })
-  require('../models/item').default.hasOne(require('../models/invoice-order-detail').default, { foreignKey: 'idh_part', sourceKey: 'pt_part' })
-  require('../models/invoice-order-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'idh_part', targetKey: 'pt_part' })
-  require('../models/customer').default.hasOne(require('../models/account-receivable').default, { foreignKey: 'ar_bill', sourceKey: 'cm_addr' })
-  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, { foreignKey: 'ar_bill', targetKey: 'cm_addr' })
-  require('../models/customer').default.hasOne(require('../models/account-receivable').default, { foreignKey: 'ar_cust', sourceKey: 'cm_addr' })
-  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, { foreignKey: 'ar_cust', targetKey: 'cm_addr' })
+  require('../models/item').default.hasOne(require('../models/quote-detail').default, {
+    foreignKey: 'qod_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/sequence').default.hasOne(require('../models/saleorder').default, {
+    foreignKey: 'so_category',
+    sourceKey: 'seq_seq',
+  });
+  require('../models/saleorder').default.belongsTo(require('../models/sequence').default, {
+    foreignKey: 'so_category',
+    targetKey: 'seq_seq',
+  });
+  require('../models/customer').default.hasOne(require('../models/saleorder').default, {
+    foreignKey: 'so_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/saleorder').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'so_cust',
+    targetKey: 'cm_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/saleorder-detail').default, {
+    foreignKey: 'sod_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/saleorder-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'sod_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/customer').default.hasOne(require('../models/invoice-order').default, {
+    foreignKey: 'ih_bill',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/invoice-order').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ih_bill',
+    targetKey: 'cm_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/invoice-order-detail').default, {
+    foreignKey: 'idh_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/invoice-order-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'idh_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/customer').default.hasOne(require('../models/account-receivable').default, {
+    foreignKey: 'ar_bill',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ar_bill',
+    targetKey: 'cm_addr',
+  });
+  require('../models/customer').default.hasOne(require('../models/account-receivable').default, {
+    foreignKey: 'ar_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ar_cust',
+    targetKey: 'cm_addr',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/saleorder-detail').default, { foreignKey: 'sod_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/saleorder-detail').default.belongsTo(require('../models/taxe').default, { foreignKey: 'sod_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/saleorder-detail').default, {
+    foreignKey: 'sod_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/saleorder-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'sod_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/purchase-order-detail').default, { foreignKey: 'pod_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/purchase-order-detail').default.belongsTo(require('../models/taxe').default, { foreignKey: 'pod_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/purchase-order-detail').default, {
+    foreignKey: 'pod_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/purchase-order-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'pod_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/quote-detail').default, { foreignKey: 'qod_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/quote-detail').default.belongsTo(require('../models/taxe').default, { foreignKey: 'qod_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/quote-detail').default, {
+    foreignKey: 'qod_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/quote-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'qod_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/invoice-order-detail').default, { foreignKey: 'idh_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/invoice-order-detail').default.belongsTo(require('../models/taxe').default, { foreignKey: 'idh_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/invoice-order-detail').default, {
+    foreignKey: 'idh_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/invoice-order-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'idh_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/purchase-receive').default, { foreignKey: 'prh_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/purchase-receive').default.belongsTo(require('../models/taxe').default, { foreignKey: 'prh_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/purchase-receive').default, {
+    foreignKey: 'prh_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/purchase-receive').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'prh_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/taxe').default.hasOne(require('../models/sale-shiper').default, { foreignKey: 'psh_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/sale-shiper').default.belongsTo(require('../models/taxe').default, { foreignKey: 'psh_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/taxe').default.hasOne(require('../models/sale-shiper').default, {
+    foreignKey: 'psh_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/sale-shiper').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'psh_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/address').default.hasOne(require('../models/bank').default, { foreignKey: 'bk_code', sourceKey: 'ad_addr' })
-  require('../models/bank').default.belongsTo(require('../models/address').default, { foreignKey: 'bk_code', targetKey: 'ad_addr' })
+  require('../models/address').default.hasOne(require('../models/bank').default, {
+    foreignKey: 'bk_code',
+    sourceKey: 'ad_addr',
+  });
+  require('../models/bank').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'bk_code',
+    targetKey: 'ad_addr',
+  });
 
-  require('../models/customer').default.hasOne(require('../models/account-shiper').default, { foreignKey: 'as_cust', sourceKey: 'cm_addr' })
-  require('../models/account-shiper').default.belongsTo(require('../models/customer').default, { foreignKey: 'as_cust', targetKey: 'cm_addr' })
+  require('../models/customer').default.hasOne(require('../models/account-shiper').default, {
+    foreignKey: 'as_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/account-shiper').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'as_cust',
+    targetKey: 'cm_addr',
+  });
 
-  require('../models/provider').default.hasOne(require('../models/voucher-order').default, { foreignKey: 'vh_vend', sourceKey: 'vd_addr' })
-  require('../models/voucher-order').default.belongsTo(require('../models/provider').default, { foreignKey: 'vh_vend', targetKey: 'vd_addr' })
-  require('../models/item').default.hasOne(require('../models/voucher-order-detail').default, { foreignKey: 'vdh_part', sourceKey: 'pt_part' })
-  require('../models/voucher-order-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'vdh_part', targetKey: 'pt_part' })
-  require('../models/taxe').default.hasOne(require('../models/voucher-order-detail').default, { foreignKey: 'vdh_tax_code', sourceKey: 'tx2_tax_code' })
-  require('../models/voucher-order-detail').default.belongsTo(require('../models/taxe').default, { foreignKey: 'vdh_tax_code', targetKey: 'tx2_tax_code' })
+  require('../models/provider').default.hasOne(require('../models/voucher-order').default, {
+    foreignKey: 'vh_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/voucher-order').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'vh_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/voucher-order-detail').default, {
+    foreignKey: 'vdh_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/voucher-order-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'vdh_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/taxe').default.hasOne(require('../models/voucher-order-detail').default, {
+    foreignKey: 'vdh_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/voucher-order-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'vdh_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
 
-  require('../models/provider').default.hasOne(require('../models/account-payable').default, { foreignKey: 'ap_vend', sourceKey: 'vd_addr' })
-  require('../models/account-payable').default.belongsTo(require('../models/provider').default, { foreignKey: 'ap_vend', targetKey: 'vd_addr' })
-  require('../models/account-payable').default.belongsTo(require('../models/address').default, { foreignKey: 'ap_vend', targetKey: 'ad_addr' })
+  require('../models/provider').default.hasOne(require('../models/account-payable').default, {
+    foreignKey: 'ap_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/account-payable').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'ap_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/account-payable').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'ap_vend',
+    targetKey: 'ad_addr',
+  });
 
-  require('../models/general-ledger').default.belongsTo(require('../models/address').default, { foreignKey: 'glt_addr', targetKey: 'ad_addr' })
+  require('../models/general-ledger').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'glt_addr',
+    targetKey: 'ad_addr',
+  });
 
-  require('../models/item').default.hasOne(require('../models/ps').default, { foreignKey: 'ps_comp', sourceKey: 'pt_part' })
-  require('../models/ps').default.belongsTo(require('../models/item').default, { foreignKey: 'ps_comp', targetKey: 'pt_part' })
+  require('../models/item').default.hasOne(require('../models/ps').default, {
+    foreignKey: 'ps_comp',
+    sourceKey: 'pt_part',
+  });
+  require('../models/ps').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'ps_comp',
+    targetKey: 'pt_part',
+  });
 
+  require('../models/item').default.hasOne(require('../models/work-order').default, {
+    foreignKey: 'wo_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/work-order').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'wo_part',
+    targetKey: 'pt_part',
+  });
 
-  require('../models/item').default.hasOne(require('../models/work-order').default, { foreignKey: 'wo_part', sourceKey: 'pt_part' })
-  require('../models/work-order').default.belongsTo(require('../models/item').default, { foreignKey: 'wo_part', targetKey: 'pt_part' })
+  require('../models/item').default.hasOne(require('../models/work-order-detail').default, {
+    foreignKey: 'wod_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/work-order-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'wod_part',
+    targetKey: 'pt_part',
+  });
 
-  require('../models/item').default.hasOne(require('../models/work-order-detail').default, { foreignKey: 'wod_part', sourceKey: 'pt_part' })
-  require('../models/work-order-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'wod_part', targetKey: 'pt_part' })
+  require('../models/customer').default.hasOne(require('../models/project').default, {
+    foreignKey: 'pm_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/project').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'pm_cust',
+    targetKey: 'cm_addr',
+  });
 
-  require('../models/customer').default.hasOne(require('../models/project').default, { foreignKey: 'pm_cust', sourceKey: 'cm_addr' })
-  require('../models/project').default.belongsTo(require('../models/customer').default, { foreignKey: 'pm_cust', targetKey: 'cm_addr' })
+  require('../models/item').default.hasOne(require('../models/project-detail').default, {
+    foreignKey: 'pmd_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/project-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'pmd_part',
+    targetKey: 'pt_part',
+  });
 
-  require('../models/item').default.hasOne(require('../models/project-detail').default, { foreignKey: 'pmd_part', sourceKey: 'pt_part' })
-  require('../models/project-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'pmd_part', targetKey: 'pt_part' })
+  require('../models/task').default.hasOne(require('../models/project-detail').default, {
+    foreignKey: 'pmd_task',
+    sourceKey: 'tk_code',
+  });
+  require('../models/project-detail').default.belongsTo(require('../models/task').default, {
+    foreignKey: 'pmd_task',
+    targetKey: 'tk_code',
+  });
 
-  require('../models/task').default.hasOne(require('../models/project-detail').default, { foreignKey: 'pmd_task', sourceKey: 'tk_code' })
-  require('../models/project-detail').default.belongsTo(require('../models/task').default, { foreignKey: 'pmd_task', targetKey: 'tk_code' })
+  require('../models/employe').default.hasOne(require('../models/employe-availability').default, {
+    foreignKey: 'empd_addr',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-availability').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'empd_addr',
+    targetKey: 'emp_addr',
+  });
 
-  require('../models/employe').default.hasOne(require('../models/employe-availability').default, { foreignKey: 'empd_addr', sourceKey: 'emp_addr' })
-  require('../models/employe-availability').default.belongsTo(require('../models/employe').default, { foreignKey: 'empd_addr', targetKey: 'emp_addr' })
+  require('../models/project').default.hasOne(require('../models/affect-employe').default, {
+    foreignKey: 'pme_pm_code',
+    sourceKey: 'pm_code',
+  });
+  require('../models/affect-employe').default.belongsTo(require('../models/project').default, {
+    foreignKey: 'pme_pm_code',
+    targetKey: 'pm_code',
+  });
 
-  require('../models/project').default.hasOne(require('../models/affect-employe').default, { foreignKey: 'pme_pm_code', sourceKey: 'pm_code' })
-  require('../models/affect-employe').default.belongsTo(require('../models/project').default, { foreignKey: 'pme_pm_code', targetKey: 'pm_code' })
+  require('../models/project').default.hasOne(require('../models/add-report').default, {
+    foreignKey: 'pmr_pm_code',
+    sourceKey: 'pm_code',
+  });
+  require('../models/add-report').default.belongsTo(require('../models/project').default, {
+    foreignKey: 'pmr_pm_code',
+    targetKey: 'pm_code',
+  });
 
-
-
-  require('../models/project').default.hasOne(require('../models/add-report').default, { foreignKey: 'pmr_pm_code', sourceKey: 'pm_code' })
-  require('../models/add-report').default.belongsTo(require('../models/project').default, { foreignKey: 'pmr_pm_code', targetKey: 'pm_code' })
-
-  require('../models/customer').default.hasOne(require('../models/invoice-order-temp').default, { foreignKey: 'ith_bill', sourceKey: 'cm_addr' })
-  require('../models/invoice-order-temp').default.belongsTo(require('../models/customer').default, { foreignKey: 'ith_bill', targetKey: 'cm_addr' })
-  require('../models/item').default.hasOne(require('../models/invoice-order-temp-detail').default, { foreignKey: 'itdh_part', sourceKey: 'pt_part' })
-  require('../models/invoice-order-temp-detail').default.belongsTo(require('../models/item').default, { foreignKey: 'itdh_part', targetKey: 'pt_part' })
-
-
+  require('../models/customer').default.hasOne(require('../models/invoice-order-temp').default, {
+    foreignKey: 'ith_bill',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/invoice-order-temp').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ith_bill',
+    targetKey: 'cm_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/invoice-order-temp-detail').default, {
+    foreignKey: 'itdh_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/invoice-order-temp-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'itdh_part',
+    targetKey: 'pt_part',
+  });
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // await sequelizeConnection.sync()
+  await sequelizeConnection.sync();
 
-  // await sequelizeConnection.sync({alter:true}).then(()=>{
-  //    console.log('database updated');
-  //  }).catch((err)=>{
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
   //     console.log(err);
-  //  })
+  //   });
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');
 };
-

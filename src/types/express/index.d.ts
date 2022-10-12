@@ -1,10 +1,10 @@
 import { IUser } from '../../interfaces/IUser';
-import * as S from 'sequelize'
+import * as S from 'sequelize';
 declare global {
   namespace Express {
     export interface Request {
       // currentUser: IUser & Document;
-    }    
+    }
   }
 
   namespace Models {
@@ -57,17 +57,17 @@ declare global {
     export type BankModel = S.Model;
     export type BankDetailModel = S.Model;
     export type VoucherOrderModel = S.Model;
-    export type VoucherOrderDetailModel = S.Model;    
+    export type VoucherOrderDetailModel = S.Model;
     export type AccountPayableDetailModel = S.Model;
     export type GeneralLedgerModel = S.Model;
     export type DaybookModel = S.Model;
     export type BomModel = S.Model;
     export type PsModel = S.Model;
     export type WorkOrderModel = S.Model;
-    export type WorkOrderDetailModel = S.Model;    
+    export type WorkOrderDetailModel = S.Model;
     export type OperationHistoryModel = S.Model;
-    export type ReasonModel = S.Model;   
-    export type FraisModel = S.Model;   
+    export type ReasonModel = S.Model;
+    export type FraisModel = S.Model;
     export type JobModel = S.Model;
     export type JobDetailModel = S.Model;
     export type ToolModel = S.Model;
@@ -93,6 +93,10 @@ declare global {
     export type CostcenterModel = S.Model;
     export type CostsubModel = S.Model;
     export type CostaccountModel = S.Model;
+    export type PosCategoryModel = S.Model;
+    export type PosProductModel = S.Model;
+    export type PosCategoryProductModel = S.Model;
+    export type ProductIngredient = S.Model;
     //
     export type UserMobileModel = S.Model;
     export type ProfileMobileModel = S.Model;
@@ -105,7 +109,7 @@ declare global {
     export type CustomerMobileModel = S.Model;
     export type ChecklistModel = S.Model;
     export type Role_itineraryModel = S.Model;
-    export type ParameterModel =S.Model;
+    export type ParameterModel = S.Model;
     export type CodeMobileModel = S.Model;
     export type TokenSerieModel = S.Model;
     export type CategoryModel = S.Model;
@@ -121,9 +125,7 @@ declare global {
     export type loadRequestModel = S.Model;
     export type loadRequestLineModel = S.Model;
     export type loadRequestDetailsModel = S.Model;
-   
-
-
+    export type posOrderModel = S.Model;
+    export type posOrderDetailModel = S.Model;
   }
-  
 }
