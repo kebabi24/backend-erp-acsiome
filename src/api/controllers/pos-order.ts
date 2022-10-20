@@ -22,14 +22,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       created_date: new Date(),
     });
     for (const product of products) {
-      const { pt_part } = product;
+      const { pt_part, pt_qty, pt_price } = product;
       let supps = product.suppliments;
       let ing = product.ingredients;
       for (const supp of supps) {
         await PosOrderDetailServiceInstance.create({
           order_code: cart.code_cart,
           pt_part: pt_part,
-          pt_part_det: supp.spec_code,
+          pt_part_det: supp.pt_part,
+          pt_qty_ord: pt_qty,
+          pt_price: pt_price,
           created_date: new Date(),
         });
       }
@@ -81,6 +83,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findByOrd = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const order = await PosOrderDetailServiceInstance.find({ ...req.body });
+    return res.status(200).json({ message: 'fetched succesfully', data: order });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -114,6 +129,7 @@ export default {
   findOne,
   findAll,
   findBy,
+  findByOrd,
   update,
   deleteOne,
 };

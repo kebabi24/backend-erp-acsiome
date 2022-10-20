@@ -30,6 +30,8 @@ const OrderPosDetail = sequelize.define(
         key: 'pt_part',
       },
     },
+    pt_qty_ord: Sequelize.INTEGER,
+    pt_price: Sequelize.DECIMAL,
     created_date: Sequelize.DATEONLY,
   },
   {

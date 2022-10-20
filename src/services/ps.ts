@@ -35,7 +35,7 @@ export default class psService {
       const pss = await this.psModel.findAll({
         where: query,
         include: this.itemModel,
-        attributes: ['ps_parent', 'ps_comp'],
+        attributes: ['ps_parent', 'ps_comp', 'ps_qty_per'],
       });
       this.logger.silly('find All pss mstr');
 

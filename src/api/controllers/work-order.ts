@@ -71,11 +71,12 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const products = req.body.cart.products;
 
     for (const product of products) {
-      const { pt_part, pt_qty, pt_bom_code } = product;
+      const { pt_part, pt_qty, pt_bom_code, line } = product;
 
       await workOrderServiceInstance.create({
         wo_nbr: code_cart,
         wo_part: pt_part,
+        wo_lot: line,
         wo_qty_ord: pt_qty,
         wo_bom_code: pt_bom_code,
         wo_ord_date: new Date(),

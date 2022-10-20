@@ -38,7 +38,7 @@ export default class ItemService {
     try {
       const codes = await this.itemModel.findAll({
         where: query,
-        attributes: ['id', 'pt_part', 'pt_desc1', 'pt_desc2', 'pt_price', 'pt_bom_code'],
+        attributes: ['id', 'pt_part', 'pt_desc1', 'pt_desc2', 'pt_price', 'pt_bom_code', 'pt_ord_qty'],
       });
       this.logger.silly('find item ');
       return codes;

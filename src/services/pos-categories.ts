@@ -35,12 +35,7 @@ export default class posCategoriesService {
     try {
       // const categories = await this.posCategoryModel.findAll({ where: query });
       const categories = await this.posCategoryModel.findAll({
-        include: [
-          {
-            model: this.itemModel,
-            attributes: ['id', 'pt_part', 'pt_desc1', 'pt_article', 'pt_page', 'pt_formule', 'pt_price', 'pt_bom_code'],
-          },
-        ],
+        where: query,
       });
       this.logger.silly('find All categories mstr');
       return categories;

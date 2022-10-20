@@ -152,9 +152,10 @@ export default async ({ expressApp }) => {
       { name: 'posCategoryModel', model: require('../models/pos-categories').default },
       { name: 'posCategoryProductModel', model: require('../models/pos-category-product').default },
       { name: 'posProductModel', model: require('../models/pos-product').default },
+
+      { name: 'posOrderDetailModel', model: require('../models/pos-order-detail').default },
       { name: 'itemModel', model: require('../models/item').default },
       { name: 'posOrderModel', model: require('../models/pos-order').default },
-      { name: 'posOrderDetailModel', model: require('../models/pos-order-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
