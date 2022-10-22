@@ -258,8 +258,8 @@ export default async ({ expressApp }) => {
 
   // associtations pos
 
-  require('../models/pos-categories').default.hasMany(require('../models/item').default, { foreignKey: 'pt_page' });
-  require('../models/item').default.belongsTo(require('../models/pos-categories').default, { foreignKey: 'pt_page' });
+  // require('../models/pos-categories').default.hasMany(require('../models/item').default, { foreignKey: 'pt_page' });
+  // require('../models/item').default.belongsTo(require('../models/pos-categories').default, { foreignKey: 'pt_page' });
 
   // associtations erp back office
   require('../models/profile').default.hasOne(require('../models/user').default, {

@@ -33,6 +33,7 @@ const OrderPosDetail = sequelize.define(
     pt_qty_ord: Sequelize.INTEGER,
     pt_price: Sequelize.DECIMAL,
     created_date: Sequelize.DATEONLY,
+   
   },
   {
     tableName: 'bb_order_pos_detail',

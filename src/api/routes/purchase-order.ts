@@ -7,6 +7,7 @@ export default (app: Router) => {
     app.use("/purchase-orders", route)
 
     route.post("/", controller.create)
+    route.post("/add", controller.createPos)
     route.get("/", controller.findAll)
     route.get("/allwithdetail", controller.findAllwithDetails)
     route.post("/allwithdetailsite", controller.findAllwithDetailsite)

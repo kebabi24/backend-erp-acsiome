@@ -35,6 +35,59 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const createPos = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers
+
+    logger.debug("Calling Create sequence endpoint")
+    try {
+        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
+        const purchaseOrderDetailServiceInstance = Container.get(
+            PurchaseOrderDetailService
+        )
+        const sequenceServiceInstance = Container.get(SequenceService)
+        const itemServiceInstance = Container.get(ItemService)
+        const { purchaseOrder, purchaseOrderDetail } = req.body
+       // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        for (let entry of purchaseOrder) {
+            const sequence = await sequenceServiceInstance.findOne({ seq_seq: "PO"       })
+            console.log(sequence)
+        
+            //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
+            //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
+             let ent = { po_category: "PO",  po_ord_date: new Date, po_vend:entry.vend, po_curr : "DA", po_ex_rate : 1, po_ex_rate1: 1, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+            const po =  await purchaseOrderServiceInstance.create(ent)
+console.log(po.po_nbr)
+
+var line = 1
+for (let obj of purchaseOrderDetail) {
+console.log("hnahnahnahnahna",obj.part)
+    if(obj.vend == entry.vend) {
+        var duedate = new Date();
+
+        // add a day
+        duedate.setDate(duedate.getDate() + 1);
+        const pt =  await itemServiceInstance.findOne({pt_part: obj.part})
+        console.log(pt.taxe)
+        
+        let entr = { pod_nbr: po.po_nbr, pod_line: line, pod_part: obj.part,pod_taxable: pt.pt_taxable,pod_tax_code: pt.pt_taxc,pod_taxc:pt.taxe.tx2_tax_pct, pod_qty_ord: obj.qtycom,pod_site: pt.pt_site, pod_loc:pt.pt_loc, pod_price: pt.pt_price, pod_um: pt.pt_um, pod_due_date: duedate, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+          await purchaseOrderDetailServiceInstance.create(entr)
+        line = line + 1
+
+    }
+}
+
+        }
+        console.log(purchaseOrder)
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data: purchaseOrder })
+    } catch (e) {
+        //#
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -541,6 +594,7 @@ const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunc
 }
 export default {
     create,
+    createPos,
     findBy,
     findByAll,
     findOne,

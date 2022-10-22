@@ -10,6 +10,7 @@ export default (app: Router) => {
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
+    route.post("/findspec", controller.findBySpec)
     route.post("/price", controller.findPrice)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)

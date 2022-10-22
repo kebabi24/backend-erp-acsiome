@@ -2,7 +2,7 @@ import PosOrder from '../../services/pos-order';
 import PosOrderDetail from '../../services/pos-order-detail';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-
+import { DATE, Op, Sequelize } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -83,6 +83,40 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+
+const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    console.log(req.body)
+    const orders = await PosOrderDetailServiceInstance.findspec({ 
+     where: {usrd_site : req.body.usrd_site} 
+        ,
+       
+      attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
+      group: ['pt_part', 'usrd_site'],
+      raw: true,
+    })
+    console.log(orders)
+    return res.status(200).json({ message: 'fetched succesfully', data: orders });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+/*const locationDetails = await locationDetailServiceInstance.findSpecial({
+        where: {
+          ld_part: item.pt_part,
+          ld_site: { [Op.between]: [req.body.pt_site_1, req.body.pt_site_2] },
+          ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
+        },
+        attributes: ['ld_part', 'ld_site', 'ld_loc', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
+        group: ['ld_part', 'ld_site', 'ld_loc'],
+        raw: true,
+      });*/
+
 const findByOrd = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
@@ -129,6 +163,7 @@ export default {
   findOne,
   findAll,
   findBy,
+  findSumQty,
   findByOrd,
   update,
   deleteOne,

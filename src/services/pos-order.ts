@@ -37,6 +37,9 @@ export default class posOrderService {
     }
   }
 
+  
+  
+
   public async update(data: any, query: any): Promise<any> {
     try {
       const order = await this.posOrderModel.upsert(data, { where: query });
