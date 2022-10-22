@@ -31,19 +31,21 @@ const createldpos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const code_cart = req.body.cart.code_cart;
+  const usrd_site = req.body.cart.usrd_site;
   const products = req.body.cart.products;
 
   logger.debug('Calling Create locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     for (const product of products) {
-      const { pt_part, pt_qty } = product;
+      const { pt_part, pt_qty, pt_loc } = product;
 
       await locationDetailServiceInstance.create({
-        ld_loc: 'MGM001',
+        ld_loc: pt_loc,
         ld_part: pt_part,
         ld_lot: code_cart,
         ld_qty_oh: pt_qty,
+        ld_site: usrd_site,
         ld_date: new Date(),
         created_by: user_code,
         created_ip_adr: req.headers.origin,

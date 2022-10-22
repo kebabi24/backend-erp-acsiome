@@ -79,6 +79,7 @@ import posCategory from './routes/pos-category';
 import posProduct from './routes/pos-product';
 import posCategoryProduct from './routes/pos-category-product';
 import posOrder from './routes/pos-order';
+import posOrderProductDetail from './routes/pos-order-detail-product';
 
 // guaranteed to get dependencies
 export default () => {
@@ -164,5 +165,6 @@ export default () => {
   posProduct(app);
   posCategoryProduct(app);
   posOrder(app);
+  posOrderProductDetail(app);
   return app;
 };

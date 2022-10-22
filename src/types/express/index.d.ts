@@ -126,6 +126,9 @@ declare global {
     export type loadRequestLineModel = S.Model;
     export type loadRequestDetailsModel = S.Model;
     export type posOrderModel = S.Model;
-    export type posOrderDetailModel = S.Model;
+    export type posOrderDetailProductModel = S.Model;
+    export type posOrderroductSuppModel = S.Model;
+    export type posOrderProductSauceModel = S.Model;
+    export type posOrderProductIngModel = S.Model;
   }
 }

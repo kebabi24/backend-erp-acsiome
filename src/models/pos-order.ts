@@ -19,6 +19,7 @@ const OrderPos = sequelize.define(
 
     customer: Sequelize.STRING,
     order_emp: Sequelize.STRING,
+    usrd_site: Sequelize.STRING,
     total_price: Sequelize.INTEGER,
     created_date: Sequelize.DATE,
   },

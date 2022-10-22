@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
 import psService from '../../services/ps';
+import { workerData } from 'worker_threads';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -72,6 +73,7 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
   console.log(req.body.cart.products);
   const products = req.body.cart.products;
   const cart = req.body.cart;
+  const { usrd_site } = req.body.cart.usrd_site;
   console.log(req.body);
   const id = req.body.cart.id;
   console.log(id);
@@ -86,12 +88,13 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
       console.log(product);
       const ps = await psServiceInstance.find({ ps_parent });
       for (const pss of ps) {
-        console.log(pss.ps_comp);
-        console.log(pss.ps_qty_per, product.pt_qty);
+        console.log(cart);
         const workOrderDetail = await workOrderDetailServiceInstance.create({
           wod_nbr: req.body.cart.code_cart,
           wod_lot: id.id,
+          wod_loc: product.pt_loc,
           wod_part: pss.ps_comp,
+          wod_site: cart.usrd_site,
           wod_qty_req: parseFloat(pss.ps_qty_per) * Number(product.pt_qty),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
