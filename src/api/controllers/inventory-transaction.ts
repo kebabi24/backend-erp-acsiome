@@ -177,10 +177,10 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           { id: ld.id },
         );
       else {
-        console.log(item.tr_status)
-     const status =   await statusServiceInstance.findOne({
-      is_status: item.tr_status
-     })
+        console.log(item.tr_status);
+        const status = await statusServiceInstance.findOne({
+          is_status: item.tr_status,
+        });
 
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
@@ -192,7 +192,8 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           ld__log01: status.is_nettable,
-        }); }
+        });
+      }
       let qtyoh = 0;
       if (ld) {
         qtyoh = Number(ld.ld_qty_oh);
@@ -302,7 +303,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(itemService);
-    const statusServiceInstance = Container.get(statusService)
+    const statusServiceInstance = Container.get(statusService);
 
     for (const item of detail) {
       const sct = await costSimulationServiceInstance.findOne({
@@ -367,9 +368,9 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           { id: ld1.id },
         );
       else {
-        const status =   await statusServiceInstance.findOne({
-          is_status: item.tr_status
-         })
+        const status = await statusServiceInstance.findOne({
+          is_status: item.tr_status,
+        });
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
           ld_lot: item.tr_serial,
@@ -377,15 +378,15 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           ld_site: it.tr_ref_site,
           ld_loc: it.tr_ref_loc,
           ld_status: item.tr_status,
-          ld__log01: status.is_nettable, 
+          ld__log01: status.is_nettable,
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
-        })
-      };
+        });
+      }
       await inventoryTransactionServiceInstance.create({
         ...item,
         ...it,
@@ -435,14 +436,14 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
     });
     const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part });
 
-    console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc)
+    console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc);
     const ld = await locationDetailServiceInstance.findOne({
       ld_part: it.tr_part,
       ld_lot: it.tr_serial,
       ld_site: it.tr_site,
       ld_loc: it.tr_loc,
     });
-    console.log(ld)
+    console.log(ld);
     await inventoryTransactionServiceInstance.create({
       ...it,
       tr_status: ld.ld_status,
@@ -466,9 +467,9 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     if (ld) {
-      const status =   await statusServiceInstance.findOne({
-        is_status: it.tr_status
-       })
+      const status = await statusServiceInstance.findOne({
+        is_status: it.tr_status,
+      });
       await locationDetailServiceInstance.update(
         {
           ld_status: it.tr_status,
@@ -542,7 +543,7 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
             tr_part: det.ld_part,
             tr_site: det.ld_site,
             tr_loc: det.ld_loc,
-            tr_ship_type: {[Op.ne]: "M"}, 
+            tr_ship_type: { [Op.ne]: 'M' },
             tr_effdate: { [Op.between]: [req.body.date, new Date()] },
           },
           attributes: ['tr_part', 'tr_site', 'tr_loc', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
@@ -551,9 +552,9 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
         });
         const qty = res[0] ? (res[0].total ? res[0].total : 0) : 0;
         det.total_qty = det.total_qty - qty;
-        const item = await itemService.findOneS({pt_part:det.ld_part})
-        det.item = item
-        result.push(det)
+        const item = await itemService.findOneS({ pt_part: det.ld_part });
+        det.item = item;
+        result.push(det);
       }
     }
     //  console.log('aaa', result);
@@ -584,9 +585,8 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
       const locationDetails = await locationDetailServiceInstance.find({
         where: {
           ld_part: item.pt_part,
-          
         },
-        attributes: ['ld_part',  [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
+        attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
         group: ['ld_part'],
         raw: true,
       });
@@ -596,10 +596,10 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_2 = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"}, 
+            tr_ship_type: { [Op.ne]: 'M' },
             tr_effdate: { [Op.between]: [req.body.date_2, new Date()] },
           },
-          attributes: ['tr_part' , [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+          attributes: ['tr_part', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
           group: ['tr_part'],
           raw: true,
         });
@@ -609,11 +609,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rctpo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-PO"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-PO' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctpo']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctpo']],
           group: ['tr_part'],
           raw: true,
         });
@@ -622,11 +622,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rctwo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-WO"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-WO' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctwo']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctwo']],
           group: ['tr_part'],
           raw: true,
         });
@@ -635,11 +635,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rctcns = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-CNS"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-CNS' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctcns']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctcns']],
           group: ['tr_part'],
           raw: true,
         });
@@ -648,12 +648,12 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rcttr = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-TR"},
-            tr_status: {[Op.eq]: "PROD"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-TR' },
+            tr_status: { [Op.eq]: 'PROD' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrcttr']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrcttr']],
           group: ['tr_part'],
           raw: true,
         });
@@ -662,12 +662,12 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rctchl = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-CHL"},
-            tr_status:  {[Op.eq]: "NONCONF"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-CHL' },
+            tr_status: { [Op.eq]: 'NONCONF' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctchl']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctchl']],
           group: ['tr_part'],
           raw: true,
         });
@@ -676,11 +676,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_isswo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "ISS-WO"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'ISS-WO' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalisswo']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalisswo']],
           group: ['tr_part'],
           raw: true,
         });
@@ -689,11 +689,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_issso = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "ISS-SO"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'ISS-SO' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissso']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissso']],
           group: ['tr_part'],
           raw: true,
         });
@@ -702,11 +702,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_issprv = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "ISS-PRV"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'ISS-PRV' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissprv']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissprv']],
           group: ['tr_part'],
           raw: true,
         });
@@ -715,11 +715,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_rctunp = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "RCT-UNP"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'RCT-UNP' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctunp']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalrctunp']],
           group: ['tr_part'],
           raw: true,
         });
@@ -728,11 +728,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_issunp = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "ISS-UNP"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'ISS-UNP' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissunp']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalissunp']],
           group: ['tr_part'],
           raw: true,
         });
@@ -741,11 +741,11 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_isscns = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.eq]: "ISS-CNS"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.eq]: 'ISS-CNS' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalisscns']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totalisscns']],
           group: ['tr_part'],
           raw: true,
         });
@@ -754,44 +754,36 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const res_tagcnt = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_ship_type: {[Op.ne]: "M"},
-            tr_type:  {[Op.contains]: "TAG"},
+            tr_ship_type: { [Op.ne]: 'M' },
+            tr_type: { [Op.contains]: 'TAG' },
             tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
           },
-          attributes: ['tr_part', 'tr_type',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totaltag']],
+          attributes: ['tr_part', 'tr_type', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'totaltag']],
           group: ['tr_part'],
           raw: true,
         });
         const qty_tagcnt = res_tagcnt[0] ? (res_tagcnt[0].totaltagcnt ? res_tagcnt[0].totaltagcnt : 0) : 0;
         det.total_qty_tagcnt = det.total_qty_tagcnt + qty_tagcnt;
 
-
-
         const res_1 = await inventoryTransactionServiceInstance.findSpecial({
           where: {
             tr_part: det.ld_part,
-            tr_type: {[Op.ne]: "M"}, 
+            tr_type: { [Op.ne]: 'M' },
             tr_effdate: { [Op.between]: [req.body.date_1, new Date()] },
           },
-          attributes: ['tr_part',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+          attributes: ['tr_part', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
           group: ['tr_part'],
           raw: true,
         });
         const qty_1 = res_1[0] ? (res_1[0].total ? res_1[0].total : 0) : 0;
         det.total_qty_1 = det.total_qty - qty_1;
 
-
-
-
-
-
-
-        const item = await itemService.findOneS({pt_part:det.ld_part})
-        det.item = item
-        result.push(det)
+        const item = await itemService.findOneS({ pt_part: det.ld_part });
+        det.item = item;
+        result.push(det);
       }
     }
-      console.log('aaa', result);
+    console.log('aaa', result);
 
     return res.status(201).json({ message: 'created succesfully', data: result });
   } catch (e) {
@@ -818,42 +810,40 @@ const inventoryByLoc = async (req: Request, res: Response, next: NextFunction) =
     const results_body = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
-          ld_part: item.pt_part,
-          ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
-                
+        ld_part: item.pt_part,
+        ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
       });
-      console.log("here",locationDetails)  
-        
-        
+      console.log('here', locationDetails);
+
       const d = moment().format('YYYY-MM-dd');
       for (const det of locationDetails) {
         const result_head = {
-                
-        ld_loc_head : det.ld_loc,
-        }; 
+          ld_loc_head: det.ld_loc,
+        };
         const result_body = {
           ld_status: det.ld_status,
-          ld_loc_body : det.ld_loc,
-          ld_part : det.ld_part,
-          pt_desc1: item.pt_desc1,        
+          ld_loc_body: det.ld_loc,
+          ld_part: det.ld_part,
+          pt_desc1: item.pt_desc1,
           pt_um: item.pt_um,
           ld_qty_oh: det.ld_qty_oh,
-          ld_lot   : det.ld_lot,
-
-        
+          ld_lot: det.ld_lot,
         };
-        results_body.push( result_body );
+        results_body.push(result_body);
         let bool = false;
         for (var i = 0; i < results_head.length; i++) {
-            if (results_head[i].ld_loc_head == det.ld_loc ) 
-            { bool = true}
-            }
-            if (!bool) { results_head.push(result_head) } 
+          if (results_head[i].ld_loc_head == det.ld_loc) {
+            bool = true;
+          }
+        }
+        if (!bool) {
+          results_head.push(result_head);
+        }
       }
     }
     //  console.log('aaa', result);
 
-    return res.status(201).json({ message: 'created succesfully', data: {results_head,results_body} });
+    return res.status(201).json({ message: 'created succesfully', data: { results_head, results_body } });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
@@ -878,44 +868,43 @@ const inventoryByStatus = async (req: Request, res: Response, next: NextFunction
     const results_body = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
-          ld_part: item.pt_part,
-          ld_status: { [Op.between]: [req.body.ld_status_1, req.body.ld_status_2] },
-          ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
-                
+        ld_part: item.pt_part,
+        ld_status: { [Op.between]: [req.body.ld_status_1, req.body.ld_status_2] },
+        ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
       });
-      console.log("here",locationDetails)  
-        
-        
+      console.log('here', locationDetails);
+
       const d = moment().format('YYYY-MM-dd');
       for (const det of locationDetails) {
         const result_head = {
-                
-          ld_status_head : det.ld_status,
-          ld_loc_head : det.ld_loc,
-        }; 
+          ld_status_head: det.ld_status,
+          ld_loc_head: det.ld_loc,
+        };
         const result_body = {
           ld_status_body: det.ld_status,
-          ld_loc_body : det.ld_loc,
-          ld_part : det.ld_part,
-          pt_desc1: item.pt_desc1,        
+          ld_loc_body: det.ld_loc,
+          ld_part: det.ld_part,
+          pt_desc1: item.pt_desc1,
           pt_um: item.pt_um,
           ld_qty_oh: det.ld_qty_oh,
-          ld_lot   : det.ld_lot,
-          ld_expire: det.ld_expire
-        
+          ld_lot: det.ld_lot,
+          ld_expire: det.ld_expire,
         };
-        results_body.push( result_body );
+        results_body.push(result_body);
         let bool = false;
         for (var i = 0; i < results_head.length; i++) {
-            if (results_head[i].ld_status_head == det.ld_status , results_head[i].ld_loc_head == det.ld_loc ) 
-            { bool = true}
-            }
-            if (!bool) { results_head.push(result_head) } 
+          if ((results_head[i].ld_status_head == det.ld_status, results_head[i].ld_loc_head == det.ld_loc)) {
+            bool = true;
+          }
+        }
+        if (!bool) {
+          results_head.push(result_head);
+        }
       }
     }
     //  console.log('aaa', result);
 
-    return res.status(201).json({ message: 'created succesfully', data: {results_head,results_body} });
+    return res.status(201).json({ message: 'created succesfully', data: { results_head, results_body } });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
@@ -943,7 +932,6 @@ const inventoryOfSecurity = async (req: Request, res: Response, next: NextFuncti
           ld_part: item.pt_part,
           ld_status: { [Op.between]: [req.body.pt_status_1, req.body.pt_status_2] },
           ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
-          
         },
         attributes: ['ld_part', 'ld_status', 'ld_loc', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
         group: ['ld_part', 'ld_status', 'ld_loc'],
@@ -952,11 +940,12 @@ const inventoryOfSecurity = async (req: Request, res: Response, next: NextFuncti
       const d = moment().format('YYYY-MM-dd');
       for (const det of locationDetails) {
         const qty = res[0] ? (res[0].total_qty ? res[0].total_qty : 0) : 0;
-        det.qty = qty ;
-        const item = await itemService.findOneS({pt_part:det.ld_part})
-        det.item = item
-        if(det.qty < items.pt_safety_stk){
-        result.push(det)}
+        det.qty = qty;
+        const item = await itemService.findOneS({ pt_part: det.ld_part });
+        det.item = item;
+        if (det.qty < items.pt_safety_stk) {
+          result.push(det);
+        }
       }
     }
     //  console.log('aaa', result);
@@ -975,14 +964,14 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.debug('Calling update one  code endpoint');
   try {
-    const { detail, it} = req.body;
+    const { detail, it } = req.body;
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
     const workOrderServiceInstance = Container.get(workOrderService);
-console.log(it)
+    console.log(it);
     for (const data of detail) {
       const { desc, ...item } = data;
       const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part });
@@ -1003,10 +992,10 @@ console.log(it)
           { id: ld.id },
         );
       else {
-        console.log(item.tr_status)
-     const status =   await statusServiceInstance.findOne({
-      is_status: item.tr_status
-     })
+        console.log(item.tr_status);
+        const status = await statusServiceInstance.findOne({
+          is_status: item.tr_status,
+        });
 
         await locationDetailServiceInstance.create({
           ld_part: it.tr_part,
@@ -1018,7 +1007,8 @@ console.log(it)
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           ld__log01: status.is_nettable,
-        }); }
+        });
+      }
       let qtyoh = 0;
       if (ld) {
         qtyoh = Number(ld.ld_qty_oh);
@@ -1049,10 +1039,17 @@ console.log(it)
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      const wo = await workOrderServiceInstance.findOne({id: it.tr_lot})
-     
-      if(wo) await workOrderServiceInstance.update({wo_qty_comp : Number(wo.wo_qty_comp) + Number(item.tr_qty_loc) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },{id: wo.id})
-      
+      const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+
+      if (wo)
+        await workOrderServiceInstance.update(
+          {
+            wo_qty_comp: Number(wo.wo_qty_comp) + Number(item.tr_qty_loc),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: wo.id },
+        );
     }
     return res.status(200).json({ message: 'Added succesfully', data: true });
   } catch (e) {
@@ -1079,9 +1076,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
-
-
-      
+      console.log(item);
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
@@ -1089,7 +1084,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
       });
-
+      console.log(ld);
       if (ld)
         await locationDetailServiceInstance.update(
           {
@@ -1121,44 +1116,42 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-  if( !isNaN(item.wodid)) {
-        const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
-        if(wod)  {
-          var bool = false
+      if (!isNaN(item.wodid)) {
+        const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
+        if (wod) {
+          var bool = false;
 
-          if(Number(wod.wod_qty_req) - ( Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >= 0) { bool = true}
+          if (
+            Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
+            0
+          ) {
+            bool = true;
+          }
           await workOrderDetailServiceInstance.update(
-          {
-            wod__qadl01 : true ? (bool) : false,
-            wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
-          },
-          { id: wod.id },
-        );
-      } 
-  }else {
-
-    await workOrderDetailServiceInstance.create({
-      wod_nbr     : it.tr_nbr,
-      wod_lot     : it.tr_lot,
-      wod_part    : item.tr_part,
-      wod_qty_req : 0,
-      wod_qty_iss : item.tr_qty_loc,
-      wod_site    : item.tr_site,
-      wod_loc     : item.tr_loc,
-      wod_um      : item.tr_um,
-      wod_serial  : item.tr_serial,
-      wod_ref     : item.tr_ref,
-      wod__qadl01 : true,
-
-    })
-
-
-
-
-  }
-
+            {
+              wod__qadl01: true ? bool : false,
+              wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: wod.id },
+          );
+        }
+      } else {
+        await workOrderDetailServiceInstance.create({
+          wod_nbr: it.tr_nbr,
+          wod_lot: it.tr_lot,
+          wod_part: item.tr_part,
+          wod_qty_req: 0,
+          wod_qty_iss: item.tr_qty_loc,
+          wod_site: item.tr_site,
+          wod_loc: item.tr_loc,
+          wod_um: item.tr_um,
+          wod_serial: item.tr_serial,
+          wod_ref: item.tr_ref,
+          wod__qadl01: true,
+        });
+      }
     }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
@@ -1167,6 +1160,18 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const issSo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  console.log(req.body);
+  logger.debug('Calling update one  code endpoint');
+  try {
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -1185,4 +1190,5 @@ export default {
   inventoryOfSecurity,
   rctWo,
   issWo,
+  issSo,
 };

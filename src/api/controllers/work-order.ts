@@ -68,8 +68,9 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const code_cart = req.body.cart.code_cart;
+    const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
-
+    console.log(products);
     for (const product of products) {
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
@@ -83,6 +84,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         wo_rel_date: new Date(),
         wo_due_date: new Date(),
         wo_status: 'R',
+        wod_site: usrd_site,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
