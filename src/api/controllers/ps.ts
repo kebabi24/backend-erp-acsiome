@@ -1,4 +1,6 @@
 import PsService from "../../services/ps"
+import ItemService from "../../services/item"
+import LocationDetailService from "../../services/location-details"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -79,7 +81,8 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
     try {
-        const  details  = req.body
+        const  details  = req.body.detail
+        const site = req.body.site
         const psServiceInstance = Container.get(PsService)
         const itemServiceInstance = Container.get(ItemService)
         const ldServiceInstance = Container.get(LocationDetailService)
@@ -103,20 +106,23 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
              }
              if (bool == false){
                 const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
-                const lds = await ldServiceInstance.find({ld_part: p.ps_comp})
+                const lds = await ldServiceInstance.find({ld_part: p.ps_comp, ld_site: site})
                 var ldqty = 0
                 for (let ld of lds ) {
                     ldqty = ldqty + Number(ld.ld_qty_oh)
                 }
-                result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty), desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , qtyoh: ldqty, qtycom:0 })
-j = j + 1
+                result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty), desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , 
+                    qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) >= 0 ? ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) : 0
+                
+                })
+                j = j + 1
              }
          }
         
  }
- for(let res of result){
-     res.qtycom = res.qty - res.qtyoh
- }
+//  for(let res of result){
+//      res.qtycom = res.qty - res.qtyoh
+//  }
  console.log(result)
         //const psServiceInstance = Container.get(PsService)
       //  const ps = await psServiceInstance.find({...req.body})

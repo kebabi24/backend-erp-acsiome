@@ -6,6 +6,7 @@ import PosOrderProductIng from '../../services/pos-order-product-ing';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
+import ItemService from '../../services/item';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -138,9 +139,11 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const itemServiceInstance = Container.get(ItemService);
+    
     console.log(req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({ 
-     where: {usrd_site : req.body.usrd_site} 
+     where: {usrd_site : req.body.usrd_site, created_date: req.body.created_date} 
         ,
        
       attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
@@ -148,7 +151,14 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
       raw: true,
     })
     console.log(orders)
-    return res.status(200).json({ message: 'fetched succesfully', data: orders });
+    let result = []
+   var i = 1
+    for (let ord of orders) {
+      const items = await itemServiceInstance.findOne({pt_part : ord.pt_part})
+      result.push({id: i,part:  ord.pt_part,desc1: items.pt_desc1, bom:items.pt_bom_code, ord_qty: ord.total_qty,  prod_qty: ord.total_qty})
+      i = i + 1
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

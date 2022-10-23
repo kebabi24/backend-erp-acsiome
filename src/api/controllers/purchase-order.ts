@@ -3,6 +3,7 @@ import PurchaseOrderDetailService from "../../services/purchase-order-detail"
 import PurchaseReceiveService from '../../services/purchase-receive'
 import VoucherOrderService from "../../services/voucher-order"
 import AccountPayableService from "../../services/account-payable"
+import SequenceService from "../../services/sequence"
 import ProviderService from "../../services/provider"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
@@ -47,7 +48,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         )
         const sequenceServiceInstance = Container.get(SequenceService)
         const itemServiceInstance = Container.get(ItemService)
-        const { purchaseOrder, purchaseOrderDetail } = req.body
+        const { Site,purchaseOrder, purchaseOrderDetail } = req.body
        // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of purchaseOrder) {
             const sequence = await sequenceServiceInstance.findOne({ seq_seq: "PO"       })
@@ -55,13 +56,14 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         
             //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
             //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
-             let ent = { po_category: "PO",  po_ord_date: new Date, po_vend:entry.vend, po_curr : "DA", po_ex_rate : 1, po_ex_rate1: 1, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+             let ent = { po_category: "PO", po_site: Site, po_ord_date: new Date, po_vend:entry.vend,po_stat: "P", po_curr : "DA", po_ex_rate : 1, po_ex_rate1: 1, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
             const po =  await purchaseOrderServiceInstance.create(ent)
 console.log(po.po_nbr)
 
 var line = 1
 for (let obj of purchaseOrderDetail) {
-console.log("hnahnahnahnahna",obj.part)
+    if(obj.qtycom > 0 ) {
+    console.log("hnahnahnahnahna",obj.part)
     if(obj.vend == entry.vend) {
         var duedate = new Date();
 
@@ -74,6 +76,7 @@ console.log("hnahnahnahnahna",obj.part)
           await purchaseOrderDetailServiceInstance.create(entr)
         line = line + 1
 
+    }
     }
 }
 
