@@ -3,6 +3,7 @@ import PurchaseOrderDetailService from '../../services/purchase-order-detail';
 import PurchaseReceiveService from '../../services/purchase-receive';
 import VoucherOrderService from '../../services/voucher-order';
 import AccountPayableService from '../../services/account-payable';
+import SequenceService from '../../services/sequence';
 import ProviderService from '../../services/provider';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -554,4 +555,5 @@ export default {
   getProviderBalance,
   getProviderCA,
   getPodRec,
+  createPos,
 };

@@ -38,7 +38,25 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find by  all item endpoint")
+  try {
+      const itemServiceInstance = Container.get(ItemService)
+      const items = await itemServiceInstance.find({...req.body})
+      console.log(req.body)
+      var data = []
+      for (let item of items){
+          data.push({id: item.id,part:  item.pt_part,desc1: item.pt_desc1,bom:item.pt_bom_code, ord_qty: item.pt_ord_qty, sim: 0, prod_qty: item.pt_ord_qty})
+      }
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: data })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
 const findBySupp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all item endpoint');
@@ -162,6 +180,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
 export default {
   create,
+  findBySpec,
   findBy,
   findBySupp,
   findByOne,
