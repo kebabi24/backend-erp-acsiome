@@ -76,9 +76,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           order_code: cart.code_cart,
           pt_part: pt_part,
           pt_pt_part: i.spec_code,
-          pt_desc1: i.spec_pt_desc1,
+          pt_desc1: i.pt_desc1,
           pt_bom_code: i.pt_bom_code,
-          pt_desc2: i.spec_pt_desc2,
+          pt_desc2: i.pt_desc2,
           pt_price: i.price,
           usrd_site: cart.usrd_site,
         });
