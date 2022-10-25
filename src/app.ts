@@ -11,7 +11,6 @@ import { emit } from 'process';
 import userMobileController from './api/controllers/user-mobile';
 
 async function startServer() {
-  
   const app = express();
 
   /**
@@ -21,11 +20,12 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require('./loaders').default({ expressApp: app });
+  const hostname = '192.99.34.138';
 
-  const server = app.listen(config.port, err => {
+  const server = app.listen(config.port, hostname, err => {
     if (err) {
       Logger.error(err);
-      
+
       process.exit(1);
       return;
     }
@@ -36,9 +36,8 @@ async function startServer() {
     `);
   });
 
-  const io = require('socket.io')(server);  
-  io.on('connection',userMobileController.getDataBack)
-
+  const io = require('socket.io')(server);
+  io.on('connection', userMobileController.getDataBack);
 }
 
 startServer();

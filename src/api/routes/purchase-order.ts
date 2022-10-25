@@ -20,4 +20,5 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.post('/findAll', controller.findByAll);
   route.post('/findAllpodRec', controller.getPodRec);
+  route.post('/add', controller.createPos);
 };

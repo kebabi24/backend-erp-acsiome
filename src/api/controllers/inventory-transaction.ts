@@ -1297,9 +1297,9 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: remain.ld_site,
         ld_loc: remain.ld_loc,
       });
-      item.tag_cnt_qty = undefined && (item.tag_cnt_qty = 0);
+      item.tag_cnt_qty == undefined && (item.tag_cnt_qty = 0);
       await inventoryTransactionServiceInstance.create({
-        // tr_line: remain.tr_line,
+        tr_line: 0,
         tr_part: remain.ld_part,
         tr_prod_line: pt.pt_prod_line,
         tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
@@ -1321,7 +1321,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         tr_type: 'CYC-CNT',
         tr_qty_chg: Number(remain.tag_cnt_qty),
         tr_loc_begin: parseFloat(ld.ld_qty_oh),
-        tr_gl_amt: (Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh)) * sctdet.sct_cst_tot,
+        tr_gl_amt: (Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh)) * Number(sctdet.sct_cst_tot),
         tr_date: new Date(),
         tr_mtl_std: sctdet.sct_mtl_tl,
         tr_lbr_std: sctdet.sct_lbr_tl,

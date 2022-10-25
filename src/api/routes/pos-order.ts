@@ -10,7 +10,9 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
-  route.post('/findorder', controller.findByOrd);
+  route.post('/findsumqty', controller.findSumQty);
+  route.post('/findsomeorders', controller.findByOrd);
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
+  route.post('/findorder', controller.findByOrd);
 };

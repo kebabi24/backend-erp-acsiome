@@ -1,4 +1,6 @@
 import PsService from "../../services/ps"
+import ItemService from "../../services/item"
+import LocationDetailService from "../../services/location-details"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -75,7 +77,63 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    try {
+        const  details  = req.body.detail
+        const site = req.body.site
+        const psServiceInstance = Container.get(PsService)
+        const itemServiceInstance = Container.get(ItemService)
+        const ldServiceInstance = Container.get(LocationDetailService)
+       // console.log(req.body)
+       const result = [];
+       var j = 1
+ for (let obj of details) {
+         console.log(obj.part, obj.prod_qty , obj.bom)
+         const ps = await psServiceInstance.find({ps_parent:obj.bom})
+     
+         for(let p of ps) {
+             var bool = false
+            for(var i = 0; i < result.length; i++ )  {
+                    
+                if(result[i].part == p.ps_comp) {
 
+                    result[i].qty = result[i].qty + Number(p.ps_qty_per) * Number(obj.prod_qty)  
+                  //  result[i].qtycom = (result[i].qty + Number(p.ps_qty_per) * Number(obj.prod_qty) )  - result[i].qtyoh
+                    bool = true
+                }
+             }
+             if (bool == false){
+                const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
+                const lds = await ldServiceInstance.find({ld_part: p.ps_comp, ld_site: site})
+                var ldqty = 0
+                for (let ld of lds ) {
+                    ldqty = ldqty + Number(ld.ld_qty_oh)
+                }
+                result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty), desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , 
+                    qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) >= 0 ? ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) : 0
+                
+                })
+                j = j + 1
+             }
+         }
+        
+ }
+//  for(let res of result){
+//      res.qtycom = res.qty - res.qtyoh
+//  }
+ console.log(result)
+        //const psServiceInstance = Container.get(PsService)
+      //  const ps = await psServiceInstance.find({...req.body})
+       return res
+           .status(200)
+           .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers
@@ -152,6 +210,7 @@ export default {
     findOne,
     findAll,
     findBy,
+    findBySpec,
     update,
     deleteOne,
     findPrice,
