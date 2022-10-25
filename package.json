@@ -14,7 +14,7 @@
     "lint:js": "npm run lint:eslint src/",
     "lint:fix": "npm run lint:js -- --fix"
   },
-  "type": "module",
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/santiq/bulletproof-nodejs.git"

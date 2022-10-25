@@ -20,9 +20,9 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require('./loaders').default({ expressApp: app });
-  const hostname = '192.99.34.138';
 
-  const server = app.listen(config.port, hostname, err => {
+
+  const server = app.listen(config.port, err => {
     if (err) {
       Logger.error(err);
 

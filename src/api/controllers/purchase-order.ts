@@ -3,10 +3,7 @@ import PurchaseOrderDetailService from '../../services/purchase-order-detail';
 import PurchaseReceiveService from '../../services/purchase-receive';
 import VoucherOrderService from '../../services/voucher-order';
 import AccountPayableService from '../../services/account-payable';
-<<<<<<< HEAD
-=======
 import SequenceService from '../../services/sequence';
->>>>>>> 129701c26478e8ca3be59a4f13ac8a591aec39f9
 import ProviderService from '../../services/provider';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
