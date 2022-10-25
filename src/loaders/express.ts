@@ -1,9 +1,9 @@
 import express from 'express';
-import bodyParser from 'body-parser';
+import bodyParser, { urlencoded } from 'body-parser';
 import cors from 'cors';
 import routes from '../api';
 import config from '../config';
-import logger from 'morgan'
+import logger from 'morgan';
 export default ({ app }: { app: express.Application }) => {
   /**
    * Health Check endpoints
@@ -16,13 +16,15 @@ export default ({ app }: { app: express.Application }) => {
     res.status(200).end();
   });
 
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
   // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
   // It shows the real origin IP in the heroku or Cloudwatch logs
   app.enable('trust proxy');
 
   // logger
-  app.use(logger("tiny"));
-
+  app.use(logger('tiny'));
 
   // The magic package that prevents frontend developers going nuts
   // Alternate description:

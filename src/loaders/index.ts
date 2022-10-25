@@ -159,6 +159,7 @@ export default async ({ expressApp }) => {
 
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+      { name: 'bkhModel', model: require('../models/bkh').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
