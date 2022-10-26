@@ -35,7 +35,10 @@ export default class posOrderService {
 
   public async find(query: any): Promise<any> {
     try {
-      const orders = await this.posOrderModel.findAll({ order: [['created_date', 'DESC']] });
+      const orders = await this.posOrderModel.findAll({
+        order: [['createdAt', 'DESC']],
+        where: { created_date: new Date() },
+      });
       this.logger.silly('find All orders mstr');
       return orders;
     } catch (e) {
@@ -50,7 +53,7 @@ export default class posOrderService {
       const o = orders.dataValues;
       const currentOrder = {
         id: o.id,
-        code_cart: o.order_code,
+        order_code: o.order_code,
         customer: o.customer,
         order_emp: o.order_emp,
         total_price: o.total_price,

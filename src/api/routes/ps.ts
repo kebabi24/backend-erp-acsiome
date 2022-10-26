@@ -14,4 +14,5 @@ export default (app: Router) => {
     route.post("/price", controller.findPrice)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
+    route.post("/findqtybystock", controller.findQtyOnStock)
 }

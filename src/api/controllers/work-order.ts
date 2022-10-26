@@ -1,11 +1,13 @@
 import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
 import WorkroutingService from '../../services/workrouting';
+
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { result } from 'lodash';
 import { IntegerDataType } from 'sequelize/types';
 import psService from '../../services/ps';
+import workOrderDetailService from '../../services/work-order-detail';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -67,15 +69,16 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
   logger.debug('Calling update one  code endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const code_cart = req.body.cart.code_cart;
+    const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
+    const psServiceInstance = Container.get(psService);
+    const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
-    console.log(products);
     for (const product of products) {
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
       await workOrderServiceInstance.create({
-        wo_nbr: code_cart,
+        wo_nbr: order_code,
         wo_part: pt_part,
         wo_lot: line,
         wo_qty_ord: pt_qty,
@@ -90,6 +93,25 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
+      const wOid = await workOrderServiceInstance.findOne({ wo_nbr: order_code, wo_lot: product.line });
+      if (wOid) {
+        let ps_parent = product.pt_bom_code;
+        const ps = await psServiceInstance.find({ ps_parent });
+        for (const pss of ps) {
+          await workOrderDetailServiceInstance.create({
+            wod_nbr: req.body.cart.order_code,
+            wod_lot: wOid.id,
+            wod_loc: product.pt_loc,
+            wod_part: pss.ps_comp,
+            wod_site: usrd_site,
+            wod_qty_req: parseFloat(pss.ps_qty_per) * Number(product.pt_qty),
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+      }
     }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {

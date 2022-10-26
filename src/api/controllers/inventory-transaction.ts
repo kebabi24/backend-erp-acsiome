@@ -13,6 +13,9 @@ import workOrderDetailService from '../../services/work-order-detail';
 import sequelize from '../../loaders/sequelize';
 import Item from '../../models/item';
 import moment from 'moment';
+import inventoryTransactionService from '../../services/inventory-transaction';
+import SaleOrderDetailService from '../../services/saleorder-detail';
+import SaleOrderService from '../../services/saleorder';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -971,7 +974,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
     const workOrderServiceInstance = Container.get(workOrderService);
-    console.log(it);
+    // console.log(it);
     for (const data of detail) {
       const { desc, ...item } = data;
       const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part });
@@ -992,7 +995,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           { id: ld.id },
         );
       else {
-        console.log(item.tr_status);
+        // console.log(item.tr_status);
         const status = await statusServiceInstance.findOne({
           is_status: item.tr_status,
         });
@@ -1064,6 +1067,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  code endpoint');
   try {
     const { detail, it } = req.body;
+    // console.log(detail);
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
@@ -1071,21 +1075,22 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
 
     for (const item of detail) {
+      console.log('isswo', item.tr_part);
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
-      console.log(item);
+
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
-        ld_lot: item.tr_serial,
+        // ld_lot: item.tr_nbr,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
       });
-      console.log(ld);
-      if (ld)
+
+      if (ld) {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
@@ -1094,28 +1099,29 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
           },
           { id: ld.id },
         );
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_gl_date: it.tr_effdate,
-        tr_qty_loc: -1 * Number(item.tr_qty_loc),
-        tr_qty_chg: -1 * Number(item.tr_qty_loc),
-        tr_loc_begin: Number(ld.ld_qty_oh),
-        tr_type: 'ISS-WO',
-        tr_date: new Date(),
-        tr_price: sct.sct_mtl_tl,
-        tr_mtl_std: sct.sct_mtl_tl,
-        tr_lbr_std: sct.sct_lbr_tl,
-        tr_bdn_std: sct.sct_bdn_tl,
-        tr_ovh_std: sct.sct_ovh_tl,
-        tr_sub_std: sct.sct_sub_tl,
-        tr_prod_line: pt.pt_prod_line,
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
+        await inventoryTransactionServiceInstance.create({
+          ...item,
+          ...it,
+          tr_gl_date: it,
+          tr_qty_loc: -1 * Number(item.tr_qty_loc),
+          tr_qty_chg: -1 * Number(item.tr_qty_loc),
+          tr_loc_begin: Number(ld.ld_qty_oh),
+          tr_type: 'ISS-WO',
+          tr_date: new Date(),
+          tr_price: sct.sct_mtl_tl,
+          tr_mtl_std: sct.sct_mtl_tl,
+          tr_lbr_std: sct.sct_lbr_tl,
+          tr_bdn_std: sct.sct_bdn_tl,
+          tr_ovh_std: sct.sct_ovh_tl,
+          tr_sub_std: sct.sct_sub_tl,
+          tr_prod_line: pt.pt_prod_line,
+          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+      }
       if (!isNaN(item.wodid)) {
         const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
         if (wod) {
@@ -1163,9 +1169,340 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
 const issSo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  console.log(req.body);
   logger.debug('Calling update one  code endpoint');
   try {
+    const { detail, it } = req.body;
+    // console.log("iss so", detail);
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const itemsServiceInstance = Container.get(itemService);
+    for (const item of detail) {
+      console.log('issso', item.tr_part);
+      const { ...remain } = item;
+      // console.log(remain);
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_part: remain.tr_part,
+        sct_site: remain.tr_site,
+        sct_sim: 'STDCG',
+      });
+      const pt = await itemsServiceInstance.findOne({ pt_part: remain.tr_part });
+      // console.log(remain.tr_part, remain.tr_site);
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: remain.tr_part,
+        // ld_lot: remain.tr_nbr,
+        ld_site: remain.tr_site,
+        ld_loc: remain.tr_loc,
+      });
+      if (ld) {
+        await inventoryTransactionServiceInstance.create({
+          tr_line: remain.tr_line,
+          tr_part: remain.tr_part,
+          tr_prod_line: pt.pt_prod_line,
+          tr_qty_loc: -Number(remain.tr_qty_loc),
+          tr_um: pt.pt_um,
+          tr_um_conv: remain.tr_um_conv,
+          tr_price: remain.tr_price,
+          tr_site: remain.tr_site,
+          tr_loc: remain.tr_loc,
+          tr_serial: remain.tr_serial,
+          tr_nbr: remain.tr_nbr,
+          tr_lot: remain.tr_lot,
+          // tr_addr: so.so_cust,
+          tr_effdate: it,
+          tr_so_job: null,
+          tr_curr: 'DZD',
+          tr_ex_rate: 1,
+          tr_ex_rate2: 1,
+
+          tr_type: 'ISS-SO',
+          tr_qty_chg: Number(remain.tr_qty_chg),
+          tr_loc_begin: Number(ld.ld_qty_oh),
+          tr_gl_amt: Number(remain.tr_qty_chg) * sctdet.sct_cst_tot,
+          tr_date: new Date(),
+          tr_mtl_std: sctdet.sct_mtl_tl,
+          tr_lbr_std: sctdet.sct_lbr_tl,
+          tr_bdn_std: sctdet.sct_bdn_tl,
+          tr_ovh_std: sctdet.sct_ovh_tl,
+          tr_sub_std: sctdet.sct_sub_tl,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+
+        if (remain.sod_type != 'M') {
+          const ld = await locationDetailServiceInstance.findOne({
+            ld_part: remain.tr_part,
+            ld_lot: remain.tr_nbr,
+            ld_site: remain.tr_site,
+            ld_loc: remain.tr_loc,
+          });
+          if (ld)
+            await locationDetailServiceInstance.update(
+              {
+                ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.tr_qty_chg) * Number(remain.tr_um_conv),
+
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+              },
+              { id: ld.id },
+            );
+        }
+        // else
+        //   await locationDetailServiceInstance.create({
+        //     ld_part: remain.tr_part,
+        //     ld_date: new Date(),
+        //     ld_lot: remain.tr_serial,
+        //     ld_site: remain.tr_site,
+        //     ld_loc: remain.tr_loc,
+        //     ld_qty_oh: -(Number(remain.tr_qty_loc) * Number(remain.tr_um_conv)),
+        //     created_by: user_code,
+        //     created_ip_adr: req.headers.origin,
+        //     last_modified_by: user_code,
+        //     last_modified_ip_adr: req.headers.origin,
+        //   });
+      }
+    }
+    const itemServiceInstance = Container.get(itemService);
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  // console.log(req.body);
+  const { detail } = req.body;
+  // console.log(detail);
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail } = req.body;
+
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const itemsServiceInstance = Container.get(itemService);
+    for (const item of detail) {
+      const { ...remain } = item;
+      console.log(remain.tag_cnt_qty);
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_part: remain.ld_part,
+        sct_site: remain.ld_site,
+        sct_sim: 'STDCG',
+      });
+      const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part });
+      // console.log(remain.tr_part, remain.tr_site);
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: remain.ld_part,
+        ld_lot: remain.ld_lot,
+        ld_site: remain.ld_site,
+        ld_loc: remain.ld_loc,
+      });
+      if (ld) {
+        console.log('good');
+        console.log(ld.ld_part);
+      } else {
+        console.log('failed');
+      }
+      item.tag_cnt_qty == undefined && (item.tag_cnt_qty = 0);
+      await inventoryTransactionServiceInstance.create({
+        tr_line: 0,
+        tr_part: remain.ld_part,
+        tr_prod_line: pt.pt_prod_line,
+        tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
+        tr_um: pt.pt_um,
+        tr_um_conv: 1,
+        tr_price: sctdet.sct_cst_tot,
+        tr_site: remain.ld_site,
+        tr_loc: remain.ld_loc,
+        tr_serial: remain.ld_lot,
+        tr_nbr: new Date().toString(),
+        tr_lot: '',
+        // tr_addr: so.so_cust,
+        tr_effdate: new Date(),
+        tr_so_job: null,
+        tr_curr: 'DZD',
+        tr_ex_rate: 1,
+        tr_ex_rate2: 1,
+        tr_ship_type: 'M',
+        tr_type: 'CYC-CNT',
+        tr_qty_chg: Number(remain.tag_cnt_qty),
+        tr_loc_begin: parseFloat(ld.ld_qty_oh),
+        tr_gl_amt: (Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh)) * Number(sctdet.sct_cst_tot),
+        tr_date: new Date(),
+        tr_mtl_std: sctdet.sct_mtl_tl,
+        tr_lbr_std: sctdet.sct_lbr_tl,
+        tr_bdn_std: sctdet.sct_bdn_tl,
+        tr_ovh_std: sctdet.sct_ovh_tl,
+        tr_sub_std: sctdet.sct_sub_tl,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+
+      if (remain.ld_rev != 'M') {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_part: remain.ld_part,
+          ld_lot: remain.ld_lot,
+          ld_site: remain.ld_site,
+          ld_loc: remain.ld_loc,
+        });
+        if (ld)
+          await locationDetailServiceInstance.update(
+            {
+              ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.tr_qty_chg) * Number(remain.tr_um_conv),
+
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id },
+          );
+        else
+          await locationDetailServiceInstance.create({
+            ld_part: remain.tr_part,
+            ld_date: new Date(),
+            ld_lot: remain.ld_lot,
+            ld_site: remain.ld_site,
+            ld_loc: remain.ld_loc,
+            ld_qty_oh: Number(remain.tag_cnt_qty),
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+      } else {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_part: remain.ld_part,
+          ld_lot: remain.ld_lot,
+          ld_site: remain.ld_site,
+          ld_loc: remain.ld_loc,
+        });
+        if (ld)
+          await locationDetailServiceInstance.update(
+            {
+              ld_qty_frz: Number(remain.tr_qty_chg),
+
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id },
+          );
+      }
+    }
+    const itemServiceInstance = Container.get(itemService);
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  // console.log(req.body);
+  const { detail } = req.body;
+  // console.log(detail);
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail } = req.body;
+
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const itemsServiceInstance = Container.get(itemService);
+    for (const item of detail) {
+      const { ...remain } = item;
+      console.log(remain.tag_cnt_qty);
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_part: remain.ld_part,
+        sct_site: remain.ld_site,
+        sct_sim: 'STDCG',
+      });
+      const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part });
+      // console.log(remain.tr_part, remain.tr_site);
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: remain.ld_part,
+        ld_lot: remain.ld_lot,
+        ld_site: remain.ld_site,
+        ld_loc: remain.ld_loc,
+      });
+      item.tag_cnt_qty = undefined && (item.tag_cnt_qty = 0);
+      await inventoryTransactionServiceInstance.create({
+        // tr_line: remain.tr_line,
+        tr_part: remain.ld_part,
+        tr_prod_line: pt.pt_prod_line,
+        tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
+        tr_um: pt.pt_um,
+        tr_um_conv: 1,
+        tr_price: sctdet.sct_cst_tot,
+        tr_site: remain.ld_site,
+        tr_loc: remain.ld_loc,
+        tr_serial: remain.ld_lot,
+        tr_nbr: new Date().toString(),
+        tr_lot: '',
+        // tr_addr: so.so_cust,
+        tr_effdate: new Date(),
+        tr_so_job: null,
+        tr_curr: 'DZD',
+        tr_ex_rate: 1,
+        tr_ex_rate2: 1,
+        tr_ship_type: null,
+        tr_type: 'CYC-RCNT',
+        tr_qty_chg: Number(remain.tag_cnt_qty),
+        tr_loc_begin: parseFloat(ld.ld_qty_oh),
+        tr_gl_amt: (Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh)) * sctdet.sct_cst_tot,
+        tr_date: new Date(),
+        tr_mtl_std: sctdet.sct_mtl_tl,
+        tr_lbr_std: sctdet.sct_lbr_tl,
+        tr_bdn_std: sctdet.sct_bdn_tl,
+        tr_ovh_std: sctdet.sct_ovh_tl,
+        tr_sub_std: sctdet.sct_sub_tl,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+
+      if (remain.ld_rev != 'M') {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_part: remain.ld_part,
+          ld_lot: remain.ld_lot,
+          ld_site: remain.ld_site,
+          ld_loc: remain.ld_loc,
+        });
+        if (ld)
+          await locationDetailServiceInstance.update(
+            {
+              ld_qty_oh: Number(remain.tag_cnt_qty),
+
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id },
+          );
+        else
+          await locationDetailServiceInstance.create({
+            ld_part: remain.tr_part,
+            ld_date: new Date(),
+            ld_lot: remain.ld_lot,
+            ld_site: remain.ld_site,
+            ld_loc: remain.ld_loc,
+            ld_qty_oh: Number(remain.tag_cnt_qty),
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+      }
+    }
+    const itemServiceInstance = Container.get(itemService);
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -1191,4 +1528,6 @@ export default {
   rctWo,
   issWo,
   issSo,
+  cycCnt,
+  cycRcnt,
 };

@@ -19,9 +19,10 @@ const OrderPos = sequelize.define(
 
     customer: Sequelize.STRING,
     order_emp: Sequelize.STRING,
+    status: Sequelize.STRING,
     usrd_site: Sequelize.STRING,
     total_price: Sequelize.INTEGER,
-    created_date: Sequelize.DATE,
+    created_date: Sequelize.DATEONLY,
   },
   {
     tableName: 'bb_order_pos',

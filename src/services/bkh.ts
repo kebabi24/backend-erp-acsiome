@@ -3,14 +3,14 @@ import { Service, Inject } from 'typedi';
 @Service()
 export default class banksSercice {
   constructor(
-    @Inject('bankModel') private bankModel: Models.bankModel,
+    @Inject('bkhModel') private bkhModel: Models.bkhModel,
     @Inject('addressModel') private addressModel: Models.AddressModel,
     @Inject('logger') private logger,
   ) {}
 
   public async create(data: any): Promise<any> {
     try {
-      const bank = await this.bankModel.create({ ...data });
+      const bank = await this.bkhModel.create({ ...data });
       this.logger.silly('bank');
       return bank;
     } catch (e) {
@@ -20,7 +20,7 @@ export default class banksSercice {
   }
   public async findOne(query: any): Promise<any> {
     try {
-      const bank = await this.bankModel.findOne({ where: query, include: this.addressModel });
+      const bank = await this.bkhModel.findOne({ where: query, include: this.addressModel });
       this.logger.silly('find one bank ');
       return bank;
     } catch (e) {
@@ -31,7 +31,7 @@ export default class banksSercice {
 
   public async find(query: any): Promise<any> {
     try {
-      const banks = await this.bankModel.findAll({ where: query, include: this.addressModel });
+      const banks = await this.bkhModel.findAll({ where: query, include: this.addressModel });
       this.logger.silly('find All banks ');
       return banks;
     } catch (e) {
@@ -42,7 +42,7 @@ export default class banksSercice {
 
   public async update(data: any, query: any): Promise<any> {
     try {
-      const bank = await this.bankModel.update(data, {
+      const bank = await this.bkhModel.update(data, {
         where: query,
       });
       this.logger.silly('update one inventoryStatus mstr');
@@ -54,7 +54,7 @@ export default class banksSercice {
   }
   public async delete(query: any): Promise<any> {
     try {
-      const bank = await this.bankModel.destroy({ where: query });
+      const bank = await this.bkhModel.destroy({ where: query });
       this.logger.silly('delete one bank ');
       return bank;
     } catch (e) {

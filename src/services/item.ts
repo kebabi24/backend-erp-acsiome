@@ -26,6 +26,7 @@ export default class ItemService {
         include: this.taxeModel,
         incluse: this.locationModel,
       });
+
       this.logger.silly('find item ');
       return codes;
     } catch (e) {

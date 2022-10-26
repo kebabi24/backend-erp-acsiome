@@ -88,6 +88,22 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
+const findQtyOnStock = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    try {
+        const psServiceInstance = Container.get(PsService)
+        const ps = await psServiceInstance.findQtyOnStock({...req.body})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: ps })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
@@ -232,5 +248,6 @@ export default {
     update,
     deleteOne,
     findPrice,
+    findQtyOnStock
 }
 

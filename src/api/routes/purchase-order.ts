@@ -1,10 +1,10 @@
-import { Router, Request, Response, NextFunction } from "express"
-import { Container } from "typedi"
-import controller from "../controllers/purchase-order"
-const route = Router()
+import { Router, Request, Response, NextFunction } from 'express';
+import { Container } from 'typedi';
+import controller from '../controllers/purchase-order';
+const route = Router();
 
 export default (app: Router) => {
-    app.use("/purchase-orders", route)
+  app.use('/purchase-orders', route);
 
     route.post("/", controller.create)
     route.post("/add", controller.createPos)
