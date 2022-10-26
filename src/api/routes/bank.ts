@@ -18,5 +18,5 @@ export default (app: Router) => {
   route.post('/findDetails', controller.findAllDetails);
   route.post('/findBk', controller.findBkByUser);
   route.post('/bk', controller.Bk);
-  route.post('/bk-order', controller.BkOrder);
+  route.post('/prP', controller.proccesPayement);
 };

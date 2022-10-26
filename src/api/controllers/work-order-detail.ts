@@ -83,14 +83,14 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const psServiceInstance = Container.get(psService);
     for (const product of products) {
-      const id = await workOrderServiceInstance.findOne({ wo_nbr: cart.code_cart, wo_lot: product.line });
+      const id = await workOrderServiceInstance.findOne({ wo_nbr: cart.order_code, wo_lot: product.line });
       let ps_parent = product.pt_bom_code;
       console.log(product);
       const ps = await psServiceInstance.find({ ps_parent });
       for (const pss of ps) {
         console.log(cart);
         const workOrderDetail = await workOrderDetailServiceInstance.create({
-          wod_nbr: req.body.cart.code_cart,
+          wod_nbr: req.body.cart.order_code,
           wod_lot: id.id,
           wod_loc: product.pt_loc,
           wod_part: pss.ps_comp,

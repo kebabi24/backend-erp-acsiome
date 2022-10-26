@@ -1,6 +1,7 @@
 import BankService from '../../services/bank';
 import BankDetailService from '../../services/bank-detail';
 import BkhService from '../../services/bkh';
+import PosOrder from '../../services/pos-order';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -95,52 +96,41 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const BkOrder = async (req: Request, res: Response, next: NextFunction) => {
+const proccesPayement = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const logger = Container.get('logger');
   logger.debug('Calling Create sequence endpoint');
   try {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
-    const bkhServiceInstance = Container.get(BkhService);
-    const { detail, type } = req.body;
-
-    for (const bank of detail) {
+    const bankhDetailerviceInstance = Container.get(BkhService);
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const { cart, type, user_site } = req.body;
+    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_site });
+    if (bank) {
+      await bankhDetailerviceInstance.create({
+        bkh_code: bank.bk_code,
+        bkh_date: new Date(),
+        bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
+        bkh_type: type,
+      });
       await bankServiceInstance.update(
         {
-          bk_balance: bank.bk_balance,
-          bk_2000: bank.bk_2000,
-          bk_1000: bank.bk_1000,
-          bk_0500: bank.bk_0500,
-          bk_0200: bank.bk_0200,
-          bk_p200: bank.bk_p200,
-          bk_p100: bank.bk_p100,
-          bk_p050: bank.bk_p050,
-          bk_p020: bank.bk_p020,
-          bk_p010: bank.bk_p010,
-          bk_p005: bank.bk_p005,
+          bk_balance: Number(bank.bk_balance) + Number(cart.total_price),
+
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
         },
-        { bk_code: bank.bk_code },
+        { bk_type: type, bk_user1: user_site },
       );
-      await bkhServiceInstance.create({
-        bkh_code: bank.bk_code,
-        bk_num_code: new Date(),
-        bkh_balance: bank.bk_balance,
-        bkh_date: new Date(),
-        bkh_type: type,
-        bk_2000: bank.bk_2000,
-        bk_1000: bank.bk_1000,
-        bk_0500: bank.bk_0500,
-        bk_0200: bank.bk_0200,
-        bk_p200: bank.bk_p200,
-        bk_p100: bank.bk_p100,
-        bk_p050: bank.bk_p050,
-        bk_p020: bank.bk_p020,
-        bk_p010: bank.bk_p010,
-        bk_p005: bank.bk_p005,
-      });
+
+      await PosOrderServiceInstance.update(
+        {
+          status: 'P',
+        },
+        { order_code: cart.order_code, usrd_site: user_site },
+      );
     }
-    // console.log(bk)
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     //#
@@ -371,5 +361,5 @@ export default {
   update,
   updatedet,
   Bk,
-  BkOrder,
+  proccesPayement,
 };

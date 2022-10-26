@@ -27,7 +27,7 @@ const Bank = sequelize.define(
         key: 'cu_curr',
       },
     },
-
+    bk_type: Sequelize.STRING,
     bk_acct: Sequelize.STRING,
     bk_sub: Sequelize.STRING,
     bk_cc: Sequelize.STRING,

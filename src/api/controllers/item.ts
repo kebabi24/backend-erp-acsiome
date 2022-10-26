@@ -5,6 +5,7 @@ import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
+import { cpuUsage } from 'process';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');

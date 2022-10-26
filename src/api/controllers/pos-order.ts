@@ -22,9 +22,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const total_price = req.body.cart.total_price;
     const products = req.body.cart.products;
     await PosOrderServiceInstance.create({
-      order_code: cart.code_cart,
+      order_code: cart.order_code,
       total_price: cart.total_price,
       order_emp: cart.order_emp,
+      status: cart.status,
       customer: cart.customer,
       created_date: new Date(),
       usrd_site: cart.usrd_site,
@@ -32,7 +33,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
       await PosOrderDetailServiceInstance.create({
-        order_code: cart.code_cart,
+        order_code: cart.order_code,
         pt_part: pt_part,
         pt_formule: pt_formule,
         pt_size: comment,
@@ -50,7 +51,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const ingredients = product.ingredients;
       for (const s of supp) {
         await PosOrderProductSuppServiceInstance.create({
-          order_code: cart.code_cart,
+          order_code: cart.order_code,
           pt_part: pt_part,
           pt_pt_part: s.pt_part,
           pt_desc1: s.pt_desc1,
@@ -62,7 +63,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       for (const sa of sauce) {
         await PosOrderProductSauceServiceInstance.create({
-          order_code: cart.code_cart,
+          order_code: cart.order_code,
           pt_part: pt_part,
           pt_pt_part: sa.pt_part,
           pt_desc1: sa.pt_desc1,
@@ -74,7 +75,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       for (const i of ingredients) {
         await PosOrderProductIngServiceInstance.create({
-          order_code: cart.code_cart,
+          order_code: cart.order_code,
           pt_part: pt_part,
           pt_pt_part: i.spec_code,
           pt_desc1: i.pt_desc1,
@@ -132,7 +133,6 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-
 const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
@@ -140,23 +140,28 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
-    
-    console.log(req.body)
-    const orders = await PosOrderDetailServiceInstance.findspec({ 
-     where: {usrd_site : req.body.usrd_site, created_date: req.body.created_date} 
-        ,
-       
+
+    console.log(req.body);
+    const orders = await PosOrderDetailServiceInstance.findspec({
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
       attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
       group: ['pt_part', 'usrd_site'],
       raw: true,
-    })
-    console.log(orders)
-    let result = []
-   var i = 1
+    });
+    console.log(orders);
+    let result = [];
+    var i = 1;
     for (let ord of orders) {
-      const items = await itemServiceInstance.findOne({pt_part : ord.pt_part})
-      result.push({id: i,part:  ord.pt_part,desc1: items.pt_desc1, bom:items.pt_bom_code, ord_qty: ord.total_qty,  prod_qty: ord.total_qty})
-      i = i + 1
+      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      result.push({
+        id: i,
+        part: ord.pt_part,
+        desc1: items.pt_desc1,
+        bom: items.pt_bom_code,
+        ord_qty: ord.total_qty,
+        prod_qty: ord.total_qty,
+      });
+      i = i + 1;
     }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
