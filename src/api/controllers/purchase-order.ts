@@ -65,14 +65,14 @@ for (let obj of purchaseOrderDetail) {
     if(obj.qtycom > 0 ) {
     console.log("hnahnahnahnahna",obj.part)
     if(obj.vend == entry.vend) {
-        var duedate = new Date();
+        var duedate = new Date() ;
 
         // add a day
         duedate.setDate(duedate.getDate() + 1);
         const pt =  await itemServiceInstance.findOne({pt_part: obj.part})
         console.log(pt.taxe)
         
-        let entr = { pod_nbr: po.po_nbr, pod_line: line, pod_part: obj.part,pod_taxable: pt.pt_taxable,pod_tax_code: pt.pt_taxc,pod_taxc:pt.taxe.tx2_tax_pct, pod_qty_ord: obj.qtycom,pod_site: pt.pt_site, pod_loc:pt.pt_loc, pod_price: pt.pt_price, pod_um: pt.pt_um, pod_due_date: duedate, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+        let entr = { pod_nbr: po.po_nbr, pod_line: line, pod_part: obj.part,pod_taxable: pt.pt_taxable,pod_stat: "P",pod_tax_code: pt.pt_taxc,pod_taxc:pt.taxe.tx2_tax_pct, pod_qty_ord: obj.qtycom,pod_site: pt.pt_site, pod_loc:pt.pt_loc, pod_price: pt.pt_price, pod_um: pt.pt_um, pod_due_date: duedate, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
           await purchaseOrderDetailServiceInstance.create(entr)
         line = line + 1
 
@@ -477,6 +477,25 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const findByStat = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    console.log(req.body)
+    logger.debug("Calling find by  all requisition endpoint")
+    try {
+        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
+        
+        const pos = await purchaseOrderServiceInstance.find({...req.body})
+            
+        return res.status(202).json({
+            message: "sec",
+            data:  pos ,
+        })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all purchaseOrder endpoint")
@@ -536,12 +555,23 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling update one  purchaseOrder endpoint")
     try {
         const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
+        const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService)
         const { id } = req.params
         console.log(req.body)
         const purchaseOrder = await purchaseOrderServiceInstance.update(
             { ...req.body, last_modified_by: user_code },
             { id }
         )
+        const purchase = await purchaseOrderServiceInstance.findOne({id})
+        console.log(purchase.po_nbr)
+        const pos = await purchaseOrderDetailServiceInstance.find({pod_nbr : purchase.po_nbr})
+        for(const po of pos){
+        
+        const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
+            { pod_status:req.body.po_stat, last_modified_by: user_code },
+            { id: po.id }
+        )
+        }
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: purchaseOrder })
@@ -602,6 +632,7 @@ export default {
     findByAll,
     findOne,
     findAll,
+    findByStat,
     findAllSite,
     update,
     findAllwithDetails,

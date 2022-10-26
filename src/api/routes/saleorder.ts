@@ -16,7 +16,9 @@ export default (app: Router) => {
     route.post("/findactivity", controller.getActivity)
     route.post("/findca", controller.getCA)
     route.put("/:id", controller.update)
+    route.put("/Sod/:id", controller.updateSod)
     route.put("/So/:id", controller.updateSo)
     route.post("/findAll", controller.findByAll)  
+    route.post("/findAllso", controller.findByAllSo)  
     
 }

@@ -45,7 +45,35 @@ export default class psService {
       throw e;
     }
   }
+  public async findby(query: any): Promise<any> {
+    try {
+      const pss = await this.psModel.findAll({
+        where: query,
+        include: this.itemModel,
+      });
+      this.logger.silly('find All pss mstr');
 
+      return pss;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findAll(query: any): Promise<any> {
+    try {
+      const pss = await this.psModel.findAll({
+        where: query,
+        include: this.itemModel,
+        
+      });
+      this.logger.silly('find All pss mstr');
+
+      return pss;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async update(data: any, query: any): Promise<any> {
     try {
       const ps = await this.psModel.update(data, { where: query });

@@ -13,6 +13,7 @@ export default (app: Router) => {
     route.post("/allwithdetailsite", controller.findAllwithDetailsite)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
+    route.post("/findStat", controller.findByStat)
     route.post("/findsite", controller.findAllSite)
     route.post("/findrange", controller.findByrange)
     route.post("/findproviderca", controller.getProviderCA)

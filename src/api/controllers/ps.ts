@@ -50,10 +50,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    logger.debug("Calling find all code endpoint")
+    logger.debug("Calling find all code pppppssssssss")
     try {
         const psServiceInstance = Container.get(PsService)
-        const ps = await psServiceInstance.find({})
+        const ps = await psServiceInstance.findAll({})
+     //   console.log(ps)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ps })
@@ -68,7 +69,17 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find by  all code endpoint")
     try {
         const psServiceInstance = Container.get(PsService)
-        const ps = await psServiceInstance.find({...req.body})
+        const ps = await psServiceInstance.findby({...req.body})
+        //console.log(ps)
+        
+        var i = 1
+        for (let p of ps) {
+           p.int01 = i
+           p.chr01 = p.item.pt_desc1
+
+        i = i + 1
+
+        }
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ps })
@@ -142,10 +153,17 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const psServiceInstance = Container.get(PsService)
         const {id} = req.params
-        const ps = await psServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        console.log(id)
+        const {ps, details} = req.body
+      console.log(details)
+        await psServiceInstance.delete({ps_parent:  id})
+        for (let entry of details) {
+            entry = { ...entry,ps_parent:id, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await psServiceInstance.create(entry)
+        }
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: ps  })
+            .json({ message: "fetched succesfully update", data: ps })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
