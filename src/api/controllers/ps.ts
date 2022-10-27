@@ -113,7 +113,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         const psServiceInstance = Container.get(PsService)
         const itemServiceInstance = Container.get(ItemService)
         const ldServiceInstance = Container.get(LocationDetailService)
-       // console.log(req.body)
+        console.log(req.body)
        const result = [];
        var j = 1
  for (let obj of details) {
@@ -132,30 +132,57 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
                 }
              }
              if (bool == false){
-                const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
-                const lds = await ldServiceInstance.find({ld_part: p.ps_comp, ld_site: site})
-                var ldqty = 0
-                for (let ld of lds ) {
-                    ldqty = ldqty + Number(ld.ld_qty_oh)
-                }
-                result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty), desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , 
-                    qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) >= 0 ? ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) : 0
+                result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty)}) 
+                    //     qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: qtyc
+                // const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
+                // const lds = await ldServiceInstance.find({ld_part: p.ps_comp, ld_site: site})
+                // var ldqty = 0
+                // for (let ld of lds ) {
+                //     ldqty = ldqty + Number(ld.ld_qty_oh)
+                // }
                 
-                })
+                // var qtyc = 0
+                //  //? ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - Number(ldqty) + Number(item.pt_sfty_stk)) : 0
+                //  if (((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) >= 0) { qtyc = ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - ldqty + Number(item.pt_sfty_stk)) } else qtyc = 0
+                //  console.log(Number(p.ps_qty_per) * Number(obj.prod_qty),ldqty,item.pt_sfty_stk,qtyc)
+                //  result.push({ id: j , part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty), desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , 
+                //     qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: qtyc
+                
+                // })
                 j = j + 1
              }
          }
         
  }
+
+let dat = []
+ for(let res of result) {
+            const item = await itemServiceInstance.findOne({pt_part: res.part})
+                const lds = await ldServiceInstance.find({ld_part: res.part, ld_site: site})
+                var ldqty = 0
+                for (let ld of lds ) {
+                    ldqty = ldqty + Number(ld.ld_qty_oh)
+                }
+                
+                var qtyc = 0
+                 //? ((Number(p.ps_qty_per) * Number(obj.prod_qty)) - Number(ldqty) + Number(item.pt_sfty_stk)) : 0
+                 if ((res.qty - ldqty + Number(item.pt_sfty_stk)) >= 0) { qtyc = (res.qty - ldqty + Number(item.pt_sfty_stk)) } else qtyc = 0
+                 //console.log(Number(p.ps_qty_per) * Number(obj.prod_qty),ldqty,item.pt_sfty_stk,qtyc)
+                 dat.push({ id: res.id , part: res.part, qty: res.qty, desc: item.pt_desc1, vend: item.pt_vend, um:item.pt_um , 
+                    qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: qtyc})
+                
+
+
+ }
 //  for(let res of result){
 //      res.qtycom = res.qty - res.qtyoh
 //  }
- console.log(result)
+ console.log(dat)
         //const psServiceInstance = Container.get(PsService)
       //  const ps = await psServiceInstance.find({...req.body})
        return res
            .status(200)
-           .json({ message: "fetched succesfully", data: result })
+           .json({ message: "fetched succesfully", data: dat })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
