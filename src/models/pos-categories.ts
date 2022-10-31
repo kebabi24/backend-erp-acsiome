@@ -20,6 +20,7 @@ const Categories = sequelize.define(
     },
     category_name: Sequelize.STRING,
     category_img: Sequelize.STRING,
+    rang: Sequelize.INTEGER,
   },
   {
     tableName: 'bb_pos_category',

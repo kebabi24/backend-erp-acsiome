@@ -35,6 +35,7 @@ export default class posCategoriesService {
     try {
       // const categories = await this.posCategoryModel.findAll({ where: query });
       const categories = await this.posCategoryModel.findAll({
+        order: [['rang', 'ASC']],
         where: query,
       });
       this.logger.silly('find All categories mstr');

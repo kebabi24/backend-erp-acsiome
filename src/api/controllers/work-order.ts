@@ -1,6 +1,7 @@
 import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
 import WorkroutingService from '../../services/workrouting';
+import ItemService from '../../services/item';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -8,6 +9,7 @@ import { result } from 'lodash';
 import { IntegerDataType } from 'sequelize/types';
 import psService from '../../services/ps';
 import workOrderDetailService from '../../services/work-order-detail';
+import { Console } from 'console';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -19,6 +21,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
+    const itemServiceInstance = Container.get(ItemService);
 
     for (const item of detail) {
       let wolot = 0;
@@ -71,6 +74,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
     const psServiceInstance = Container.get(psService);
+    const itemServiceInstance = Container.get(ItemService);
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
@@ -110,6 +114,72 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
+        }
+        console.log(product);
+        const supp = product.suppliments;
+        for (const s of supp) {
+          const s_part = s.pt_part;
+          console.log(s_part);
+          await workOrderDetailServiceInstance.create({
+            wod_nbr: req.body.cart.order_code,
+            wod_lot: wOid.id,
+            wod_loc: s.pt_loc,
+            wod_part: s_part,
+            wod_site: usrd_site,
+            wod_qty_req: parseFloat(s.pt_net_wt),
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+        const sauce = product.sauces;
+        for (const sa of sauce) {
+          const sa_part = sa.pt_part;
+          await workOrderDetailServiceInstance.create({
+            wod_nbr: req.body.cart.order_code,
+            wod_lot: wOid.id,
+            wod_loc: sa.pt_loc,
+            wod_part: sa_part,
+            wod_site: usrd_site,
+            wod_qty_req: parseFloat(sa.pt_net_wt),
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+        const ing = product.ingredients;
+        if (ing.length > 0) {
+          for (const g of ing) {
+            console.log(order_code);
+            console.log(product.line);
+            const wOd = await workOrderDetailServiceInstance.findOne({
+              wod_nbr: order_code,
+              wod_lot: wOid.id,
+              wod_part: g.spec_code,
+            });
+
+            await workOrderDetailServiceInstance.update(
+              { wod_qty_req: Number(0) },
+              { wod_nbr: order_code, wod_lot: wOid.id, wod_part: g.spec_code },
+            );
+
+            // const ing_part = g.pt_part;
+            // console.log(ing_part);
+            // await workOrderDetailServiceInstance.create({
+            //   wod_nbr: req.body.cart.order_code,
+            //   wod_lot: wOid.id,
+            //   wod_loc: g.pt_loc,
+            //   wod_part: ing_part,
+            //   wod_site: usrd_site,
+            //   wod_qty_req: 0,
+            //   created_by: user_code,
+            //   created_ip_adr: req.headers.origin,
+            //   last_modified_by: user_code,
+            //   last_modified_ip_adr: req.headers.origin,
+            // });
+          }
         }
       }
     }
