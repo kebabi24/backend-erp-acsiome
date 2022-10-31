@@ -106,6 +106,8 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
     const { cart, type, user_site } = req.body;
+    console.log(cart);
+    console.log(user_site);
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_site });
     if (bank) {
       await bankhDetailerviceInstance.create({
@@ -128,8 +130,37 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
         {
           status: 'P',
         },
-        { order_code: cart.order_code, usrd_site: user_site },
+        { order_code: cart.order_code, bk_user1: user_site },
       );
+    }
+    return res.status(201).json({ message: 'created succesfully', data: true });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const createFRequest = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bankServiceInstance = Container.get(BankService);
+    const bankDetailServiceInstance = Container.get(BankDetailService);
+    const bankhDetailerviceInstance = Container.get(BkhService);
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const { mv, type, user_site } = req.body;
+
+    console.log(user_site);
+    const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_site });
+    if (bank) {
+      await bankhDetailerviceInstance.create({
+        bkh_code: bank.bk_code,
+        bkh_date: new Date(),
+        bkh_num_doc: mv.mv_cause,
+        bkh_balance: mv.mv_amt,
+        bkh_type: type,
+      });
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -362,4 +393,5 @@ export default {
   updatedet,
   Bk,
   proccesPayement,
+  createFRequest,
 };
