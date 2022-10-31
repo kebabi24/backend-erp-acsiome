@@ -118,6 +118,7 @@ export default async ({ expressApp }) => {
       { name: 'costcenterModel', model: require('../models/costcenter').default },
       { name: 'costsubModel', model: require('../models/costsub').default },
       { name: 'costaccountModel', model: require('../models/costaccount').default },
+      { name: 'employeTimeModel', model: require('../models/employe-time').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -729,6 +730,14 @@ export default async ({ expressApp }) => {
   require('../models/invoice-order-temp-detail').default.belongsTo(require('../models/item').default, {
     foreignKey: 'itdh_part',
     targetKey: 'pt_part',
+  });
+  require('../models/employe').default.hasOne(require('../models/employe-time').default, {
+    foreignKey: 'empt_addr',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-time').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'empt_addr',
+    targetKey: 'emp_addr',
   });
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');

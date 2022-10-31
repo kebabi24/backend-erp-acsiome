@@ -80,6 +80,7 @@ import posProduct from './routes/pos-product';
 import posCategoryProduct from './routes/pos-category-product';
 import posOrder from './routes/pos-order';
 import posOrderProductDetail from './routes/pos-order-detail-product';
+import employeTime from './routes/employe-time';
 
 // guaranteed to get dependencies
 export default () => {
@@ -142,6 +143,7 @@ export default () => {
   project(app);
   employe(app);
   employeAvailability(app);
+  employeTime(app);
   affectEmploye(app);
   //addReport(app)
   config(app);
