@@ -732,11 +732,11 @@ export default async ({ expressApp }) => {
     targetKey: 'pt_part',
   });
   require('../models/employe').default.hasOne(require('../models/employe-time').default, {
-    foreignKey: 'empt_addr',
+    foreignKey: 'empt_code',
     sourceKey: 'emp_addr',
   });
   require('../models/employe-time').default.belongsTo(require('../models/employe').default, {
-    foreignKey: 'empt_addr',
+    foreignKey: 'empt_code',
     targetKey: 'emp_addr',
   });
 

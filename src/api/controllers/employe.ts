@@ -105,7 +105,7 @@ const findByTime = async (req: Request, res: Response, next: NextFunction) => {
         for(let emp of employe) {
             const empTime = await empTimeServiceInstance.findOne({empt_code:emp.emp_addr, empt_date: new Date()})
             const stat = (empTime != null) ? empTime.empt_stat : null
-            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname, reason: stat})
+            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site, reason: stat})
                 i = i + 1
 
         }

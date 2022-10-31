@@ -26,7 +26,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                 await empTimeServiceInstance.update({...entry},{id: employe.id})
             }
             else {
-            entry = { empt_code: entry.emp_addr,empt_stat:entry.reason,empt_date: new Date(), created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { empt_code: entry.emp_addr,empt_site:entry.emp_site,empt_stat:entry.reason,empt_date: new Date(), created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
            
             await empTimeServiceInstance.create(entry)
             }
