@@ -114,13 +114,18 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         var bool = false;
         for (var i = 0; i < result.length; i++) {
           if (result[i].part == p.ps_comp) {
-            result[i].qty = result[i].qty + Number(p.ps_qty_per) * Number(obj.prod_qty);
+            result[i].qty =
+              result[i].qty + (Number(p.ps_qty_per) / (parseFloat(p.ps_scrp_pct) / 100)) * Number(obj.prod_qty);
             //  result[i].qtycom = (result[i].qty + Number(p.ps_qty_per) * Number(obj.prod_qty) )  - result[i].qtyoh
             bool = true;
           }
         }
         if (bool == false) {
-          result.push({ id: j, part: p.ps_comp, qty: Number(p.ps_qty_per) * Number(obj.prod_qty) });
+          result.push({
+            id: j,
+            part: p.ps_comp,
+            qty: (Number(p.ps_qty_per) / (parseFloat(p.ps_scrp_pct) / 100)) * Number(obj.prod_qty),
+          });
           //     qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: qtyc
           // const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
           // const lds = await ldServiceInstance.find({ld_part: p.ps_comp, ld_site: site})

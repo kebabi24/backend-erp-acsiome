@@ -100,22 +100,25 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
       const wOid = await workOrderServiceInstance.findOne({ wo_nbr: order_code, wo_lot: product.line });
       if (wOid) {
         let ps_parent = product.pt_bom_code;
+
         const ps = await psServiceInstance.find({ ps_parent });
         for (const pss of ps) {
+          console.log(pss.ps_scrp_pct);
           await workOrderDetailServiceInstance.create({
             wod_nbr: req.body.cart.order_code,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
             wod_part: pss.ps_comp,
             wod_site: usrd_site,
-            wod_qty_req: parseFloat(pss.ps_qty_per) * Number(product.pt_qty),
+            wod_qty_req:
+              (parseFloat(pss.ps_qty_per) / (parseFloat(pss.ps_scrp_pct) / 100)) * parseFloat(product.pt_qty),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
         }
-        console.log(product);
+        // console.log(product);
         const supp = product.suppliments;
         for (const s of supp) {
           const s_part = s.pt_part;

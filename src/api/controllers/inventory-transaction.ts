@@ -1075,7 +1075,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
 
     for (const item of detail) {
-      console.log('isswo', item.tr_part);
+      console.log('isswo', item.tr_part, item.tr_loc, item.tr_site);
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: item.tr_site,
@@ -1089,7 +1089,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
       });
-
+      console.log(ld);
       if (ld) {
         await locationDetailServiceInstance.update(
           {

@@ -37,8 +37,19 @@ export default class posOrderService {
     try {
       const orders = await this.posOrderModel.findAll({
         order: [['createdAt', 'DESC']],
-        where: { created_date: new Date() },
+        where: { status: 'N', created_date: new Date() },
       });
+      this.logger.silly('find All orders mstr');
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findW(query: any): Promise<any> {
+    try {
+      const orders = await this.posOrderModel.findAll();
       this.logger.silly('find All orders mstr');
       return orders;
     } catch (e) {
@@ -113,7 +124,7 @@ export default class posOrderService {
 
   public async update(data: any, query: any): Promise<any> {
     try {
-      const order = await this.posOrderModel.upsert(data, { where: query });
+      const order = await this.posOrderModel.update(data, { where: query });
       this.logger.silly('update one orders mstr');
       return order;
     } catch (e) {

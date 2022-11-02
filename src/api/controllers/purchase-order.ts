@@ -203,6 +203,52 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+const createPosUnpp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const itemServiceInstance = Container.get(ItemService);
+    const taxeServiceInstance = Container.get(taxeService);
+    const { Site, purchaseOrder } = req.body;
+    // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    for (let entry of purchaseOrder) {
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
+      console.log(sequence);
+
+      //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
+      //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
+      let ent = {
+        po_category: 'PO',
+        po_site: Site,
+        po_ord_date: new Date(),
+        po_vend: entry.pt_vend,
+        po_stat: 'p',
+        po_curr: 'DA',
+        po_ex_rate: 1,
+        po_ex_rate1: 1,
+        po_blanket: null, // code_bank
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      const po = await purchaseOrderServiceInstance.create(ent);
+      console.log(po.po_nbr);
+    }
+    console.log(purchaseOrder);
+    return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
@@ -590,6 +636,32 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const pod_site = req.body.pod_site;
+  console.log(pod_site);
+  const details = [];
+  logger.debug('Calling find one  purchaseOrder endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const { id } = req.params;
+
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const detail = await purchaseOrderDetailServiceInstance.find({
+      pod_stat: 'v',
+      pod_site: pod_site,
+    });
+
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      detail,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all purchaseOrder endpoint');
@@ -723,4 +795,6 @@ export default {
   getProviderBalance,
   getProviderCA,
   createPosUnp,
+  getPodRec,
+  createPosUnpp,
 };

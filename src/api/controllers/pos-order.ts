@@ -120,6 +120,19 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findAlll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const order = await PosOrderServiceInstance.findW({});
+    return res.status(200).json({ message: 'fetched succesfully', data: order });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
@@ -230,4 +243,5 @@ export default {
   findByOrd,
   update,
   deleteOne,
+  findAlll,
 };

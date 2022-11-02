@@ -15,4 +15,5 @@ export default (app: Router) => {
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/findorder', controller.findByOrd);
+  route.get('/findw', controller.findAlll);
 };

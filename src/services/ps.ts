@@ -1,11 +1,10 @@
 import { Service, Inject } from 'typedi';
 import sequelize from '../loaders/sequelize';
-import { QueryTypes, Sequelize } from "sequelize"
-import config from "../config"
+import { QueryTypes, Sequelize } from 'sequelize';
+import config from '../config';
 
 @Service()
 export default class psService {
-  
   constructor(
     @Inject('psModel') private psModel: Models.PsModel,
     @Inject('itemModel') private itemModel: Models.ItemModel,
@@ -35,17 +34,19 @@ export default class psService {
   }
 
   public async find(query: any): Promise<any> {
-    const sequelize = new Sequelize(config.databaseURL, { logging: false })
+    const sequelize = new Sequelize(config.databaseURL, { logging: false });
     try {
       const pss = await this.psModel.findAll({
         where: query,
         include: this.itemModel,
-        attributes: ['ps_parent', 'ps_comp', 'ps_qty_per'],
       });
-      const t = await sequelize.query("SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",  {
-        type: QueryTypes.SELECT
-      });
-      console.log(t)
+      const t = await sequelize.query(
+        "SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",
+        {
+          type: QueryTypes.SELECT,
+        },
+      );
+      console.log(t);
       this.logger.silly('find All pss mstr');
 
       return pss;
@@ -56,12 +57,14 @@ export default class psService {
   }
 
   public async findQtyOnStock(query: any): Promise<any> {
-    const sequelize = new Sequelize(config.databaseURL, { logging: false })
+    const sequelize = new Sequelize(config.databaseURL, { logging: false });
     try {
-   
-      const pss = await sequelize.query("SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",  {
-        type: QueryTypes.SELECT
-      });
+      const pss = await sequelize.query(
+        "SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",
+        {
+          type: QueryTypes.SELECT,
+        },
+      );
       this.logger.silly('find All pss mstr');
 
       return pss;
@@ -89,7 +92,6 @@ export default class psService {
       const pss = await this.psModel.findAll({
         where: query,
         include: this.itemModel,
-        
       });
       this.logger.silly('find All pss mstr');
 

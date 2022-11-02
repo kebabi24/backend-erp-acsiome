@@ -125,12 +125,13 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
         },
         { bk_type: type, bk_user1: user_site },
       );
-
+      console.log(cart.order_code, user_site);
       await PosOrderServiceInstance.update(
         {
           status: 'P',
         },
-        { order_code: cart.order_code, bk_user1: user_site },
+
+        { order_code: cart.order_code, usrd_site: user_site },
       );
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
