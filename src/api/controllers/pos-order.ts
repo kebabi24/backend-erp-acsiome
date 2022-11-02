@@ -28,7 +28,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       status: cart.status,
       customer: cart.customer,
       created_date: new Date(),
-      usrd_site: cart.usrd_site,
+      usrd_site: cart.usrd_name,
     });
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
@@ -43,7 +43,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         line: line,
         pt_qty_ord_pos: pt_qty,
         pt_price_pos: pt_price,
-        usrd_site: cart.usrd_site,
+        usrd_site: cart.usrd_name,
         created_date: new Date(),
       });
       const supp = product.suppliments;
@@ -58,7 +58,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_bom_code: s.pt_bom_code,
           pt_ord_qty: s.pt_ord_qty,
           pt_price: s.pt_price,
-          usrd_site: cart.usrd_site,
+          usrd_site: cart.usrd_name,
         });
       }
       for (const sa of sauce) {
@@ -70,7 +70,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_bom_code: sa.pt_bom_code,
           pt_ord_qty: sa.pt_ord_qty,
           pt_price: sa.pt_price,
-          usrd_site: cart.usrd_site,
+          usrd_site: cart.usrd_name,
         });
       }
       for (const i of ingredients) {
@@ -82,7 +82,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_bom_code: i.pt_bom_code,
           pt_desc2: i.pt_desc2,
           pt_price: i.price,
-          usrd_site: cart.usrd_site,
+          usrd_site: cart.usrd_name,
         });
       }
     }

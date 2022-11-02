@@ -105,10 +105,10 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const { cart, type, user_site } = req.body;
+    const { cart, type, user_name } = req.body;
     console.log(cart);
-    console.log(user_site);
-    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_site });
+    console.log(user_name);
+    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_name });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
@@ -123,15 +123,15 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { bk_type: type, bk_user1: user_site },
+        { bk_type: type, bk_user1: user_name },
       );
-      console.log(cart.order_code, user_site);
+      console.log(cart.order_code, user_name);
       await PosOrderServiceInstance.update(
         {
           status: 'P',
         },
 
-        { order_code: cart.order_code, usrd_site: user_site },
+        { order_code: cart.order_code, usrd_site: cart.usrd_site },
       );
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
@@ -150,10 +150,10 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const { mv, type, user_site } = req.body;
+    const { mv, type, user_name } = req.body;
 
-    console.log(user_site);
-    const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_site });
+    console.log(user_name);
+    const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_name });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
