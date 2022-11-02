@@ -1,5 +1,6 @@
 import EmployeService from "../../services/employe"
 import EmployeAvailabilityService from "../../services/employe-availability"
+import EmployeTimeService from "../../services/employe-time"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -92,6 +93,30 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findByTime = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    try {
+        const employeServiceInstance = Container.get(EmployeService)
+        const empTimeServiceInstance = Container.get(EmployeTimeService)
+        const employe = await employeServiceInstance.find({...req.body})
+        let result=[]
+        let i = 1
+        for(let emp of employe) {
+            const empTime = await empTimeServiceInstance.findOne({empt_code:emp.emp_addr, empt_date: new Date()})
+            const stat = (empTime != null) ? empTime.empt_stat : null
+            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site, reason: stat})
+                i = i + 1
+
+        }
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const findByDet = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all empdet endpoint")
@@ -146,6 +171,7 @@ export default {
     findOne,
     findAll,
     findBy,
+    findByTime,
     findByDet,
     update,
     deleteOne

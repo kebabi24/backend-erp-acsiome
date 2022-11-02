@@ -68,6 +68,24 @@ const findCheck = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findEmpTime = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findsome({ code_fldname: 'check_emp' });
+    // console.log(codes)
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_cmmt });
+    }
+    console.log(data);
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findConge = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -174,6 +192,7 @@ export default {
   findOne,
   findAll,
   findCheck,
+  findEmpTime,
   findConge,
   findModule,
   findTrans,

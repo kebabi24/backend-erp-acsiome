@@ -26,4 +26,5 @@ export default (app: Router) => {
   route.post('/iss-so', controller.issSo);
   route.post('/cyc-cnt', controller.cycCnt);
   route.post('/cyc-rcnt', controller.cycRcnt);
+  route.post('/dayly', controller.findDayly);
 };

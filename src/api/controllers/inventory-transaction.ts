@@ -1509,6 +1509,87 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findDayly = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const itemServiceInstance = Container.get(itemService);
+    console.log(req.body)
+    const parts = await inventoryTransactionServiceInstance.findSpecial({  where: {
+      tr_site: req.body.tr_site,
+      tr_effdate: req.body.tr_effdate,
+    },
+      attributes: ['tr_part','tr_site','tr_effdate', 'tr_serial'],
+      group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
+      raw: true,
+    });
+    console.log(parts)
+    let result = []
+    var i = 1
+    for(let part of parts) {
+      const item = await itemServiceInstance.findOne({ pt_part: part.tr_part });
+      
+      const invbeg = await inventoryTransactionServiceInstance.findOne({ tr_part: part.tr_part, tr_effdate:part.tr_effdate, tr_site: part.tr_site,tr_serial: part.tr_serial, tr_type: "CYC-RCNT" });
+
+      const rctpos = await inventoryTransactionServiceInstance.findSpecial({  where: {
+        tr_site: part.tr_site,
+        tr_effdate: part.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: "RCT-PO",
+      },
+        attributes: ['tr_part','tr_site','tr_effdate','tr_type','tr_serial',  [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qtyrec']],
+        group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type','tr_serial'],
+        raw: true,
+      });
+      const rec = (rctpos[0] != null) ? rctpos[0].qtyrec : 0
+
+   console.log("rec", rec )   
+   const isswos = await inventoryTransactionServiceInstance.findSpecial({  where: {
+        tr_site: part.tr_site,
+        tr_effdate: part.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: "ISS-WO",
+      },
+        attributes: ['tr_part','tr_site','tr_effdate','tr_type','tr_serial',  [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qtyiss']],
+        group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
+        raw: true,
+      });
+      const isssos = await inventoryTransactionServiceInstance.findSpecial({  where: {
+        tr_site: part.tr_site,
+        tr_effdate: part.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: "ISS-SO",
+      },
+        attributes: ['tr_part','tr_site','tr_effdate','tr_type','tr_serial',  [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qtyiss']],
+        group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
+        raw: true,
+      });
+ 
+      const isswo = (isswos[0] != null) ? -Number(isswos[0].qtyiss) : 0
+      const issso = (isssos[0] != null) ? -Number(isssos[0].qtyiss) : 0  
+       //console.log("iss", isswos)
+const iss = Number(isswo) + Number(issso)
+        //console.log(iss)
+       const invend = await inventoryTransactionServiceInstance.findOne({ tr_part: part.tr_part, tr_effdate:part.tr_effdate, tr_site: part.tr_site,tr_serial: part.tr_serial, tr_type: "CYC-CNT" });
+      result.push({id:i, part : part.tr_part, desc:item.pt_desc1, serial:part.serial, qtyinvbeg: (invbeg) ? Number(invbeg.tr_loc_begin) : 0, qtyinvdeb: (invbeg) ? Number(invbeg.tr_qty_chg):0,
+      qtyrec: Number(rec), qtyiss: Number(iss),
+      qtyrest: (invend) ? Number(invend.tr_loc_begin) : 0, qtyinvfin: (invend) ? Number(invend.tr_qty_chg):0
+    
+    })
+      i=i+1
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+    
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -1530,4 +1611,5 @@ export default {
   issSo,
   cycCnt,
   cycRcnt,
+  findDayly,
 };
