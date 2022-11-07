@@ -7,6 +7,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
+import SequenceService from '../../services/sequence';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -18,22 +19,25 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderProductSuppServiceInstance = Container.get(PosOrderProductSupp);
     const PosOrderProductSauceServiceInstance = Container.get(PosOrderProductSauce);
     const PosOrderProductIngServiceInstance = Container.get(PosOrderProductIng);
+    const SequenceServiceInstance = Container.get(SequenceService);
     const cart = req.body.cart;
     const total_price = req.body.cart.total_price;
     const products = req.body.cart.products;
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     await PosOrderServiceInstance.create({
-      order_code: cart.order_code,
+      order_code: nbr,
       total_price: cart.total_price,
       order_emp: cart.order_emp,
       status: cart.status,
       customer: cart.customer,
       created_date: new Date(),
-      usrd_site: cart.usrd_name,
+      usrd_site: cart.usrd_site,
     });
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
       await PosOrderDetailServiceInstance.create({
-        order_code: cart.order_code,
+        order_code: nbr,
         pt_part: pt_part,
         pt_formule: pt_formule,
         pt_size: comment,
@@ -43,7 +47,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         line: line,
         pt_qty_ord_pos: pt_qty,
         pt_price_pos: pt_price,
-        usrd_site: cart.usrd_name,
+        usrd_site: cart.usrd_site,
         created_date: new Date(),
       });
       const supp = product.suppliments;
@@ -51,41 +55,42 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const ingredients = product.ingredients;
       for (const s of supp) {
         await PosOrderProductSuppServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: s.pt_part,
           pt_desc1: s.pt_desc1,
           pt_bom_code: s.pt_bom_code,
           pt_ord_qty: s.pt_ord_qty,
           pt_price: s.pt_price,
-          usrd_site: cart.usrd_name,
+          usrd_site: cart.usrd_site,
         });
       }
       for (const sa of sauce) {
         await PosOrderProductSauceServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: sa.pt_part,
           pt_desc1: sa.pt_desc1,
           pt_bom_code: sa.pt_bom_code,
           pt_ord_qty: sa.pt_ord_qty,
           pt_price: sa.pt_price,
-          usrd_site: cart.usrd_name,
+          usrd_site: cart.usrd_site,
         });
       }
       for (const i of ingredients) {
         await PosOrderProductIngServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: i.spec_code,
           pt_desc1: i.pt_desc1,
           pt_bom_code: i.pt_bom_code,
           pt_desc2: i.pt_desc2,
           pt_price: i.price,
-          usrd_site: cart.usrd_name,
+          usrd_site: cart.usrd_site,
         });
       }
     }
+
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);

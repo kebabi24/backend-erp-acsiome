@@ -125,7 +125,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
         },
         { bk_type: type, bk_user1: user_name },
       );
-      console.log(cart.order_code, user_name);
+      // console.log(cart.order_code, user_name);
       await PosOrderServiceInstance.update(
         {
           status: 'P',
@@ -152,7 +152,7 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
     const PosOrderServiceInstance = Container.get(PosOrder);
     const { mv, type, user_name } = req.body;
 
-    console.log(user_name);
+    // console.log(user_name);
     const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_name });
     if (bank) {
       await bankhDetailerviceInstance.create({
@@ -173,7 +173,7 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
 
 const findAR = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  // console.log(req.body);
   logger.debug('Calling find by  all bank endpoint');
   try {
     const bankServiceInstance = Container.get(BankService);

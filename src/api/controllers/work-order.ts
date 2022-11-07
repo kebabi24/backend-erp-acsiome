@@ -10,6 +10,7 @@ import { IntegerDataType } from 'sequelize/types';
 import psService from '../../services/ps';
 import workOrderDetailService from '../../services/work-order-detail';
 import { Console } from 'console';
+import sequenceService from '../../services/sequence';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -75,6 +76,9 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
     const psServiceInstance = Container.get(psService);
     const itemServiceInstance = Container.get(ItemService);
+    const SequenceServiceInstance = Container.get(sequenceService);
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
@@ -82,7 +86,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
       await workOrderServiceInstance.create({
-        wo_nbr: order_code,
+        wo_nbr: nbr,
         wo_part: pt_part,
         wo_lot: line,
         wo_qty_ord: pt_qty,
@@ -91,13 +95,13 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         wo_rel_date: new Date(),
         wo_due_date: new Date(),
         wo_status: 'R',
-        wod_site: usrd_site,
+        wo_site: usrd_site,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      const wOid = await workOrderServiceInstance.findOne({ wo_nbr: order_code, wo_lot: product.line });
+      const wOid = await workOrderServiceInstance.findOne({ wo_nbr: nbr, wo_lot: product.line });
       if (wOid) {
         let ps_parent = product.pt_bom_code;
 
@@ -105,7 +109,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         for (const pss of ps) {
           console.log(pss.ps_scrp_pct);
           await workOrderDetailServiceInstance.create({
-            wod_nbr: req.body.cart.order_code,
+            wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
             wod_part: pss.ps_comp,
@@ -124,7 +128,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           const s_part = s.pt_part;
           console.log(s_part);
           await workOrderDetailServiceInstance.create({
-            wod_nbr: req.body.cart.order_code,
+            wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: s.pt_loc,
             wod_part: s_part,
@@ -140,7 +144,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         for (const sa of sauce) {
           const sa_part = sa.pt_part;
           await workOrderDetailServiceInstance.create({
-            wod_nbr: req.body.cart.order_code,
+            wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: sa.pt_loc,
             wod_part: sa_part,
@@ -155,17 +159,15 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         const ing = product.ingredients;
         if (ing.length > 0) {
           for (const g of ing) {
-            console.log(order_code);
-            console.log(product.line);
             const wOd = await workOrderDetailServiceInstance.findOne({
-              wod_nbr: order_code,
+              wod_nbr: nbr,
               wod_lot: wOid.id,
               wod_part: g.spec_code,
             });
 
             await workOrderDetailServiceInstance.update(
               { wod_qty_req: Number(0) },
-              { wod_nbr: order_code, wod_lot: wOid.id, wod_part: g.spec_code },
+              { wod_nbr: nbr, wod_lot: wOid.id, wod_part: g.spec_code },
             );
 
             // const ing_part = g.pt_part;
@@ -186,6 +188,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         }
       }
     }
+    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP' });
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
