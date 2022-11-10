@@ -4,6 +4,7 @@ import InventoryStatusDetailService from '../../services/inventory-status-detail
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
+import sequenceService from '../../services/sequence';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -37,13 +38,16 @@ const createldpos = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const SequenceServiceInstance = Container.get(sequenceService);
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     for (const product of products) {
       const { pt_part, pt_qty, pt_loc } = product;
 
       await locationDetailServiceInstance.create({
         ld_loc: pt_loc,
         ld_part: pt_part,
-        ld_lot: code_cart,
+        ld_lot: nbr,
         ld_qty_oh: pt_qty,
         ld_site: usrd_site,
         ld_date: new Date(),

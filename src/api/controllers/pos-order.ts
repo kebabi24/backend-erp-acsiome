@@ -21,10 +21,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderProductIngServiceInstance = Container.get(PosOrderProductIng);
     const SequenceServiceInstance = Container.get(SequenceService);
     const cart = req.body.cart;
+    console.log(cart);
     const total_price = req.body.cart.total_price;
     const products = req.body.cart.products;
     const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    // console.log(cart.products);
     await PosOrderServiceInstance.create({
       order_code: nbr,
       total_price: cart.total_price,
@@ -65,6 +67,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           usrd_site: cart.usrd_site,
         });
       }
+      // console.log(sauce);
       for (const sa of sauce) {
         await PosOrderProductSauceServiceInstance.create({
           order_code: nbr,

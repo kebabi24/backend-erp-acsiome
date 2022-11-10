@@ -82,6 +82,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
+    console.log(products);
     for (const product of products) {
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
@@ -106,8 +107,9 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         let ps_parent = product.pt_bom_code;
 
         const ps = await psServiceInstance.find({ ps_parent });
+        // console.log(ps);
         for (const pss of ps) {
-          console.log(pss.ps_scrp_pct);
+          // console.log(pss.ps_scrp_pct);
           await workOrderDetailServiceInstance.create({
             wod_nbr: nbr,
             wod_lot: wOid.id,
@@ -126,7 +128,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         const supp = product.suppliments;
         for (const s of supp) {
           const s_part = s.pt_part;
-          console.log(s_part);
+          // console.log(s_part);
           await workOrderDetailServiceInstance.create({
             wod_nbr: nbr,
             wod_lot: wOid.id,

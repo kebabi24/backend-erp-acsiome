@@ -1075,6 +1075,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
 
     for (const item of detail) {
+      console.log(detail);
       // console.log('isswo', item.tr_part, item.tr_loc, item.tr_site);
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
@@ -1091,6 +1092,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
       });
       // console.log(ld);
       if (ld) {
+        console.log(item.tr_qty_chg);
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
@@ -1121,43 +1123,46 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         });
-      }
-      if (!isNaN(item.wodid)) {
-        const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
-        if (wod) {
-          var bool = false;
-
-          if (
-            Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
-            0
-          ) {
-            bool = true;
-          }
-          await workOrderDetailServiceInstance.update(
-            {
-              wod__qadl01: true ? bool : false,
-              wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-              last_modified_by: user_code,
-              last_modified_ip_adr: req.headers.origin,
-            },
-            { id: wod.id },
-          );
-        }
-      } else {
-        await workOrderDetailServiceInstance.create({
-          wod_nbr: it.tr_nbr,
-          wod_lot: it.tr_lot,
-          wod_part: item.tr_part,
-          wod_qty_req: 0,
-          wod_qty_iss: item.tr_qty_loc,
-          wod_site: item.tr_site,
-          wod_loc: item.tr_loc,
-          wod_um: item.tr_um,
-          wod_serial: item.tr_serial,
-          wod_ref: item.tr_ref,
-          wod__qadl01: true,
+        await locationDetailServiceInstance.delete({
+          ld_lot: item.tr_nbr,
         });
       }
+      // if (!isNaN(item.wodid)) {
+      //   const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
+      //   if (wod) {
+      //     var bool = false;
+
+      //     if (
+      //       Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
+      //       0
+      //     ) {
+      //       bool = true;
+      //     }
+      //     await workOrderDetailServiceInstance.update(
+      //       {
+      //         wod__qadl01: true ? bool : false,
+      //         wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //         last_modified_by: user_code,
+      //         last_modified_ip_adr: req.headers.origin,
+      //       },
+      //       { id: wod.id },
+      //     );
+      //   }
+      // } else {
+      //   await workOrderDetailServiceInstance.create({
+      //     wod_nbr: it.tr_nbr,
+      //     wod_lot: it.tr_lot,
+      //     wod_part: item.tr_part,
+      //     wod_qty_req: 0,
+      //     wod_qty_iss: item.tr_qty_loc,
+      //     wod_site: item.tr_site,
+      //     wod_loc: item.tr_loc,
+      //     wod_um: item.tr_um,
+      //     wod_serial: item.tr_serial,
+      //     wod_ref: item.tr_ref,
+      //     wod__qadl01: true,
+      //   });
+      // }
     }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
@@ -1166,113 +1171,113 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const issSo = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get('logger');
-  const { user_code } = req.headers;
-  logger.debug('Calling update one  code endpoint');
-  try {
-    const { detail, it } = req.body;
-    // console.log("iss so", detail);
-    const saleOrderServiceInstance = Container.get(SaleOrderService);
-    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    const costSimulationServiceInstance = Container.get(costSimulationService);
-    const locationDetailServiceInstance = Container.get(locationDetailService);
-    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
-    const itemsServiceInstance = Container.get(itemService);
-    for (const item of detail) {
-      // console.log('issso', item.tr_part);
-      const { ...remain } = item;
-      // console.log(remain);
-      const sctdet = await costSimulationServiceInstance.findOne({
-        sct_part: remain.tr_part,
-        sct_site: remain.tr_site,
-        sct_sim: 'STDCG',
-      });
-      const pt = await itemsServiceInstance.findOne({ pt_part: remain.tr_part });
-      // console.log(remain.tr_part, remain.tr_site);
-      const ld = await locationDetailServiceInstance.findOne({
-        ld_part: remain.tr_part,
-        // ld_lot: remain.tr_nbr,
-        ld_site: remain.tr_site,
-        ld_loc: remain.tr_loc,
-      });
-      if (ld) {
-        await inventoryTransactionServiceInstance.create({
-          tr_line: remain.tr_line,
-          tr_part: remain.tr_part,
-          tr_prod_line: pt.pt_prod_line,
-          tr_qty_loc: -Number(remain.tr_qty_loc),
-          tr_um: pt.pt_um,
-          tr_um_conv: remain.tr_um_conv,
-          tr_price: remain.tr_price,
-          tr_site: remain.tr_site,
-          tr_loc: remain.tr_loc,
-          tr_serial: remain.tr_serial,
-          tr_nbr: remain.tr_nbr,
-          tr_lot: remain.tr_lot,
-          // tr_addr: so.so_cust,
-          tr_effdate: it,
-          tr_so_job: null,
-          tr_curr: 'DZD',
-          tr_ex_rate: 1,
-          tr_ex_rate2: 1,
+// const issSo = async (req: Request, res: Response, next: NextFunction) => {
+//   const logger = Container.get('logger');
+//   const { user_code } = req.headers;
+//   logger.debug('Calling update one  code endpoint');
+//   try {
+//     const { detail, it } = req.body;
+//     // console.log("iss so", detail);
+//     const saleOrderServiceInstance = Container.get(SaleOrderService);
+//     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+//     const costSimulationServiceInstance = Container.get(costSimulationService);
+//     const locationDetailServiceInstance = Container.get(locationDetailService);
+//     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+//     const itemsServiceInstance = Container.get(itemService);
+//     for (const item of detail) {
+//       // console.log('issso', item.tr_part);
+//       const { ...remain } = item;
+//       // console.log(remain);
+//       const sctdet = await costSimulationServiceInstance.findOne({
+//         sct_part: remain.tr_part,
+//         sct_site: remain.tr_site,
+//         sct_sim: 'STDCG',
+//       });
+//       const pt = await itemsServiceInstance.findOne({ pt_part: remain.tr_part });
+//       // console.log(remain.tr_part, remain.tr_site);
+//       const ld = await locationDetailServiceInstance.findOne({
+//         ld_part: remain.tr_part,
+//         // ld_lot: remain.tr_nbr,
+//         ld_site: remain.tr_site,
+//         ld_loc: remain.tr_loc,
+//       });
+//       if (ld) {
+//         await inventoryTransactionServiceInstance.create({
+//           tr_line: remain.tr_line,
+//           tr_part: remain.tr_part,
+//           tr_prod_line: pt.pt_prod_line,
+//           tr_qty_loc: -Number(remain.tr_qty_loc),
+//           tr_um: pt.pt_um,
+//           tr_um_conv: remain.tr_um_conv,
+//           tr_price: remain.tr_price,
+//           tr_site: remain.tr_site,
+//           tr_loc: remain.tr_loc,
+//           tr_serial: remain.tr_serial,
+//           tr_nbr: remain.tr_nbr,
+//           tr_lot: remain.tr_lot,
+//           // tr_addr: so.so_cust,
+//           tr_effdate: it,
+//           tr_so_job: null,
+//           tr_curr: 'DZD',
+//           tr_ex_rate: 1,
+//           tr_ex_rate2: 1,
 
-          tr_type: 'ISS-SO',
-          tr_qty_chg: Number(remain.tr_qty_chg),
-          tr_loc_begin: Number(ld.ld_qty_oh),
-          tr_gl_amt: Number(remain.tr_qty_chg) * sctdet.sct_cst_tot,
-          tr_date: new Date(),
-          tr_mtl_std: sctdet.sct_mtl_tl,
-          tr_lbr_std: sctdet.sct_lbr_tl,
-          tr_bdn_std: sctdet.sct_bdn_tl,
-          tr_ovh_std: sctdet.sct_ovh_tl,
-          tr_sub_std: sctdet.sct_sub_tl,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
+//           tr_type: 'ISS-SO',
+//           tr_qty_chg: Number(remain.tr_qty_chg),
+//           tr_loc_begin: Number(ld.ld_qty_oh),
+//           tr_gl_amt: Number(remain.tr_qty_chg) * sctdet.sct_cst_tot,
+//           tr_date: new Date(),
+//           tr_mtl_std: sctdet.sct_mtl_tl,
+//           tr_lbr_std: sctdet.sct_lbr_tl,
+//           tr_bdn_std: sctdet.sct_bdn_tl,
+//           tr_ovh_std: sctdet.sct_ovh_tl,
+//           tr_sub_std: sctdet.sct_sub_tl,
+//           created_by: user_code,
+//           created_ip_adr: req.headers.origin,
+//           last_modified_by: user_code,
+//           last_modified_ip_adr: req.headers.origin,
+//         });
 
-        if (remain.sod_type != 'M') {
-          const ld = await locationDetailServiceInstance.findOne({
-            ld_part: remain.tr_part,
-            ld_lot: remain.tr_nbr,
-            ld_site: remain.tr_site,
-            ld_loc: remain.tr_loc,
-          });
-          if (ld)
-            await locationDetailServiceInstance.update(
-              {
-                ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.tr_qty_chg) * Number(remain.tr_um_conv),
+//         if (remain.sod_type != 'M') {
+//           const ld = await locationDetailServiceInstance.findOne({
+//             ld_part: remain.tr_part,
+//             ld_lot: remain.tr_nbr,
+//             ld_site: remain.tr_site,
+//             ld_loc: remain.tr_loc,
+//           });
+//           if (ld)
+//             await locationDetailServiceInstance.update(
+//               {
+//                 ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.tr_qty_chg) * Number(remain.tr_um_conv),
 
-                last_modified_by: user_code,
-                last_modified_ip_adr: req.headers.origin,
-              },
-              { id: ld.id },
-            );
-        }
-        // else
-        //   await locationDetailServiceInstance.create({
-        //     ld_part: remain.tr_part,
-        //     ld_date: new Date(),
-        //     ld_lot: remain.tr_serial,
-        //     ld_site: remain.tr_site,
-        //     ld_loc: remain.tr_loc,
-        //     ld_qty_oh: -(Number(remain.tr_qty_loc) * Number(remain.tr_um_conv)),
-        //     created_by: user_code,
-        //     created_ip_adr: req.headers.origin,
-        //     last_modified_by: user_code,
-        //     last_modified_ip_adr: req.headers.origin,
-        //   });
-      }
-    }
-    const itemServiceInstance = Container.get(itemService);
-    return res.status(200).json({ message: 'deleted succesfully', data: true });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
-};
+//                 last_modified_by: user_code,
+//                 last_modified_ip_adr: req.headers.origin,
+//               },
+//               { id: ld.id },
+//             );
+//         }
+//         // else
+//         //   await locationDetailServiceInstance.create({
+//         //     ld_part: remain.tr_part,
+//         //     ld_date: new Date(),
+//         //     ld_lot: remain.tr_serial,
+//         //     ld_site: remain.tr_site,
+//         //     ld_loc: remain.tr_loc,
+//         //     ld_qty_oh: -(Number(remain.tr_qty_loc) * Number(remain.tr_um_conv)),
+//         //     created_by: user_code,
+//         //     created_ip_adr: req.headers.origin,
+//         //     last_modified_by: user_code,
+//         //     last_modified_ip_adr: req.headers.origin,
+//         //   });
+//       }
+//     }
+//     const itemServiceInstance = Container.get(itemService);
+//     return res.status(200).json({ message: 'deleted succesfully', data: true });
+//   } catch (e) {
+//     logger.error('🔥 error: %o', e);
+//     return next(e);
+//   }
+// };
 const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1657,7 +1662,7 @@ export default {
   inventoryOfSecurity,
   rctWo,
   issWo,
-  issSo,
+  //issSo,
   cycCnt,
   cycRcnt,
   findDayly,

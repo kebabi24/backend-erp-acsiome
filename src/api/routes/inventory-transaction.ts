@@ -23,7 +23,7 @@ export default (app: Router) => {
   route.post('/inventoryofsecurity', controller.inventoryOfSecurity);
   route.post('/rct-wo', controller.rctWo);
   route.post('/iss-wo', controller.issWo);
-  route.post('/iss-so', controller.issSo);
+  // route.post('/iss-so', controller.issSo);
   route.post('/cyc-cnt', controller.cycCnt);
   route.post('/cyc-rcnt', controller.cycRcnt);
   route.post('/dayly', controller.findDayly);
