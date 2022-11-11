@@ -3,6 +3,7 @@ import EmployeAvailabilityService from "../../services/employe-availability"
 import EmployeTimeService from "../../services/employe-time"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
+import { start } from "repl"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -105,7 +106,9 @@ const findByTime = async (req: Request, res: Response, next: NextFunction) => {
         for(let emp of employe) {
             const empTime = await empTimeServiceInstance.findOne({empt_code:emp.emp_addr, empt_date: new Date()})
             const stat = (empTime != null) ? empTime.empt_stat : null
-            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site, reason: stat})
+            const start =  (empTime != null) ? empTime.empt_start : null
+            const end = (empTime != null) ? empTime.empt_end : null
+            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site, reason: stat, timestart: start, timeend:end})
                 i = i + 1
 
         }

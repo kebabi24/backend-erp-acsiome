@@ -29,6 +29,8 @@ const EmployeTime = sequelize.define(
         empt_stat: Sequelize.STRING,
         empt_date: Sequelize.DATEONLY,
         empt_site: Sequelize.STRING,
+        empt_start: Sequelize.TIME,
+        empt_end:   Sequelize.TIME,
         
         empt_domain: {
             type: Sequelize.STRING,

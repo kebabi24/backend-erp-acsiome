@@ -15,14 +15,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             EmployeTimeService
         )
         const {  empDetails } = req.body
-        console.log(empDetails)
+      //  console.log(empDetails)
         for (let entry of empDetails) {
            // console.log(entry)
             const employe = await empTimeServiceInstance.findOne({empt_date: new Date(), empt_code:entry.emp_addr})
-            console.log("emp",employe)
+         //   console.log("emp",employe)
             if(employe) {
-                entry = { empt_code: entry.emp_addr,empt_stat:entry.reason,empt_date: new Date(),  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
-           console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
+                entry = { empt_code: entry.emp_addr,empt_stat:entry.reason,empt_date: new Date(),empt_start: entry.timestart, empt_end: entry.timeend,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+           //console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
                 await empTimeServiceInstance.update({...entry},{id: employe.id})
             }
             else {
