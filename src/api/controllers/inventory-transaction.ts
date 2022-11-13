@@ -1308,12 +1308,6 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: remain.ld_site,
         ld_loc: remain.ld_loc,
       });
-      if (ld) {
-        console.log('good');
-        console.log(ld.ld_part);
-      } else {
-        console.log('failed');
-      }
       item.tag_cnt_qty == undefined && (item.tag_cnt_qty = 0);
       await inventoryTransactionServiceInstance.create({
         tr_line: 0,
@@ -1358,29 +1352,34 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           ld_site: remain.ld_site,
           ld_loc: remain.ld_loc,
         });
-        if (ld)
+        if (ld) {
+          let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
+          console.log(Number(remain.tag_cnt_qty));
           await locationDetailServiceInstance.update(
             {
-              ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.tr_qty_chg) * Number(remain.tr_um_conv),
+              ld_qty_oh: Number(qty),
 
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
             },
             { id: ld.id },
           );
-        else
+        } else {
+          let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
+
           await locationDetailServiceInstance.create({
             ld_part: remain.tr_part,
             ld_date: new Date(),
             ld_lot: remain.ld_lot,
             ld_site: remain.ld_site,
             ld_loc: remain.ld_loc,
-            ld_qty_oh: Number(remain.tag_cnt_qty),
+            ld_qty_oh: qty,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
+        }
       } else {
         const ld = await locationDetailServiceInstance.findOne({
           ld_part: remain.ld_part,
@@ -1484,7 +1483,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
         });
 
         if (ld) {
-          let qty = Number(remain.tag_cnt_qty) >= 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
+          let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
           console.log(Number(remain.tag_cnt_qty));
           await locationDetailServiceInstance.update(
             {
@@ -1496,7 +1495,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
             { id: ld.id },
           );
         } else {
-          let qty = Number(remain.tag_cnt_qty) >= 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
+          let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
 
           await locationDetailServiceInstance.create({
             ld_part: remain.tr_part,

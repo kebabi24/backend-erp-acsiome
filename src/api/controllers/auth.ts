@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import argon2 from "argon2"
 import jwt from "jsonwebtoken"
+
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
@@ -29,6 +30,50 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             return res
                 .status(401)
                 .json({ message: "error password", data: null })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling login endpoint")
+    console.log(req.body)
+    try {
+        
+        const userServiceInstance = Container.get(UserService)
+
+        const data = req.body.data
+        const customer = await userServiceInstance.createCustomer(data)
+        
+        return res
+                .status(200)
+                .json({ message: "customer created", data: customer })
+
+       
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const getCustomerPhone = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling login endpoint")
+    console.log(req.body)
+    try {
+        
+        const userServiceInstance = Container.get(UserService)
+
+        const data = req.params.phone
+        const phone = await userServiceInstance.getPhone(data)
+        
+        return res
+                .status(200)
+                .json({ message: "phone results", data: phone })
+
+       
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -68,4 +113,6 @@ const verifypwd = async (req: Request, res: Response, next: NextFunction) => {
 export default {
     login,
     verifypwd,
+    createCustomer,
+    getCustomerPhone,
 }

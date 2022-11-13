@@ -5,6 +5,8 @@ import PosOrder from '../../services/pos-order';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import sequenceService from '../../services/sequence';
+import serviceMobile from '../../services/mobile-service';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
@@ -50,7 +52,11 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bkhServiceInstance = Container.get(BkhService);
-    const { detail, type } = req.body;
+    const SequenceServiceInstance = Container.get(sequenceService);
+    const ServiceInstance = Container.get(serviceMobile);
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'SR' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    const { detail, type, user } = req.body;
 
     for (const bank of detail) {
       await bankServiceInstance.update(
@@ -86,6 +92,25 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         bk_p010: bank.bk_p010,
         bk_p005: bank.bk_p005,
       });
+    }
+    if (type === 'O') {
+      const service = await ServiceInstance.create({
+        service_code: nbr,
+        service_period_activate_date: new Date(),
+        service_creation_date: new Date(),
+        role_code: user,
+        service_open: true,
+      });
+      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR' });
+    } else {
+      console.log(user);
+      const service = await ServiceInstance.update(
+        {
+          service_closing_date: new Date(),
+          service_open: false,
+        },
+        { role_code: user, service_open: true },
+      );
     }
     // console.log(bk)
     return res.status(201).json({ message: 'created succesfully', data: true });
