@@ -35,6 +35,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       customer: cart.customer,
       created_date: new Date(),
       usrd_site: cart.usrd_site,
+      loy_num: cart.loy_num,
+      disc_amt: cart.disc_amt,
+      del_comp: cart.del_comp,
+      site_loc: cart.site_loc,
     });
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;

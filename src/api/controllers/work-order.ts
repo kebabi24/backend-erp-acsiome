@@ -107,23 +107,42 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         let ps_parent = product.pt_bom_code;
 
         const ps = await psServiceInstance.find({ ps_parent });
-        // console.log(ps);
-        for (const pss of ps) {
-          // console.log(pss.ps_scrp_pct);
+        console.log(ps);
+        if (ps.length > 0) {
+          console.log('ps l dakhel f if', ps);
+
+          for (const pss of ps) {
+            // console.log(pss.ps_scrp_pct);
+            await workOrderDetailServiceInstance.create({
+              wod_nbr: nbr,
+              wod_lot: wOid.id,
+              wod_loc: product.pt_loc,
+              wod_part: pss.ps_comp,
+              wod_site: usrd_site,
+              wod_qty_req:
+                (parseFloat(pss.ps_qty_per) / (parseFloat(pss.ps_scrp_pct) / 100)) * parseFloat(product.pt_qty),
+              created_by: user_code,
+              created_ip_adr: req.headers.origin,
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            });
+          }
+        } else {
+          console.log('ps f else', ps);
           await workOrderDetailServiceInstance.create({
             wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
-            wod_part: pss.ps_comp,
+            wod_part: product.pt_part,
             wod_site: usrd_site,
-            wod_qty_req:
-              (parseFloat(pss.ps_qty_per) / (parseFloat(pss.ps_scrp_pct) / 100)) * parseFloat(product.pt_qty),
+            wod_qty_req: parseFloat(product.pt_qty),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
         }
+
         // console.log(product);
         const supp = product.suppliments;
         for (const s of supp) {
@@ -135,7 +154,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             wod_loc: s.pt_loc,
             wod_part: s_part,
             wod_site: usrd_site,
-            wod_qty_req: parseFloat(s.pt_net_wt),
+            wod_qty_req: parseFloat(s.pt_net_wt) * parseFloat(product.pt_qty),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -143,6 +162,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           });
         }
         const sauce = product.sauces;
+        console.log(sauce);
         for (const sa of sauce) {
           const sa_part = sa.pt_part;
           await workOrderDetailServiceInstance.create({
@@ -151,7 +171,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             wod_loc: sa.pt_loc,
             wod_part: sa_part,
             wod_site: usrd_site,
-            wod_qty_req: parseFloat(sa.pt_net_wt),
+            wod_qty_req: parseFloat(sa.pt_net_wt) * parseFloat(product.pt_qty),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
