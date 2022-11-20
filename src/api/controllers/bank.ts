@@ -5,6 +5,8 @@ import PosOrder from '../../services/pos-order';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import sequenceService from '../../services/sequence';
+import serviceMobile from '../../services/mobile-service';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
@@ -50,7 +52,11 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bkhServiceInstance = Container.get(BkhService);
-    const { detail, type } = req.body;
+    const SequenceServiceInstance = Container.get(sequenceService);
+    const ServiceInstance = Container.get(serviceMobile);
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'SR' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    const { detail, type, user } = req.body;
 
     for (const bank of detail) {
       await bankServiceInstance.update(
@@ -87,6 +93,25 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         bk_p005: bank.bk_p005,
       });
     }
+    if (type === 'O') {
+      const service = await ServiceInstance.create({
+        service_code: nbr,
+        service_period_activate_date: new Date(),
+        service_creation_date: new Date(),
+        role_code: user,
+        service_open: true,
+      });
+      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR' });
+    } else {
+      console.log(user);
+      const service = await ServiceInstance.update(
+        {
+          service_closing_date: new Date(),
+          service_open: false,
+        },
+        { role_code: user, service_open: true },
+      );
+    }
     // console.log(bk)
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -105,10 +130,10 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const { cart, type, user_site } = req.body;
+    const { cart, type, user_name } = req.body;
     console.log(cart);
-    console.log(user_site);
-    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_site });
+    console.log(user_name);
+    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_name });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
@@ -123,14 +148,15 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { bk_type: type, bk_user1: user_site },
+        { bk_type: type, bk_user1: user_name },
       );
-
+      // console.log(cart.order_code, user_name);
       await PosOrderServiceInstance.update(
         {
           status: 'P',
         },
-        { order_code: cart.order_code, bk_user1: user_site },
+
+        { order_code: cart.order_code, usrd_site: cart.usrd_site },
       );
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
@@ -149,10 +175,10 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const { mv, type, user_site } = req.body;
+    const { mv, type, user_name } = req.body;
 
-    console.log(user_site);
-    const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_site });
+    // console.log(user_name);
+    const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_name });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
@@ -172,7 +198,7 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
 
 const findAR = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  // console.log(req.body);
   logger.debug('Calling find by  all bank endpoint');
   try {
     const bankServiceInstance = Container.get(BankService);

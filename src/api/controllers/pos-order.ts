@@ -7,6 +7,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
+import SequenceService from '../../services/sequence';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -18,22 +19,31 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderProductSuppServiceInstance = Container.get(PosOrderProductSupp);
     const PosOrderProductSauceServiceInstance = Container.get(PosOrderProductSauce);
     const PosOrderProductIngServiceInstance = Container.get(PosOrderProductIng);
+    const SequenceServiceInstance = Container.get(SequenceService);
     const cart = req.body.cart;
+    console.log(cart);
     const total_price = req.body.cart.total_price;
     const products = req.body.cart.products;
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    // console.log(cart.products);
     await PosOrderServiceInstance.create({
-      order_code: cart.order_code,
+      order_code: nbr,
       total_price: cart.total_price,
       order_emp: cart.order_emp,
       status: cart.status,
       customer: cart.customer,
       created_date: new Date(),
       usrd_site: cart.usrd_site,
+      loy_num: cart.loy_num,
+      disc_amt: cart.disc_amt,
+      del_comp: cart.del_comp,
+      site_loc: cart.site_loc,
     });
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
       await PosOrderDetailServiceInstance.create({
-        order_code: cart.order_code,
+        order_code: nbr,
         pt_part: pt_part,
         pt_formule: pt_formule,
         pt_size: comment,
@@ -51,7 +61,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const ingredients = product.ingredients;
       for (const s of supp) {
         await PosOrderProductSuppServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: s.pt_part,
           pt_desc1: s.pt_desc1,
@@ -61,9 +71,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           usrd_site: cart.usrd_site,
         });
       }
+      // console.log(sauce);
       for (const sa of sauce) {
         await PosOrderProductSauceServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: sa.pt_part,
           pt_desc1: sa.pt_desc1,
@@ -75,7 +86,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       for (const i of ingredients) {
         await PosOrderProductIngServiceInstance.create({
-          order_code: cart.order_code,
+          order_code: nbr,
           pt_part: pt_part,
           pt_pt_part: i.spec_code,
           pt_desc1: i.pt_desc1,
@@ -86,6 +97,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
     }
+
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -113,6 +125,19 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const order = await PosOrderServiceInstance.find({});
+    return res.status(200).json({ message: 'fetched succesfully', data: order });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findAlll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const order = await PosOrderServiceInstance.findW({});
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -278,4 +303,5 @@ export default {
   findByOrd,
   update,
   deleteOne,
+  findAlll,
 };

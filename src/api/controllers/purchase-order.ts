@@ -35,7 +35,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(201).json({ message: 'created succesfully', data: po });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -115,7 +115,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -198,7 +198,84 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
     return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
+
+const createPosUnpp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const itemServiceInstance = Container.get(ItemService);
+    const taxeServiceInstance = Container.get(taxeService);
+    const { Site, purchaseOrder, po_blanket } = req.body;
+    // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    for (let entry of purchaseOrder) {
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
+      console.log(sequence);
+
+      //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
+      //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
+      let ent = {
+        po_category: 'PO',
+        po_site: Site,
+        po_ord_date: new Date(),
+        po_vend: entry.pt_vend,
+        po_stat: 'p',
+        po_curr: 'DA',
+        po_ex_rate: 1,
+        po_ex_rate1: 1,
+        po_blanket: po_blanket, // code_bank
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      const po = await purchaseOrderServiceInstance.create(ent);
+      console.log(po.po_nbr);
+      var line = 1;
+
+      var duedate = new Date();
+
+      // add a day
+      duedate.setDate(duedate.getDate() + 1);
+      const pt = await itemServiceInstance.findOne({ pt_part: entry.pt_part });
+      const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc });
+      console.log(pt.taxe);
+
+      let entr = {
+        pod_nbr: po.po_nbr,
+        pod_line: line,
+        pod_part: pt.pt_part,
+        pod_taxable: pt.pt_taxable,
+        pod_stat: 'p',
+        pod_tax_code: pt.pt_taxc,
+        pod_taxc: taxe.tx2_tax_pct,
+        pod_qty_ord: entry.pt_ord_qty,
+        pod_site: pt.pt_site,
+        pod_loc: pt.pt_loc,
+        pod_price: entry.pt_price,
+        pod_um: pt.pt_um,
+        pod_due_date: duedate,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await purchaseOrderDetailServiceInstance.create(entr);
+      line = line + 1;
+    }
+
+    return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
+  } catch (e) {
+    //#
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -228,7 +305,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -295,7 +372,7 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -377,7 +454,7 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -478,7 +555,7 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
     //#
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -526,7 +603,7 @@ const getProviderCA = async (req: Request, res: Response, next: NextFunction) =>
 
     return res.status(200).json({ message: 'fetched succesfully', data: results_head });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -547,7 +624,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
       data: { purchaseOrder, details },
     });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -566,7 +643,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
       data: pos,
     });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -585,7 +662,33 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
       data: pos,
     });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
+
+const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const pod_site = req.body.pod_site;
+  console.log(pod_site);
+  const details = [];
+  logger.debug('Calling find one  purchaseOrder endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const { id } = req.params;
+
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const detail = await purchaseOrderDetailServiceInstance.find({
+      pod_stat: 'v',
+      pod_site: pod_site,
+    });
+
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      detail,
+    });
+  } catch (e) {
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -606,7 +709,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -630,7 +733,7 @@ const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
     }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -659,7 +762,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     }
     return res.status(200).json({ message: 'fetched succesfully', data: purchaseOrder });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -680,7 +783,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
 
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -702,7 +805,7 @@ const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunc
 
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
-    logger.error('🔥 error: %o', e);
+    logger.error('ðŸ”¥ error: %o', e);
     return next(e);
   }
 };
@@ -723,4 +826,6 @@ export default {
   getProviderBalance,
   getProviderCA,
   createPosUnp,
+  getPodRec,
+  createPosUnpp,
 };

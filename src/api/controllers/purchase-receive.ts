@@ -222,6 +222,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
       await purchaseOrderDetailServiceInstance.update(
         {
           pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(po.pod_qty_rcvd),
+          pod_stat: 'r',
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },

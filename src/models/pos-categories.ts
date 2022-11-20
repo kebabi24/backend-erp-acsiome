@@ -21,6 +21,7 @@ const Categories = sequelize.define(
     category_name: Sequelize.STRING,
     category_img: Sequelize.STRING,
     rang: Sequelize.INTEGER,
+    direct: Sequelize.BOOLEAN,
   },
   {
     tableName: 'bb_pos_category',

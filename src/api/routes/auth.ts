@@ -7,5 +7,7 @@ export default (app: Router) => {
     app.use("/auth", route)
 
     route.post("/login", controller.login)
+    route.get("/getPhone/:phone", controller.getCustomerPhone)
     route.post("/verifypwd", controller.verifypwd)
+    route.post("/createCustomer", controller.createCustomer)
 }

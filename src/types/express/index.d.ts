@@ -132,5 +132,6 @@ declare global {
     export type posOrderProductIngModel = S.Model;
     export type bkhModel = S.Model;
     export type emplyeTimeModel = S.Model;
+    export type deliveryModel = S.Model;
   }
 }
