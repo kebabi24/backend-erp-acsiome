@@ -169,6 +169,53 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const itemServiceInstance = Container.get(ItemService);
+
+   if(req.body.usrd_site == "*") {
+    var orders = await PosOrderDetailServiceInstance.findspec({
+      where: { created_date: req.body.created_date },
+      attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],[Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt']],
+      group: ['pt_part', 'usrd_site'],
+      raw: true,
+    });
+   } else {
+    var  orders = await PosOrderDetailServiceInstance.findspec({
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],[Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt']],
+      group: ['pt_part', 'usrd_site'],
+      raw: true,
+    });
+  }
+    //console.log(orders);
+    let result = [];
+    var i = 1;
+    for (let ord of orders) {
+      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      result.push({
+        id: i,
+        site:ord.usrd_site,
+        part: ord.pt_part,
+        desc1: items.pt_desc1,
+        bom: items.pt_bom_code,
+        ord_qty: ord.total_qty,
+        prod_qty: ord.total_qty,
+        amt: ord.total_amt,
+      });
+      i = i + 1;
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 /*const locationDetails = await locationDetailServiceInstance.findSpecial({
         where: {
           ld_part: item.pt_part,
@@ -227,6 +274,7 @@ export default {
   findAll,
   findBy,
   findSumQty,
+  findSumAmt,
   findByOrd,
   update,
   deleteOne,
