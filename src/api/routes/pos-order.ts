@@ -6,6 +6,7 @@ const route = Router();
 export default (app: Router) => {
   app.use('/pos-order', route);
 
+  route.get("/findw", controller.findAlll);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.get('/:id', controller.findOne);
@@ -16,5 +17,5 @@ export default (app: Router) => {
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/findorder', controller.findByOrd);
-  route.get('/findw', controller.findAlll);
+  
 };

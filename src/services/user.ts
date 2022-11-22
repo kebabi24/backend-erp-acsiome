@@ -54,8 +54,10 @@ export default class UserService {
         }
     }
     public async updated(data: any, query: any): Promise<any> {
+        const usrd_pwd = await argon2.hash(data.usrd_pwd)
+
         try {
-            const user = await this.userModel.update(data, {
+            const user = await this.userModel.update({...data,usrd_pwd} ,{
                 where: query,
             })
             this.logger.silly("update one tool mstr")
