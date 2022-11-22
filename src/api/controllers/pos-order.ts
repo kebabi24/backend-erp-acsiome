@@ -7,7 +7,9 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
+import CodeService from '../../services/code';
 import SequenceService from '../../services/sequence';
+import { isNull } from 'lodash';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -137,7 +139,7 @@ const findAlll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all order endpoint');
   try {
-    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+    
     const PosOrderServiceInstance = Container.get(PosOrder);
     const order = await PosOrderServiceInstance.findW({});
     return res.status(200).json({ message: 'fetched succesfully', data: order });
@@ -203,6 +205,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
+    const codeServiceInstance = Container.get(CodeService);
 
    if(req.body.usrd_site == "*") {
     var orders = await PosOrderDetailServiceInstance.findspec({
@@ -224,6 +227,11 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+
+      const parttypes = await codeServiceInstance.findOne({code_fldname: "pt_part_type" , code_value: items.pt_part_type})
+      const groups = await codeServiceInstance.findOne({code_fldname: "pt_group" , code_value: items.pt_group})
+      const promos = await codeServiceInstance.findOne({code_fldname: "pt_promo" , code_value: items.pt_promo})
+     // console.log(parttypes,groups,promos)
       result.push({
         id: i,
         site:ord.usrd_site,
@@ -233,6 +241,10 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         ord_qty: ord.total_qty,
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
+        parttype: (isNull(parttypes)) ?  null : parttypes.code_cmmt ,
+        group: (isNull(groups)) ?  null : groups.code_cmmt ,
+        promo: (isNull(promos))?  null : promos.code_cmmt,
+        size: items.pt_size,
       });
       i = i + 1;
     }
