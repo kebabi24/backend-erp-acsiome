@@ -679,7 +679,7 @@ const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
 
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const detail = await purchaseOrderDetailServiceInstance.find({
-      pod_stat: 'v',
+      pod_stat: 'V',
       pod_site: pod_site,
     });
 
@@ -756,7 +756,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const pos = await purchaseOrderDetailServiceInstance.find({ pod_nbr: purchase.po_nbr });
     for (const po of pos) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
-        { pod_status: req.body.po_stat, last_modified_by: user_code },
+        { pod_stat: req.body.po_stat, last_modified_by: user_code },
         { id: po.id },
       );
     }
