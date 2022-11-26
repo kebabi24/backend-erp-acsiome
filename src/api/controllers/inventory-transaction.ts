@@ -16,6 +16,7 @@ import moment from 'moment';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import SaleOrderService from '../../services/saleorder';
+import MobileService from '../../services/mobile-service';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1066,14 +1067,15 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.debug('Calling update one  code endpoint');
   try {
-    const { detail, it } = req.body;
+    const { detail, user } = req.body;
     // console.log(detail);
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(itemService);
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
-
+    const service = Container.get(MobileService);
+    const currentService = await service.findOne({ role_code: user, service_open: true });
     for (const item of detail) {
       console.log(detail);
       // console.log('isswo', item.tr_part, item.tr_loc, item.tr_site);
@@ -1103,13 +1105,13 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         );
         await inventoryTransactionServiceInstance.create({
           ...item,
-          ...it,
-          tr_gl_date: it,
+          tr_gl_date: currentService.service_period_activate_date,
           tr_qty_loc: -1 * Number(item.tr_qty_loc),
           tr_qty_chg: -1 * Number(item.tr_qty_loc),
           tr_loc_begin: Number(ld.ld_qty_oh),
           tr_type: 'ISS-WO',
           tr_date: new Date(),
+          tr_effdate: currentService.service_period_activate_date,
           tr_price: sct.sct_mtl_tl,
           tr_mtl_std: sct.sct_mtl_tl,
           tr_lbr_std: sct.sct_lbr_tl,
