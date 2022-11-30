@@ -133,5 +133,8 @@ declare global {
     export type bkhModel = S.Model;
     export type emplyeTimeModel = S.Model;
     export type deliveryModel = S.Model;
+    export type complaintModel = S.Model;
+    export type complaintDetailsModel = S.Model;
+    export type SatisfactionModel = S.Model;
   }
 }
