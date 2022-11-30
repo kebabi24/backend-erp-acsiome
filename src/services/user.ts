@@ -100,11 +100,11 @@ export default class UserService {
   public async createCustomer(data: any): Promise<any> {
     try {
       const customerAdr = await this.addressModel.create({
-        ad_attn: data.name,
+        ad_name: data.name,
         ad_addr: data.phone,
         ad_format: data.age,
         ad_ref: data.gender,
-        ad_name: data.commune,
+        ad_line1: data.commune,
         ad_ext: data.email,
       });
 
