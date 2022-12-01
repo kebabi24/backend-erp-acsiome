@@ -170,14 +170,13 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
 
-    console.log(req.body);
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
       attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
       group: ['pt_part', 'usrd_site'],
       raw: true,
     });
-    console.log(orders);
+
     let result = [];
     var i = 1;
     for (let ord of orders) {
