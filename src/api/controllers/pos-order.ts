@@ -172,19 +172,52 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
 
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
-      attributes: ['pt_part', 'usrd_site', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
-      group: ['pt_part', 'usrd_site'],
+      attributes: ['pt_part', 'usrd_site','pt_desc1', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
+      group: ['pt_part', 'usrd_site','pt_desc1'],
       raw: true,
     });
 
     let result = [];
-    var i = 1;
+     var i = 1;
+    for (let ord of orders) {
+    //  const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      result.push({
+        id: i,
+        part: ord.pt_part,
+        desc1: ord.pt_desc1,
+        ord_qty: ord.total_qty,
+      });
+      i = i + 1;
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const itemServiceInstance = Container.get(ItemService);
+
+    const orders = await PosOrderDetailServiceInstance.findspec({
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      attributes: ['pt_part', 'usrd_site','pt_desc1', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
+      group: ['pt_part', 'usrd_site','pt_desc1'],
+      raw: true,
+    });
+
+    let result = [];
+     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
       result.push({
         id: i,
         part: ord.pt_part,
-        desc1: items.pt_desc1,
+        desc1: ord.pt_desc1,
         bom: items.pt_bom_code,
         ord_qty: ord.total_qty,
         prod_qty: ord.total_qty,
@@ -197,6 +230,7 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
@@ -312,6 +346,7 @@ export default {
   findAll,
   findBy,
   findSumQty,
+  findSumQtyPs,
   findSumAmt,
   findByOrd,
   update,

@@ -327,6 +327,15 @@ export default async ({ expressApp }) => {
     foreignKey: 'rqd_part',
     targetKey: 'pt_part',
   });
+  
+  require('../models/item').default.hasOne(require('../models/pos-order-detail-product').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/pos-order-detail-product').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    targetKey: 'pt_part',
+  });
   require('../models/provider').default.hasOne(require('../models/vendor-proposal').default, {
     foreignKey: 'vp_vend',
     sourceKey: 'vd_addr',
