@@ -49,15 +49,16 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling Create sequence endpoint');
   try {
+    const { detail, type, user } = req.body;
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bkhServiceInstance = Container.get(BkhService);
     const SequenceServiceInstance = Container.get(sequenceService);
     const ServiceInstance = Container.get(serviceMobile);
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'SR' });
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'SR', seq_profile: user });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
-    const { detail, type, user } = req.body;
 
+    console.log(user);
     for (const bank of detail) {
       await bankServiceInstance.update(
         {
@@ -101,7 +102,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         role_code: user_code,
         service_open: true,
       });
-      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR' });
+      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR', seq_profile: user });
     } else {
       console.log(user);
       const service = await ServiceInstance.update(

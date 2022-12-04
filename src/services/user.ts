@@ -112,6 +112,7 @@ export default class UserService {
         cm_db: data.promo_code,
         cm_addr: data.phone,
         cm_disc_pct: data.discount_pct,
+        cm_sort: data.name,
       });
 
       this.logger.silly('created new customer', customerAdr, customer);

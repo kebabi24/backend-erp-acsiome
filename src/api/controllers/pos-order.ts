@@ -41,11 +41,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const cart = req.body.cart;
     // console.log(cart);
     const detail = [];
-    const currentService = await service.findOne({ role_code: cart.usrd_name, service_open: true });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true });
     // console.log(currentService);
     // console.log(cart);
     const products = req.body.cart.products;
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', seq_profile: cart.usrd_name });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     // console.log(cart.products);
     await PosOrderServiceInstance.create({
@@ -61,7 +61,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       del_comp: cart.del_comp,
       site_loc: cart.site_loc,
     });
-    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP' });
+    await sequence.update(
+      { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
+      { seq_seq: 'OP', seq_profile: cart.usrd_name },
+    );
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: nbr });
     for (const product of products) {
       const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
@@ -328,8 +331,9 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all order endpoint');
   try {
     const { user } = req.body;
+    const { user_code } = req.headers;
     const service = Container.get(mobileService);
-    const currentService = await service.findOne({ role_code: user, service_open: true });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true });
     console.log(currentService);
 
     const PosOrderServiceInstance = Container.get(PosOrder);
@@ -381,15 +385,20 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
 
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
-      attributes: ['pt_part', 'usrd_site','pt_desc1', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
-      group: ['pt_part', 'usrd_site','pt_desc1'],
+      attributes: [
+        'pt_part',
+        'usrd_site',
+        'pt_desc1',
+        [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+      ],
+      group: ['pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
 
     let result = [];
-     var i = 1;
+    var i = 1;
     for (let ord of orders) {
-    //  const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      //  const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
       result.push({
         id: i,
         part: ord.pt_part,
@@ -414,13 +423,18 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
 
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
-      attributes: ['pt_part', 'usrd_site','pt_desc1', [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty']],
-      group: ['pt_part', 'usrd_site','pt_desc1'],
+      attributes: [
+        'pt_part',
+        'usrd_site',
+        'pt_desc1',
+        [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+      ],
+      group: ['pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
 
     let result = [];
-     var i = 1;
+    var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
       result.push({
