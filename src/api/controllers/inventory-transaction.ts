@@ -1553,6 +1553,12 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
       raw: true,
     });
+
+for(let part of parts) {
+    const searchIndex = tr.findIndex((tr_part,tr_site,tr_serial) => tr_part==part.tr_part && tr_site == part.tr_site && tr_serial==part.tr_serial);
+
+    console.log(searchIndex)
+}
   return res.status(200).json({ message: 'fetched succesfully', data: tr });
 } catch (e) {
   logger.error('🔥 error: %o', e);
