@@ -1549,17 +1549,45 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
         'tr_serial',
         [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
         [Sequelize.fn('sum', Sequelize.col('tr_loc_begin')), 'qtybeg'],
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_chg')), 'qtychg'], 
       ],
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
       raw: true,
     });
 
+    let result = []
+   var i = 1
 for(let part of parts) {
-    const searchIndex = tr.findIndex((tr_part,tr_site,tr_serial) => tr_part==part.tr_part && tr_site == part.tr_site && tr_serial==part.tr_serial);
+// console.log(part)
+const items = await itemServiceInstance.findOnedesc({ pt_part: part.tr_part  });
+  const cyccnt = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="CYC-CNT");
+  const cycrcnt = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="CYC-RCNT");
+  const rctpo = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="RCT-PO");
+  const issso = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="ISS-SO");
+  const isswo = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="ISS-WO");
 
-    console.log(searchIndex)
+  let qtyso = 0;
+  let qtywo = 0;
+  (issso >= 0 ) ? qtyso = -Number(tr[issso].qty) : 0,
+  (isswo >= 0 ) ? qtywo = -Number(tr[isswo].qty) : 0
+
+
+  result.push({
+    id: i,
+    part: part.tr_part,
+    desc: items.pt_desc1,
+    serial: part.serial,
+    qtyinvbeg: (cyccnt>=0) ? Number(tr[cyccnt].qtybeg) : 0 ,
+    qtyinvdeb: (cyccnt>=0) ? Number(tr[cyccnt].qtychg) : 0,
+    qtyrec: (rctpo>=0) ? Number(tr[rctpo].qty) : 0 ,
+    qtyiss:  Number(qtyso) + Number(qtywo) ,
+    qtyrest: (cycrcnt>=0) ? Number(tr[cycrcnt].qtybeg) : 0 ,
+    qtyinvfin: (cycrcnt>=0) ? Number(tr[cycrcnt].qtychg) : 0  ,
+  });
+  i = i + 1;
+
 }
-  return res.status(200).json({ message: 'fetched succesfully', data: tr });
+  return res.status(200).json({ message: 'fetched succesfully', data: result });
 } catch (e) {
   logger.error('🔥 error: %o', e);
   return next(e);
