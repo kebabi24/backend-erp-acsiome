@@ -192,6 +192,151 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+
+// CONTROLLERS FOR : RECLAMATION + SATISFACTION 
+
+const createComplaint = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const{user_code} = req.headers
+
+  logger.debug("Calling Create customer endpoint with body: %o", req.body)
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+      const complaintData = req.body.complaintData
+      const customerData = req.body.customerData
+      const complaintDetailsData = req.body.complaintDetailsData
+      console.log(req.body)
+      // created_by:user_code
+      let today = new Date();
+      let now =  today.getFullYear()  +'-'+ (today.getMonth()+1)  +'-'+ today.getDate()   +' '+today.getHours()+':'+String(today.getMinutes()).padStart(2,"0")+':'+String(today.getSeconds()).padStart(2,"0");
+      let complaint_date = now+'.63682+01'
+      let hash = Math.floor(1000 + Math.random() * 9000);
+      let complaint_code = Date.now()+'-code-'+hash.toString()
+
+      // CREATE COMPLAINT 
+      const complaint = await customerServiceInstance.createComplaint({...complaintData , complaint_date :complaint_date, complaint_code:complaint_code ,status:'open'})
+      
+      // CREATE COMPLAINT DETAILS 
+      complaintDetailsData.forEach(detail => {
+          detail.complaint_code = complaint_code
+      });
+      const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
+
+      // CREATE CUSTOMER IF EXIST 
+      if( Object.keys(customerData).length > 0){
+          const customer = await customerServiceInstance.createCustomer(customerData)
+      }
+      return res
+          .status(201)
+          .json({ message: "created succesfully", data: { complaint } })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+
+}
+
+const findCustomer = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find one  customer endpoint")
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+      
+      const {phone} = req.params
+      const customer = await customerServiceInstance.findCustomer(phone)
+      console.log(customer)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: customer  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
+const findOder = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find one  order endpoint")
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+      
+      const {order_code} = req.params
+      const order = await customerServiceInstance.findOrder(order_code)
+      console.log(order)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: order  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
+const getReclamationCauses = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling get reclamation causes endpoint")
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+   
+      const causes = await customerServiceInstance.getReclamationCauses()
+      console.log(causes)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: causes  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
+const createSatisfaction = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const{user_code} = req.headers
+
+  logger.debug("Calling createSatisfaction endpoint with body: %o", req.body)
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+
+      const satisfactionData = req.body.satisfactionData
+      const complaintDetailsData = req.body.complaintDetailsData
+      const order_code = satisfactionData.order_code
+
+      // created_by:user_code
+      let today = new Date();
+      let now =  today.getFullYear()  +'-'+ (today.getMonth()+1)  +'-'+ today.getDate()   +' '+today.getHours()+':'+String(today.getMinutes()).padStart(2,"0")+':'+String(today.getSeconds()).padStart(2,"0");
+      let hash = Math.floor(1000 + Math.random() * 9000);
+
+      let satisfaction_date = now+'.63682+01'
+      let satisfaction_code = Date.now()+'-code-'+hash.toString()
+
+      // CREATE SATISFACTION 
+      const satisfaction = await customerServiceInstance.createSatisfaction({...satisfactionData , satisfaction_date :satisfaction_date, satisfaction_code:satisfaction_code })
+      
+      // THERE IS A COMPLAINT 
+      if( complaintDetailsData.length > 0){
+          // CREATE COMPLAINT 
+          const complaint = await customerServiceInstance.createComplaint({ complaint_date :satisfaction_date, complaint_code:satisfaction_code ,status:'open' , order_code:order_code })
+          // CREATE COMPLAINT DETAILS 
+          complaintDetailsData.forEach(detail => {
+              detail.complaint_code = satisfaction_code
+          });
+          const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
+      }
+
+     
+      return res
+          .status(201)
+          .json({ message: "created succesfully", data: { satisfaction } })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+
+}
+
+
+
 export default {
   create,
   findOne,
@@ -202,4 +347,9 @@ export default {
   getSolde,
   deleteOne,
   createCmPos,
+  createComplaint,
+  findCustomer,
+  findOder,
+  getReclamationCauses,
+  createSatisfaction,
 };

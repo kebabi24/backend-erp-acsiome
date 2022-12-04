@@ -158,9 +158,14 @@ export default async ({ expressApp }) => {
       { name: 'itemModel', model: require('../models/item').default },
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
-      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
+      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+
+      { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
+      { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
+      { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -751,7 +756,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

@@ -37,7 +37,7 @@ export default class posOrderService {
     try {
       const orders = await this.posOrderModel.findAll({
         order: [['createdAt', 'DESC']],
-        where: { status: 'N', created_date: new Date() },
+        where: query,
       });
       this.logger.silly('find All orders mstr');
       return orders;

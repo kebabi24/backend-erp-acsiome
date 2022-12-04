@@ -98,7 +98,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         service_code: nbr,
         service_period_activate_date: new Date(),
         service_creation_date: new Date(),
-        role_code: user,
+        role_code: user_code,
         service_open: true,
       });
       await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR' });
@@ -109,7 +109,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           service_closing_date: new Date(),
           service_open: false,
         },
-        { role_code: user, service_open: true },
+        { role_code: user_code, service_open: true },
       );
     }
     // console.log(bk)
