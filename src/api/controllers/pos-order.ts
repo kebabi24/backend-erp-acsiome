@@ -14,6 +14,10 @@ import workOrderService from '../../services/work-order';
 import workOrderDetailService from '../../services/work-order-detail';
 import psService from '../../services/ps';
 import mobileService from '../../services/mobile-service';
+import inventoryTransactionService from '../../services/inventory-transaction';
+import locationDetailService from '../../services/location-details';
+import costSimulationService from '../../services/cost-simulation';
+import { type } from 'os';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -30,11 +34,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const psServiceInstance = Container.get(psService);
     const SequenceServiceInstance = Container.get(SequenceService);
     const service = Container.get(mobileService);
-
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(ItemService);
     const cart = req.body.cart;
-    console.log(cart);
+    // console.log(cart);
+    const detail = [];
     const currentService = await service.findOne({ role_code: cart.usrd_name, service_open: true });
-    console.log(currentService);
+    // console.log(currentService);
     // console.log(cart);
     const products = req.body.cart.products;
     const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
@@ -92,11 +100,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const wo_bom_code = wOid.wo_bom_code;
         const ps = await psServiceInstance.find({ ps_parent: wo_bom_code });
         for (const pss of ps) {
-          // console.log(pss.ps_scrp_pct);
-          await workOrderDetailServiceInstance.create({
+          const elem_wod = {
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
+            wod_price: product.pt_price,
             wod_part: pss.ps_comp,
             wod_site: cart.usrd_site,
             wod_qty_req: ((pss.ps_qty_per / (pss.ps_scrp_pct / 100)) * product.pt_qty).toFixed(2),
@@ -104,21 +112,26 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
-          });
+          };
+          await workOrderDetailServiceInstance.create(elem_wod);
+          detail.push(elem_wod);
         }
       } else {
-        await workOrderDetailServiceInstance.create({
+        const elem_wod = {
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
           wod_loc: product.pt_loc,
           wod_part: product.pt_part,
+          wod_price: product.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: product.pt_qty,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
-        });
+        };
+        await workOrderDetailServiceInstance.create(elem_wod);
+        detail.push(elem_wod);
       }
       const supp = product.suppliments;
       const sauce = product.sauces;
@@ -134,18 +147,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_price: s.pt_price,
           usrd_site: cart.usrd_site,
         });
-        await workOrderDetailServiceInstance.create({
+        const elem_wod = {
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
           wod_loc: s.pt_loc,
           wod_part: s.pt_part,
+          wod_price: s.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: s.pt_net_wt * product.pt_qty,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
-        });
+        };
+        await workOrderDetailServiceInstance.create(elem_wod);
+        detail.push(elem_wod);
       }
       // console.log(sauce);
       for (const sa of sauce) {
@@ -159,18 +175,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_price: sa.pt_price,
           usrd_site: cart.usrd_site,
         });
-        await workOrderDetailServiceInstance.create({
+        const elem_wod = {
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
           wod_loc: sa.pt_loc,
           wod_part: sa.pt_part,
+          wod_price: sa.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: sa.pt_net_wt * product.pt_qty,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
-        });
+        };
+        await workOrderDetailServiceInstance.create(elem_wod);
+        detail.push(elem_wod);
       }
       for (const i of ingredients) {
         await PosOrderProductIngServiceInstance.create({
@@ -194,6 +213,94 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           { wod_nbr: currentProduct.order_code, wod_lot: wOid.id, wod_part: i.spec_code },
         );
       }
+    }
+
+    for (const item of detail) {
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_part: item.wod_part,
+        sct_site: item.wod_site,
+        sct_sim: 'STDCG',
+      });
+
+      const pt = await itemServiceInstance.findOne({ pt_part: item.wod_part });
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: item.wod_part,
+        ld_site: item.wod_site,
+        ld_loc: item.wod_loc,
+      });
+      if (ld) {
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.wod_qty_req),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+        await inventoryTransactionServiceInstance.create({
+          tr_nbr: item.wod_nbr,
+          tr_part: item.wod_part,
+          tr_lot: item.wod_lot,
+          tr_loc: item.wod_loc,
+          tr_site: item.wod_site,
+          tr_um_conv: 1,
+          tr_gl_date: currentService.service_period_activate_date,
+          tr_qty_loc: -1 * Number(item.wod_qty_req),
+          tr_qty_chg: -1 * Number(item.wod_qty_req),
+          tr_loc_begin: Number(ld.ld_qty_oh),
+          tr_type: 'ISS-WO',
+          tr_date: new Date(),
+          tr_effdate: currentService.service_period_activate_date,
+          tr_price: sct.sct_mtl_tl,
+          tr_mtl_std: sct.sct_mtl_tl,
+          tr_lbr_std: sct.sct_lbr_tl,
+          tr_bdn_std: sct.sct_bdn_tl,
+          tr_ovh_std: sct.sct_ovh_tl,
+          tr_sub_std: sct.sct_sub_tl,
+          tr_prod_line: pt.pt_prod_line,
+          tr_gl_amt: Number(item.wod_qty_req) * Number(item.wod_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+      }
+      // if (!isNaN(item.wodid)) {
+      //   const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
+      //   if (wod) {
+      //     var bool = false;
+
+      //     if (
+      //       Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
+      //       0
+      //     ) {
+      //       bool = true;
+      //     }
+      //     await workOrderDetailServiceInstance.update(
+      //       {
+      //         wod__qadl01: true ? bool : false,
+      //         wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //         last_modified_by: user_code,
+      //         last_modified_ip_adr: req.headers.origin,
+      //       },
+      //       { id: wod.id },
+      //     );
+      //   }
+      // } else {
+      //   await workOrderDetailServiceInstance.create({
+      //     wod_nbr: it.tr_nbr,
+      //     wod_lot: it.tr_lot,
+      //     wod_part: item.tr_part,
+      //     wod_qty_req: 0,
+      //     wod_qty_iss: item.tr_qty_loc,
+      //     wod_site: item.tr_site,
+      //     wod_loc: item.tr_loc,
+      //     wod_um: item.tr_um,
+      //     wod_serial: item.tr_serial,
+      //     wod_ref: item.tr_ref,
+      //     wod__qadl01: true,
+      //   });
+      // }
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
