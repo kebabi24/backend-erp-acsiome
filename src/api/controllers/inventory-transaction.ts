@@ -1521,13 +1521,12 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-const findDayly = async (req: Request, res: Response, next: NextFunction) => {
+const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
-    console.log(req.body);
     const parts = await inventoryTransactionServiceInstance.findSpecial({
       where: {
         tr_site: req.body.tr_site,
@@ -1537,11 +1536,101 @@ const findDayly = async (req: Request, res: Response, next: NextFunction) => {
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
       raw: true,
     });
-    console.log(parts);
+    const tr = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+      },
+      attributes: [
+        'tr_part',
+        'tr_site',
+        'tr_effdate',
+        'tr_type',
+        'tr_serial',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+        [Sequelize.fn('sum', Sequelize.col('tr_loc_begin')), 'qtybeg'],
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_chg')), 'qtychg'], 
+      ],
+      group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
+      raw: true,
+    });
+
+    let result = []
+   var i = 1
+for(let part of parts) {
+// console.log(part)
+const items = await itemServiceInstance.findOnedesc({ pt_part: part.tr_part  });
+  const cyccnt = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="CYC-CNT");
+  const cycrcnt = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="CYC-RCNT");
+  const rctpo = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="RCT-PO");
+  const issso = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="ISS-SO");
+  const isswo = tr.findIndex(({tr_site,tr_part,tr_type,tr_serial}) => tr_site== part.tr_site && tr_part==part.tr_part && tr_serial==part.tr_serial && tr_type=="ISS-WO");
+
+  let qtyso = 0;
+  let qtywo = 0;
+  (issso >= 0 ) ? qtyso = -Number(tr[issso].qty) : 0,
+  (isswo >= 0 ) ? qtywo = -Number(tr[isswo].qty) : 0
+
+
+  result.push({
+    id: i,
+    part: part.tr_part,
+    desc: items.pt_desc1,
+    serial: part.serial,
+    qtyinvbeg: (cyccnt>=0) ? Number(tr[cyccnt].qtybeg) : 0 ,
+    qtyinvdeb: (cyccnt>=0) ? Number(tr[cyccnt].qtychg) : 0,
+    qtyrec: (rctpo>=0) ? Number(tr[rctpo].qty) : 0 ,
+    qtyiss:  Number(qtyso) + Number(qtywo) ,
+    qtyrest: (cycrcnt>=0) ? Number(tr[cycrcnt].qtybeg) : 0 ,
+    qtyinvfin: (cycrcnt>=0) ? Number(tr[cycrcnt].qtychg) : 0  ,
+  });
+  i = i + 1;
+
+}
+  return res.status(200).json({ message: 'fetched succesfully', data: result });
+} catch (e) {
+  logger.error('🔥 error: %o', e);
+  return next(e);
+}
+};
+
+const findDayly = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const itemServiceInstance = Container.get(itemService);
+    const parts = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+      },
+      attributes: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
+      group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
+      raw: true,
+    });
+    const tr = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+      },
+      attributes: [
+        'tr_part',
+        'tr_site',
+        'tr_effdate',
+        'tr_type',
+        'tr_serial',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+        [Sequelize.fn('sum', Sequelize.col('tr_loc_begin')), 'qtybeg'],
+      ],
+      group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
+      raw: true,
+    });
+   
     let result = [];
     var i = 1;
     for (let part of parts) {
-      const item = await itemServiceInstance.findOne({ pt_part: part.tr_part });
+  //    const item = await itemServiceInstance.findOne({ pt_part: part.tr_part });
 
       const invbeg = await inventoryTransactionServiceInstance.findOne({
         tr_part: part.tr_part,
@@ -1572,7 +1661,6 @@ const findDayly = async (req: Request, res: Response, next: NextFunction) => {
       });
       const rec = rctpos[0] != null ? rctpos[0].qtyrec : 0;
 
-      console.log('rec', rec);
       const isswos = await inventoryTransactionServiceInstance.findSpecial({
         where: {
           tr_site: part.tr_site,
@@ -1627,7 +1715,7 @@ const findDayly = async (req: Request, res: Response, next: NextFunction) => {
       result.push({
         id: i,
         part: part.tr_part,
-        desc: item.pt_desc1,
+//        desc: item.pt_desc1,
         serial: part.serial,
         qtyinvbeg: invbeg ? Number(invbeg.tr_loc_begin) : 0,
         qtyinvdeb: invbeg ? Number(invbeg.tr_qty_chg) : 0,
@@ -1638,7 +1726,7 @@ const findDayly = async (req: Request, res: Response, next: NextFunction) => {
       });
       i = i + 1;
     }
-    return res.status(200).json({ message: 'fetched succesfully', data: result });
+    return res.status(200).json({ message: 'fetched succesfully', data: {  result,  tr} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1667,4 +1755,6 @@ export default {
   cycCnt,
   cycRcnt,
   findDayly,
+  findDayly1,
+
 };
