@@ -576,10 +576,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const { user_code } = req.headers;
     const service = Container.get(mobileService);
     const currentService = await service.findOne({ role_code: user_code, service_open: true });
+    const { Op } = require('sequelize');
     console.log(currentService);
 
     const PosOrderServiceInstance = Container.get(PosOrder);
     const order = await PosOrderServiceInstance.find({
+      status: { [Op.notLike]: 'P' },
       created_date: currentService.service_period_activate_date,
     });
 
