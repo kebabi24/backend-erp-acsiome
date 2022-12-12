@@ -34,6 +34,9 @@ const OrderPosProductDetail = sequelize.define(
     pt_desc1: {
       type: Sequelize.STRING,
     },
+    pt_loc: {
+      type: Sequelize.STRING,
+    },
     pt_size: {
       type: Sequelize.STRING,
     },

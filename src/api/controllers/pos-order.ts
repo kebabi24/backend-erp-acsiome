@@ -17,6 +17,9 @@ import mobileService from '../../services/mobile-service';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
+import { PosPrinter, PosPrintData, PosPrintOptions } from 'electron-pos-printer';
+import * as path from 'path';
+
 import { type } from 'os';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -39,54 +42,140 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(ItemService);
     const cart = req.body.cart;
-    // console.log(cart);
-    const detail = [];
-    const currentService = await service.findOne({ role_code: user_code, service_open: true });
-    // console.log(currentService);
-    // console.log(cart);
     const products = req.body.cart.products;
+    const editCart = req.body.editCart;
+    const detail = [];
+    let update: boolean = false;
+    const currentService = await service.findOne({ role_code: user_code, service_open: true });
     const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', seq_profile: cart.usrd_name });
-    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
-    // console.log(cart.products);
-    await PosOrderServiceInstance.create({
-      order_code: nbr,
-      total_price: cart.total_price,
-      order_emp: cart.order_emp,
-      status: cart.status,
-      customer: cart.customer,
-      created_date: currentService.service_period_activate_date,
-      usrd_site: cart.usrd_site,
-      loy_num: cart.loy_num,
-      disc_amt: cart.disc_amt,
-      del_comp: cart.del_comp,
-      site_loc: cart.site_loc,
-    });
-    await sequence.update(
-      { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
-      { seq_seq: 'OP', seq_profile: cart.usrd_name },
-    );
-    const currentProduct = await PosOrderServiceInstance.findOne({ order_code: nbr });
-    for (const product of products) {
-      const { pt_part, pt_formule, pt_qty, pt_price, comment, pt_desc1, pt_bom_code, pt_article, line } = product;
-      await PosOrderDetailServiceInstance.create({
-        order_code: currentProduct.order_code,
-        pt_part: pt_part,
-        pt_formule: pt_formule,
-        pt_size: comment,
-        pt_desc1: pt_desc1,
-        pt_bom_code: pt_bom_code,
-        pt_article: pt_article,
-        line: line,
-        pt_qty_ord_pos: pt_qty,
-        pt_price_pos: pt_price,
-        usrd_site: cart.usrd_site,
-        created_date: currentService.service_period_activate_date,
+    // const currentCart = await PosOrderServiceInstance.findOne({ order_code: cart.order_code });
+    // console.log('current cart', currentCart);
+    // console.log(cart);
+    console.log(cart);
+    if (editCart) {
+      update = true;
+      const it = await inventoryTransactionServiceInstance.findSpecial({
+        where: { tr_site: cart.usrd_site, tr_nbr: cart.order_code },
       });
+      if (it) {
+        for (const i of it) {
+          const ld = await locationDetailServiceInstance.findOne({
+            ld_part: i.tr_part,
+            ld_site: i.tr_site,
+            ld_loc: i.tr_loc,
+          });
+          if (ld) {
+            await locationDetailServiceInstance.update(
+              {
+                ld_qty_oh: Number(ld.ld_qty_oh) - 1 * Number(i.tr_qty_chg),
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+              },
+              { id: ld.id },
+            );
+            await workOrderDetailServiceInstance.delete({
+              wod_nbr: cart.order_code,
+              wod_site: i.tr_site,
+            });
+            await inventoryTransactionServiceInstance.delete({
+              tr_nbr: cart.order_code,
+              tr_part: i.tr_part,
+              tr_site: i.tr_site,
+              tr_gl_date: currentService.service_period_activate_date,
+
+              tr_effdate: currentService.service_period_activate_date,
+            });
+          }
+        }
+        await workOrderServiceInstance.delete({
+          wo_nbr: cart.order_code,
+          wo_site: cart.usrd_site,
+        });
+        await PosOrderDetailServiceInstance.delete({
+          order_code: cart.order_code,
+          usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
+        });
+        await PosOrderProductSauceServiceInstance.delete({
+          order_code: cart.order_code,
+          usrd_site: cart.usrd_site,
+        });
+        await PosOrderProductIngServiceInstance.delete({
+          order_code: cart.order_code,
+          usrd_site: cart.usrd_site,
+        });
+        await PosOrderProductSuppServiceInstance.delete({
+          order_code: cart.order_code,
+          usrd_site: cart.usrd_site,
+        });
+        await PosOrderServiceInstance.delete({
+          order_code: cart.order_code,
+          usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
+        });
+      }
+    }
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    if (cart.from !== 'CALL CENTER') {
+      await PosOrderServiceInstance.create({
+        order_code: update ? cart.order_code : nbr,
+        total_price: cart.total_price,
+        order_emp: cart.order_emp,
+        status: cart.status,
+        customer: cart.customer,
+        created_date: currentService.service_period_activate_date,
+        usrd_site: cart.usrd_site,
+        loy_num: cart.loy_num,
+        disc_amt: cart.disc_amt,
+        del_comp: cart.del_comp,
+        site_loc: cart.site_loc,
+        from: cart.from,
+      });
+    }
+    !update &&
+      (await sequence.update(
+        { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
+        { seq_seq: 'OP', seq_profile: cart.usrd_name },
+      ));
+    const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
+    for (const product of products) {
+      console.log('product', product);
+      const {
+        pt_part,
+        pt_formule,
+        pt_qty,
+        pt_price,
+        comment,
+        pt_desc1,
+        pt_bom_code,
+        pt_article,
+        line,
+        pt_loc,
+      } = product;
+      // console.log('pt_loc', pt_loc);
+      if (cart.from !== 'CALL CENTER') {
+        await PosOrderDetailServiceInstance.create({
+          order_code: currentProduct.order_code,
+          pt_part: pt_part,
+          pt_formule: pt_formule,
+          pt_size: comment,
+          pt_desc1: pt_desc1,
+          pt_bom_code: pt_bom_code,
+          pt_loc: pt_loc,
+          pt_article: pt_article,
+          line: line,
+          pt_qty_ord_pos: pt_qty,
+          pt_price_pos: pt_price,
+          usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
+        });
+      }
       await workOrderServiceInstance.create({
         wo_nbr: currentProduct.order_code,
         wo_part: pt_part,
         wo_lot: line,
         wo_qty_ord: pt_qty,
+        wo_loc: pt_loc,
         wo_bom_code: pt_bom_code,
         wo_ord_date: currentService.service_period_activate_date,
         wo_rel_date: currentService.service_period_activate_date,
@@ -139,17 +228,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const supp = product.suppliments;
       const sauce = product.sauces;
       const ingredients = product.ingredients;
+
       for (const s of supp) {
-        await PosOrderProductSuppServiceInstance.create({
-          order_code: currentProduct.order_code,
-          pt_part: pt_part,
-          pt_pt_part: s.pt_part,
-          pt_desc1: s.pt_desc1,
-          pt_bom_code: s.pt_bom_code,
-          pt_ord_qty: s.pt_ord_qty,
-          pt_price: s.pt_price,
-          usrd_site: cart.usrd_site,
-        });
+        if (cart.from !== 'CALL CENTER') {
+          await PosOrderProductSuppServiceInstance.create({
+            order_code: currentProduct.order_code,
+            pt_part: pt_part,
+            pt_pt_part: s.pt_part,
+            pt_desc1: s.pt_desc1,
+            pt_loc: s.pt_loc,
+            pt_bom_code: s.pt_bom_code,
+            pt_ord_qty: s.pt_ord_qty,
+            pt_price: s.pt_price,
+            usrd_site: cart.usrd_site,
+          });
+        }
+
         const elem_wod = {
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
@@ -168,16 +262,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       // console.log(sauce);
       for (const sa of sauce) {
-        await PosOrderProductSauceServiceInstance.create({
-          order_code: currentProduct.order_code,
-          pt_part: pt_part,
-          pt_pt_part: sa.pt_part,
-          pt_desc1: sa.pt_desc1,
-          pt_bom_code: sa.pt_bom_code,
-          pt_ord_qty: sa.pt_ord_qty,
-          pt_price: sa.pt_price,
-          usrd_site: cart.usrd_site,
-        });
+        if (cart.from !== 'CALL CENTER') {
+          await PosOrderProductSauceServiceInstance.create({
+            order_code: currentProduct.order_code,
+            pt_part: pt_part,
+            pt_pt_part: sa.pt_part,
+            pt_desc1: sa.pt_desc1,
+            pt_loc: sa.pt_loc,
+            pt_bom_code: sa.pt_bom_code,
+            pt_ord_qty: sa.pt_ord_qty,
+            pt_price: sa.pt_price,
+            usrd_site: cart.usrd_site,
+          });
+        }
+
         const elem_wod = {
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
@@ -194,26 +292,30 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await workOrderDetailServiceInstance.create(elem_wod);
         detail.push(elem_wod);
       }
+
       for (const i of ingredients) {
-        await PosOrderProductIngServiceInstance.create({
-          order_code: currentProduct.order_code,
-          pt_part: pt_part,
-          pt_pt_part: i.spec_code,
-          pt_desc1: i.pt_desc1,
-          pt_bom_code: i.pt_bom_code,
-          pt_desc2: i.pt_desc2,
-          pt_price: i.price,
-          usrd_site: cart.usrd_site,
-        });
+        if (cart.from !== 'CALL CENTER') {
+          await PosOrderProductIngServiceInstance.create({
+            order_code: currentProduct.order_code,
+            pt_part: pt_part,
+            pt_pt_part: i.pt_pt_part,
+            pt_desc1: i.pt_desc1,
+            pt_bom_code: i.pt_bom_code,
+            pt_loc: i.pt_loc,
+            pt_desc2: i.pt_desc2,
+            pt_price: i.price,
+            usrd_site: cart.usrd_site,
+          });
+        }
         const wOd = await workOrderDetailServiceInstance.findOne({
           wod_nbr: currentProduct.order_code,
           wod_lot: wOid.id,
-          wod_part: i.spec_code,
+          wod_part: i.pt_pt_part,
         });
 
         await workOrderDetailServiceInstance.update(
           { wod_qty_req: Number(0) },
-          { wod_nbr: currentProduct.order_code, wod_lot: wOid.id, wod_part: i.spec_code },
+          { wod_nbr: currentProduct.order_code, wod_lot: wOid.id, wod_part: i.pt_pt_part },
         );
       }
     }
@@ -226,6 +328,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const pt = await itemServiceInstance.findOne({ pt_part: item.wod_part });
+
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.wod_part,
         ld_site: item.wod_site,
@@ -305,13 +408,152 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       //   });
       // }
     }
+    if (cart.from !== 'CALL CENTER') {
+      await PosOrderServiceInstance.update(
+        { status: 'N', from: 'BOUTIQUE' },
+        { order_code: currentProduct.order_code, usrd_site: cart.usrd_site },
+      );
+    }
+
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
+const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
 
+  logger.debug('Calling Create order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const PosOrderProductSuppServiceInstance = Container.get(PosOrderProductSupp);
+    const PosOrderProductSauceServiceInstance = Container.get(PosOrderProductSauce);
+    const PosOrderProductIngServiceInstance = Container.get(PosOrderProductIng);
+    const workOrderServiceInstance = Container.get(workOrderService);
+    const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
+    const psServiceInstance = Container.get(psService);
+    const SequenceServiceInstance = Container.get(SequenceService);
+    const service = Container.get(mobileService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(ItemService);
+    const cart = req.body.cart;
+    const products = req.body.cart.products;
+    const user_site = req.body.user_site;
+    const detail = [];
+    let update: boolean = false;
+    const currentService = await service.findOne({ service_site: user_site, service_open: true });
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', chr01: user_site });
+    // console.log(cart);
+    console.log(sequence);
+    console.log(user_code);
+    console.log(cart);
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    await PosOrderServiceInstance.create({
+      order_code: update ? cart.order_code : nbr,
+      total_price: cart.total_price,
+      order_emp: cart.order_emp,
+      status: 'A',
+      customer: cart.customer,
+      created_date: currentService.service_period_activate_date,
+      usrd_site: cart.usrd_site,
+      loy_num: cart.loy_num,
+      disc_amt: cart.disc_amt,
+      del_comp: cart.del_comp,
+      site_loc: cart.site_loc,
+      from: cart.from,
+    });
+    const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
+    for (const product of products) {
+      console.log('product', product);
+      const {
+        pt_part,
+        pt_formule,
+        pt_qty,
+        pt_price,
+        comment,
+        pt_desc1,
+        pt_bom_code,
+        pt_article,
+        line,
+        pt_loc,
+      } = product;
+      // console.log('pt_loc', pt_loc);
+      await PosOrderDetailServiceInstance.create({
+        order_code: currentProduct.order_code,
+        pt_part: pt_part,
+        pt_formule: pt_formule,
+        pt_size: comment,
+        pt_desc1: pt_desc1,
+        pt_bom_code: pt_bom_code,
+        pt_loc: pt_loc,
+        pt_article: pt_article,
+        line: line,
+        pt_qty_ord_pos: pt_qty,
+        pt_price_pos: pt_price,
+        usrd_site: cart.usrd_site,
+        created_date: currentService.service_period_activate_date,
+      });
+
+      const supp = product.suppliments;
+      const sauce = product.sauces;
+      const ingredients = product.ingredients;
+
+      for (const s of supp) {
+        await PosOrderProductSuppServiceInstance.create({
+          order_code: currentProduct.order_code,
+          pt_part: pt_part,
+          pt_pt_part: s.pt_part,
+          pt_desc1: s.pt_desc1,
+          pt_loc: s.pt_loc,
+          pt_bom_code: s.pt_bom_code,
+          pt_ord_qty: s.pt_ord_qty,
+          pt_price: s.pt_price,
+          usrd_site: cart.usrd_site,
+        });
+      }
+      // console.log(sauce);
+      for (const sa of sauce) {
+        await PosOrderProductSauceServiceInstance.create({
+          order_code: currentProduct.order_code,
+          pt_part: pt_part,
+          pt_pt_part: sa.pt_part,
+          pt_desc1: sa.pt_desc1,
+          pt_loc: sa.pt_loc,
+          pt_bom_code: sa.pt_bom_code,
+          pt_ord_qty: sa.pt_ord_qty,
+          pt_price: sa.pt_price,
+          usrd_site: cart.usrd_site,
+        });
+      }
+
+      for (const i of ingredients) {
+        await PosOrderProductIngServiceInstance.create({
+          order_code: currentProduct.order_code,
+          pt_part: pt_part,
+          pt_pt_part: i.pt_pt_part,
+          pt_desc1: i.pt_desc1,
+          pt_bom_code: i.pt_bom_code,
+          pt_loc: i.pt_loc,
+          pt_desc2: i.pt_desc2,
+          pt_price: i.price,
+          usrd_site: cart.usrd_site,
+        });
+      }
+    }
+
+    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP', chr01: user_site });
+
+    return res.status(201).json({ message: 'created succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  order endpoint');
@@ -338,7 +580,6 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 
     const PosOrderServiceInstance = Container.get(PosOrder);
     const order = await PosOrderServiceInstance.find({
-      status: 'N',
       created_date: currentService.service_period_activate_date,
     });
 
@@ -541,6 +782,7 @@ const findByOrd = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const PosOrderDetailServiceInstance = Container.get(PosOrder);
     const order = await PosOrderDetailServiceInstance.findOrder({ ...req.body });
+    console.log(order);
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -588,4 +830,5 @@ export default {
   update,
   deleteOne,
   findAlll,
+  createCALLCenterORDER,
 };

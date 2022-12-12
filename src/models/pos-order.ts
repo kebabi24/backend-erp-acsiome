@@ -25,6 +25,7 @@ const OrderPos = sequelize.define(
     disc_amt: Sequelize.DECIMAL,
     del_comp: Sequelize.STRING,
     usrd_site: Sequelize.STRING,
+    from: Sequelize.STRING,
     total_price: Sequelize.DECIMAL,
     created_date: Sequelize.DATEONLY,
   },

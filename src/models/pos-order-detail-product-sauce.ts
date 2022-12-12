@@ -25,6 +25,9 @@ const OrderPosProductSauce = sequelize.define(
     pt_bom_code: {
       type: Sequelize.STRING,
     },
+    pt_loc: {
+      type: Sequelize.STRING,
+    },
     pt_desc1: {
       type: Sequelize.STRING,
     },
