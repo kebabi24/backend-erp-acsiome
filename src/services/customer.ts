@@ -109,7 +109,7 @@ export default class customersSercice {
         try {
             const customer = await this.addressModel.findOne({
                 where:{ad_addr:query },
-                attributes: ["id","ad_attn","ad_addr","ad_format","ad_ref","ad_name","ad_ext"]
+                attributes: ["id","ad_attn","ad_addr","ad_format","ad_ref","ad_name","ad_ext","ad_line1"]
             })
             this.logger.silly("find one customer ")
             return customer
@@ -161,12 +161,14 @@ export default class customersSercice {
                 attributes: ["id","order_code","usrd_site","order_emp","created_date"]
             })
 
-            const site = await this.siteModel.findOne({
-                where : {si_site : order.usrd_site},
-                attributes: ["si_desc"]
-            })
+            if(order){
+                const site = await this.siteModel.findOne({
+                    where : {si_site : order.usrd_site},
+                    attributes: ["si_desc"]
+                })
+                order.usrd_site = site.si_desc
+            }
 
-            order.usrd_site = site.si_desc
             this.logger.silly("find one order ")
             return order
         } catch (e) {
