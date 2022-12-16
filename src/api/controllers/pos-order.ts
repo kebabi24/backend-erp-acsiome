@@ -47,7 +47,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const detail = [];
     let update: boolean = false;
     const currentService = await service.findOne({ role_code: user_code, service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', seq_profile: cart.usrd_name });
+    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', seq_profile: cart.usrd_profile });
     // const currentCart = await PosOrderServiceInstance.findOne({ order_code: cart.order_code });
     // console.log('current cart', currentCart);
     // console.log(cart);
@@ -135,7 +135,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     !update &&
       (await sequence.update(
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
-        { seq_seq: 'OP', seq_profile: cart.usrd_name },
+        { seq_seq: 'OP', seq_profile: cart.usrd_profile },
       ));
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
     for (const product of products) {
