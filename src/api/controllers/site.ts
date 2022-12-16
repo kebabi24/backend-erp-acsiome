@@ -1,4 +1,8 @@
 import SiteService from "../../services/site"
+import ItemService from "../../services/item"
+import CostSimulationService from "../../services/cost-simulation"
+
+
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -8,7 +12,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling Create site endpoint")
     try {
         const siteServiceInstance = Container.get(SiteService)
+        const itemServiceInstance = Container.get(ItemService)
+        const costSimulationServiceInstance = Container.get(CostSimulationService)
+        
         const site = await siteServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const items = await itemServiceInstance.find({});
+
+        for(let item of items) {
+            const sct = await costSimulationServiceInstance.create({sct_site: req.body.si_site,sct_sim:"STDCG", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            const sct2 = await costSimulationServiceInstance.create({sct_site: req.body.si_site,sct_sim:"STDCR", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+       
+
+        }
         return res
             .status(201)
             .json({ message: "created succesfully", data:  site })
