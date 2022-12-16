@@ -18,4 +18,5 @@ export default (app: Router) => {
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/findorder', controller.findByOrd);
+  route.post('/createCallCenterOrder', controller.createCALLCenterORDER);
 };

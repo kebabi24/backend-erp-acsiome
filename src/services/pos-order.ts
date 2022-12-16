@@ -70,6 +70,7 @@ export default class posOrderService {
         total_price: o.total_price,
         created_date: o.created_date,
         products: [],
+        from: o.from,
       };
       const pro = await this.posOrderDetailProductModel.findAll({ where: { order_code: o.order_code } });
 
@@ -85,6 +86,7 @@ export default class posOrderService {
           comment: '',
           pt_price: 0,
           pt_qty: 0,
+          pt_loc: '',
           created_date: '',
           suppliments: [],
           ingredients: [],
@@ -99,7 +101,8 @@ export default class posOrderService {
           (product.pt_desc1 = p.pt_desc1),
           (product.comment = p.pt_size),
           (product.pt_price = p.pt_price_pos),
-          (product.pt_qty = p.pt_qty_ord_pos);
+          (product.pt_qty = p.pt_qty_ord_pos),
+          (product.pt_loc = p.pt_loc);
         const supp = await this.orderPosProductSuppModel.findAll({
           where: { order_code: o.order_code, pt_part: p.pt_part },
         });

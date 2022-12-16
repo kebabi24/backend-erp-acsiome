@@ -31,6 +31,9 @@ const OrderPosProductSupp = sequelize.define(
     pt_ord_qty: {
       type: Sequelize.STRING,
     },
+    pt_loc: {
+      type: Sequelize.STRING,
+    },
     pt_price: {
       type: Sequelize.STRING,
     },
