@@ -408,12 +408,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       //   });
       // }
     }
-    if (cart.from !== 'CALL CENTER') {
-      await PosOrderServiceInstance.update(
-        { status: 'N', from: 'BOUTIQUE' },
-        { order_code: currentProduct.order_code, usrd_site: cart.usrd_site },
-      );
-    }
+    // if (cart.from !== 'CALL CENTER') {
+    //   await PosOrderServiceInstance.update(
+    //     { status: 'N', from: 'BOUTIQUE' },
+    //     { order_code: currentProduct.order_code, usrd_site: cart.usrd_site },
+    //   );
+    // }
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
