@@ -55,7 +55,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const SequenceServiceInstance = Container.get(sequenceService);
     const ServiceInstance = Container.get(serviceMobile);
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'SR', seq_profile: user });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'AP', seq_profile: user });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
 
     console.log(user_code);
@@ -103,7 +103,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         service_open: true,
         service_site: user_site,
       });
-      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'SR', seq_profile: user });
+      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_type: 'AP', seq_profile: user });
     } else {
       console.log(user);
       const service = await ServiceInstance.update(
