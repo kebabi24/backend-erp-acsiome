@@ -42,6 +42,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(ItemService);
     const cart = req.body.cart;
+
     const products = req.body.cart.products;
     const editCart = req.body.editCart;
     const detail = [];
@@ -53,6 +54,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     // console.log(cart);
     console.log(cart);
     if (editCart) {
+      console.log(cart);
       update = true;
       const it = await inventoryTransactionServiceInstance.findSpecial({
         where: { tr_site: cart.usrd_site, tr_nbr: cart.order_code },
@@ -371,49 +373,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
       }
-      // if (!isNaN(item.wodid)) {
-      //   const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
-      //   if (wod) {
-      //     var bool = false;
-
-      //     if (
-      //       Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
-      //       0
-      //     ) {
-      //       bool = true;
-      //     }
-      //     await workOrderDetailServiceInstance.update(
-      //       {
-      //         wod__qadl01: true ? bool : false,
-      //         wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //         last_modified_by: user_code,
-      //         last_modified_ip_adr: req.headers.origin,
-      //       },
-      //       { id: wod.id },
-      //     );
-      //   }
-      // } else {
-      //   await workOrderDetailServiceInstance.create({
-      //     wod_nbr: it.tr_nbr,
-      //     wod_lot: it.tr_lot,
-      //     wod_part: item.tr_part,
-      //     wod_qty_req: 0,
-      //     wod_qty_iss: item.tr_qty_loc,
-      //     wod_site: item.tr_site,
-      //     wod_loc: item.tr_loc,
-      //     wod_um: item.tr_um,
-      //     wod_serial: item.tr_serial,
-      //     wod_ref: item.tr_ref,
-      //     wod__qadl01: true,
-      //   });
-      // }
     }
-    // if (cart.from !== 'CALL CENTER') {
-    //   await PosOrderServiceInstance.update(
-    //     { status: 'N', from: 'BOUTIQUE' },
-    //     { order_code: currentProduct.order_code, usrd_site: cart.usrd_site },
-    //   );
-    // }
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {

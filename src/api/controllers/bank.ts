@@ -133,15 +133,17 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
     const { cart, type, user_name } = req.body;
+    // console.log(cart);
     console.log(cart);
     console.log(user_name);
-    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_name });
+    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
         bkh_date: new Date(),
         bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
-        bkh_type: type,
+        bkh_type: 'R',
+        dec01: Number(cart.total_price),
       });
       await bankServiceInstance.update(
         {
