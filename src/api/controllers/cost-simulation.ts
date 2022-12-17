@@ -1,4 +1,6 @@
 import costSimulationService from "../../services/cost-simulation"
+import SiteService from "../../services/site"
+
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -9,7 +11,19 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling Create sct endpoint")
     try {
         const costSimulationServiceInstance = Container.get(costSimulationService)
+        const siteServiceInstance = Container.get(SiteService)
+        
         const sct = await costSimulationServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        
+        const sites = await siteServiceInstance.find({});
+
+        for(let site of sites) {
+            if(site.si_site != req.body.sct_site){
+            const sct1 = await costSimulationServiceInstance.create({sct_site: site.si_site,sct_sim:req.body.sct_sim, sct_part:req.body.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            }
+
+        }
+        
         return res
             .status(201)
             .json({ message: "created succesfully", data:  sct })
