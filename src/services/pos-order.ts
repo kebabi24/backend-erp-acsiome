@@ -60,8 +60,11 @@ export default class posOrderService {
 
   public async findOrder(query: any): Promise<any> {
     try {
-      const orders = await this.posOrderModel.findOne({ where: query });
+      const order_code = query.order_code;
+      const orders = await this.posOrderModel.findOne({ where: { order_code: order_code, created_date: new Date() } });
+      console.log(orders);
       const o = orders.dataValues;
+      // console.log(o.created_date);
       const currentOrder = {
         id: o.id,
         order_code: o.order_code,
@@ -72,8 +75,10 @@ export default class posOrderService {
         products: [],
         from: o.from,
       };
-      const pro = await this.posOrderDetailProductModel.findAll({ where: { order_code: o.order_code } });
-
+      const pro = await this.posOrderDetailProductModel.findAll({
+        where: { order_code: o.order_code, created_date: o.created_date },
+      });
+      // console.log(pro);
       for (const p of pro) {
         const product = {
           id: '',
@@ -117,6 +122,7 @@ export default class posOrderService {
         product.ingredients = ing;
         currentOrder.products.push(product);
       }
+      // console.log(currentOrder);
       this.logger.silly('find All orders mstr');
       return currentOrder;
     } catch (e) {
