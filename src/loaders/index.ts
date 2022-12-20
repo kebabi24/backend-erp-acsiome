@@ -164,8 +164,8 @@ export default async ({ expressApp }) => {
       { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
       { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
       { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
-      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
+      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
