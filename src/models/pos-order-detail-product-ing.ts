@@ -38,6 +38,7 @@ const OrderPosProductIng = sequelize.define(
       type: Sequelize.STRING,
     },
     usrd_site: Sequelize.STRING,
+    created_date: Sequelize.DATEONLY,
   },
   {
     tableName: 'bb_order_pos_detail_product_ing',

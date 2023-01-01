@@ -42,22 +42,31 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(ItemService);
     const cart = req.body.cart;
+
     const products = req.body.cart.products;
-    const editCart = req.body.editCart;
+    const editCart = req.body.modif;
     const detail = [];
     let update: boolean = false;
     const currentService = await service.findOne({ role_code: user_code, service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', seq_profile: cart.usrd_profile });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', seq_profile: cart.usrd_profile });
     // const currentCart = await PosOrderServiceInstance.findOne({ order_code: cart.order_code });
     // console.log('current cart', currentCart);
     // console.log(cart);
-    console.log(cart);
+
     if (editCart) {
+      console.log(cart);
+      console.log('bizzare');
       update = true;
+      console.log(update);
       const it = await inventoryTransactionServiceInstance.findSpecial({
-        where: { tr_site: cart.usrd_site, tr_nbr: cart.order_code },
+        where: {
+          tr_site: cart.usrd_site,
+          tr_nbr: cart.order_code,
+          tr_effdate: currentService.service_period_activate_date,
+        },
       });
       if (it) {
+        console.log(it.tr_part, it.tr_site, it.tr_loc);
         for (const i of it) {
           const ld = await locationDetailServiceInstance.findOne({
             ld_part: i.tr_part,
@@ -65,6 +74,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             ld_loc: i.tr_loc,
           });
           if (ld) {
+            console.log('ld mlih');
             await locationDetailServiceInstance.update(
               {
                 ld_qty_oh: Number(ld.ld_qty_oh) - 1 * Number(i.tr_qty_chg),
@@ -76,13 +86,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             await workOrderDetailServiceInstance.delete({
               wod_nbr: cart.order_code,
               wod_site: i.tr_site,
+              wod_iss_date: currentService.service_period_activate_date,
             });
             await inventoryTransactionServiceInstance.delete({
               tr_nbr: cart.order_code,
               tr_part: i.tr_part,
               tr_site: i.tr_site,
-              tr_gl_date: currentService.service_period_activate_date,
-
               tr_effdate: currentService.service_period_activate_date,
             });
           }
@@ -90,6 +99,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await workOrderServiceInstance.delete({
           wo_nbr: cart.order_code,
           wo_site: cart.usrd_site,
+          wo_ord_date: currentService.service_period_activate_date,
         });
         await PosOrderDetailServiceInstance.delete({
           order_code: cart.order_code,
@@ -99,14 +109,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await PosOrderProductSauceServiceInstance.delete({
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
         });
         await PosOrderProductIngServiceInstance.delete({
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
         });
         await PosOrderProductSuppServiceInstance.delete({
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
+          created_date: currentService.service_period_activate_date,
         });
         await PosOrderServiceInstance.delete({
           order_code: cart.order_code,
@@ -115,7 +128,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
     }
-    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)}`;
     if (cart.from !== 'CALL CENTER') {
       await PosOrderServiceInstance.create({
         order_code: update ? cart.order_code : nbr,
@@ -135,7 +148,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     !update &&
       (await sequence.update(
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
-        { seq_seq: 'OP', seq_profile: cart.usrd_profile },
+        { seq_type: 'OF', seq_profile: cart.usrd_profile },
       ));
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
     for (const product of products) {
@@ -147,6 +160,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         pt_price,
         comment,
         pt_desc1,
+        pt_desc2,
         pt_bom_code,
         pt_article,
         line,
@@ -160,6 +174,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_formule: pt_formule,
           pt_size: comment,
           pt_desc1: pt_desc1,
+          pt_desc2: pt_desc2,
           pt_bom_code: pt_bom_code,
           pt_loc: pt_loc,
           pt_article: pt_article,
@@ -200,6 +215,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             wod_part: pss.ps_comp,
             wod_site: cart.usrd_site,
             wod_qty_req: ((pss.ps_qty_per / (pss.ps_scrp_pct / 100)) * product.pt_qty).toFixed(2),
+            wod_iss_date: currentService.service_period_activate_date,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -217,6 +233,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           wod_price: product.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: product.pt_qty,
+          wod_iss_date: currentService.service_period_activate_date,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -236,11 +253,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_part: pt_part,
             pt_pt_part: s.pt_part,
             pt_desc1: s.pt_desc1,
+            pt_desc2: s.pt_desc2,
             pt_loc: s.pt_loc,
             pt_bom_code: s.pt_bom_code,
             pt_ord_qty: s.pt_ord_qty,
             pt_price: s.pt_price,
             usrd_site: cart.usrd_site,
+            created_date: currentService.service_period_activate_date,
           });
         }
 
@@ -252,6 +271,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           wod_price: s.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: s.pt_net_wt * product.pt_qty,
+          wod_iss_date: currentService.service_period_activate_date,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -268,11 +288,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_part: pt_part,
             pt_pt_part: sa.pt_part,
             pt_desc1: sa.pt_desc1,
+            pt_desc2: sa.pt_desc2,
             pt_loc: sa.pt_loc,
             pt_bom_code: sa.pt_bom_code,
             pt_ord_qty: sa.pt_ord_qty,
             pt_price: sa.pt_price,
             usrd_site: cart.usrd_site,
+            created_date: currentService.service_period_activate_date,
           });
         }
 
@@ -284,6 +306,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           wod_price: sa.pt_price,
           wod_site: cart.usrd_site,
           wod_qty_req: sa.pt_net_wt * product.pt_qty,
+          wod_iss_date: currentService.service_period_activate_date,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -300,11 +323,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_part: pt_part,
             pt_pt_part: i.pt_pt_part,
             pt_desc1: i.pt_desc1,
+            pt_desc2: i.pt_desc2,
             pt_bom_code: i.pt_bom_code,
             pt_loc: i.pt_loc,
-            pt_desc2: i.pt_desc2,
             pt_price: i.price,
             usrd_site: cart.usrd_site,
+            created_date: currentService.service_period_activate_date,
           });
         }
         const wOd = await workOrderDetailServiceInstance.findOne({
@@ -371,50 +395,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
       }
-      // if (!isNaN(item.wodid)) {
-      //   const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
-      //   if (wod) {
-      //     var bool = false;
-
-      //     if (
-      //       Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
-      //       0
-      //     ) {
-      //       bool = true;
-      //     }
-      //     await workOrderDetailServiceInstance.update(
-      //       {
-      //         wod__qadl01: true ? bool : false,
-      //         wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //         last_modified_by: user_code,
-      //         last_modified_ip_adr: req.headers.origin,
-      //       },
-      //       { id: wod.id },
-      //     );
-      //   }
-      // } else {
-      //   await workOrderDetailServiceInstance.create({
-      //     wod_nbr: it.tr_nbr,
-      //     wod_lot: it.tr_lot,
-      //     wod_part: item.tr_part,
-      //     wod_qty_req: 0,
-      //     wod_qty_iss: item.tr_qty_loc,
-      //     wod_site: item.tr_site,
-      //     wod_loc: item.tr_loc,
-      //     wod_um: item.tr_um,
-      //     wod_serial: item.tr_serial,
-      //     wod_ref: item.tr_ref,
-      //     wod__qadl01: true,
-      //   });
-      // }
     }
-    if (cart.from !== 'CALL CENTER') {
-      await PosOrderServiceInstance.update(
-        { status: 'N', from: 'BOUTIQUE' },
-        { order_code: currentProduct.order_code, usrd_site: cart.usrd_site },
-      );
-    }
-
+    // update = false;
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -447,7 +429,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     const detail = [];
     let update: boolean = false;
     const currentService = await service.findOne({ service_site: user_site, service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP', chr01: user_site });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', chr01: user_site });
     // console.log(cart);
     console.log(sequence);
     console.log(user_code);

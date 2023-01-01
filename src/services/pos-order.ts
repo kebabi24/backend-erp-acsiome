@@ -4,6 +4,7 @@ import { Service, Inject } from 'typedi';
 export default class posOrderService {
   constructor(
     @Inject('posOrderModel') private posOrderModel: Models.posOrderModel,
+    @Inject('serviceModel') private serviceModel: Models.ServiceModel,
     @Inject('posOrderDetailProductModel') private posOrderDetailProductModel: Models.posOrderDetailProductModel,
     @Inject('orderPosProductSuppModel') private orderPosProductSuppModel: Models.posOrderroductSuppModel,
     @Inject('orderPosProductSauceModel') private orderPosProductSauceModel: Models.posOrderProductSauceModel,
@@ -60,8 +61,21 @@ export default class posOrderService {
 
   public async findOrder(query: any): Promise<any> {
     try {
-      const orders = await this.posOrderModel.findOne({ where: query });
+      const order_code = query.order_code;
+      const usrd_site = query.usrd_site;
+      console.log(query);
+      const service = await this.serviceModel.findOne({
+        where: { service_site: usrd_site, service_open: true },
+      });
+
+      const service_date = service.dataValues.service_period_activate_date;
+      console.log(service_date);
+      const orders = await this.posOrderModel.findOne({
+        where: { order_code: order_code, created_date: service_date, usrd_site: usrd_site },
+      });
+      console.log(orders);
       const o = orders.dataValues;
+      // console.log(o.created_date);
       const currentOrder = {
         id: o.id,
         order_code: o.order_code,
@@ -72,9 +86,12 @@ export default class posOrderService {
         products: [],
         from: o.from,
       };
-      const pro = await this.posOrderDetailProductModel.findAll({ where: { order_code: o.order_code } });
-
+      const pro = await this.posOrderDetailProductModel.findAll({
+        where: { order_code: o.order_code, created_date: service_date, usrd_site: usrd_site },
+      });
+      // console.log(pro);
       for (const p of pro) {
+        console.log(p);
         const product = {
           id: '',
           pt_part: '',
@@ -82,6 +99,7 @@ export default class posOrderService {
           pt_article: '',
           pt_bom_code: '',
           pt_desc1: '',
+          pt_desc2: '',
           pt_formule: '',
           comment: '',
           pt_price: 0,
@@ -99,24 +117,26 @@ export default class posOrderService {
           (product.pt_bom_code = p.pt_bom_code),
           (product.pt_formule = p.pt_formule),
           (product.pt_desc1 = p.pt_desc1),
+          (product.pt_desc2 = p.pt_desc2),
           (product.comment = p.pt_size),
           (product.pt_price = p.pt_price_pos),
           (product.pt_qty = p.pt_qty_ord_pos),
           (product.pt_loc = p.pt_loc);
         const supp = await this.orderPosProductSuppModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part },
+          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
         });
         product.suppliments = supp;
         const sauces = await this.orderPosProductSauceModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part },
+          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
         });
         product.sauces = sauces;
         const ing = await this.orderPosProductIngModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part },
+          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
         });
         product.ingredients = ing;
         currentOrder.products.push(product);
       }
+      // console.log(currentOrder);
       this.logger.silly('find All orders mstr');
       return currentOrder;
     } catch (e) {

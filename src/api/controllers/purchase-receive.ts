@@ -316,7 +316,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           ld_site: po.pod_site,
           ld_loc: po.item.pt_loc,
           ld_qty_oh: Number(po.pod_qty_rcvd),
-
+          ld_status: 'CONFORME',
           ld__log01: true,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
