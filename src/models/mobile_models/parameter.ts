@@ -29,7 +29,7 @@ const Parameter = sequelize.define(
         },
         description:{
             type:Sequelize.STRING,
-            unique:true,
+           
         },
         hold:{
             type: Sequelize.BOOLEAN,
