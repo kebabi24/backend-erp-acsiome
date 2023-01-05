@@ -34,9 +34,9 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
     const customerServiceInstance = Container.get(CustomerService);
     const adresseServiceInstance = Container.get(addresseService);
     const addr = await adresseServiceInstance.create({
-      ad_addr: customer.customer_phone_one,
-      ad_name: customer.customer_name,
-      ad_line1: customer.customer_addr,
+      ad_addr: customer.cm_addr,
+      ad_name: customer.cm_sort,
+      ad_line1: customer.cm_ar_sub,
       ad_type: 'customer',
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -44,9 +44,12 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     const customerr = await customerServiceInstance.create({
-      cm_addr: customer.customer_phone_one,
-      cm_sort: customer.customer_name,
-      // cm_high_date: customer.customer_birthday,
+      cm_addr: customer.cm_addr,
+      cm_sort: customer.cm_sort,
+      cm_high_cr: customer.cm_high_cr,
+      cm_ar_sub: customer.cm_ar_sub,
+      cm_ar_acct: customer.cm_ar_acct,
+      cm_rmks: customer.cm_rmks,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -54,6 +57,35 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
     });
 
     return res.status(201).json({ message: 'created succesfully', data: { customer } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { customer_number, type } = req.body;
+  logger.debug('Calling Create customer endpoint with body: %o', req.body);
+  try {
+    const customerServiceInstance = Container.get(CustomerService);
+    //const adresseServiceInstance = Container.get(addresseService);
+
+    const customerr = await customerServiceInstance.update(
+      {
+        cm_disc_pct: '25',
+        cm_sale_date: new Date(),
+        cm_high_date: new Date(),
+        cm_db: Math.random()
+          .toString(36)
+          .slice(2),
+        cm_type: type,
+      },
+      { cm_addr: customer_number },
+    );
+
+    return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -368,6 +400,7 @@ export default {
   getSolde,
   deleteOne,
   createCmPos,
+  setLoyCm,
   createComplaint,
   findCustomer,
   findOder,

@@ -103,7 +103,10 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         service_open: true,
         service_site: user_site,
       });
-      await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_type: 'AP', seq_profile: user });
+      await SequenceServiceInstance.update(
+        { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
+        { seq_type: 'AP', seq_profile: user },
+      );
     } else {
       console.log(user);
       const service = await ServiceInstance.update(
@@ -113,6 +116,9 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         },
         { role_code: user_code, service_open: true },
       );
+      console.log('avant');
+      await SequenceServiceInstance.update({ seq_curr_val: 1 }, { seq_type: 'OF', seq_profile: user });
+      console.log('aprés');
     }
     // console.log(bk)
     return res.status(201).json({ message: 'created succesfully', data: true });

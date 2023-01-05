@@ -123,15 +123,33 @@ export default class posOrderService {
           (product.pt_qty = p.pt_qty_ord_pos),
           (product.pt_loc = p.pt_loc);
         const supp = await this.orderPosProductSuppModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
         product.suppliments = supp;
         const sauces = await this.orderPosProductSauceModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
         product.sauces = sauces;
         const ing = await this.orderPosProductIngModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
         product.ingredients = ing;
         currentOrder.products.push(product);

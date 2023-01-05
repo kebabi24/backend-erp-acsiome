@@ -31,6 +31,9 @@ const OrderPosProductSupp = sequelize.define(
     pt_desc2: {
       type: Sequelize.STRING,
     },
+    line: {
+      type: Sequelize.STRING,
+    },
     pt_ord_qty: {
       type: Sequelize.STRING,
     },
@@ -42,6 +45,7 @@ const OrderPosProductSupp = sequelize.define(
     },
     usrd_site: Sequelize.STRING,
     created_date: Sequelize.DATEONLY,
+    bool05: Sequelize.BOOLEAN,
   },
   {
     tableName: 'bb_order_pos_detail_product_supp',

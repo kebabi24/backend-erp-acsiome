@@ -143,6 +143,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         del_comp: cart.del_comp,
         site_loc: cart.site_loc,
         from: cart.from,
+        bool05: false,
       });
     }
     !update &&
@@ -183,6 +184,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_price_pos: pt_price,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
+          bool05: false,
         });
       }
       await workOrderServiceInstance.create({
@@ -257,9 +259,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_loc: s.pt_loc,
             pt_bom_code: s.pt_bom_code,
             pt_ord_qty: s.pt_ord_qty,
+            line: line,
             pt_price: s.pt_price,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
+            bool05: false,
           });
         }
 
@@ -293,8 +297,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_bom_code: sa.pt_bom_code,
             pt_ord_qty: sa.pt_ord_qty,
             pt_price: sa.pt_price,
+            line: line,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
+            bool05: false,
           });
         }
 
@@ -327,8 +333,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_bom_code: i.pt_bom_code,
             pt_loc: i.pt_loc,
             pt_price: i.price,
+            line: line,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
+            bool05: false,
           });
         }
         const wOd = await workOrderDetailServiceInstance.findOne({

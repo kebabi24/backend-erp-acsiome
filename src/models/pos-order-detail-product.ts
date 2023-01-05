@@ -47,6 +47,7 @@ const OrderPosProductDetail = sequelize.define(
     pt_price_pos: Sequelize.DECIMAL,
     usrd_site: Sequelize.STRING,
     created_date: Sequelize.DATEONLY,
+    bool05: Sequelize.BOOLEAN,
   },
   {
     tableName: 'bb_order_pos_detail_product',
