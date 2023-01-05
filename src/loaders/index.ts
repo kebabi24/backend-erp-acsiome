@@ -37,7 +37,6 @@ export default async ({ expressApp }) => {
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
       { name: 'productLineModel', model: require('../models/product-line').default },
-
       { name: 'codeModel', model: require('../models/code').default },
       { name: 'accountModel', model: require('../models/account').default },
       { name: 'subaccountModel', model: require('../models/subaccount').default },
@@ -754,6 +753,8 @@ export default async ({ expressApp }) => {
     foreignKey: 'empt_code',
     targetKey: 'emp_addr',
   });
+
+  
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models

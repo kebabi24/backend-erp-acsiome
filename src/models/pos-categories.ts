@@ -5,7 +5,7 @@ import base from './base';
 const sequelize = Container.get('sequelize');
 
 const Categories = sequelize.define(
-  'category',
+  'categories',
   {
     id: {
       type: Sequelize.INTEGER,
