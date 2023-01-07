@@ -823,9 +823,12 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
         created_date: { [Op.between]: [req.body.date, req.body.date1] },
         site: req.body.site,
       },
-     
+      attributes: {
+        //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
+      },
     });
- 
+    
     return res.status(200).json({ message: 'fetched succesfully', data: orders });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -833,16 +836,21 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   }
 } else {
   try{  
-    console.log(req.body)
+    
     const orders = await PosOrderDetailServiceInstance.findgrp({
       where: {
         created_date: { [Op.between]: [req.body.date, req.body.date1] },
       
       },
      
-     
+        attributes: {
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+        include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
+    },
+      
+   
     });
- 
+   
     return res.status(200).json({ message: 'fetched succesfully', data: orders });
   } catch (e) {
     logger.error('🔥 error: %o', e);
