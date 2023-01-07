@@ -32,7 +32,7 @@ export default class inventoryTransactionService {
 
     public async find(query: any): Promise<any> {
         try {
-            const inventoryTransactions = await this.inventoryTransactionModel.findAll({ where: query ,include: this.itemModel})
+            const inventoryTransactions = await this.inventoryTransactionModel.findAll({ attributes: ['id',  'tr_part','item.pt_desc1','tr_type','tr_loc','tr_site','tr_loc_begin','tr_qty_loc','tr_serial','tr_price','tr_effdate','tr_date','tr_nbr','tr_status','tr_expire','tr_lot'], where: query ,include: this.itemModel})
             this.logger.silly("find All inventoryTransactions mstr")
             return inventoryTransactions
         } catch (e) {
@@ -41,6 +41,16 @@ export default class inventoryTransactionService {
         }
     }
 
+    public async findSpec(query: any): Promise<any> {
+        try {
+            const inventoryTransactions = await this.inventoryTransactionModel.findAll({where: query})
+            this.logger.silly("find All inventoryTransactions mstr")
+            return inventoryTransactions
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async findSpecial(query: any): Promise<any> {
         try {
             const inventoryTransactions = await this.inventoryTransactionModel.findAll(query)
