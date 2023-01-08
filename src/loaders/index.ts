@@ -163,9 +163,8 @@ export default async ({ expressApp }) => {
       { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
       { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
       { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
-
-      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -753,8 +752,6 @@ export default async ({ expressApp }) => {
     foreignKey: 'empt_code',
     targetKey: 'emp_addr',
   });
-
-  
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
