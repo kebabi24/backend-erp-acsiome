@@ -688,9 +688,9 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
 
-    if (req.body.usrd_site == '*') {
+    if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { created_date: req.body.created_date },
+        where: { created_date: { [Op.between]: [req.body.date, req.body.date1] }, },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -702,7 +702,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
       });
     } else {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+        where: { usrd_site: req.body.site, created_date:  { [Op.between]: [req.body.date, req.body.date1] }, },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -802,6 +802,55 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  
+    const PosOrderDetailServiceInstance = Container.get(PosOrder);
+    if(req.body.site != "*") {
+    try{  
+    const orders = await PosOrderDetailServiceInstance.findgrp({
+      where: {
+        created_date: { [Op.between]: [req.body.date, req.body.date1] },
+        site: req.body.site,
+      },
+      attributes: {
+        //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
+      },
+    });
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: orders });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+} else {
+  try{  
+    
+    const orders = await PosOrderDetailServiceInstance.findgrp({
+      where: {
+        created_date: { [Op.between]: [req.body.date, req.body.date1] },
+      
+      },
+     
+        attributes: {
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+        include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
+    },
+      
+   
+    });
+   
+    return res.status(200).json({ message: 'fetched succesfully', data: orders });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+
+};
+}
 export default {
   create,
   findOne,
@@ -815,4 +864,5 @@ export default {
   deleteOne,
   findAlll,
   createCALLCenterORDER,
+  findPosGrp,
 };

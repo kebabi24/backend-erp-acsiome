@@ -58,8 +58,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const devise = await inventoryTransactionServiceInstance.find({});
-    return res.status(200).json({ message: 'fetched succesfully', data: devise });
+    const trans = await inventoryTransactionServiceInstance.find({
+          }) ;
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: trans });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1527,6 +1529,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
+    
     const parts = await inventoryTransactionServiceInstance.findSpecial({
       where: {
         tr_site: req.body.tr_site,
@@ -1732,6 +1735,87 @@ const findDayly = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  console.log(req.body.date)
+  logger.debug("Calling find by  all saleOrder endpoint")
+  try {
+      console.log("hereherehere")
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+      const tr = await inventoryTransactionServiceInstance.findSpec({
+         
+              
+              tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+           
+      })
+     // console.log(tr)
+     
+      return res.status(201).json({ message: 'created succesfully', data: tr});
+      //return res2.status(201).json({ message: 'created succesfully', data: results_body });
+  } catch (e) {
+      //#
+      logger.error('🔥 error: %o', e);
+      return next(e);
+  }
+}
+
+
+const findTrType = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const itemServiceInstance = Container.get(itemService);
+   
+    const trs = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+      },
+      attributes: [
+        'tr_part',
+        'tr_site',
+        'tr_effdate',
+        'tr_type',
+        'tr_serial',
+        'tr_expire',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+        [Sequelize.fn('sum', Sequelize.col('tr_gl_amt')), 'amt'],
+        
+      ],
+      group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial','tr_expire'],
+      raw: true,
+    });
+
+    let result = []
+   var i = 1
+for(let tr of trs) {
+// console.log(part)
+const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part  });
+const effdate = new Date(tr.tr_effdate)  
+  result.push({
+    id: i,
+    desc: items.pt_desc1,
+    um: items.pt_um,
+    tr_part :tr.tr_part,
+    tr_site : tr.tr_site,
+    tr_effdate :  effdate.getUTCFullYear() + "-" + (effdate.getUTCMonth() + 1) + "-" + effdate.getUTCDate(),
+    tr_type : tr.tr_type,
+    tr_serial : tr.tr_serial,
+    tr_expire : tr.tr_serial,
+    qty : tr.qty,
+    amt : tr.amt,  
+  });
+  i = i + 1;
+
+}
+//console.log(result)
+  return res.status(200).json({ message: 'fetched succesfully', data: result });
+} catch (e) {
+  logger.error('🔥 error: %o', e);
+  return next(e);
+}
+};
+
 
 export default {
   create,
@@ -1752,6 +1836,8 @@ export default {
   rctWo,
   issWo,
   //issSo,
+  findtrDate,
+  findTrType,
   cycCnt,
   cycRcnt,
   findDayly,

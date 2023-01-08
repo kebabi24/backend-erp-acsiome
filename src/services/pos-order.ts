@@ -47,7 +47,16 @@ export default class posOrderService {
       throw e;
     }
   }
-
+  public async findgrp(query: any): Promise<any> {
+    try {
+      const orders = await this.posOrderModel.findAll(query );
+      this.logger.silly('find All orders mstr');
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findW(query: any): Promise<any> {
     try {
       const orders = await this.posOrderModel.findAll();
