@@ -1,4 +1,5 @@
 import { Service, Inject } from "typedi"
+const { Op } = require('sequelize')
 
 @Service()
 export default class codeService {
@@ -70,5 +71,57 @@ export default class codeService {
             throw e
         }
     }
+
+    public async getWilayas(query: any): Promise<any> {
+        try {
+            const wilayas = await this.codeModel.findAll({ 
+                where: query,
+                attributes : ["id","code_value","code_cmmt"] 
+            })
+            this.logger.silly("found all wilayas")
+            return wilayas
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getCommunes(query: any): Promise<any> {
+        try {
+            const communes = await this.codeModel.findAll({ 
+                where: query,
+                attributes : ["id","code_value","code_cmmt"] 
+            })
+            this.logger.silly("found all communes")
+            return communes
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getValidePromo(): Promise<any> {
+        try {
+          let today = new Date();
+          let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
+          const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
+          
+          const param = await this.codeModel.findOne({
+            where:
+              {
+                 code_fldname : "promo_open",
+                 date02 :  {[Op.gte]:new Date(dt)},
+                 date01 :  {[Op.lte]:new Date(dt)},
+                 bool01 :  true   
+              },
+             attributes:["id","code_fldname","code_cmmt","dec01","date01","date02","bool01"]
+            })
+            this.logger.silly("found promo ")
+            return param
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+      }
     
 }
