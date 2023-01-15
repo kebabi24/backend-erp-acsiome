@@ -59,6 +59,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const devise = await inventoryTransactionServiceInstance.find({});
+    console.log('devise : '+Object.keys(devise[0].dataValues))
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
     logger.error('🔥 error: %o', e);

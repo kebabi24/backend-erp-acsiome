@@ -7,6 +7,7 @@ import { randomBytes } from 'crypto';
 import { IUser, IUserInputDTO } from '../interfaces/IUser';
 import { EventDispatcher, EventDispatcherInterface } from '../decorators/eventDispatcher';
 import events from '../subscribers/events';
+import { Op } from 'sequelize/types';
 
 @Service()
 export default class AuthService {
@@ -124,4 +125,6 @@ export default class AuthService {
       config.jwtSecret,
     );
   }
+
+  
 }

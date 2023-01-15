@@ -136,5 +136,20 @@ declare global {
     export type complaintModel = S.Model;
     export type complaintDetailsModel = S.Model;
     export type SatisfactionModel = S.Model;
+    export type invoiceModel = S.Model;
+    // new models 
+    export type ListPriceModel = S.Model;
+    export type fidelityCardModel = S.Model;
+    export type InventoryModel = S.Model;
+    export type InventoryLineModel = S.Model;
+    export type cancelationReasonModel = S.Model;
+    export type paymentModel = S.Model;
+
+    // CRM models 
+    export type paramHeaderModel = S.Model;
+    export type paramDetailsModel = S.Model;
+    export type populationModel = S.Model;
+    export type agendaModel = S.Model;
+    export type agendaExecutionModel = S.Model;
   }
 }

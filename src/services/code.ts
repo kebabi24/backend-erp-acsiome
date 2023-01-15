@@ -114,7 +114,7 @@ export default class codeService {
                  date01 :  {[Op.lte]:new Date(dt)},
                  bool01 :  true   
               },
-             attributes:["id","code_fldname","code_cmmt","dec01","date01","date02","bool01"]
+             attributes:["id","code_fldname","code_value","code_cmmt","dec01","date01","date02","bool01"]
             })
             this.logger.silly("found promo ")
             return param
@@ -123,5 +123,33 @@ export default class codeService {
             throw e
         }
       }
+
+      public async getCRMSelfCall(): Promise<any> {
+        try {
+            const self_calls = await this.codeModel.findAll({ 
+                where: { code_fldname : "crm_self_call"},
+                attributes : ["id","code_value","bool01"] 
+            })
+            this.logger.silly("found all results")
+            return self_calls
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getAbsenceDayParam(): Promise<any> {
+        try {
+            const absenceDays = await this.codeModel.findOne({ 
+                where: { code_fldname : "crm_absence_days"},
+                attributes : ["id","code_value","int01"] 
+            })
+            this.logger.silly("found absenceDays ")
+            return absenceDays.dataValues.int01
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     
 }

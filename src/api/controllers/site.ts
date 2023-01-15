@@ -1,4 +1,8 @@
 import SiteService from "../../services/site"
+
+import crmService from '../../services/crm';
+import SequenceService from '../../services/sequence';
+
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -8,7 +12,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling Create site endpoint")
     try {
         const siteServiceInstance = Container.get(SiteService)
+        const crmServiceInstance = Container.get(crmService)
+        const sequenceServiceInstance = Container.get(SequenceService);
         const site = await siteServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        
+        // ADD TO AGENDA 
+        const param = await crmServiceInstance.getParamFilterd("new_shop")
+        const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+        const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
+        for(const element of elements ){
+            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+            const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
+            console.log(addLine)
+        }
+        
+        
         return res
             .status(201)
             .json({ message: "created succesfully", data:  site })

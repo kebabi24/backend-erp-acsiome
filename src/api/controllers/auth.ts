@@ -61,7 +61,8 @@ const createCustomer = async (req: Request, res: Response, next: NextFunction) =
             ad_type: 'OPN',
             ad_ref : data.gender,
             ad_ext : data.email,
-            ad_format : data.age,
+            // ad_format : data.age,
+            
 
             created_by: user_code,
             created_ip_adr: req.headers.origin,
@@ -72,7 +73,8 @@ const createCustomer = async (req: Request, res: Response, next: NextFunction) =
         const customerr = await customerServiceInstance.create({
             cm_addr: data.phone,
             cm_sort: data.name,
-            cm_high_date: data.age,
+            cm_high_date: data.birthdate,
+            cm_promo : data.promo_code,
             cm_disc_pct: data.discount_pct,
             cm_type: 'OPN',
             // wilaya ; commune , sexe , email , age 

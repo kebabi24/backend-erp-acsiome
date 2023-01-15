@@ -19,27 +19,19 @@ const Parameter = sequelize.define(
             unique: true
         },
         parameter_code: {
-            type: Sequelize.STRING, 
-            primaryKey: true,
-            unique: true
+            type: Sequelize.STRING,
         },
         parameter_name:{
-            type:Sequelize.STRING,
-            unique:true, 
+            type:Sequelize.STRING
         },
         description:{
-            type:Sequelize.STRING,
-            unique:true,
+            type:Sequelize.STRING
         },
         hold:{
             type: Sequelize.BOOLEAN,
         },
-        creation_customer:{
-            type: Sequelize.BOOLEAN,
-        },
         profile_code:{
             type: Sequelize.STRING,
-            unique: true,
             references: {
                 model: "aa_profile",
                 key: "profile_code",

@@ -204,6 +204,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
             const user_mobile_code = role.user_mobile_code; 
             const userMobile =  await userMobileServiceInstanse.getUser({user_mobile_code : user_mobile_code})
+            var users =[];
+            var profiles = [];
+            var role_controller = {};
+            var profile_controller = {};
             const profile = await userMobileServiceInstanse.getProfile({profile_code: userMobile.profile_code })
             const menus = await userMobileServiceInstanse.getMenus({ profile_code:userMobile.profile_code})
             const parameter = await userMobileServiceInstanse.getParameter({profile_code:userMobile.profile_code})
@@ -216,9 +220,28 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
             const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest)
             const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest)
             const locationDetail = await userMobileServiceInstanse.getLocationDetail(role.role_loc, role.role_site)
+            const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
+            const payments = await userMobileServiceInstanse.getPayments()
+            const cancelation_reasons = await userMobileServiceInstanse.getCancelationReasons()
+            const price_list = await userMobileServiceInstanse.getPriceList()
+            const invoices = await userMobileServiceInstanse.getInvoice()
+            const invoice_lines = await userMobileServiceInstanse.getInvoiceLine()
 
+            if(role['controller_role'] != null ){
+                role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
+                profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
+                const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
+                menus.push(...controller_menus)
+            }
+
+            users.push(userMobile,role_controller)
+            profiles.push(profile,profile_controller)
+            const index = parameter.map(elem => elem.parameter_code).indexOf ('service')
+            console.log(index)
+            
             // service created on backend 
-            if(parameter.hold === true){
+            if(parameter[index].hold === true){
+
 
                 const service  = await userMobileServiceInstanse.getService({role_code :role.role_code })
                 // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
@@ -262,7 +285,14 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         loadRequest:loadRequest,
                         loadRequestsLines:loadRequestsLines,
                         loadRequestsDetails:loadRequestsDetails,
-                        locationDetail:locationDetail
+                        locationDetail:locationDetail,
+                        paymentMethods:paymentMethods,
+                        payments: payments,
+                        cancelation_reasons:cancelation_reasons,
+                        price_list:price_list,
+                        invoices:invoices,
+                        invoice_lines:invoice_lines,
+
                     })
             }
             // service created by mobile user
@@ -310,7 +340,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
                         loadRequest:loadRequest,
                         loadRequestsLines:loadRequestsLines,
                         loadRequestsDetails:loadRequestsDetails,
-                        locationDetail:locationDetail
+                        locationDetail:locationDetail,
+                        paymentMethods:paymentMethods,
+                        payments: payments,
+                        cancelation_reasons:cancelation_reasons,
+                        price_list:price_list,
+                        invoices:invoices,
+                        invoice_lines:invoice_lines,
                     })
             }
         }      

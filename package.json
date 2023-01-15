@@ -14,7 +14,6 @@
     "lint:js": "npm run lint:eslint src/",
     "lint:fix": "npm run lint:js -- --fix"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/santiq/bulletproof-nodejs.git"
@@ -32,6 +31,7 @@
   "author": "Santiago Quinteros",
   "license": "ISC",
   "dependencies": {
+    "@types/sequelize": "^4.28.14",
     "agenda": "^2.0.2",
     "agendash": "^1.0.0",
     "argon2": "^0.28.5",

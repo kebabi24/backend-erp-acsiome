@@ -8,6 +8,7 @@ export default (app: Router) => {
 
   route.get('/', controller.findAll);
   route.post('/', controller.create);
+  route.get("/getCustomersBirthday", controller.findCustomersBirthday)
   route.get("/getReclamationCauses", controller.getReclamationCauses)
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
@@ -22,4 +23,5 @@ export default (app: Router) => {
   route.post("/createSatisfaction", controller.createSatisfaction)
   route.get("/getCustomer/:phone", controller.findCustomer)
   route.get("/getOrder/:order_code", controller.findOder)
+  route.get("/getComplaintData/:phone", controller.getComplaintData)
 };

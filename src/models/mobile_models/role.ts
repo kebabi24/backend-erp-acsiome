@@ -35,6 +35,14 @@ const Role = sequelize.define(
                 key: "user_mobile_code",
             },
         },
+        controller_role:{
+            type: Sequelize.STRING,
+            allowNull : true,
+            references: {
+                model: "aa_userMobile",
+                key: "user_mobile_code",
+            },
+        },
         token_serie_code:{
             type:Sequelize.STRING,
             unique: true,
@@ -43,8 +51,11 @@ const Role = sequelize.define(
                 key: "token_code",
             },
         },
+        upper_role_code:{type:Sequelize.STRING},
         role_loc:{ type:Sequelize.STRING},
-        role_site:{ type:Sequelize.STRING}
+        role_site:{ type:Sequelize.STRING},
+        role_loc_from :{ type:Sequelize.STRING},
+        // role_loc_from , string   , stock details - ld_det , stock info  - loc_mstr
         // ...base,
     },
     {

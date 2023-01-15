@@ -32,7 +32,8 @@ export default class inventoryTransactionService {
 
     public async find(query: any): Promise<any> {
         try {
-            const inventoryTransactions = await this.inventoryTransactionModel.findAll({ where: query ,include: this.itemModel})
+            const inventoryTransactions = await this.inventoryTransactionModel.findAll({ where: query })
+            // ,include: this.itemModel
             this.logger.silly("find All inventoryTransactions mstr")
             return inventoryTransactions
         } catch (e) {
