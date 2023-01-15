@@ -9,7 +9,7 @@ import base from "../base"
 const sequelize = Container.get("sequelize")
 
 const Category = sequelize.define(
-    "category",
+    "categoryMobile",
     {
         id: {
             type: Sequelize.INTEGER,

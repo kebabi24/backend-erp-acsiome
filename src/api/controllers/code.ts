@@ -43,7 +43,6 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.find({});
-    console.log(codes);
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -61,7 +60,7 @@ const findCheck = async (req: Request, res: Response, next: NextFunction) => {
     for (let code of codes) {
       data.push({ value: code.code_value, label: code.code_cmmt });
     }
-    console.log(data);
+    //data);
     return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -79,7 +78,7 @@ const findEmpTime = async (req: Request, res: Response, next: NextFunction) => {
     for (let code of codes) {
       data.push({ value: code.code_value, label: code.code_cmmt });
     }
-    console.log(data);
+  //  console.log(data);
     return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -92,12 +91,12 @@ const findConge = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.findsome({ code_fldname: 'empd_type' });
-    console.log(codes);
+    //console.log(codes);
     var data = [];
     for (let code of codes) {
       data.push({ value: code.code_value, label: code.code_cmmt });
     }
-    console.log(data);
+    //console.log(data);
     return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -115,7 +114,7 @@ const findModule = async (req: Request, res: Response, next: NextFunction) => {
     for (let code of codes) {
       data.push({ value: code.code_value, label: code.code_cmmt });
     }
-    console.log(data);
+    //console.log(data);
     return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -133,7 +132,7 @@ const findTrans = async (req: Request, res: Response, next: NextFunction) => {
     for (let code of codes) {
       data.push({ value: code.code_value, label: code.code_cmmt });
     }
-    console.log(data);
+    //console.log(data);
     return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -147,7 +146,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.find({ ...req.body });
-    console.log(req.body);
+    //console.log(req.body);
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
     logger.error('🔥 error: %o', e);

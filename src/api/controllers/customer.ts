@@ -37,25 +37,29 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerServiceInstance = Container.get(CustomerService);
     const adresseServiceInstance = Container.get(addresseService);
-    const customerr = await customerServiceInstance.create({
-      cm_addr: customer.customer_phone_one,
-      cm_sort: customer.customer_name,
-      cm_high_date: customer.customer_birthday,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
     const addr = await adresseServiceInstance.create({
-      ad_addr: customer.customer_phone_one,
-      ad_name: customer.customer_name,
-      ad_line1: customer.customer_addr,
+      ad_addr: customer.cm_addr,
+      ad_name: customer.cm_sort,
+      ad_line1: customer.cm_ar_sub,
       ad_type: 'customer',
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    const customerr = await customerServiceInstance.create({
+      cm_addr: customer.cm_addr,
+      cm_sort: customer.cm_sort,
+      cm_high_cr: customer.cm_high_cr,
+      cm_ar_sub: customer.cm_ar_sub,
+      cm_ar_acct: customer.cm_ar_acct,
+      cm_rmks: customer.cm_rmks,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
     return res.status(201).json({ message: 'created succesfully', data: { customer } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -63,6 +67,34 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { customer_number, type } = req.body;
+  logger.debug('Calling Create customer endpoint with body: %o', req.body);
+  try {
+    const customerServiceInstance = Container.get(CustomerService);
+    //const adresseServiceInstance = Container.get(addresseService);
+
+    const customerr = await customerServiceInstance.update(
+      {
+        cm_disc_pct: '25',
+        cm_sale_date: new Date(),
+        cm_high_date: new Date(),
+        cm_db: Math.random()
+          .toString(36)
+          .slice(2),
+        cm_type: type,
+      },
+      { cm_addr: customer_number },
+    );
+
+    return res.status(201).json({ message: 'created succesfully', data: null });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  customer endpoint');
@@ -199,14 +231,13 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-
-// CONTROLLERS FOR : RECLAMATION + SATISFACTION 
+// CONTROLLERS FOR : RECLAMATION + SATISFACTION
 
 const createComplaint = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get("logger")
-  const{user_code} = req.headers
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
 
-  logger.debug("Calling Create customer endpoint with body: %o", req.body)
+  logger.debug('Calling Create customer endpoint with body: %o', req.body);
   try {
       const customerServiceInstance = Container.get(CustomerService)
       const crmServiceInstance = Container.get(crmService)
@@ -235,6 +266,19 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
         });
         const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
       }
+    // CREATE COMPLAINT
+    const complaint = await customerServiceInstance.createComplaint({
+      ...complaintData,
+      complaint_date: complaint_date,
+      complaint_code: complaint_code,
+      status: 'open',
+    });
+
+    // CREATE COMPLAINT DETAILS
+    complaintDetailsData.forEach(detail => {
+      detail.complaint_code = complaint_code;
+    });
+    const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData);
 
       // CREATE CUSTOMER IF EXIST 
       if(customerData != null){
@@ -257,15 +301,14 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
           .status(201)
           .json({ message: "created succesfully", data: { complaint  , param , paramDetails , addLine} })
   } catch (e) {
-      logger.error("🔥 error: %o", e)
-      return next(e)
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
-
-}
+};
 
 const findCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get("logger")
-  logger.debug("Calling find one  customer endpoint")
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  customer endpoint');
   try {
       const customerServiceInstance = Container.get(CustomerService)
       
@@ -277,32 +320,30 @@ const findCustomer = async (req: Request, res: Response, next: NextFunction) => 
           .status(200)
           .json({ message: "fetched succesfully", data: customer  })
   } catch (e) {
-      logger.error("🔥 error: %o", e)
-      return next(e)
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
-}
+};
 
 const findOder = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get("logger")
-  logger.debug("Calling find one  order endpoint")
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  order endpoint');
   try {
-      const customerServiceInstance = Container.get(CustomerService)
-      
-      const {order_code} = req.params
-      const order = await customerServiceInstance.findOrder(order_code)
-      console.log(order)
-      return res
-          .status(200)
-          .json({ message: "fetched succesfully", data: order  })
+    const customerServiceInstance = Container.get(CustomerService);
+
+    const { order_code } = req.params;
+    const order = await customerServiceInstance.findOrder(order_code);
+    console.log(order);
+    return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
-      logger.error("🔥 error: %o", e)
-      return next(e)
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
-}
+};
 
 const getReclamationCauses = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get("logger")
-  logger.debug("Calling get reclamation causes endpoint")
+  const logger = Container.get('logger');
+  logger.debug('Calling get reclamation causes endpoint');
   try {
       const customerServiceInstance = Container.get(CustomerService)
    
@@ -312,18 +353,18 @@ const getReclamationCauses = async (req: Request, res: Response, next: NextFunct
           .status(200)
           .json({ message: "fetched succesfully", data: causes.causes , filtered_causes : causes_grouped  })
   } catch (e) {
-      logger.error("🔥 error: %o", e)
-      return next(e)
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
-}
+};
 
 const createSatisfaction = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get("logger")
-  const{user_code} = req.headers
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
 
-  logger.debug("Calling createSatisfaction endpoint with body: %o", req.body)
+  logger.debug('Calling createSatisfaction endpoint with body: %o', req.body);
   try {
-      const customerServiceInstance = Container.get(CustomerService)
+    const customerServiceInstance = Container.get(CustomerService);
 
       const satisfactionData = req.body.satisfactionData
       const complaintDetailsData = req.body.complaintDetailsData
@@ -361,8 +402,8 @@ const createSatisfaction = async (req: Request, res: Response, next: NextFunctio
           .status(201)
           .json({ message: "created succesfully", data: { satisfaction } })
   } catch (e) {
-      logger.error("🔥 error: %o", e)
-      return next(e)
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
 
 }
@@ -417,6 +458,7 @@ export default {
   getSolde,
   deleteOne,
   createCmPos,
+  setLoyCm,
   createComplaint,
   findCustomer,
   findOder,

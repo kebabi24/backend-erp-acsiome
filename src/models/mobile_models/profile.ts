@@ -8,8 +8,8 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const Profile = sequelize.define(
-    "profile",
+const ProfileMobile = sequelize.define(
+    "profileMobile",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -33,4 +33,4 @@ const Profile = sequelize.define(
         tableName: "aa_profile",
     }
 )
-export default  Profile ;
+export default  ProfileMobile ;

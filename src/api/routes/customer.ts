@@ -17,6 +17,7 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/cmPos', controller.createCmPos);
+  route.post('/setloy', controller.setLoyCm);
 
   // ROUTERS OF : RECLAMATION + SATISFACTION 
   route.post("/createComplaint", controller.createComplaint)

@@ -37,7 +37,6 @@ export default async ({ expressApp }) => {
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
       { name: 'productLineModel', model: require('../models/product-line').default },
-
       { name: 'codeModel', model: require('../models/code').default },
       { name: 'accountModel', model: require('../models/account').default },
       { name: 'subaccountModel', model: require('../models/subaccount').default },
@@ -160,7 +159,6 @@ export default async ({ expressApp }) => {
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
 
-      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
       
@@ -382,6 +380,15 @@ export default async ({ expressApp }) => {
   });
   require('../models/requisition-detail').default.belongsTo(require('../models/item').default, {
     foreignKey: 'rqd_part',
+    targetKey: 'pt_part',
+  });
+
+  require('../models/item').default.hasOne(require('../models/pos-order-detail-product').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/pos-order-detail-product').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'pt_part',
     targetKey: 'pt_part',
   });
   require('../models/provider').default.hasOne(require('../models/vendor-proposal').default, {
@@ -801,7 +808,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+  await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

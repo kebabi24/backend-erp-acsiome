@@ -24,4 +24,6 @@ export default (app: Router) => {
   route.post('/createposunp', controller.createPosUnp);
   route.post('/createposunpp', controller.createPosUnpp);
   route.post('/findAllpodRec', controller.getPodRec);
+  route.post('/findAllpo', controller.findAllPo);
+  route.post('/payPo', controller.payPo);
 };

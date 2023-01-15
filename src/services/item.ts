@@ -59,6 +59,22 @@ export default class ItemService {
     }
   }
 
+  public async findOnedesc(query: any): Promise<any> {
+    try {
+      const item = await this.itemModel.findOne({
+        where: query,
+        attributes: [
+          'pt_desc1'],
+        raw: true,
+      });
+      this.logger.silly('find one item mstr');
+      return item;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async findOneS(query: any): Promise<any> {
     try {
       const item = await this.itemModel.findOne({

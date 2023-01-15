@@ -28,13 +28,21 @@ const OrderPosProductIng = sequelize.define(
     pt_desc1: {
       type: Sequelize.STRING,
     },
+    pt_loc: {
+      type: Sequelize.STRING,
+    },
     pt_desc2: {
       type: Sequelize.STRING,
     },
     pt_price: {
       type: Sequelize.STRING,
     },
+    line: {
+      type: Sequelize.STRING,
+    },
     usrd_site: Sequelize.STRING,
+    created_date: Sequelize.DATEONLY,
+    bool05: Sequelize.BOOLEAN,
   },
   {
     tableName: 'bb_order_pos_detail_product_ing',

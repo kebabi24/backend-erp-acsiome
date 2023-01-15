@@ -21,94 +21,94 @@ export default class customersSercice {
         @Inject("logger") private logger
     ) {}
 
-    public async create(data: any): Promise<any> {
-        try {
-            const customer = await this.customerModel.create({ ...data })
-            this.logger.silly("customer", customer)
-            return customer
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  public async create(data: any): Promise<any> {
+    try {
+      const customer = await this.customerModel.create({ ...data });
+      this.logger.silly('customer', customer);
+      return customer;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-    
-    public async findOne(query: any): Promise<any> {
-        try {
-            const customer = await this.customerModel.findOne({ where: query,include: this.addressModel })
-            this.logger.silly("find one customer ")
-            return customer
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
+  }
 
-    public async find(query: any): Promise<any> {
-        try {
-            const customers = await this.customerModel.findAll({ where: query,include: this.addressModel})
-            this.logger.silly("find All customers ")
-            return customers
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  public async findOne(query: any): Promise<any> {
+    try {
+      const customer = await this.customerModel.findOne({ where: query, include: this.addressModel });
+      this.logger.silly('find one customer ');
+      return customer;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
 
-    public async update(data: any, query: any): Promise<any> {
-        try {
-            const customer = await this.customerModel.update(data, { where: query })
-            this.logger.silly("update one customer ")
-            return customer
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  public async find(query: any): Promise<any> {
+    try {
+      const customers = await this.customerModel.findAll({ where: query, include: this.addressModel });
+      this.logger.silly('find All customers ');
+      return customers;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
 
-    public async delete(query: any): Promise<any> {
-        try {
-            const customer = await this.customerModel.destroy({ where: query })
-            this.logger.silly("delete one customer ")
-            return customer
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  public async update(data: any, query: any): Promise<any> {
+    try {
+      const customer = await this.customerModel.update(data, { where: query });
+      this.logger.silly('update one customer ');
+      return customer;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
 
-    // NEW METHODS FOR : RECLAMATION & SATISFACTION
-    public async createComplaint(data: any): Promise<any> {
-        try {
-            const complaint = await this.complaintModel.create({ ...data })
-            this.logger.silly("complaint", complaint)
-            return complaint
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  public async delete(query: any): Promise<any> {
+    try {
+      const customer = await this.customerModel.destroy({ where: query });
+      this.logger.silly('delete one customer ');
+      return customer;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
 
-    public async createComplaintDetails(data: any): Promise<any> {
-        try {
-            const complaintDetails = await this.complaintDetailsModel.bulkCreate(data)
-            this.logger.silly("complaint details", complaintDetails)
-            return complaintDetails
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    } 
-
-    public async createSatisfaction(data: any): Promise<any> {
-        try {
-            const satisfaction = await this.satisfactionModel.create({ ...data })
-            this.logger.silly("satisfaction", satisfaction)
-            return satisfaction
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+  // NEW METHODS FOR : RECLAMATION & SATISFACTION
+  public async createComplaint(data: any): Promise<any> {
+    try {
+      const complaint = await this.complaintModel.create({ ...data });
+      this.logger.silly('complaint', complaint);
+      return complaint;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
+
+  public async createComplaintDetails(data: any): Promise<any> {
+    try {
+      const complaintDetails = await this.complaintDetailsModel.bulkCreate(data);
+      this.logger.silly('complaint details', complaintDetails);
+      return complaintDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async createSatisfaction(data: any): Promise<any> {
+    try {
+      const satisfaction = await this.satisfactionModel.create({ ...data });
+      this.logger.silly('satisfaction', satisfaction);
+      return satisfaction;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
     // FIND ONE CUSTOMER WITH RETURNING FEW FIELDS ONLY
     public async findCustomer(query: any): Promise<any> {
@@ -138,13 +138,13 @@ export default class customersSercice {
                 ad_ext : data.email,
             })
 
-            this.logger.silly("created new customer",customer )
-            return customer
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+      this.logger.silly('created new customer', customer);
+      return customer;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
+  }
 
     public async getReclamationCauses(): Promise<any> {
         try {
@@ -172,181 +172,24 @@ export default class customersSercice {
         }
     }
 
-    public async findOrder(query: any): Promise<any> {
-        try {
-            const order = await this.posOrderModel.findOne({
-                where:{order_code:query },
-                attributes: ["id","order_code","usrd_site","order_emp","created_date"]
-            })
+  public async findOrder(query: any): Promise<any> {
+    try {
+      const order = await this.posOrderModel.findOne({
+        where: { order_code: query },
+        attributes: ['id', 'order_code', 'usrd_site', 'order_emp', 'created_date'],
+      });
 
-            if(order){
-                const site = await this.siteModel.findOne({
-                    where : {si_site : order.usrd_site},
-                    attributes: ["si_desc"]
-                })
-                order.usrd_site = site.si_desc
-            }
+      const site = await this.siteModel.findOne({
+        where: { si_site: order.usrd_site },
+        attributes: ['si_desc'],
+      });
 
-            this.logger.silly("find one order ")
-            return order
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
+      order.usrd_site = site.si_desc;
+      this.logger.silly('find one order ');
+      return order;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
     }
-
-    // GET COMPLAINT SEQUENCE NUMBER : seq_mstr
-    public async getRecSeqNB(): Promise<any> {
-        try {
-            const sequence = await this.sequenceModel.findOne({
-                where:{seq_seq:"REC" },
-                attributes: ["seq_curr_val"]
-            })
-
-            let rec_nb = sequence.dataValues.seq_curr_val
-            
-            const update = await this.sequenceModel.increment(
-                'seq_curr_val',
-                {
-                    by:1 , 
-                    where:{seq_seq:"REC"}
-                })
-
-            
-        
-            this.logger.silly("find one order ")
-            return rec_nb
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }  
-
-    // GET COMPLAINT SEQUENCE NUMBER : seq_mstr
-    public async getSatSeqNB(): Promise<any> {
-        try {
-            const sequence = await this.sequenceModel.findOne({
-                where:{seq_seq:"SAT" },
-                attributes: ["seq_curr_val"]
-            })
-
-            let sat_nb = sequence.dataValues.seq_curr_val
-            
-            const update = await this.sequenceModel.increment(
-                'seq_curr_val',
-                {
-                    by:1 , 
-                    where:{seq_seq:"SAT"}
-                })
-
-            this.logger.silly("find one order ")
-            return sat_nb
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async findCustomersBirthdate(): Promise<any> {
-        try {
-            let today = new Date();
-            let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
-            const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
-            const customers = await this.customerModel.findAll({ 
-                attributes:["id","cm_addr","cm_high_date"],
-
-                where: {
-                    // [Op.and]: [
-                    //     Sequelize.fn('MONTH', Sequelize.col('cm_high_date')),
-                    // ],
-                    //   cm_high_date:  Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date'))),
-                    
-                    // cm_high_date :  {[Op.lte]:new Date(dt)}
-                },
-            })
-            let data = []
-            customers.forEach(customer => {
-                const date = new Date(customer.dataValues.cm_high_date)
-                if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
-                    data.push(customer.dataValues.cm_addr)
-                }
-            });
-
-            this.logger.silly("find one customers with birthdate today ")
-            return data
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async findCustomersBirthdateFirstOrder(): Promise<any> {
-        try {
-            let today = new Date();
-            let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
-            const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
-            const customers = await this.customerModel.findAll({ 
-                attributes:["id","cm_addr","cm_high_date","date01"],
-            })
-            let data = []
-            customers.forEach(customer => {
-                const date = new Date(customer.dataValues.date01)
-                if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
-                    data.push(customer.dataValues.cm_addr)
-                }
-            });
-
-            this.logger.silly("find one customers with birthday first order today ")
-            return data
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async findCustomersAbsent(differentDays : any): Promise<any> {
-        try {
-            
-            let today = new Date();
-            var diffrence = new Date(today.getFullYear(),today.getMonth(),today.getDate());
-            diffrence.setDate(diffrence.getDate()-differentDays);
-            let todayFormatted= diffrence.getFullYear().toString()+'-'+(diffrence.getMonth()+1).toString()+'-'+(diffrence.getDate()).toString()
-
-            const customers = await this.customerModel.findAll({ 
-                attributes:["id","cm_addr","cm_high_date","date02"],
-            })
-            let data = []
-            
-            customers.forEach(customer => {
-                const lastOrderDate = new Date(customer.dataValues.date02)
-                let orderDateFormatted = lastOrderDate.getFullYear().toString()+'-'+(lastOrderDate.getMonth()+1).toString()+'-'+(lastOrderDate.getDate()).toString()
-                // console.log(orderDateFormatted)
-                // console.log(todayFormatted)
-                // console.log(todayFormatted ===orderDateFormatted )
-                if(todayFormatted ===orderDateFormatted ){
-                    data.push(customer.dataValues.cm_addr)
-                }
-            });
-
-            this.logger.silly("find absent customers ")
-            return data
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    // FOR CRM : COMPLAINT DATA
-    public async getComplaintData(phone : any): Promise<any> {
-        try {
-            const complaint = await this.complaintModel.findOne({
-                where :{customer_phone :phone }
-             })
-            this.logger.silly("complaint", complaint)
-            return complaint
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
+  }
 }

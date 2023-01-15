@@ -2,6 +2,9 @@ import UserService from "../../services/user"
 import CustomerService from '../../services/customer';
 import addresseService from '../../services/address';
 import CodeService from "../../services/code"
+import CustomerService from '../../services/customer';
+import addresseService from '../../services/address';
+import CodeService from "../../services/code"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import argon2 from "argon2"

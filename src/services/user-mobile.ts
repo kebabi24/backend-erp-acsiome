@@ -4,7 +4,7 @@ import argon2 from 'argon2'
 export default class UserMobileService {
     constructor(
         @Inject("userMobileModel") private userMobileModel: Models.UserMobileModel,
-        @Inject("profileMobileModel") private profileMobileModel: Models.Profile_menuModel,
+        @Inject("profileMobileModel") private profileMobileModel: Models.ProfileModel,
         @Inject("roleModel") private roleModel: Models.RoleModel,
         @Inject("menuModel") private menuModel: Models.MenuModel,
         @Inject("profile_menuModel") private profile_menuModel: Models.Profile_menuModel,

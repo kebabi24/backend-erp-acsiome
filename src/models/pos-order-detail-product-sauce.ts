@@ -25,7 +25,16 @@ const OrderPosProductSauce = sequelize.define(
     pt_bom_code: {
       type: Sequelize.STRING,
     },
+    pt_loc: {
+      type: Sequelize.STRING,
+    },
     pt_desc1: {
+      type: Sequelize.STRING,
+    },
+    pt_desc2: {
+      type: Sequelize.STRING,
+    },
+    line: {
       type: Sequelize.STRING,
     },
     pt_ord_qty: {
@@ -35,6 +44,8 @@ const OrderPosProductSauce = sequelize.define(
       type: Sequelize.STRING,
     },
     usrd_site: Sequelize.STRING,
+    created_date: Sequelize.DATEONLY,
+    bool05: Sequelize.BOOLEAN,
   },
   {
     tableName: 'bb_order_pos_detail_product_sauce',
