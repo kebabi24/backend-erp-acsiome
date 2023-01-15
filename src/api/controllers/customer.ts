@@ -266,14 +266,6 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
         });
         const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
       }
-    // CREATE COMPLAINT
-    const complaint = await customerServiceInstance.createComplaint({
-      ...complaintData,
-      complaint_date: complaint_date,
-      complaint_code: complaint_code,
-      status: 'open',
-    });
-
     // CREATE COMPLAINT DETAILS
     complaintDetailsData.forEach(detail => {
       detail.complaint_code = complaint_code;

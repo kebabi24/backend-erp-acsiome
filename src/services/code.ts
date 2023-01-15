@@ -1,6 +1,5 @@
 import { Service, Inject } from "typedi"
 const { Op } = require('sequelize')
-const { Op } = require('sequelize')
 
 @Service()
 export default class codeService {
