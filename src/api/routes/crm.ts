@@ -7,6 +7,7 @@ export default (app: Router) => {
     app.use("/crm", route)
 
     route.get("/customerData/:phone", controller.getCustomerData)
+    route.get("/getPopulation/:code", controller.getPopulationByCode)
     route.get("/categories", controller.getParamCategories)
     route.get("/time_units", controller.getTimeUnits)
     route.get("/action_types", controller.getActionTypes)

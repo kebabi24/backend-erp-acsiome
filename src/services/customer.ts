@@ -192,4 +192,71 @@ export default class customersSercice {
       throw e;
     }
   }
+
+  // GET COMPLAINT SEQUENCE NUMBER : seq_mstr
+  public async getRecSeqNB(): Promise<any> {
+    try {
+        const sequence = await this.sequenceModel.findOne({
+            where:{seq_seq:"REC" },
+            attributes: ["seq_curr_val"]
+        })
+
+        let rec_nb = sequence.dataValues.seq_curr_val
+        
+        const update = await this.sequenceModel.increment(
+            'seq_curr_val',
+            {
+                by:1 , 
+                where:{seq_seq:"REC"}
+            })
+
+        
+    
+        this.logger.silly("find one order ")
+        return rec_nb
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}  
+
+// GET COMPLAINT SEQUENCE NUMBER : seq_mstr
+public async getSatSeqNB(): Promise<any> {
+    try {
+        const sequence = await this.sequenceModel.findOne({
+            where:{seq_seq:"SAT" },
+            attributes: ["seq_curr_val"]
+        })
+
+        let sat_nb = sequence.dataValues.seq_curr_val
+        
+        const update = await this.sequenceModel.increment(
+            'seq_curr_val',
+            {
+                by:1 , 
+                where:{seq_seq:"SAT"}
+            })
+
+        this.logger.silly("find one order ")
+        return sat_nb
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
+
+// FOR CRM : COMPLAINT DATA
+public async getComplaintData(phone : any): Promise<any> {
+  try {
+      const complaint = await this.complaintModel.findOne({
+          where :{customer_phone :phone }
+       })
+      this.logger.silly("complaint", complaint)
+      return complaint
+  } catch (e) {
+      this.logger.error(e)
+      throw e
+  }
+}
+
 }

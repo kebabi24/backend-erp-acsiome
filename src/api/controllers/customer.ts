@@ -266,11 +266,6 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
         });
         const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
       }
-    // CREATE COMPLAINT DETAILS
-    complaintDetailsData.forEach(detail => {
-      detail.complaint_code = complaint_code;
-    });
-    const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData);
 
       // CREATE CUSTOMER IF EXIST 
       if(customerData != null){

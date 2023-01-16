@@ -354,6 +354,22 @@ export default class CRMService {
     }
   }
 
+  public async getPopulationByCode(code : any): Promise<any> {
+    try {
+     
+      const population = await this.populationModel.findOne({
+            where:{ population_code : code}
+         })
+
+        
+        this.logger.silly("found population ")
+        return population
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
   public async getPopulationElements(population_code: any): Promise<any> {
     try {
      
