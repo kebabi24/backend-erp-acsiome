@@ -82,6 +82,7 @@ import posOrder from './routes/pos-order';
 import posOrderProductDetail from './routes/pos-order-detail-product';
 import employeTime from './routes/employe-time';
 import delivery from './routes/delivery';
+import forcast from './routes/forcast';
 
 // guaranteed to get dependencies
 export default () => {
@@ -170,5 +171,6 @@ export default () => {
   posOrder(app);
   posOrderProductDetail(app);
   delivery(app);
+  forcast(app);
   return app;
 };

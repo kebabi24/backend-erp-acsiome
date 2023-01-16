@@ -166,6 +166,7 @@ export default async ({ expressApp }) => {
 
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+      { name: 'forcastModel', model: require('../models/forcast').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -754,7 +755,23 @@ export default async ({ expressApp }) => {
     targetKey: 'emp_addr',
   });
 
-  
+  require('../models/pos-order').default.hasOne(require('../models/pos-order-detail-product').default, {
+    foreignKey: 'order_code',
+    sourceKey: 'order_code',
+  });
+  require('../models/pos-order-detail-product').default.belongsTo(require('../models/pos-order').default, {
+    foreignKey: 'order_code',
+    targetKey: 'order_code',
+  });
+
+  require('../models/site').default.hasOne(require('../models/forcast').default, {
+    foreignKey: 'frc_site',
+    sourceKey: 'si_site',
+  });
+  require('../models/forcast').default.belongsTo(require('../models/site').default, {
+    foreignKey: 'frc_site',
+    sourceKey: 'si_site',
+  });
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models

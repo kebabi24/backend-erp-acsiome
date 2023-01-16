@@ -136,5 +136,6 @@ declare global {
     export type complaintModel = S.Model;
     export type complaintDetailsModel = S.Model;
     export type SatisfactionModel = S.Model;
+    export type ForcastModel = S.Model;
   }
 }

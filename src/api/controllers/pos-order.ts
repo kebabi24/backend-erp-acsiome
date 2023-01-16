@@ -17,7 +17,6 @@ import mobileService from '../../services/mobile-service';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
-import { PosPrinter, PosPrintData, PosPrintOptions } from 'electron-pos-printer';
 import * as path from 'path';
 
 import { type } from 'os';
@@ -726,13 +725,14 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+     
 
       const parttypes = await codeServiceInstance.findOne({
         code_fldname: 'pt_part_type',
         code_value: items.pt_part_type,
       });
-      const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
-      const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+     // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+     // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
       // console.log(parttypes,groups,promos)
       result.push({
         id: i,
@@ -744,9 +744,9 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: isNull(groups) ? null : groups.code_cmmt,
-        promo: isNull(promos) ? null : promos.code_cmmt,
-        size: items.pt_size,
+        group: ord.pt_size //isNull(groups) ? null : groups.code_cmmt,
+       // promo: isNull(promos) ? null : promos.code_cmmt,
+       
       });
       i = i + 1;
     }

@@ -15,6 +15,10 @@ const OrderPosProductDetail = sequelize.define(
     },
     order_code: {
       type: Sequelize.STRING,
+      references:{
+        model: "bb_order_pos",
+        key: "order_code",
+    },
     },
     pt_part: {
       type: Sequelize.STRING,
