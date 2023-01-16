@@ -142,7 +142,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         del_comp: cart.del_comp,
         site_loc: cart.site_loc,
         from: cart.from,
-        bool05: false,
       });
     }
     !update &&
@@ -183,7 +182,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_price_pos: pt_price,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
-          bool05: false,
         });
       }
       await workOrderServiceInstance.create({
@@ -262,7 +260,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             pt_price: s.pt_price,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
-            bool05: false,
           });
         }
 
@@ -299,7 +296,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             line: line,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
-            bool05: false,
           });
         }
 
@@ -421,26 +417,19 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     const PosOrderProductSuppServiceInstance = Container.get(PosOrderProductSupp);
     const PosOrderProductSauceServiceInstance = Container.get(PosOrderProductSauce);
     const PosOrderProductIngServiceInstance = Container.get(PosOrderProductIng);
-    const workOrderServiceInstance = Container.get(workOrderService);
-    const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
-    const psServiceInstance = Container.get(psService);
+
     const SequenceServiceInstance = Container.get(SequenceService);
     const service = Container.get(mobileService);
-    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
-    const locationDetailServiceInstance = Container.get(locationDetailService);
-    const costSimulationServiceInstance = Container.get(costSimulationService);
-    const itemServiceInstance = Container.get(ItemService);
+
     const cart = req.body.cart;
     const products = req.body.cart.products;
     const user_site = req.body.user_site;
-    const detail = [];
+
     let update: boolean = false;
+
     const currentService = await service.findOne({ service_site: user_site, service_open: true });
     const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', chr01: user_site });
-    // console.log(cart);
-    console.log(sequence);
-    console.log(user_code);
-    console.log(cart);
+
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     await PosOrderServiceInstance.create({
       order_code: update ? cart.order_code : nbr,
@@ -448,7 +437,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       order_emp: cart.order_emp,
       status: 'A',
       customer: cart.customer,
-      created_date: currentService.service_period_activate_date,
+      created_date: new Date(),
       usrd_site: cart.usrd_site,
       loy_num: cart.loy_num,
       disc_amt: cart.disc_amt,
@@ -485,7 +474,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
         pt_qty_ord_pos: pt_qty,
         pt_price_pos: pt_price,
         usrd_site: cart.usrd_site,
-        created_date: currentService.service_period_activate_date,
+        created_date: new Date(),
       });
 
       const supp = product.suppliments;
@@ -503,6 +492,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_ord_qty: s.pt_ord_qty,
           pt_price: s.pt_price,
           usrd_site: cart.usrd_site,
+          created_date: new Date(),
         });
       }
       // console.log(sauce);
@@ -517,6 +507,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_ord_qty: sa.pt_ord_qty,
           pt_price: sa.pt_price,
           usrd_site: cart.usrd_site,
+          created_date: new Date(),
         });
       }
 
@@ -531,6 +522,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_desc2: i.pt_desc2,
           pt_price: i.price,
           usrd_site: cart.usrd_site,
+          created_date: new Date(),
         });
       }
     }

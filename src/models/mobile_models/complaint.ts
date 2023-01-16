@@ -27,13 +27,13 @@ const Complaint = sequelize.define(
         user_code:{type: Sequelize.STRING},
         customer_phone : {type:Sequelize.STRING}, // LINK
         status : {type:Sequelize.STRING},
-        // causes :{type: Sequelize.TEXT},
-        // complaint_details : {type:Sequelize.TEXT},
 
         order_code : {type: Sequelize.STRING},
         site_loc: {type:Sequelize.STRING},
         order_emp: {type:Sequelize.STRING},
-        created_date: {type:Sequelize.DATEONLY},
+        created_date: {type:Sequelize.DATEONLY}, //order creation date 
+
+        priority:{type: Sequelize.INTEGER}
 
 
         // ...base,

@@ -31,6 +31,20 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findOneByCode = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  category endpoint');
+  try {
+    const PosCategoryServiceInstance = Container.get(PosCategory);
+    const { code } = req.params;
+    const category = await PosCategoryServiceInstance.findOneByCode( code );
+    return res.status(200).json({ message: 'fetched succesfully', data: category });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all category endpoint');
@@ -92,4 +106,5 @@ export default {
   findBy,
   update,
   deleteOne,
+  findOneByCode,
 };

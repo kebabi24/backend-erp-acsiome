@@ -10,4 +10,7 @@ export default (app: Router) => {
     route.get("/getPhone/:phone", controller.getCustomerPhone)
     route.post("/verifypwd", controller.verifypwd)
     route.post("/createCustomer", controller.createCustomer)
+    route.get("/getNotifications", controller.getNotifications)
+    route.get("/getWilayasCommunes", controller.getWilayasCommunes)
+    route.get("/getValidePromo", controller.getValidePromo)
 }

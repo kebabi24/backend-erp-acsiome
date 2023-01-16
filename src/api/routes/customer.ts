@@ -8,7 +8,8 @@ export default (app: Router) => {
 
   route.get('/', controller.findAll);
   route.post('/', controller.create);
-  route.get('/getReclamationCauses', controller.getReclamationCauses);
+  route.get("/getCustomersBirthday", controller.findCustomersBirthday)
+  route.get("/getReclamationCauses", controller.getReclamationCauses)
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
   route.post('/findsolde', controller.getSolde);
@@ -18,9 +19,10 @@ export default (app: Router) => {
   route.post('/cmPos', controller.createCmPos);
   route.post('/setloy', controller.setLoyCm);
 
-  // ROUTERS OF : RECLAMATION + SATISFACTION
-  route.post('/createComplaint', controller.createComplaint);
-  route.post('/createSatisfaction', controller.createSatisfaction);
-  route.get('/getCustomer/:phone', controller.findCustomer);
-  route.get('/getOrder/:order_code', controller.findOder);
+  // ROUTERS OF : RECLAMATION + SATISFACTION 
+  route.post("/createComplaint", controller.createComplaint)
+  route.post("/createSatisfaction", controller.createSatisfaction)
+  route.get("/getCustomer/:phone", controller.findCustomer)
+  route.get("/getOrder/:order_code", controller.findOder)
+  route.get("/getComplaintData/:phone", controller.getComplaintData)
 };
