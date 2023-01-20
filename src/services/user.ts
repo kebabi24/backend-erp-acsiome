@@ -87,14 +87,31 @@ export default class UserService {
     }
   }
 
+  // cm_addr: data.phone,
+  // cm_sort: data.name,
+  // cm_high_date: data.birthdate,
+  // cm_promo : data.promo_code,
+  // cm_disc_pct: data.discount_pct,
+  // cm_type: 'OPN',
+
   public async getPhone(data: any): Promise<any> {
     try {
-      const phone = await this.customerModel.findOne({
+      const customer_data = await this.customerModel.findOne({
         where: { cm_addr: data },
+        attributes: ['id', 'cm_addr', 'cm_sort', 'cm_high_date', 'cm_promo', 'cm_disc_pct', 'cm_type'],
       });
 
-      this.logger.silly('results', phone);
-      return phone;
+      const addr = await this.addressModel.findOne({
+        where: { ad_addr: data },
+        attributes: ['ad_line1', 'ad_line2', 'ad_ref', 'ad_ext'],
+      });
+
+      customer_data.dataValues.wilaya = addr.ad_line1;
+      customer_data.dataValues.commune = addr.ad_line2;
+      (customer_data.dataValues.email = addr.ad_ext),
+        (customer_data.dataValues.gender = addr.ad_ref),
+        this.logger.silly('results', customer_data);
+      return customer_data;
     } catch (e) {
       this.logger.error(e);
       throw e;

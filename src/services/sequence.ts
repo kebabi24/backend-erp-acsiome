@@ -60,4 +60,34 @@ export default class sequenceService {
             throw e
         }
     }
+
+    // GET AGENDA EVENT SEQUENCE NUMBER
+    public async getCRMEVENTSeqNB(): Promise<any> {
+        try {
+            const sequence = await this.sequenceModel.findOne({
+                where:{seq_seq:"CRM-EVENT" },
+                attributes: ["seq_curr_val"]
+            })
+
+            let event_nb = sequence.dataValues.seq_curr_val
+            
+            const update = await this.sequenceModel.increment(
+                'seq_curr_val',
+                {
+                    by:1 , 
+                    where:{seq_seq:"CRM-EVENT"}
+                })
+
+            
+        
+            this.logger.silly("find one order ")
+            return event_nb
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    } 
+
+    
+    
 }

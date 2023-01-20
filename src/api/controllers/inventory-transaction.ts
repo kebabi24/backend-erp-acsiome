@@ -58,9 +58,9 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const trans = await inventoryTransactionServiceInstance.find({});
-
-    return res.status(200).json({ message: 'fetched succesfully', data: trans });
+    const devise = await inventoryTransactionServiceInstance.find({});
+    console.log('devise : ' + Object.keys(devise[0].dataValues));
+    return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

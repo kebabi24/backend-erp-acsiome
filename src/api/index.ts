@@ -82,7 +82,11 @@ import posOrder from './routes/pos-order';
 import posOrderProductDetail from './routes/pos-order-detail-product';
 import employeTime from './routes/employe-time';
 import delivery from './routes/delivery';
+<<<<<<< HEAD
 import synchro from './routes/synchro';
+=======
+import crm from './routes/crm';
+>>>>>>> 8f837220ee24f7aa3dd80ad8e694e71d47fdb14c
 
 // guaranteed to get dependencies
 export default () => {
@@ -171,6 +175,10 @@ export default () => {
   posOrder(app);
   posOrderProductDetail(app);
   delivery(app);
+<<<<<<< HEAD
   synchro(app);
+=======
+  crm(app);
+>>>>>>> 8f837220ee24f7aa3dd80ad8e694e71d47fdb14c
   return app;
 };

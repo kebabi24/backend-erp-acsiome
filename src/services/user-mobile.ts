@@ -30,6 +30,12 @@ export default class UserMobileService {
         @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
         @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
         @Inject("locationDetailModel") private locationDetailModel: Models.LocationDetailModel,
+        @Inject("paymentMethodModel") private paymentMethodModel: Models.PayMethModel,
+        @Inject("paymentModel") private paymentModel: Models.paymentModel,
+        @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
+        @Inject("priceListModel") private priceListModel: Models.PricelistModel,
+        @Inject("invoiceModel") private invoiceModel: Models.invoiceModel,
+        @Inject("invoiceLineModel") private invoiceLineModel: Models.InventoryLineModel,
         @Inject("logger") private logger
     ) {}
 
@@ -127,8 +133,9 @@ export default class UserMobileService {
     // ******************** GET PARAMETER **************************
     public async getParameter(query: any): Promise<any> {
         try {
-            const parameter = await this.parameterModel.findOne({ where: query})
-            return parameter.dataValues;
+            const parameter = await this.parameterModel.findAll({ where: query})
+            console.log(parameter)
+            return parameter;
         } catch (e) {
             console.log('Error from service-getParameter')
             this.logger.error(e)
@@ -702,9 +709,10 @@ export default class UserMobileService {
                 { where: {pt_part : productsCodes},
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
-                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking']
+                    'pt_net_wt','pt_net_wt_um','pt_article']
                     },
                 )  
+                // missing fields : 'pt_loadpacking' , ,'pt_salepacking'
             return products;
         } catch (e) {
             console.log('Error from getProducts - service ')
@@ -782,6 +790,80 @@ export default class UserMobileService {
         }
         // this.logger.silly("find one user mstr")
     }
+
+    // ******************** GET PAYMENT METHOD  **************************
+    public async getPaymentMethods(): Promise<any> {
+        try {
+            const paymentMethods = await this.paymentMethodModel.findAll()
+            return paymentMethods
+        } catch (e) {
+            console.log('Error from service- getPaymentMethods')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET PAYMENT BY CUSTOMERS CODES  **************************
+    public async getPayments(): Promise<any> {
+        try {
+            const payment = await this.paymentModel.findAll()
+            return payment
+        } catch (e) {
+            console.log('Error from service- getPayments')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CANCELATION REASONS   **************************
+    public async getCancelationReasons(): Promise<any> {
+        try {
+            const cancelation_reasons = await this.cancelationReasonModel.findAll()
+            return cancelation_reasons
+        } catch (e) {
+            console.log('Error from service- getCancelationReasons')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET PRICELIST    **************************
+    public async getPriceList(): Promise<any> {
+        try {
+            const price_list = await this.priceListModel.findAll()
+            return price_list
+        } catch (e) {
+            console.log('Error from service- getPriceList')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET INVOICE    **************************
+    public async getInvoice(): Promise<any> {
+        try {
+            const invoice = await this.invoiceModel.findAll()
+            return invoice
+        } catch (e) {
+            console.log('Error from service- getInvoice')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET INVOICE LINE    **************************
+    public async getInvoiceLine(): Promise<any> {
+        try {
+            const invoice_line = await this.invoiceLineModel.findAll()
+            return invoice_line
+        } catch (e) {
+            console.log('Error from service- getInvoiceLine')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
 
    
 }

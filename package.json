@@ -31,6 +31,7 @@
   "author": "Santiago Quinteros",
   "license": "ISC",
   "dependencies": {
+    "@types/sequelize": "^4.28.14",
     "agenda": "^2.0.2",
     "agendash": "^1.0.0",
     "argon2": "^0.28.5",

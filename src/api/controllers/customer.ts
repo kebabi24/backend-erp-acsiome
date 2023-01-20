@@ -2,9 +2,12 @@ import CustomerService from '../../services/customer';
 import AccountReceivableService from '../../services/account-receivable';
 import accountShiperService from '../../services/account-shiper';
 import addresseService from '../../services/address';
+import crmService from '../../services/crm';
+import SequenceService from '../../services/sequence';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op } from 'sequelize';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -25,6 +28,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -131,6 +135,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 const getSolde = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
@@ -234,48 +239,54 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
 
   logger.debug('Calling Create customer endpoint with body: %o', req.body);
   try {
-    const customerServiceInstance = Container.get(CustomerService);
-    const complaintData = req.body.complaintData;
-    const customerData = req.body.customerData;
-    const complaintDetailsData = req.body.complaintDetailsData;
-    console.log(req.body);
-    // created_by:user_code
-    let today = new Date();
-    let now =
-      today.getFullYear() +
-      '-' +
-      (today.getMonth() + 1) +
-      '-' +
-      today.getDate() +
-      ' ' +
-      today.getHours() +
-      ':' +
-      String(today.getMinutes()).padStart(2, '0') +
-      ':' +
-      String(today.getSeconds()).padStart(2, '0');
-    let complaint_date = now + '.63682+01';
-    let hash = Math.floor(1000 + Math.random() * 9000);
-    let complaint_code = Date.now() + '-code-' + hash.toString();
+      const customerServiceInstance = Container.get(CustomerService)
+      const crmServiceInstance = Container.get(crmService)
+      const sequenceServiceInstance = Container.get(SequenceService);
 
-    // CREATE COMPLAINT
-    const complaint = await customerServiceInstance.createComplaint({
-      ...complaintData,
-      complaint_date: complaint_date,
-      complaint_code: complaint_code,
-      status: 'open',
-    });
+      const complaintData = req.body.complaintData
+      const customerData = req.body.customerData
+      const complaintDetailsData = req.body.complaintDetailsData
+      const req_code = await customerServiceInstance.getRecSeqNB()
+    
+      let today = new Date();
+      let now =  (today.getMonth()+1)  +'/'+  today.getDate() +'/'+ today.getFullYear()   +' '+today.getHours()+':'+String(today.getMinutes()).padStart(2,"0")+':'+String(today.getSeconds()).padStart(2,"0");
+      let complaint_date = now+'.955+00'
+      console.log('complaint_date in controller : ' + complaint_date)
+      let date_code = today.getFullYear()  +'-'+ (today.getMonth()+1)  +'-'+ today.getDate()
+      let complaint_code = date_code+'-'+req_code.toString()
 
-    // CREATE COMPLAINT DETAILS
-    complaintDetailsData.forEach(detail => {
-      detail.complaint_code = complaint_code;
-    });
-    const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData);
+      // CREATE COMPLAINT 
+      const complaint = await customerServiceInstance.createComplaint({...complaintData , complaint_date :complaint_date, complaint_code:complaint_code ,status:'open' , user_code :user_code })
+      
+      // CREATE COMPLAINT DETAILS 
+      if(complaintDetailsData != null){
 
-    // CREATE CUSTOMER IF EXIST
-    if (Object.keys(customerData).length > 0) {
-      const customer = await customerServiceInstance.createCustomer(customerData);
-    }
-    return res.status(201).json({ message: 'created succesfully', data: { complaint } });
+        complaintDetailsData.forEach(detail => {
+            detail.complaint_code = complaint_code
+        });
+        const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
+      }
+
+      // CREATE CUSTOMER IF EXIST 
+      if(customerData != null){
+        if( Object.keys(customerData).length > 0){
+          const customer = await customerServiceInstance.createCustomer(customerData)
+          
+      }
+      }
+
+      // ADD TO AGENDA 
+      let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
+
+      const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+      const param = await crmServiceInstance.getParam(searchDate)
+      const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+      const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone,param,paramDetails, sequence)
+      
+
+      return res
+          .status(201)
+          .json({ message: "created succesfully", data: { complaint  , param , paramDetails , addLine} })
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -286,12 +297,15 @@ const findCustomer = async (req: Request, res: Response, next: NextFunction) => 
   const logger = Container.get('logger');
   logger.debug('Calling find one  customer endpoint');
   try {
-    const customerServiceInstance = Container.get(CustomerService);
-
-    const { phone } = req.params;
-    const customer = await customerServiceInstance.findCustomer(phone);
-    console.log(customer);
-    return res.status(200).json({ message: 'fetched succesfully', data: customer });
+      const customerServiceInstance = Container.get(CustomerService)
+      
+      const {phone} = req.params
+      console.log(req.params)
+      const customer = await customerServiceInstance.findCustomer(phone)
+      console.log(customer)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: customer  })
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -318,11 +332,13 @@ const getReclamationCauses = async (req: Request, res: Response, next: NextFunct
   const logger = Container.get('logger');
   logger.debug('Calling get reclamation causes endpoint');
   try {
-    const customerServiceInstance = Container.get(CustomerService);
-
-    const causes = await customerServiceInstance.getReclamationCauses();
-    console.log(causes);
-    return res.status(200).json({ message: 'fetched succesfully', data: causes });
+      const customerServiceInstance = Container.get(CustomerService)
+   
+      const causes = await customerServiceInstance.getReclamationCauses()
+      const causes_grouped = causes.filtered_causes
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: causes.causes , filtered_causes : causes_grouped  })
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -337,58 +353,87 @@ const createSatisfaction = async (req: Request, res: Response, next: NextFunctio
   try {
     const customerServiceInstance = Container.get(CustomerService);
 
-    const satisfactionData = req.body.satisfactionData;
-    const complaintDetailsData = req.body.complaintDetailsData;
-    const order_code = satisfactionData.order_code;
+      const satisfactionData = req.body.satisfactionData
+      const complaintDetailsData = req.body.complaintDetailsData
+      const order_code = satisfactionData.order_code
+      const req_code = await customerServiceInstance.getRecSeqNB()
+      const sat_code = await customerServiceInstance.getSatSeqNB()
+      
 
-    // created_by:user_code
-    let today = new Date();
-    let now =
-      today.getFullYear() +
-      '-' +
-      (today.getMonth() + 1) +
-      '-' +
-      today.getDate() +
-      ' ' +
-      today.getHours() +
-      ':' +
-      String(today.getMinutes()).padStart(2, '0') +
-      ':' +
-      String(today.getSeconds()).padStart(2, '0');
-    let hash = Math.floor(1000 + Math.random() * 9000);
+      // created_by:user_code
+      let today = new Date();
+      let now =  today.getFullYear()  +'-'+ (today.getMonth()+1)  +'-'+ today.getDate()   +' '+today.getHours()+':'+String(today.getMinutes()).padStart(2,"0")+':'+String(today.getSeconds()).padStart(2,"0");
+      let date_code = today.getFullYear()  +'-'+ (today.getMonth()+1)  +'-'+ today.getDate()
 
-    let satisfaction_date = now + '.63682+01';
-    let satisfaction_code = Date.now() + '-code-' + hash.toString();
+      let complaint_code = date_code+'-'+req_code.toString()
+      let satisfaction_code = date_code+'-'+sat_code.toString()
 
-    // CREATE SATISFACTION
-    const satisfaction = await customerServiceInstance.createSatisfaction({
-      ...satisfactionData,
-      satisfaction_date: satisfaction_date,
-      satisfaction_code: satisfaction_code,
-    });
+      let satisfaction_date = now+'.63682+01'
+      
+      // CREATE SATISFACTION 
+      const satisfaction = await customerServiceInstance.createSatisfaction({...satisfactionData , satisfaction_date :satisfaction_date, satisfaction_code:satisfaction_code ,user_code:user_code })
+      
+      // THERE IS A COMPLAINT 
+      if( complaintDetailsData.length > 0){
+          // CREATE COMPLAINT 
+          const complaint = await customerServiceInstance.createComplaint({ complaint_date :satisfaction_date, complaint_code:complaint_code ,status:'open' , order_code:order_code , user_code:user_code , priority:0})
+          // CREATE COMPLAINT DETAILS 
+          complaintDetailsData.forEach(detail => {
+              detail.complaint_code = satisfaction_code
+          });
+          const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData)
+      }
 
-    // THERE IS A COMPLAINT
-    if (complaintDetailsData.length > 0) {
-      // CREATE COMPLAINT
-      const complaint = await customerServiceInstance.createComplaint({
-        complaint_date: satisfaction_date,
-        complaint_code: satisfaction_code,
-        status: 'open',
-        order_code: order_code,
-      });
-      // CREATE COMPLAINT DETAILS
-      complaintDetailsData.forEach(detail => {
-        detail.complaint_code = satisfaction_code;
-      });
-      const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData);
-    }
-
-    return res.status(201).json({ message: 'created succesfully', data: { satisfaction } });
+     
+      return res
+          .status(201)
+          .json({ message: "created succesfully", data: { satisfaction } })
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
-};
+
+}
+
+// FOR TESTS ONLY
+const findCustomersBirthday = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find one  customer endpoint")
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+      
+      
+      const customers = await customerServiceInstance.findCustomersBirthdate()
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", count:customers.length , data: customers  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
+// FOR CRM
+const getComplaintData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find one  customer endpoint")
+  try {
+      const customerServiceInstance = Container.get(CustomerService)
+      const { phone } = req.params;
+
+      const complaint = await customerServiceInstance.getComplaintData(phone)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully",  data: complaint  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
+
+
+
 
 export default {
   create,
@@ -406,4 +451,9 @@ export default {
   findOder,
   getReclamationCauses,
   createSatisfaction,
+  findCustomersBirthday,
+  getComplaintData
 };
+
+
+
