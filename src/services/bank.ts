@@ -62,4 +62,14 @@ export default class banksSercice {
       throw e;
     }
   }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.bankModel.upsert(query.bank);
+      this.logger.silly('update one pss mstr');
+      return site;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

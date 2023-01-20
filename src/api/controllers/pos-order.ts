@@ -21,6 +21,7 @@ import { PosPrinter, PosPrintData, PosPrintOptions } from 'electron-pos-printer'
 import * as path from 'path';
 
 import { type } from 'os';
+import posCategoriesService from '../../services/pos-categories';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -129,7 +130,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)}`;
-    if (cart.from !== 'CALL CENTER') {
+    if (cart.plateforme !== 'CALL CENTER') {
       await PosOrderServiceInstance.create({
         order_code: update ? cart.order_code : nbr,
         total_price: cart.total_price,
@@ -142,7 +143,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         disc_amt: cart.disc_amt,
         del_comp: cart.del_comp,
         site_loc: cart.site_loc,
-        from: cart.from,
+        plateforme: cart.plateforme,
       });
     }
     !update &&
@@ -167,7 +168,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         pt_loc,
       } = product;
       // console.log('pt_loc', pt_loc);
-      if (cart.from !== 'CALL CENTER') {
+      if (cart.plateforme !== 'CALL CENTER') {
         await PosOrderDetailServiceInstance.create({
           order_code: currentProduct.order_code,
           pt_part: pt_part,
@@ -247,7 +248,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const ingredients = product.ingredients;
 
       for (const s of supp) {
-        if (cart.from !== 'CALL CENTER') {
+        if (cart.plateforme !== 'CALL CENTER') {
           await PosOrderProductSuppServiceInstance.create({
             order_code: currentProduct.order_code,
             pt_part: pt_part,
@@ -283,7 +284,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       // console.log(sauce);
       for (const sa of sauce) {
-        if (cart.from !== 'CALL CENTER') {
+        if (cart.plateforme !== 'CALL CENTER') {
           await PosOrderProductSauceServiceInstance.create({
             order_code: currentProduct.order_code,
             pt_part: pt_part,
@@ -319,7 +320,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
 
       for (const i of ingredients) {
-        if (cart.from !== 'CALL CENTER') {
+        if (cart.plateforme !== 'CALL CENTER') {
           await PosOrderProductIngServiceInstance.create({
             order_code: currentProduct.order_code,
             pt_part: pt_part,
@@ -444,7 +445,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       disc_amt: cart.disc_amt,
       del_comp: cart.del_comp,
       site_loc: cart.site_loc,
-      from: cart.from,
+      plateforme: cart.plateforme,
     });
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
     for (const product of products) {
@@ -559,13 +560,14 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const service = Container.get(mobileService);
     const currentService = await service.findOne({ role_code: user_code, service_open: true });
     const { Op } = require('sequelize');
-    console.log(currentService);
-
+    // console.log(currentService);
+    console.log(currentService.service_period_activate_date);
     const PosOrderServiceInstance = Container.get(PosOrder);
     const order = await PosOrderServiceInstance.find({
       status: { [Op.notLike]: 'P' },
       created_date: currentService.service_period_activate_date,
     });
+    console.log(order);
 
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
@@ -690,7 +692,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
 
     if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { created_date: { [Op.between]: [req.body.date, req.body.date1] }, },
+        where: { created_date: { [Op.between]: [req.body.date, req.body.date1] } },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -702,7 +704,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
       });
     } else {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { usrd_site: req.body.site, created_date:  { [Op.between]: [req.body.date, req.body.date1] }, },
+        where: { usrd_site: req.body.site, created_date: { [Op.between]: [req.body.date, req.body.date1] } },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -803,54 +805,60 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const createOrder = (socket, data) => {
+  const PosOrderDetailServiceInstance = Container.get(PosOrder);
+  console.log('socket connected');
+
+  socket.emit('readyToRecieve');
+
+  socket.on('sendData', data => {
+    console.log(data.data.customers);
+  });
+};
+
 const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
-  
-    const PosOrderDetailServiceInstance = Container.get(PosOrder);
-    if(req.body.site != "*") {
-    try{  
-    const orders = await PosOrderDetailServiceInstance.findgrp({
-      where: {
-        created_date: { [Op.between]: [req.body.date, req.body.date1] },
-        site: req.body.site,
-      },
-      attributes: {
-        //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-          include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
-      },
-    });
-    
-    return res.status(200).json({ message: 'fetched succesfully', data: orders });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
-} else {
-  try{  
-    
-    const orders = await PosOrderDetailServiceInstance.findgrp({
-      where: {
-        created_date: { [Op.between]: [req.body.date, req.body.date1] },
-      
-      },
-     
-        attributes: {
-      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-        include:[[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']]
-    },
-      
-   
-    });
-   
-    return res.status(200).json({ message: 'fetched succesfully', data: orders });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
 
+  const PosOrderDetailServiceInstance = Container.get(PosOrder);
+  if (req.body.site != '*') {
+    try {
+      const orders = await PosOrderDetailServiceInstance.findgrp({
+        where: {
+          created_date: { [Op.between]: [req.body.date, req.body.date1] },
+          site: req.body.site,
+        },
+        attributes: {
+          //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          include: [[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']],
+        },
+      });
+
+      return res.status(200).json({ message: 'fetched succesfully', data: orders });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  } else {
+    try {
+      const orders = await PosOrderDetailServiceInstance.findgrp({
+        where: {
+          created_date: { [Op.between]: [req.body.date, req.body.date1] },
+        },
+
+        attributes: {
+          //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          include: [[Sequelize.literal('(total_price * 100 / (100 - disc_amt))- total_price'), 'Remise']],
+        },
+      });
+
+      return res.status(200).json({ message: 'fetched succesfully', data: orders });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  }
 };
-}
 export default {
   create,
   findOne,
@@ -865,4 +873,5 @@ export default {
   findAlll,
   createCALLCenterORDER,
   findPosGrp,
+  createOrder,
 };

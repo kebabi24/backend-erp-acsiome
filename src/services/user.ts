@@ -7,9 +7,9 @@ export default class UserService {
     @Inject('profileModel') private profileModel: Models.ProfileModel,
     @Inject('addressModel') private addressModel: Models.AddressModel,
     @Inject('customerModel') private customerModel: Models.CustomerModel,
-    @Inject("codeModel") private codeModel: Models.CodeModel,
-    @Inject("purchaseOrderModel")
-        private purchaseOrderModel: Models.PurchaseOrderModel,
+    @Inject('codeModel') private codeModel: Models.CodeModel,
+    @Inject('purchaseOrderModel')
+    private purchaseOrderModel: Models.PurchaseOrderModel,
     @Inject('posOrderModel') private posOrderModel: Models.posOrderModel,
     @Inject('logger') private logger,
   ) {}
@@ -90,7 +90,7 @@ export default class UserService {
   public async getPhone(data: any): Promise<any> {
     try {
       const phone = await this.customerModel.findOne({
-        where: { cm_addr: data }
+        where: { cm_addr: data },
       });
 
       this.logger.silly('results', phone);
@@ -104,13 +104,12 @@ export default class UserService {
   public async createCustomer(data: any): Promise<any> {
     try {
       const customerAdr = await this.addressModel.create({
-        ad_addr: data.phone, 
+        ad_addr: data.phone,
         ad_name: data.name,
-        ad_format: data.age, 
-        ad_ref: data.gender, 
-        ad_line1: data.commune, 
-        ad_ext: data.email,  
-        
+        ad_format: data.age,
+        ad_ref: data.gender,
+        ad_line1: data.commune,
+        ad_ext: data.email,
       });
 
       const customer = await this.customerModel.create({
@@ -130,8 +129,8 @@ export default class UserService {
   public async getNewPurchaseOrders(): Promise<any> {
     try {
       const orders = await this.purchaseOrderModel.findAll({
-        where :{ po_stat : "p"},
-        attributes:['id','po_nbr','po_vend','po_ord_date']
+        where: { po_stat: 'p' },
+        attributes: ['id', 'po_nbr', 'po_vend', 'po_ord_date'],
       });
 
       this.logger.silly('created new orders', orders);
@@ -145,8 +144,8 @@ export default class UserService {
   public async getNewOrders(): Promise<any> {
     try {
       const orders = await this.posOrderModel.findAll({
-        where :{ status : "A"},
-        attributes:['id','order_code','customer','order_emp']
+        where: { status: 'A' },
+        attributes: ['id', 'order_code', 'customer', 'order_emp'],
       });
 
       this.logger.silly('found new orders', orders);
@@ -156,7 +155,14 @@ export default class UserService {
       throw e;
     }
   }
-
- 
-
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.userModel.upsert(query.user);
+      this.logger.silly('update one user mstr');
+      return site;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

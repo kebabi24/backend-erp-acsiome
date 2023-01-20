@@ -172,4 +172,14 @@ export default class customersSercice {
       throw e;
     }
   }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.customerModel.upsert(query.customer);
+      this.logger.silly('update one customer mstr');
+      return site;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }
