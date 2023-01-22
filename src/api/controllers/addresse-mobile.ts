@@ -5,7 +5,8 @@ import user from "./user"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
     logger.debug("Calling Create address endpoint with body: %o", req.body)
     try {
         const addresseMobileServiceInstance = Container.get(AddresseMobileService)
@@ -49,7 +50,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 }
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling update one  provider endpoint")
     try {

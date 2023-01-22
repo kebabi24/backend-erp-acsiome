@@ -10,7 +10,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const hostname = os.networkInterfaces()
     console.log(hostname)
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
     const customerMobileData = req.body
     console.log(customerMobileData)
     console.log(req.body)

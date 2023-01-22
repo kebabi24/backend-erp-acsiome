@@ -5,7 +5,8 @@ import { DATE, Op } from 'sequelize';
 import exchangeRate from '../routes/exchange-rate';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling Create exchangeRate endpoint');
   try {
@@ -72,7 +73,8 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
   logger.debug('Calling update one  exchangeRate endpoint');
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);

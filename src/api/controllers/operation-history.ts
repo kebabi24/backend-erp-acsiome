@@ -147,7 +147,8 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling update one  site endpoint")
     try {
