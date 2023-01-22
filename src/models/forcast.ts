@@ -18,6 +18,7 @@ const Forcast = sequelize.define(
         frc_year: Sequelize.INTEGER,
         frc_month: Sequelize.INTEGER,
         frc_day: Sequelize.INTEGER,
+        frc_dayname: Sequelize.STRING,
         frc_date: Sequelize.DATEONLY,
         frc_site:  {
             type: Sequelize.STRING,
@@ -28,7 +29,9 @@ const Forcast = sequelize.define(
 
         },
         frc_cust: Sequelize.STRING,
+        frc_type:Sequelize.STRING,
         frc_part: Sequelize.STRING,
+        frc_dsgn_grp: Sequelize.STRING,
         frc_part_type: Sequelize.STRING,
         frc_part_group: Sequelize.STRING,
         frc_promo: Sequelize.STRING,

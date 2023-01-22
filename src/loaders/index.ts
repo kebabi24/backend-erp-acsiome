@@ -118,6 +118,7 @@ export default async ({ expressApp }) => {
       { name: 'costsubModel', model: require('../models/costsub').default },
       { name: 'costaccountModel', model: require('../models/costaccount').default },
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
+      { name: 'forcastModel', model: require('../models/forcast').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -183,6 +184,7 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
+      
 
     
     ],
@@ -806,27 +808,6 @@ export default async ({ expressApp }) => {
     targetKey: 'emp_addr',
   });
 
-<<<<<<< HEAD
-  require('../models/pos-order').default.hasOne(require('../models/pos-order-detail-product').default, {
-    foreignKey: 'order_code',
-    sourceKey: 'order_code',
-  });
-  require('../models/pos-order-detail-product').default.belongsTo(require('../models/pos-order').default, {
-    foreignKey: 'order_code',
-    targetKey: 'order_code',
-  });
-
-  require('../models/site').default.hasOne(require('../models/forcast').default, {
-    foreignKey: 'frc_site',
-    sourceKey: 'si_site',
-  });
-  require('../models/forcast').default.belongsTo(require('../models/site').default, {
-    foreignKey: 'frc_site',
-    sourceKey: 'si_site',
-  });
-
-=======
->>>>>>> 1554af99738701ce20b3ef27bb95c439ede7784b
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   await sequelizeConnection.sync();

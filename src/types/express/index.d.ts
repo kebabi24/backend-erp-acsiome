@@ -137,6 +137,7 @@ declare global {
     export type complaintDetailsModel = S.Model;
     export type SatisfactionModel = S.Model;
     export type invoiceModel = S.Model;
+    export type forcastModel = S.Model;
     // new models 
     export type ListPriceModel = S.Model;
     export type fidelityCardModel = S.Model;

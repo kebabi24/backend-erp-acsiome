@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken"
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
-    console.log(req.body)
+    //console.log("hnhnhn",req.body)
     try {
         
         const userServiceInstance = Container.get(UserService)
@@ -29,6 +29,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         if (await argon2.verify(user.usrd_pwd, password)) {
            
             const token = jwt.sign({ user: user.id }, "acsiome")
+            
             return res
                 .status(200)
                 .json({ message: "succesfully", data: { user, token } })
