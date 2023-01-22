@@ -7,9 +7,9 @@ export default class UserService {
     @Inject('profileModel') private profileModel: Models.ProfileModel,
     @Inject('addressModel') private addressModel: Models.AddressModel,
     @Inject('customerModel') private customerModel: Models.CustomerModel,
-    @Inject("codeModel") private codeModel: Models.CodeModel,
-    @Inject("purchaseOrderModel")
-        private purchaseOrderModel: Models.PurchaseOrderModel,
+    @Inject('codeModel') private codeModel: Models.CodeModel,
+    @Inject('purchaseOrderModel')
+    private purchaseOrderModel: Models.PurchaseOrderModel,
     @Inject('posOrderModel') private posOrderModel: Models.posOrderModel,
     @Inject('logger') private logger,
   ) {}
@@ -98,20 +98,19 @@ export default class UserService {
     try {
       const customer_data = await this.customerModel.findOne({
         where: { cm_addr: data },
-        attributes :["id","cm_addr","cm_sort","cm_high_date","cm_promo","cm_disc_pct","cm_type"]
+        attributes: ['id', 'cm_addr', 'cm_sort', 'cm_high_date', 'cm_promo', 'cm_disc_pct', 'cm_type'],
       });
 
       const addr = await this.addressModel.findOne({
-      
-          where : {ad_addr: data},
-          attributes:["ad_line1","ad_line2","ad_ref","ad_ext"]
-        })
-      
-      customer_data.dataValues.wilaya = addr.ad_line1
-      customer_data.dataValues.commune = addr.ad_line2
-      customer_data.dataValues.email = addr.ad_ext,
-      customer_data.dataValues.gender = addr.ad_ref,
-      this.logger.silly('results', customer_data);
+        where: { ad_addr: data },
+        attributes: ['ad_line1', 'ad_line2', 'ad_ref', 'ad_ext'],
+      });
+
+      customer_data.dataValues.wilaya = addr.ad_line1;
+      customer_data.dataValues.commune = addr.ad_line2;
+      (customer_data.dataValues.email = addr.ad_ext),
+        (customer_data.dataValues.gender = addr.ad_ref),
+        this.logger.silly('results', customer_data);
       return customer_data;
     } catch (e) {
       this.logger.error(e);
@@ -122,13 +121,12 @@ export default class UserService {
   public async createCustomer(data: any): Promise<any> {
     try {
       const customerAdr = await this.addressModel.create({
-        ad_addr: data.phone, 
+        ad_addr: data.phone,
         ad_name: data.name,
-        ad_format: data.age, 
-        ad_ref: data.gender, 
-        ad_line1: data.commune, 
-        ad_ext: data.email,  
-        
+        ad_format: data.age,
+        ad_ref: data.gender,
+        ad_line1: data.commune,
+        ad_ext: data.email,
       });
 
       const customer = await this.customerModel.create({
@@ -148,8 +146,8 @@ export default class UserService {
   public async getNewPurchaseOrders(): Promise<any> {
     try {
       const orders = await this.purchaseOrderModel.findAll({
-        where :{ po_stat : "p"},
-        attributes:['id','po_nbr','po_vend','po_ord_date']
+        where: { po_stat: 'p' },
+        attributes: ['id', 'po_nbr', 'po_vend', 'po_ord_date'],
       });
 
       this.logger.silly('created new orders', orders);
@@ -163,8 +161,8 @@ export default class UserService {
   public async getNewOrders(): Promise<any> {
     try {
       const orders = await this.posOrderModel.findAll({
-        where :{ status : "A"},
-        attributes:['id','order_code','customer','order_emp']
+        where: { status: 'A' },
+        attributes: ['id', 'order_code', 'customer', 'order_emp'],
       });
 
       this.logger.silly('found new orders', orders);
@@ -174,7 +172,14 @@ export default class UserService {
       throw e;
     }
   }
-
- 
-
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.userModel.upsert(query.user);
+      this.logger.silly('update one user mstr');
+      return site;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

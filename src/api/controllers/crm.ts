@@ -322,6 +322,23 @@ const { Op } = require('sequelize')
     }
   }
 
+  const getPopulationByCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPopulationByCode endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+        const { code } = req.params;
+        const populations = await crmServiceInstance.getPopulationByCode(code)
+   
+        return res
+            .status(200)
+            .json({ message: "population search results", data: populations  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
   const getCustomerData = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling getCustomerData endpoint")
@@ -377,6 +394,7 @@ export default {
     getCustomers,
     createPopulation,
     getPopulations,
+    getPopulationByCode,
     getEventResults,
     getCustomerData,
     createAgendaExecutionLine

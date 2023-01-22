@@ -83,6 +83,7 @@ import posOrderProductDetail from './routes/pos-order-detail-product';
 import employeTime from './routes/employe-time';
 import delivery from './routes/delivery';
 import forcast from './routes/forcast';
+import synchro from './routes/synchro';
 import crm from './routes/crm';
 
 // guaranteed to get dependencies
@@ -172,6 +173,7 @@ export default () => {
   posOrder(app);
   posOrderProductDetail(app);
   delivery(app);
+  synchro(app);
   crm(app);
   forcast(app);
   return app;

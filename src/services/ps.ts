@@ -122,4 +122,14 @@ export default class psService {
       throw e;
     }
   }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.psModel.upsert(query.pss);
+      this.logger.silly('update one pss mstr');
+      return site;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

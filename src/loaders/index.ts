@@ -150,7 +150,7 @@ export default async ({ expressApp }) => {
       { name: 'itinerary_CustomerModel', model: require('../models/mobile_models/itinerary_customer').default },
       { name: 'productPageDetailsModel', model: require('../models/mobile_models/product_page_details').default },
       { name: 'profileProductPageModel', model: require('../models/mobile_models/profile_product_page').default },
-      
+
       { name: 'posCategoryModel', model: require('../models/pos-categories').default },
       { name: 'posCategoryProductModel', model: require('../models/pos-category-product').default },
       { name: 'posProductModel', model: require('../models/pos-product').default },
@@ -162,11 +162,11 @@ export default async ({ expressApp }) => {
 
       { name: 'deliveryModel', model: require('../models/delivery').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
-      
+
       { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
       { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
       { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
-      
+
       { name: 'priceListModel', model: require('../models/mobile_models/price_list').default },
       { name: 'fidelityCardModel', model: require('../models/mobile_models/fidelity_card').default },
       { name: 'cancelationReasonModel', model: require('../models/mobile_models/cancelation_reason').default },
@@ -177,8 +177,8 @@ export default async ({ expressApp }) => {
       // WAS ALREADY COMMENTED
       // { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
       // { name: 'InventoryLineModel', model: require('../mobile_models/inventory_line').default },
-      
-      // CRM 
+
+      // CRM
       { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
       { name: 'agendaExecutionModel', model: require('../models/mobile_models/agenda_execution').default },
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
@@ -286,31 +286,30 @@ export default async ({ expressApp }) => {
     require('../models/mobile_models/itinerary').default,
     { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
   );
-  
 
   // 03 / 12 / 2022 NEW RELATIONS
-  require('../models/mobile_models/service').default.hasOne(
-    require('../models/mobile_models/inventory').default,
-    { foreignKey: 'service_code', sourceKey: 'service_code' },
-  );
-  require('../models/mobile_models/inventory').default.belongsTo(
-    require('../models/mobile_models/service').default,
-    { foreignKey: 'service_code', targetKey: 'service_code' },
-  );
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'service_code',
+    sourceKey: 'service_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'service_code',
+    targetKey: 'service_code',
+  });
 
-  require('../models/mobile_models/role').default.hasOne(
-    require('../models/mobile_models/inventory').default,
-    { foreignKey: 'role_code', sourceKey: 'role_code' },
-  );
-  require('../models/mobile_models/inventory').default.belongsTo(
-    require('../models/mobile_models/role').default,
-    { foreignKey: 'role_code', targetKey: 'role_code' },
-  );
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'role_code',
+    sourceKey: 'role_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/role').default, {
+    foreignKey: 'role_code',
+    targetKey: 'role_code',
+  });
 
-  require('../models/mobile_models/invoice').default.hasOne(
-    require('../models/mobile_models/invoice_line').default,
-    { foreignKey: 'invoice_code', sourceKey: 'invoice_code' },
-  );
+  require('../models/mobile_models/invoice').default.hasOne(require('../models/mobile_models/invoice_line').default, {
+    foreignKey: 'invoice_code',
+    sourceKey: 'invoice_code',
+  });
   require('../models/mobile_models/invoice_line').default.belongsTo(
     require('../models/mobile_models/invoice').default,
     { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
@@ -367,7 +366,6 @@ export default async ({ expressApp }) => {
     targetKey: 'seq_seq',
   });
 
-  
   require('../models/provider').default.hasOne(require('../models/requisition').default, {
     foreignKey: 'rqm_vend',
     sourceKey: 'vd_addr',
@@ -512,7 +510,7 @@ export default async ({ expressApp }) => {
 
   // require('../models/exchange-rate').default.hasOne(require('../models/currency').default,{foreignKey: 'cu_curr',sourceKey: 'exr_curr2'})
   // require('../models/currency').default.belongsTo(require('../models/exchange-rate').default,{  foreignKey: 'cu_curr', targetKey: 'exr_curr2'})
-  
+
   require('../models/sale-shiper').default.belongsTo(require('../models/item').default, {
     foreignKey: 'psh_part',
     targetKey: 'pt_part',

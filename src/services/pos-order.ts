@@ -49,7 +49,7 @@ export default class posOrderService {
   }
   public async findgrp(query: any): Promise<any> {
     try {
-      const orders = await this.posOrderModel.findAll(query );
+      const orders = await this.posOrderModel.findAll(query);
       this.logger.silly('find All orders mstr');
       return orders;
     } catch (e) {
@@ -78,11 +78,11 @@ export default class posOrderService {
       });
 
       const service_date = service.dataValues.service_period_activate_date;
-      console.log(service_date);
+      // console.log(service_date);
       const orders = await this.posOrderModel.findOne({
         where: { order_code: order_code, created_date: service_date, usrd_site: usrd_site },
       });
-      console.log(orders);
+      // console.log(orders);
       const o = orders.dataValues;
       // console.log(o.created_date);
       const currentOrder = {
@@ -93,14 +93,14 @@ export default class posOrderService {
         total_price: o.total_price,
         created_date: o.created_date,
         products: [],
-        from: o.from,
+        plateforme: o.plateforme,
       };
       const pro = await this.posOrderDetailProductModel.findAll({
         where: { order_code: o.order_code, created_date: service_date, usrd_site: usrd_site },
       });
       // console.log(pro);
       for (const p of pro) {
-        console.log(p);
+        // console.log(p);
         const product = {
           id: '',
           pt_part: '',

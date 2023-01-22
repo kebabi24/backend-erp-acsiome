@@ -9,6 +9,7 @@ import { setTimeout } from 'timers';
 import { emit } from 'process';
 
 import userMobileController from './api/controllers/user-mobile';
+import posOrderController from './api/controllers/pos-order';
 
 async function startServer() {
   const app = express();
@@ -20,7 +21,6 @@ async function startServer() {
    * So we are using good old require.
    **/
   await require('./loaders').default({ expressApp: app });
-
 
   const server = app.listen(config.port, err => {
     if (err) {
@@ -37,7 +37,13 @@ async function startServer() {
   });
 
   const io = require('socket.io')(server);
-  io.on('connection', userMobileController.getDataBack);
+  io.on('connection', socket => {
+    console.log('new connection');
+
+    socket.on('createOrder', data => posOrderController.createOrder(socket, data));
+
+    socket.on('disconnect', () => console.log('disconnected'));
+  });
 }
 
 startServer();
