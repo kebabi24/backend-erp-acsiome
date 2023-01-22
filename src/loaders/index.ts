@@ -158,6 +158,7 @@ export default async ({ expressApp }) => {
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
 
       { name: 'deliveryModel', model: require('../models/delivery').default },
