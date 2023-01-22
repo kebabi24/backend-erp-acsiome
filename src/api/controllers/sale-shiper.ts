@@ -12,7 +12,8 @@ import {QueryTypes} from 'sequelize'
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling Create code endpoint');
   try {
@@ -157,7 +158,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling update one  code endpoint');
   try {

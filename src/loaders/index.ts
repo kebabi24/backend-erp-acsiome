@@ -118,6 +118,7 @@ export default async ({ expressApp }) => {
       { name: 'costsubModel', model: require('../models/costsub').default },
       { name: 'costaccountModel', model: require('../models/costaccount').default },
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
+      { name: 'forcastModel', model: require('../models/forcast').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -157,6 +158,7 @@ export default async ({ expressApp }) => {
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
 
       { name: 'deliveryModel', model: require('../models/delivery').default },
@@ -183,6 +185,9 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
+      
+
+    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -804,16 +809,16 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
-  // await sequelizeConnection
-  //   .sync({ alter: true })
-  //   .then(() => {
-  //     console.log('database updated');
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //   });
+  await sequelizeConnection
+    .sync({ alter: true })
+    .then(() => {
+      console.log('database updated');
+    })
+    .catch(err => {
+      console.log(err);
+    });
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

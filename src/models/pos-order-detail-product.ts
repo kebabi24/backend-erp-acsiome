@@ -15,6 +15,7 @@ const OrderPosProductDetail = sequelize.define(
     },
     order_code: {
       type: Sequelize.STRING,
+      
     },
     pt_part: {
       type: Sequelize.STRING,
