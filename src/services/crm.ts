@@ -324,6 +324,17 @@ export default class CRMService {
     }
   }
 
+  public async createOneAgendaLine(data:any): Promise<any> {
+    try {
+        const line = await this.agendaModel.create(data)
+        this.logger.silly("created agenda line ")
+        return line
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
   public async createPopulation(data:any): Promise<any> {
     try {
         const population = await this.populationModel.bulkCreate(data)
@@ -423,7 +434,6 @@ export default class CRMService {
                 order : eventHeader.order+1
               }})
               console.log(updatedAgendaLine2)
-
          }
        }
 
@@ -435,6 +445,29 @@ export default class CRMService {
         throw e
     }
   }
+
+  // UPDATE ALL 4 SUB EVENT OF AN EVENT VISIBILITY TO FALSE
+  public async updateEventStatus(codeEvent : any ): Promise<any> {
+    try {
+     
+      
+          const updatedLines = await this.agendaModel.update(
+            {visibility:false},
+            {where :{
+              code_event : codeEvent,
+            }})
+       
+
+        
+        this.logger.silly("created agendaExecutionLine ")
+        return updatedLines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+
 }
 
 function addSeconds(date, seconds) {

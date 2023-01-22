@@ -162,7 +162,7 @@ const { Op } = require('sequelize')
             }
         }
 
-        // BIRTHDAYS2 : CLIENTS
+        // BIRTHDAYS2 : ORDER
         if(birthdays2){
              const clients = await customerServiceInstance.findCustomersBirthdateFirstOrder()
              const param = await crmServiceInstance.getParamFilterd("birthdays_2")
@@ -177,14 +177,14 @@ const { Op } = require('sequelize')
             }
         }
 
-        // BIRTHDAYS2 : CLIENTS
+        // ABSENCE
         if(absence){
             const absence_days = await codeServiceInstance.getAbsenceDayParam()
             const clients = await customerServiceInstance.findCustomersAbsent(absence_days)
             const param = await crmServiceInstance.getParamFilterd("absence")
-             if(param != null && clients.length > 0){
-                       const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
-                       for(const client of clients ){
+            if(param != null && clients.length > 0){
+                const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+                for(const client of clients ){
                            const sequenceServiceInstance = Container.get(SequenceService);
                            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
                            const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence)   
@@ -194,17 +194,22 @@ const { Op } = require('sequelize')
              
         }
 
-        // BIRTHDAYS2 : CLIENTS
+        // RANDOM
         if(random){
-            // const param = await crmServiceInstance.getParamFilterd("random")
-            // const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
-            //  const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
-            // for(const element of elements ){
-            //     const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-            //     const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
-            //     console.log(addLine)
-            // }
-            // console.log(elements)
+             const sequenceServiceInstance = Container.get(SequenceService);
+             const param = await crmServiceInstance.getParamFilterd("random")
+             const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+             const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
+             console.log(paramDetails.dataValues.population_nb)
+             const max_value = elements.length 
+             const nb = paramDetails.dataValues.population_nb
+             let selected_random_indexes = selectRandomIndexes(max_value, nb) 
+            
+            for(const index of selected_random_indexes ){
+                const element = elements[index]
+                const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
+            }
              
         }
 
@@ -213,6 +218,31 @@ const { Op } = require('sequelize')
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: events  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
+  const createOneAgendaLine = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getEventsByDay endpoint")
+    try {
+
+        const crmServiceInstance = Container.get(CRMService)
+
+        const {newEventData} = req.body
+
+        console.log(req.body)
+      
+        const addLine = await crmServiceInstance.createOneAgendaLine(newEventData) 
+        
+        const updatedLines = await crmServiceInstance.updateEventStatus(newEventData.code_event)
+                    
+                
+        return res
+            .status(200)
+            .json({ message: "created one agenda line", data: addLine  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -381,6 +411,19 @@ const { Op } = require('sequelize')
     }
   }
 
+  // FOR CRM : RANDOM : to select nb random unique indexes between 0 and max_value
+  const selectRandomIndexes = (max_value , nb)=>{
+    let selectedIndexes = []
+    while (selectedIndexes.length < nb){
+        const new_value = Math.floor(Math.random() * (max_value))
+        const index = selectedIndexes.indexOf(new_value)
+        if(index == -1 ){
+         selectedIndexes.push(new_value)
+        }
+     }
+    return  selectedIndexes
+  }   
+
 
 
 
@@ -397,5 +440,6 @@ export default {
     getPopulationByCode,
     getEventResults,
     getCustomerData,
-    createAgendaExecutionLine
+    createAgendaExecutionLine,
+    createOneAgendaLine
 }
