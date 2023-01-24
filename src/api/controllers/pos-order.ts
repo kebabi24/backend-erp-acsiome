@@ -821,12 +821,13 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all order endpoint');
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
+  console.log(req.body)
   if (req.body.site != '*') {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
-          site: req.body.site,
+          usrd_site: req.body.site,
         },
         attributes: {
           //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
