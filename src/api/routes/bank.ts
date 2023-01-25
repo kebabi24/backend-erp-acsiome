@@ -20,4 +20,5 @@ export default (app: Router) => {
   route.post('/bk', controller.Bk);
   route.post('/prP', controller.proccesPayement);
   route.post('/createFRequest', controller.createFRequest);
+  route.post('/findbankgrp', controller.findBkhGrp);
 };

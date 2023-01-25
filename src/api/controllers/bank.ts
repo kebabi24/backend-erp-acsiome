@@ -7,6 +7,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import sequenceService from '../../services/sequence';
 import serviceMobile from '../../services/mobile-service';
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
@@ -416,6 +417,108 @@ const updatedet = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+
+  const bkhServiceInstance = Container.get(BkhService);
+  
+
+  
+  if (req.body.site != '*') {
+    try {
+      const orders = await bkhServiceInstance.findq({
+        where: {
+          bkh_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+          bkh_site: req.body.site,
+        },
+        order: [
+         
+          ['id', 'ASC'],
+        ]
+      });
+      
+      let result = [];
+      var i = 1;
+      for (let ord of orders) {
+       // const effdate = new Date(ord.bkh_effdate);
+       // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+       // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+        // console.log(parttypes,groups,promos)
+        result.push({
+          id: i,
+          effdate: ord.bkh_effdate,
+          date: ord.bkh_date,
+          site: ord.bkh_site,
+          code: ord.bkh_code,
+          balance: ord.bkh_balance,
+          O: (ord.bkh_type =="O"? ord.bkh_balance : 0),
+          R: (ord.bkh_type =="R"? ord.dec01 : 0),
+          D: (ord.bkh_type =="D"? ord.dec01 : 0),
+          C: (ord.bkh_type =="C"? ord.bkh_balance : 0),
+          num: ord.bkh_num_doc,
+         
+         
+        });
+        i = i + 1;
+      }
+      return res.status(200).json({ message: 'fetched succesfully', data: result });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  } else {
+    try {
+     // console.log(req.body)
+     console.log(req.body.date1, )
+      const orders = await bkhServiceInstance.findq({
+        where: {
+          bkh_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+        },
+        order: [
+         
+          ['id', 'ASC'],
+        ]
+        // attributes: {
+        //   //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+        //   include: [[Sequelize.literal('(bkh_type == "O")?bkh_2000'), 'Open']],
+        // },
+      });
+
+let result = [];
+var i = 1;
+for (let ord of orders) {
+  
+ // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+ // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+  // console.log(parttypes,groups,promos)
+  result.push({
+    id: i,
+    effdate:ord.bkh_effdate,
+    date:ord.bkh_date,
+    site: ord.bkh_site,
+    code: ord.bkh_code,
+    balance: ord.bkh_balance,
+    O: (ord.bkh_type =="O"? ord.bkh_balance : 0),
+    R: (ord.bkh_type =="R"? ord.dec01 : 0),
+    D: (ord.bkh_type =="D"? ord.dec01 : 0),
+    C: (ord.bkh_type =="C"? ord.bkh_balance : 0),
+    num: ord.bkh_num_doc,
+   
+   
+  });
+  i = i + 1;
+}
+
+//console.log(result)
+      return res.status(200).json({ message: 'fetched succesfully', data: result });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  }
+};
+
 export default {
   create,
   findBy,
@@ -430,4 +533,5 @@ export default {
   Bk,
   proccesPayement,
   createFRequest,
+  findBkhGrp,
 };

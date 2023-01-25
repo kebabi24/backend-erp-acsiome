@@ -688,7 +688,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
-
+console.log(req.body)
     if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
         where: { created_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -821,7 +821,7 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all order endpoint');
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
-  console.log(req.body)
+  
   if (req.body.site != '*') {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
