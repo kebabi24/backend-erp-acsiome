@@ -41,13 +41,13 @@ export default class psService {
         include: this.itemModel,
         attributes: ['id', 'ps_parent', 'ps_comp', 'ps_qty_per', 'ps_scrp_pct'],
       });
-      const t = await sequelize.query(
-        "SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",
-        {
-          type: QueryTypes.SELECT,
-        },
-      );
-      console.log(t);
+      // const t = await sequelize.query(
+      //   "SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",
+      //   {
+      //     type: QueryTypes.SELECT,
+      //   },
+      // );
+      // console.log(t);
       this.logger.silly('find All pss mstr');
 
       return pss;

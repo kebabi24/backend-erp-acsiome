@@ -663,7 +663,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
-
+//console.log( "here",req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
       attributes: [
@@ -675,7 +675,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
       group: ['pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
-
+//console.log(orders)
     let result = [];
     var i = 1;
     for (let ord of orders) {

@@ -103,11 +103,11 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const psServiceInstance = Container.get(PsService);
     const itemServiceInstance = Container.get(ItemService);
     const ldServiceInstance = Container.get(LocationDetailService);
-    console.log(req.body);
+    //console.log(req.body);
     const result = [];
     var j = 1;
     for (let obj of details) {
-      console.log(obj.part, obj.prod_qty, obj.bom);
+      //console.log(obj.part, obj.prod_qty, obj.bom);
       const ps = await psServiceInstance.find({ ps_parent: obj.bom });
 
       for (let p of ps) {
@@ -177,7 +177,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     //  for(let res of result){
     //      res.qtycom = res.qty - res.qtyoh
     //  }
-    console.log(dat);
+//    console.log(dat);
     //const psServiceInstance = Container.get(PsService)
     //  const ps = await psServiceInstance.find({...req.body})
     return res.status(200).json({ message: 'fetched succesfully', data: dat });
