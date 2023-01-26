@@ -17,7 +17,7 @@ import mobileService from '../../services/mobile-service';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
-import { PosPrinter, PosPrintData, PosPrintOptions } from 'electron-pos-printer';
+import crmService from '../../services/crm';
 import * as path from 'path';
 
 import { type } from 'os';
@@ -408,6 +408,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -449,7 +450,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     });
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
     for (const product of products) {
-      console.log('product', product);
+      // console.log('product', product);
       const {
         pt_part,
         pt_formule,
@@ -529,7 +530,18 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       }
     }
 
+  
+
     await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP', chr01: user_site });
+
+    // ADD TO AGENDA 
+    const crmServiceInstance = Container.get(crmService)
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const param = await crmServiceInstance.getParamFilterd("pos_call_order")
+    const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+    const sequence_event = await sequenceServiceInstance.getCRMEVENTSeqNB()
+    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num,param,paramDetails, sequence_event)   
+    
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -537,6 +549,8 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     return next(e);
   }
 };
+
+
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  order endpoint');
@@ -720,13 +734,14 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+     
 
       const parttypes = await codeServiceInstance.findOne({
         code_fldname: 'pt_part_type',
         code_value: items.pt_part_type,
       });
-      const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
-      const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+     // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+     // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
       // console.log(parttypes,groups,promos)
       result.push({
         id: i,
@@ -738,9 +753,9 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: isNull(groups) ? null : groups.code_cmmt,
-        promo: isNull(promos) ? null : promos.code_cmmt,
-        size: items.pt_size,
+        group: ord.pt_size //isNull(groups) ? null : groups.code_cmmt,
+       // promo: isNull(promos) ? null : promos.code_cmmt,
+       
       });
       i = i + 1;
     }

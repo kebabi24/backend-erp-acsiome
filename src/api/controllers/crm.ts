@@ -7,6 +7,7 @@ import SequenceService from '../../services/sequence';
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { print } from "util";
+import _ from "lodash";
 const { Op } = require('sequelize')
 
   const getParamCategories = async (req: Request, res: Response, next: NextFunction) => {
@@ -394,17 +395,100 @@ const { Op } = require('sequelize')
     logger.debug("Calling createAgendaExecutionLine endpoint")
     try {
         const crmServiceInstance = Container.get(CRMService)
-        const { executionLine , eventHeader} = req.body;
-        console.log(executionLine)
+        const { executionLine , eventHeader ,recreateEvent} = req.body;
+        console.log(recreateEvent)
         console.log(eventHeader)
+        console.log(executionLine)
 
         const agendaExecutionLine = await crmServiceInstance.createAgendaExecutionLine(executionLine,eventHeader)
+
+        if(recreateEvent){
+            const sequenceServiceInstance = Container.get(SequenceService);
+            console.log("recreating the event")
+            const param = await crmServiceInstance.getParamByCode(eventHeader.param_code)
+            const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+            const addLine = await crmServiceInstance.createAgendaLine(executionLine.phone_to_call,param,paramDetails, sequence)  
+
+        }
+
 
         
         console.log
         return res
             .status(200)
             .json({ message: "agendaExecutionLine created succesfully", data: agendaExecutionLine  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
+  const getCRMDashboardData = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getCustomerData endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+
+         const lines = await crmServiceInstance.getAllAgendaExecutionLines()
+         const event_results = await crmServiceInstance.getEventResults()
+         const index_sat_result = event_results.findIndex((result)=>{return result.bool01 == false})
+         
+         let data = {}
+
+         // NUMBER OF ALL EVENTS
+         data['nb_events']= lines.length
+
+         // ACTIONS
+         const actions = _.mapValues(_.groupBy(lines, 'action'));
+         const actions_filtered = [];
+            for (const [key, value] of Object.entries(actions)) {
+                actions_filtered.push({
+                action_code: key,
+                action_nb : value.length,
+                // events: value,
+            });
+         } 
+
+         // METHODS
+         const methods = _.mapValues(_.groupBy(lines, 'method'));
+         const methods_filtered = [];
+            for (const [key, value] of Object.entries(methods)) {
+                methods_filtered.push({
+                method_code: key,
+                method_nb : value.length,
+                // events: value,
+            });
+         } 
+
+         // EVENT RESULTS 
+         const eventResults = _.mapValues(_.groupBy(lines, 'event_result'));
+         const eventResults_filtered = [];
+            for (const [key, value] of Object.entries(eventResults)) {
+                eventResults_filtered.push({
+                event_result_code: key,
+                event_result_nb : value.length,
+                // events: value,
+            });
+         } 
+
+         // TAUX DE SATISFACTIONS
+         const index_satisfaction = eventResults_filtered.findIndex((result)=>{return result.event_result_code === event_results[index_sat_result].code_value})
+         const nb_events_satisfied = eventResults_filtered[index_satisfaction].event_result_nb
+         const taux = nb_events_satisfied/lines.length 
+         
+         
+         data['actions'] = actions_filtered
+         data['methods'] = methods_filtered
+         data['event_results'] = eventResults_filtered
+         data['taux'] = taux
+
+
+        
+    
+        return res
+            .status(200)
+            .json({ message: "got all agenda execution lines", data:data })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -441,5 +525,6 @@ export default {
     getEventResults,
     getCustomerData,
     createAgendaExecutionLine,
-    createOneAgendaLine
+    createOneAgendaLine,
+    getCRMDashboardData
 }

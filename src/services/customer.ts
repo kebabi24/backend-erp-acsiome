@@ -257,97 +257,96 @@ export default class customersSercice {
       throw e;
     }
   }
-}
 
-public async findCustomersBirthdate(): Promise<any> {
-  try {
-      let today = new Date();
-      let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
-      const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
-      const customers = await this.customerModel.findAll({ 
-          attributes:["id","cm_addr","cm_high_date"],
+  public async findCustomersBirthdate(): Promise<any> {
+    try {
+        let today = new Date();
+        let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
+        const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
+        const customers = await this.customerModel.findAll({ 
+            attributes:["id","cm_addr","cm_high_date"],
 
-          where: {
-              // [Op.and]: [
-              //     Sequelize.fn('MONTH', Sequelize.col('cm_high_date')),
-              // ],
-              //   cm_high_date:  Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date'))),
-              
-              // cm_high_date :  {[Op.lte]:new Date(dt)}
-          },
-      })
-      let data = []
-      customers.forEach(customer => {
-          const date = new Date(customer.dataValues.cm_high_date)
-          if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
-              data.push(customer.dataValues.cm_addr)
-          }
-      });
+            where: {
+                // [Op.and]: [
+                //     Sequelize.fn('MONTH', Sequelize.col('cm_high_date')),
+                // ],
+                //   cm_high_date:  Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date'))),
+                
+                // cm_high_date :  {[Op.lte]:new Date(dt)}
+            },
+        })
+        let data = []
+        customers.forEach(customer => {
+            const date = new Date(customer.dataValues.cm_high_date)
+            if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
+                data.push(customer.dataValues.cm_addr)
+            }
+        });
 
-      this.logger.silly("find one customers with birthdate today ")
-      return data
-  } catch (e) {
-      this.logger.error(e)
-      throw e
+        this.logger.silly("find one customers with birthdate today ")
+        return data
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
   }
-}
 
-public async findCustomersBirthdateFirstOrder(): Promise<any> {
-  try {
-      let today = new Date();
-      let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
-      const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
-      const customers = await this.customerModel.findAll({ 
-          attributes:["id","cm_addr","cm_high_date","date01"],
-      })
-      let data = []
-      customers.forEach(customer => {
-          const date = new Date(customer.dataValues.date01)
-          if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
-              data.push(customer.dataValues.cm_addr)
-          }
-      });
+  public async findCustomersBirthdateFirstOrder(): Promise<any> {
+      try {
+          let today = new Date();
+          let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
+          const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
+          const customers = await this.customerModel.findAll({ 
+              attributes:["id","cm_addr","cm_high_date","date01"],
+          })
+          let data = []
+          customers.forEach(customer => {
+              const date = new Date(customer.dataValues.date01)
+              if(date.getMonth()=== searchDate.getMonth() && date.getDate()=== searchDate.getDate()) {
+                  data.push(customer.dataValues.cm_addr)
+              }
+          });
 
-      this.logger.silly("find one customers with birthday first order today ")
-      return data
-  } catch (e) {
-      this.logger.error(e)
-      throw e
+          this.logger.silly("find one customers with birthday first order today ")
+          return data
+      } catch (e) {
+          this.logger.error(e)
+          throw e
+      }
   }
-}
 
-public async findCustomersAbsent(differentDays : any): Promise<any> {
-  try {
-      
-      let today = new Date();
-      var diffrence = new Date(today.getFullYear(),today.getMonth(),today.getDate());
-      diffrence.setDate(diffrence.getDate()-differentDays);
-      let todayFormatted= diffrence.getFullYear().toString()+'-'+(diffrence.getMonth()+1).toString()+'-'+(diffrence.getDate()).toString()
+  public async findCustomersAbsent(differentDays : any): Promise<any> {
+      try {
+          
+          let today = new Date();
+          var diffrence = new Date(today.getFullYear(),today.getMonth(),today.getDate());
+          diffrence.setDate(diffrence.getDate()-differentDays);
+          let todayFormatted= diffrence.getFullYear().toString()+'-'+(diffrence.getMonth()+1).toString()+'-'+(diffrence.getDate()).toString()
 
-      const customers = await this.customerModel.findAll({ 
-          attributes:["id","cm_addr","cm_high_date","date02"],
-      })
-      let data = []
-      
-      customers.forEach(customer => {
-          const lastOrderDate = new Date(customer.dataValues.date02)
-          let orderDateFormatted = lastOrderDate.getFullYear().toString()+'-'+(lastOrderDate.getMonth()+1).toString()+'-'+(lastOrderDate.getDate()).toString()
-          // console.log(orderDateFormatted)
-          // console.log(todayFormatted)
-          // console.log(todayFormatted ===orderDateFormatted )
-          if(todayFormatted ===orderDateFormatted ){
-              data.push(customer.dataValues.cm_addr)
-          }
-      });
+          const customers = await this.customerModel.findAll({ 
+              attributes:["id","cm_addr","cm_high_date","date02"],
+          })
+          let data = []
+          
+          customers.forEach(customer => {
+              const lastOrderDate = new Date(customer.dataValues.date02)
+              let orderDateFormatted = lastOrderDate.getFullYear().toString()+'-'+(lastOrderDate.getMonth()+1).toString()+'-'+(lastOrderDate.getDate()).toString()
+            
+              if(todayFormatted ===orderDateFormatted ){
+                  data.push(customer.dataValues.cm_addr)
+              }
+          });
 
-      this.logger.silly("find absent customers ")
-      return data
-  } catch (e) {
-      this.logger.error(e)
-      throw e
+          this.logger.silly("find absent customers ")
+          return data
+      } catch (e) {
+          this.logger.error(e)
+          throw e
+      }
+
   }
-}
-
-
 
 }
+
+
+

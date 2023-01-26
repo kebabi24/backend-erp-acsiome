@@ -20,6 +20,7 @@ export default (app: Router) => {
     route.post("/createPopulation", controller.createPopulation)
     route.post("/createOneAgendaLine", controller.createOneAgendaLine)
     route.get("/getPopulations", controller.getPopulations)
+    route.get("/getCRMDashboardData", controller.getCRMDashboardData)
 
   
 }

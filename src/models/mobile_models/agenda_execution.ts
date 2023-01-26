@@ -33,6 +33,7 @@ const AgendaExecution = sequelize.define(
 
         event_code  :{type:Sequelize.STRING},
         event_result :{type:Sequelize.STRING},
+
     },
     {
         tableName: "aa_agendaExecution",

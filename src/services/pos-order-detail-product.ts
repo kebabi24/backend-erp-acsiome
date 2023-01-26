@@ -4,6 +4,7 @@ import { Service, Inject } from 'typedi';
 export default class posOrderProductService {
   constructor(
     @Inject('posOrderDetailProductModel') private posOrderDetailProductModel: Models.posOrderDetailProductModel,
+    @Inject('posOrderModel') private posOrderModel: Models.posOrderModel,
     @Inject('itemModel') private itemModel: Models.ItemModel,
     @Inject('logger') private logger,
   ) {}
