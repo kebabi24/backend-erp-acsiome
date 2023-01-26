@@ -185,9 +185,6 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
-      
-
-    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

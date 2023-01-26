@@ -12,7 +12,8 @@ import moment from 'moment';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling Create account endpoint")
     try {
@@ -29,7 +30,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const createNote = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
     const  date = new Date();
     logger.debug("Calling Create account endpoint")
     try {
@@ -100,7 +102,8 @@ const createNote = async (req: Request, res: Response, next: NextFunction) => {
 }
 const createP = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
     const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -190,7 +193,8 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
 
 const createUP = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
     const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -356,7 +360,8 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling update one  account endpoint")
     try {

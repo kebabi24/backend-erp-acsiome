@@ -6,7 +6,8 @@ import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling Create forcast endpoint")
     try {
@@ -45,8 +46,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.headers)
-
+    
     logger.debug("Calling find all site endpoint")
     try {
         const forcastServiceInstance = Container.get(ForcastService)
@@ -94,7 +94,8 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling update one  site endpoint")
     try {

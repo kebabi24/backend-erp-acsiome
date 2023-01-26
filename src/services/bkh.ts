@@ -28,10 +28,30 @@ export default class banksSercice {
       throw e;
     }
   }
+  public async findgrp(query: any): Promise<any> {
+    try {
+      const orders = await this.bkhModel.findAll(query);
+      this.logger.silly('find All orders mstr');
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
   public async find(query: any): Promise<any> {
     try {
       const banks = await this.bkhModel.findAll({ where: query, include: this.addressModel });
+      this.logger.silly('find All banks ');
+      return banks;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findq(query: any): Promise<any> {
+    try {
+      const banks = await this.bkhModel.findAll(query);
       this.logger.silly('find All banks ');
       return banks;
     } catch (e) {

@@ -33,6 +33,10 @@ const User = sequelize.define(
             },
         },
         usrd_site:  Sequelize.STRING,
+        usrd_domain:  {
+            type: Sequelize.STRING,
+            defaultValue: 'zima'
+        },
              
         oid_usrd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
