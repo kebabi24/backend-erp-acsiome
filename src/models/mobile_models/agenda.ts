@@ -32,8 +32,11 @@ const Agenda = sequelize.define(
         status:{type:Sequelize.STRING},  // C or O // when created  o (open)
         visibility:{type:Sequelize.BOOLEAN},
         duration:{type:Sequelize.INTEGER},
-        action:{type:Sequelize.STRING}, // sms 
-        method :{type:Sequelize.STRING}, // sms 
+        action:{type:Sequelize.STRING}, // sms , email , call 
+        method :{type:Sequelize.STRING}, // commercial method    
+
+        // to re-create the 4 events , if the finale one (4) reaches and with status != SATISFIED
+        param_code: {type: Sequelize.STRING},
     },
     {
         tableName: "aa_agenda",

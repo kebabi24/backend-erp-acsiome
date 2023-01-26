@@ -19,6 +19,7 @@ import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
 import BkhService from '../../services/bkh';
 import ForcastService from "../../services/forcast"
+import crmService from '../../services/crm';
 import * as path from 'path';
 
 import { type } from 'os';
@@ -409,6 +410,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -450,7 +452,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     });
     const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
     for (const product of products) {
-      console.log('product', product);
+      // console.log('product', product);
       const {
         pt_part,
         pt_formule,
@@ -530,7 +532,18 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       }
     }
 
+  
+
     await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP', chr01: user_site });
+
+    // ADD TO AGENDA 
+    const crmServiceInstance = Container.get(crmService)
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const param = await crmServiceInstance.getParamFilterd("pos_call_order")
+    const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+    const sequence_event = await sequenceServiceInstance.getCRMEVENTSeqNB()
+    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num,param,paramDetails, sequence_event)   
+    
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -538,6 +551,8 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     return next(e);
   }
 };
+
+
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  order endpoint');

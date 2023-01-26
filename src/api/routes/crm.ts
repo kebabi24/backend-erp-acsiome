@@ -18,7 +18,9 @@ export default (app: Router) => {
     route.post("/createExecutionLine", controller.createAgendaExecutionLine)
     route.post("/getCustomers", controller.getCustomers)
     route.post("/createPopulation", controller.createPopulation)
+    route.post("/createOneAgendaLine", controller.createOneAgendaLine)
     route.get("/getPopulations", controller.getPopulations)
+    route.get("/getCRMDashboardData", controller.getCRMDashboardData)
 
   
 }
