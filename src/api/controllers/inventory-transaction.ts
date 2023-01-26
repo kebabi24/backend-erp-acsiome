@@ -1528,7 +1528,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
-
+console.log(req.body)
     const parts = await inventoryTransactionServiceInstance.findSpecial({
       where: {
         tr_site: req.body.tr_site,

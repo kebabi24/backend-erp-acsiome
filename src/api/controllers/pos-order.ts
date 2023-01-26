@@ -942,7 +942,7 @@ for (let ord of orders) {
     rec: recu,
     ecart: ord.total_amt -  recu,
     obj: objc,
-    cavsobj: (objc != 0) ? ord.total_amt / objc : 1,
+    cavsobj: (objc != 0) ? 100 * ord.total_amt / objc : 100,
    
   });
   i = i + 1;
@@ -1011,7 +1011,7 @@ for (let ord of orders) {
     rec: recu,
     ecart : ord.total_amt -  recu,
     obj: objc,
-    cavsobj: (objc != 0) ? ord.total_amt / objc : 1,
+    cavsobj: (objc != 0) ? 100 * ord.total_amt / objc : 100,
     
    
   });
