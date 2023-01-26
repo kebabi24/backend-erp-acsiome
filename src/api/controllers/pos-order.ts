@@ -933,7 +933,7 @@ for (let ord of orders) {
     raw: true,
   });
   var recu = (banks.length > 0) ? banks[0].total_rec : 0
-  var obj = (objcts.length > 0) ? objcts[0].total_obj : 0
+  var objc = (objcts.length > 0) ? objcts[0].total_obj : 0
   result.push({
     id: i,
     effdate: ord.created_date,
@@ -941,14 +941,14 @@ for (let ord of orders) {
     amt:ord.total_amt,
     rec: recu,
     ecart: ord.total_amt -  recu,
-    obj: obj,
-    
+    obj: objc,
+    cavsobj: (objc != 0) ? ord.total_amt / objc : 1,
    
   });
   i = i + 1;
 
 }
-console.log("here",result)
+//console.log("here",result)
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
       logger.error('🔥 error: %o', e);
@@ -1002,7 +1002,7 @@ for (let ord of orders) {
     raw: true,
   });
   var recu = (banks.length > 0) ? banks[0].total_rec : 0
-  var obj = (objcts.length > 0) ? objcts[0].total_obj : 0
+  var objc = (objcts.length > 0) ? objcts[0].total_obj : 0
   result.push({
     id: i,
     effdate: ord.created_date,
@@ -1010,14 +1010,15 @@ for (let ord of orders) {
     amt: ord.total_amt,
     rec: recu,
     ecart : ord.total_amt -  recu,
-    obj: obj
+    obj: objc,
+    cavsobj: (objc != 0) ? ord.total_amt / objc : 1,
     
    
   });
   i = i + 1;
 
 }
-console.log("here",result)
+
 
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
