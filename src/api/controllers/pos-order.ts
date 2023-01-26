@@ -17,6 +17,8 @@ import mobileService from '../../services/mobile-service';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
+import BkhService from '../../services/bkh';
+import ForcastService from "../../services/forcast"
 import * as path from 'path';
 
 import { type } from 'os';
@@ -860,6 +862,155 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
     }
   }
 };
+const findBySite = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+
+  const PosOrderDetailServiceInstance = Container.get(PosOrder);
+  const bkhServiceInstance = Container.get(BkhService);
+  const forcastServiceInstance = Container.get(ForcastService)
+  if (req.body.site != '*') {
+    try {
+      const orders = await PosOrderDetailServiceInstance.findgrp({
+        where: {
+          created_date: { [Op.between]: [req.body.date, req.body.date1] },
+          usrd_site: req.body.site,
+        },
+        attributes: [
+          //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          'created_date',
+          'usrd_site',
+          [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_amt'],
+        ],
+        group: ['created_date', 'usrd_site'],
+        raw: true,
+      });
+let result=[]
+var i = 1
+for (let ord of orders) {
+  const banks = await bkhServiceInstance.findq({
+    where: {
+      bkh_effdate: ord.created_date ,
+      bkh_site: ord.usrd_site,
+      bkh_type: 'R'
+    },
+    attributes: [
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+      'bkh_effdate',
+      'bkh_site',
+      [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
+    ],
+    group: ['bkh_effdate', 'bkh_site'],
+    raw: true,
+  });
+  const objcts = await forcastServiceInstance.findq({
+    where: {
+      frc_date: ord.created_date ,
+      frc_site: ord.usrd_site,
+    },
+    attributes: [
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+      'frc_date',
+      'frc_site',
+      [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
+    ],
+    group: ['frc_date', 'frc_site'],
+    raw: true,
+  });
+  var recu = (banks.length > 0) ? banks[0].total_rec : 0
+  var obj = (objcts.length > 0) ? objcts[0].total_obj : 0
+  result.push({
+    id: i,
+    effdate: ord.created_date,
+    site: ord.usrd_site,
+    amt:ord.total_amt,
+    rec: recu,
+    ecart: ord.total_amt -  recu,
+    obj: obj,
+    
+   
+  });
+  i = i + 1;
+
+}
+console.log("here",result)
+      return res.status(200).json({ message: 'fetched succesfully', data: result });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  } else {
+    try {
+      const orders = await PosOrderDetailServiceInstance.findgrp({
+        where: {
+          created_date: { [Op.between]: [req.body.date, req.body.date1] },
+         
+        },
+        attributes: [
+          //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+          'created_date',
+          'usrd_site',
+          [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_amt'],
+        ],
+        group: ['created_date', 'usrd_site'],
+        raw: true,
+      });
+let result=[]
+var i = 1
+for (let ord of orders) {
+  const banks = await bkhServiceInstance.findq({
+    where: {
+      bkh_effdate: ord.created_date ,
+      bkh_type: 'R'
+    },
+    attributes: [
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+      'bkh_effdate',
+      'bkh_site',
+      [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
+    ],
+    group: ['bkh_effdate', 'bkh_site'],
+    raw: true,
+  });
+  const objcts = await forcastServiceInstance.findq({
+    where: {
+      frc_date: ord.created_date ,
+      frc_site: ord.usrd_site,
+    },
+    attributes: [
+      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+      'frc_date',
+      'frc_site',
+      [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
+    ],
+    group: ['frc_date', 'frc_site'],
+    raw: true,
+  });
+  var recu = (banks.length > 0) ? banks[0].total_rec : 0
+  var obj = (objcts.length > 0) ? objcts[0].total_obj : 0
+  result.push({
+    id: i,
+    effdate: ord.created_date,
+    site: ord.usrd_site,
+    amt: ord.total_amt,
+    rec: recu,
+    ecart : ord.total_amt -  recu,
+    obj: obj
+    
+   
+  });
+  i = i + 1;
+
+}
+console.log("here",result)
+
+      return res.status(200).json({ message: 'fetched succesfully', data: result });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  }
+};
 export default {
   create,
   findOne,
@@ -874,5 +1025,6 @@ export default {
   findAlll,
   createCALLCenterORDER,
   findPosGrp,
+  findBySite,
   createOrder,
 };

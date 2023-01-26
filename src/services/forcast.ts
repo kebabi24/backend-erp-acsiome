@@ -39,7 +39,16 @@ export default class forcastService {
             throw e
         }
     }
-
+    public async findq(query: any): Promise<any> {
+        try {
+          const forcasts = await this.forcastModel.findAll(query);
+          this.logger.silly('find All banks ');
+          return forcasts;
+        } catch (e) {
+          this.logger.error(e);
+          throw e;
+        }
+      }
     public async update(data: any, query: any): Promise<any> {
         try {
             const forcast = await this.forcastModel.update(data, { where: query })
