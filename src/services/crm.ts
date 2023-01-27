@@ -192,6 +192,23 @@ export default class CRMService {
     }
   }
 
+  public async getParamByCode(code:any): Promise<any> {
+    try {
+      
+      
+      const param = await this.paramHeaderModel.findOne({
+        where:{
+          param_code : code
+              }
+        })
+        this.logger.silly("found param ")
+        return param
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
   public async getParamFilterd( category : any): Promise<any> {
     try {
       let today = new Date();
@@ -236,10 +253,23 @@ export default class CRMService {
       let r2 = { method : paramDetails.method_2 , action : paramDetails.action_2, r : paramDetails.rel_2  }
       let r3 = { method : paramDetails.method_3 , action : paramDetails.action_3, r : paramDetails.rel_3  }
       
-      const date0  = addSeconds(today,r0.r)
-      const date1 = addSeconds(date0,r1.r)
-      const date2 = addSeconds(date1,r2.r)
-      const date3 = addSeconds(date2,r3.r)
+      let date0  = addSeconds(today,r0.r)
+      if(date0.getHours() > 22 || date0.getHours() < 8){
+        date0 = addHours(date0, 12)
+      }
+      let date1 = addSeconds(date0,r1.r)
+      if(date1.getHours() > 22  || date1.getHours() < 8){
+        date1 = addHours(date1, 12)
+      }
+      let date2 = addSeconds(date1,r2.r)
+      if(date2.getHours() > 22  || date2.getHours() < 8){
+        date2 = addHours(date2, 12)
+      }
+      
+      let date3 = addSeconds(date2,r3.r)
+      if(date3.getHours() > 22 || date3.getHours() < 8){
+        date3 = addHours(date3, 12)
+      }
       
       const code_event = "event-"+eventSequence
       
@@ -261,6 +291,7 @@ export default class CRMService {
           method: r0.method,
           order:1,
           visibility:true,
+          param_code : paramHeader.param_code 
         },
         {
           code_event : code_event,
@@ -277,6 +308,7 @@ export default class CRMService {
           method: r1.method,
           order:2,
           visibility:false,
+          param_code : paramHeader.param_code 
         },
         {
           code_event : code_event,
@@ -293,6 +325,7 @@ export default class CRMService {
           method: r2.method,
           order:3,
           visibility:false,
+          param_code : paramHeader.param_code 
         },
         {
           code_event : code_event,
@@ -309,6 +342,7 @@ export default class CRMService {
           method: r3.method,
           order:4,
           visibility:false,
+          param_code : paramHeader.param_code 
         },
       )
 
@@ -318,6 +352,17 @@ export default class CRMService {
       const lines = await this.agendaModel.bulkCreate(agendaLines)
         this.logger.silly("created agenda lines ")
         return lines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+  public async createOneAgendaLine(data:any): Promise<any> {
+    try {
+        const line = await this.agendaModel.create(data)
+        this.logger.silly("created agenda line ")
+        return line
     } catch (e) {
         this.logger.error(e)
         throw e
@@ -423,7 +468,6 @@ export default class CRMService {
                 order : eventHeader.order+1
               }})
               console.log(updatedAgendaLine2)
-
          }
        }
 
@@ -435,11 +479,53 @@ export default class CRMService {
         throw e
     }
   }
+
+  public async getAllAgendaExecutionLines(): Promise<any> {
+    try {  
+      const agendaExecutionLines = await this.agendaExecutionModel.findAll()
+        this.logger.silly("got All agendaExecutionLines")
+        return agendaExecutionLines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+  // UPDATE ALL 4 SUB EVENT OF AN EVENT VISIBILITY TO FALSE
+  public async updateEventStatus(codeEvent : any ): Promise<any> {
+    try {
+     
+      
+          const updatedLines = await this.agendaModel.update(
+            {visibility:false},
+            {where :{
+              code_event : codeEvent,
+            }})
+       
+
+        
+        this.logger.silly("created agendaExecutionLine ")
+        return updatedLines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+
 }
 
 function addSeconds(date, seconds) {
   let d  = new Date(date)
   d.setSeconds(d.getSeconds() + seconds);
+  let t = new Date(d)
+  return t;
+}
+
+function addHours(date, hours) {
+  console.log("called")
+  let d  = new Date(date)
+  d.setHours(d.getHours() + hours);
   let t = new Date(d)
   return t;
 }

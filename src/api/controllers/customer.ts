@@ -89,12 +89,24 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
       { cm_addr: customer_number },
     );
 
+    // ADD TO AGENDA 
+    const crmServiceInstance = Container.get(crmService)
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const param = await crmServiceInstance.getParamFilterd("fidelity")
+    const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+    const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+    const addLine = await crmServiceInstance.createAgendaLine(customer_number,param,paramDetails, sequence)   
+    
+    console.log(addLine)
+
     return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
+
+
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  customer endpoint');

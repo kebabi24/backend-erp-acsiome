@@ -2,9 +2,11 @@ import UserService from "../../services/user"
 import CustomerService from '../../services/customer';
 import addresseService from '../../services/address';
 import CodeService from "../../services/code"
-import CustomerService from '../../services/customer';
-import addresseService from '../../services/address';
-import CodeService from "../../services/code"
+
+import crmService from '../../services/crm';
+import SequenceService from '../../services/sequence';
+
+
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import argon2 from "argon2"
@@ -88,6 +90,16 @@ const createCustomer = async (req: Request, res: Response, next: NextFunction) =
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
         });
+
+        // ADD TO AGENDA 
+        const crmServiceInstance = Container.get(crmService)
+        const sequenceServiceInstance = Container.get(SequenceService);
+        const param = await crmServiceInstance.getParamFilterd("new_client")
+        const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+        const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+        const addLine = await crmServiceInstance.createAgendaLine(data.phone,param,paramDetails, sequence)   
+        
+        console.log(addLine)
 
         return res
                 .status(200)

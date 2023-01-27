@@ -30,6 +30,10 @@ const AgendaExecution = sequelize.define(
         call_end_hour:{type:Sequelize.STRING},
 
         observation:{type:Sequelize.STRING},
+
+        event_code  :{type:Sequelize.STRING},
+        event_result :{type:Sequelize.STRING},
+
     },
     {
         tableName: "aa_agendaExecution",
