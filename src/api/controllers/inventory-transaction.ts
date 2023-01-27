@@ -1065,10 +1065,11 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
 const issWo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  console.log(user_code);
   logger.debug('Calling update one  code endpoint');
   try {
     const { detail, user } = req.body;
+    console.log(user);
     // console.log(detail);
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
@@ -1295,6 +1296,9 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     const itemsServiceInstance = Container.get(itemService);
+    const service = Container.get(MobileService);
+    const currentService = await service.findOne({ role_code: user_code, service_open: true });
+    console.log(currentService.service_period_activate_date);
     for (const item of detail) {
       const { ...remain } = item;
       console.log(remain.tag_cnt_qty);
@@ -1326,7 +1330,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         tr_nbr: new Date().toString(),
         tr_lot: '',
         // tr_addr: so.so_cust,
-        tr_effdate: new Date(),
+        tr_effdate: currentService.service_period_activate_date,
         tr_so_job: null,
         tr_curr: 'DZD',
         tr_ex_rate: 1,
@@ -1424,6 +1428,8 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     const itemsServiceInstance = Container.get(itemService);
+    const service = Container.get(MobileService);
+    const currentService = await service.findOne({ role_code: user_code, service_open: true });
     for (const item of detail) {
       const { ...remain } = item;
       console.log(remain.tag_cnt_qty);
@@ -1455,7 +1461,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
         tr_nbr: new Date().toString(),
         tr_lot: '',
         // tr_addr: so.so_cust,
-        tr_effdate: new Date(),
+        tr_effdate: currentService.service_period_activate_date,
         tr_so_job: null,
         tr_curr: 'DZD',
         tr_ex_rate: 1,

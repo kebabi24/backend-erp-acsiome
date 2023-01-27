@@ -719,14 +719,13 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
-     
 
       const parttypes = await codeServiceInstance.findOne({
         code_fldname: 'pt_part_type',
         code_value: items.pt_part_type,
       });
-     // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
-     // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+      // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+      // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
       // console.log(parttypes,groups,promos)
       result.push({
         id: i,
@@ -738,9 +737,8 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: ord.pt_size //isNull(groups) ? null : groups.code_cmmt,
-       // promo: isNull(promos) ? null : promos.code_cmmt,
-       
+        group: ord.pt_size, //isNull(groups) ? null : groups.code_cmmt,
+        // promo: isNull(promos) ? null : promos.code_cmmt,
       });
       i = i + 1;
     }
@@ -826,7 +824,7 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
-          site: req.body.site,
+          usrd_site: req.body.site,
         },
         attributes: {
           //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],

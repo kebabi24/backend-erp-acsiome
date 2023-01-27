@@ -56,44 +56,11 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
     const SequenceServiceInstance = Container.get(sequenceService);
     const ServiceInstance = Container.get(serviceMobile);
     const sequence = await SequenceServiceInstance.findOne({ seq_type: 'AP', seq_profile: user });
+    const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
 
     console.log(user_code);
-    for (const bank of detail) {
-      await bankServiceInstance.update(
-        {
-          bk_balance: bank.bk_balance,
-          bk_2000: bank.bk_2000,
-          bk_1000: bank.bk_1000,
-          bk_0500: bank.bk_0500,
-          bk_0200: bank.bk_0200,
-          bk_p200: bank.bk_p200,
-          bk_p100: bank.bk_p100,
-          bk_p050: bank.bk_p050,
-          bk_p020: bank.bk_p020,
-          bk_p010: bank.bk_p010,
-          bk_p005: bank.bk_p005,
-        },
-        { bk_code: bank.bk_code },
-      );
-      await bkhServiceInstance.create({
-        bkh_code: bank.bk_code,
-        bk_num_code: new Date(),
-        bkh_balance: bank.bk_balance,
-        bkh_date: new Date(),
-        bkh_type: type,
-        bk_2000: bank.bk_2000,
-        bk_1000: bank.bk_1000,
-        bk_0500: bank.bk_0500,
-        bk_0200: bank.bk_0200,
-        bk_p200: bank.bk_p200,
-        bk_p100: bank.bk_p100,
-        bk_p050: bank.bk_p050,
-        bk_p020: bank.bk_p020,
-        bk_p010: bank.bk_p010,
-        bk_p005: bank.bk_p005,
-      });
-    }
+
     if (type === 'O') {
       const service = await ServiceInstance.create({
         service_code: nbr,
@@ -116,6 +83,42 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         },
         { role_code: user_code, service_open: true },
       );
+      for (const bank of detail) {
+        await bankServiceInstance.update(
+          {
+            bk_balance: bank.bk_balance,
+            bk_2000: bank.bk_2000,
+            bk_1000: bank.bk_1000,
+            bk_0500: bank.bk_0500,
+            bk_0200: bank.bk_0200,
+            bk_p200: bank.bk_p200,
+            bk_p100: bank.bk_p100,
+            bk_p050: bank.bk_p050,
+            bk_p020: bank.bk_p020,
+            bk_p010: bank.bk_p010,
+            bk_p005: bank.bk_p005,
+          },
+          { bk_code: bank.bk_code },
+        );
+        await bkhServiceInstance.create({
+          bkh_code: bank.bk_code,
+          bk_num_code: new Date(),
+          bkh_balance: bank.bk_balance,
+          bkh_date: new Date(),
+          bkh_type: type,
+          bk_2000: bank.bk_2000,
+          bk_1000: bank.bk_1000,
+          bk_0500: bank.bk_0500,
+          bk_0200: bank.bk_0200,
+          bk_p200: bank.bk_p200,
+          bk_p100: bank.bk_p100,
+          bk_p050: bank.bk_p050,
+          bk_p020: bank.bk_p020,
+          bk_p010: bank.bk_p010,
+          bk_p005: bank.bk_p005,
+          bkh_effdate: currentService.service_period_activate_date,
+        });
+      }
       console.log('avant');
       await SequenceServiceInstance.update({ seq_curr_val: 1 }, { seq_type: 'OF', seq_profile: user });
       console.log('aprés');
@@ -138,11 +141,22 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const bankhDetailerviceInstance = Container.get(BkhService);
     const PosOrderServiceInstance = Container.get(PosOrder);
+    const ServiceInstance = Container.get(serviceMobile);
+    const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
     const { cart, type, user_name } = req.body;
     // console.log(cart);
     console.log(cart);
     console.log(user_name);
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
+    console.log(currentService.service_period_activate_date);
+    await bankhDetailerviceInstance.create({
+      bkh_code: 'CR0901',
+      bkh_date: new Date(),
+      bkh_balance: 100,
+      bkh_type: 'R',
+      dec01: 20,
+      bkh_effdate: currentService.service_period_activate_date,
+    });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
@@ -150,6 +164,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
         bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
         bkh_type: 'R',
         dec01: Number(cart.total_price),
+        bkh_effdate: currentService.service_period_activate_date,
       });
       await bankServiceInstance.update(
         {
