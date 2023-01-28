@@ -150,14 +150,14 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     console.log(user_name);
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
     console.log(currentService.service_period_activate_date);
-    await bankhDetailerviceInstance.create({
-      bkh_code: 'CR0901',
-      bkh_date: new Date(),
-      bkh_balance: 100,
-      bkh_type: 'R',
-      dec01: 20,
-      bkh_effdate: currentService.service_period_activate_date,
-    });
+    // await bankhDetailerviceInstance.create({
+    //   bkh_code: 'CR0901',
+    //   bkh_date: new Date(),
+    //   bkh_balance: 100,
+    //   bkh_type: 'R',
+    //   dec01: 20,
+    //   bkh_effdate: currentService.service_period_activate_date,
+    // });
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,
@@ -437,9 +437,7 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all order endpoint');
 
   const bkhServiceInstance = Container.get(BkhService);
-  
 
-  
   if (req.body.site != '*') {
     try {
       const orders = await bkhServiceInstance.findq({
@@ -447,18 +445,15 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
           bkh_effdate: { [Op.between]: [req.body.date, req.body.date1] },
           bkh_site: req.body.site,
         },
-        order: [
-         
-          ['id', 'ASC'],
-        ]
+        order: [['id', 'ASC']],
       });
-      
+
       let result = [];
       var i = 1;
       for (let ord of orders) {
-       // const effdate = new Date(ord.bkh_effdate);
-       // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
-       // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+        // const effdate = new Date(ord.bkh_effdate);
+        // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+        // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
         // console.log(parttypes,groups,promos)
         result.push({
           id: i,
@@ -467,13 +462,11 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
           site: ord.bkh_site,
           code: ord.bkh_code,
           balance: ord.bkh_balance,
-          O: (ord.bkh_type =="O"? ord.bkh_balance : 0),
-          R: (ord.bkh_type =="R"? ord.dec01 : 0),
-          D: (ord.bkh_type =="D"? ord.dec01 : 0),
-          C: (ord.bkh_type =="C"? ord.bkh_balance : 0),
+          O: ord.bkh_type == 'O' ? ord.bkh_balance : 0,
+          R: ord.bkh_type == 'R' ? ord.dec01 : 0,
+          D: ord.bkh_type == 'D' ? ord.dec01 : 0,
+          C: ord.bkh_type == 'C' ? ord.bkh_balance : 0,
           num: ord.bkh_num_doc,
-         
-         
         });
         i = i + 1;
       }
@@ -484,48 +477,42 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
     }
   } else {
     try {
-     // console.log(req.body)
-     console.log(req.body.date1, )
+      // console.log(req.body)
+      console.log(req.body.date1);
       const orders = await bkhServiceInstance.findq({
         where: {
           bkh_effdate: { [Op.between]: [req.body.date, req.body.date1] },
         },
-        order: [
-         
-          ['id', 'ASC'],
-        ]
+        order: [['id', 'ASC']],
         // attributes: {
         //   //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
         //   include: [[Sequelize.literal('(bkh_type == "O")?bkh_2000'), 'Open']],
         // },
       });
 
-let result = [];
-var i = 1;
-for (let ord of orders) {
-  
- // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
- // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
-  // console.log(parttypes,groups,promos)
-  result.push({
-    id: i,
-    effdate:ord.bkh_effdate,
-    date:ord.bkh_date,
-    site: ord.bkh_site,
-    code: ord.bkh_code,
-    balance: ord.bkh_balance,
-    O: (ord.bkh_type =="O"? ord.bkh_balance : 0),
-    R: (ord.bkh_type =="R"? ord.dec01 : 0),
-    D: (ord.bkh_type =="D"? ord.dec01 : 0),
-    C: (ord.bkh_type =="C"? ord.bkh_balance : 0),
-    num: ord.bkh_num_doc,
-   
-   
-  });
-  i = i + 1;
-}
+      let result = [];
+      var i = 1;
+      for (let ord of orders) {
+        // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+        // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+        // console.log(parttypes,groups,promos)
+        result.push({
+          id: i,
+          effdate: ord.bkh_effdate,
+          date: ord.bkh_date,
+          site: ord.bkh_site,
+          code: ord.bkh_code,
+          balance: ord.bkh_balance,
+          O: ord.bkh_type == 'O' ? ord.bkh_balance : 0,
+          R: ord.bkh_type == 'R' ? ord.dec01 : 0,
+          D: ord.bkh_type == 'D' ? ord.dec01 : 0,
+          C: ord.bkh_type == 'C' ? ord.bkh_balance : 0,
+          num: ord.bkh_num_doc,
+        });
+        i = i + 1;
+      }
 
-//console.log(result)
+      //console.log(result)
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
       logger.error('🔥 error: %o', e);

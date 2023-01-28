@@ -18,7 +18,7 @@ import inventoryTransactionService from '../../services/inventory-transaction';
 import locationDetailService from '../../services/location-details';
 import costSimulationService from '../../services/cost-simulation';
 import BkhService from '../../services/bkh';
-import ForcastService from "../../services/forcast"
+import ForcastService from '../../services/forcast';
 import crmService from '../../services/crm';
 import * as path from 'path';
 
@@ -132,6 +132,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)}`;
+    console.log(cart);
     if (cart.plateforme !== 'CALL CENTER') {
       await PosOrderServiceInstance.create({
         order_code: update ? cart.order_code : nbr,
@@ -532,18 +533,15 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       }
     }
 
-  
-
     await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP', chr01: user_site });
 
-    // ADD TO AGENDA 
-    const crmServiceInstance = Container.get(crmService)
+    // ADD TO AGENDA
+    const crmServiceInstance = Container.get(crmService);
     const sequenceServiceInstance = Container.get(SequenceService);
-    const param = await crmServiceInstance.getParamFilterd("pos_call_order")
-    const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
-    const sequence_event = await sequenceServiceInstance.getCRMEVENTSeqNB()
-    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num,param,paramDetails, sequence_event)   
-    
+    const param = await crmServiceInstance.getParamFilterd('pos_call_order');
+    const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
+    const sequence_event = await sequenceServiceInstance.getCRMEVENTSeqNB();
+    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num, param, paramDetails, sequence_event);
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -551,7 +549,6 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     return next(e);
   }
 };
-
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -663,7 +660,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
-//console.log( "here",req.body)
+    //console.log( "here",req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
       attributes: [
@@ -675,7 +672,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
       group: ['pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
-//console.log(orders)
+    //console.log(orders)
     let result = [];
     var i = 1;
     for (let ord of orders) {
@@ -705,7 +702,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
-console.log(req.body)
+    console.log(req.body);
     if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
         where: { created_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -836,7 +833,7 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all order endpoint');
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
-  
+
   if (req.body.site != '*') {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
@@ -881,7 +878,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
   const bkhServiceInstance = Container.get(BkhService);
-  const forcastServiceInstance = Container.get(ForcastService)
+  const forcastServiceInstance = Container.get(ForcastService);
   if (req.body.site != '*') {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
@@ -898,55 +895,53 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         group: ['created_date', 'usrd_site'],
         raw: true,
       });
-let result=[]
-var i = 1
-for (let ord of orders) {
-  const banks = await bkhServiceInstance.findq({
-    where: {
-      bkh_effdate: ord.created_date ,
-      bkh_site: ord.usrd_site,
-      bkh_type: 'R'
-    },
-    attributes: [
-      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-      'bkh_effdate',
-      'bkh_site',
-      [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
-    ],
-    group: ['bkh_effdate', 'bkh_site'],
-    raw: true,
-  });
-  const objcts = await forcastServiceInstance.findq({
-    where: {
-      frc_date: ord.created_date ,
-      frc_site: ord.usrd_site,
-    },
-    attributes: [
-      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-      'frc_date',
-      'frc_site',
-      [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
-    ],
-    group: ['frc_date', 'frc_site'],
-    raw: true,
-  });
-  var recu = (banks.length > 0) ? banks[0].total_rec : 0
-  var objc = (objcts.length > 0) ? objcts[0].total_obj : 0
-  result.push({
-    id: i,
-    effdate: ord.created_date,
-    site: ord.usrd_site,
-    amt:ord.total_amt,
-    rec: recu,
-    ecart: ord.total_amt -  recu,
-    obj: objc,
-    cavsobj: (objc != 0) ? 100 * ord.total_amt / objc : 100,
-   
-  });
-  i = i + 1;
-
-}
-//console.log("here",result)
+      let result = [];
+      var i = 1;
+      for (let ord of orders) {
+        const banks = await bkhServiceInstance.findq({
+          where: {
+            bkh_effdate: ord.created_date,
+            bkh_site: ord.usrd_site,
+            bkh_type: 'R',
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'bkh_effdate',
+            'bkh_site',
+            [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
+          ],
+          group: ['bkh_effdate', 'bkh_site'],
+          raw: true,
+        });
+        const objcts = await forcastServiceInstance.findq({
+          where: {
+            frc_date: ord.created_date,
+            frc_site: ord.usrd_site,
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'frc_date',
+            'frc_site',
+            [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
+          ],
+          group: ['frc_date', 'frc_site'],
+          raw: true,
+        });
+        var recu = banks.length > 0 ? banks[0].total_rec : 0;
+        var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        result.push({
+          id: i,
+          effdate: ord.created_date,
+          site: ord.usrd_site,
+          amt: ord.total_amt,
+          rec: recu,
+          ecart: ord.total_amt - recu,
+          obj: objc,
+          cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
+        });
+        i = i + 1;
+      }
+      //console.log("here",result)
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
       logger.error('🔥 error: %o', e);
@@ -957,7 +952,6 @@ for (let ord of orders) {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
-         
         },
         attributes: [
           //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -968,55 +962,51 @@ for (let ord of orders) {
         group: ['created_date', 'usrd_site'],
         raw: true,
       });
-let result=[]
-var i = 1
-for (let ord of orders) {
-  const banks = await bkhServiceInstance.findq({
-    where: {
-      bkh_effdate: ord.created_date ,
-      bkh_type: 'R'
-    },
-    attributes: [
-      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-      'bkh_effdate',
-      'bkh_site',
-      [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
-    ],
-    group: ['bkh_effdate', 'bkh_site'],
-    raw: true,
-  });
-  const objcts = await forcastServiceInstance.findq({
-    where: {
-      frc_date: ord.created_date ,
-      frc_site: ord.usrd_site,
-    },
-    attributes: [
-      //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
-      'frc_date',
-      'frc_site',
-      [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
-    ],
-    group: ['frc_date', 'frc_site'],
-    raw: true,
-  });
-  var recu = (banks.length > 0) ? banks[0].total_rec : 0
-  var objc = (objcts.length > 0) ? objcts[0].total_obj : 0
-  result.push({
-    id: i,
-    effdate: ord.created_date,
-    site: ord.usrd_site,
-    amt: ord.total_amt,
-    rec: recu,
-    ecart : ord.total_amt -  recu,
-    obj: objc,
-    cavsobj: (objc != 0) ? 100 * ord.total_amt / objc : 100,
-    
-   
-  });
-  i = i + 1;
-
-}
-
+      let result = [];
+      var i = 1;
+      for (let ord of orders) {
+        const banks = await bkhServiceInstance.findq({
+          where: {
+            bkh_effdate: ord.created_date,
+            bkh_type: 'R',
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'bkh_effdate',
+            'bkh_site',
+            [Sequelize.fn('sum', Sequelize.col('dec01')), 'total_rec'],
+          ],
+          group: ['bkh_effdate', 'bkh_site'],
+          raw: true,
+        });
+        const objcts = await forcastServiceInstance.findq({
+          where: {
+            frc_date: ord.created_date,
+            frc_site: ord.usrd_site,
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'frc_date',
+            'frc_site',
+            [Sequelize.fn('sum', Sequelize.col('frc_amt')), 'total_obj'],
+          ],
+          group: ['frc_date', 'frc_site'],
+          raw: true,
+        });
+        var recu = banks.length > 0 ? banks[0].total_rec : 0;
+        var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        result.push({
+          id: i,
+          effdate: ord.created_date,
+          site: ord.usrd_site,
+          amt: ord.total_amt,
+          rec: recu,
+          ecart: ord.total_amt - recu,
+          obj: objc,
+          cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
+        });
+        i = i + 1;
+      }
 
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
