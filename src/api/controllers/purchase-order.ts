@@ -14,6 +14,10 @@ import taxeService from '../../services/taxe';
 import BankService from '../../services/bank';
 import BkhService from '../../services/bkh';
 
+import AddressService from '../../services/address';
+
+import { generatePdf } from '../../reporting/generator';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -33,6 +37,41 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     for (let entry of purchaseOrderDetail) {
       entry = { ...entry, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
+      logger.debug('Calling Create sequence endpoint');
+      try {
+        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+        const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+        const { purchaseOrder, purchaseOrderDetail } = req.body;
+        const po = await purchaseOrderServiceInstance.create({
+          ...purchaseOrder,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+        for (let entry of purchaseOrderDetail) {
+          entry = { ...entry, pod_nbr: po.po_nbr };
+          await purchaseOrderDetailServiceInstance.create(entry);
+        }
+
+        const addressServiceInstance = Container.get(AddressService);
+        const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+
+        const pdfData = {
+          pod: purchaseOrderDetail,
+          po: po,
+          adr: addr,
+        };
+        console.log('\n\n', pdfData);
+
+        let pdf = await generatePdf(pdfData, 'po');
+
+        return res.status(201).json({ message: 'created succesfully', data: po, pdf: pdf.content });
+      } catch (e) {
+        //#
+        logger.error('🔥 error: %o', e);
+        return next(e);
+      }
     }
     return res.status(201).json({ message: 'created succesfully', data: po });
   } catch (e) {

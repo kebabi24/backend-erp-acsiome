@@ -1,0 +1,256 @@
+2022-08-28T12:14:27.138Z - error: Error when processing render request 1 Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341). Error: Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341).
+    at ChromeLauncher.launch (/Users/bchahrazed/backend-erp-acsiome/node_modules/puppeteer/lib/cjs/puppeteer/node/Launcher.js:109:27)
+    at async createBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:98:26)
+    at async allocateBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:113:5)
+    at async getBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:23:30)
+    at async module.exports (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/conversion.js:11:19)
+    at async execute (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:20:22)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/lazyRecipe.js:62:20
+    at async invokeRender (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:95:5)
+    at async WorkerReporter._render (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:147:7)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/reporter.js:179:19 rootId=7hf9c93fs2l4ew9, id=7hf9c93fs2l4ew9, fromEmitProfile=true
+2022-08-28T12:14:27.140Z - error: Rendering request 1 finished with error in 3941 ms rootId=7hf9c93fs2l4ew9, id=7hf9c93fs2l4ew9, fromEmitProfile=true
+2022-08-28T12:20:07.343Z - error: Error when processing render request 1 Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341). Error: Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341).
+    at ChromeLauncher.launch (/Users/bchahrazed/backend-erp-acsiome/node_modules/puppeteer/lib/cjs/puppeteer/node/Launcher.js:109:27)
+    at async createBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:98:26)
+    at async allocateBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:113:5)
+    at async getBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:23:30)
+    at async module.exports (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/conversion.js:11:19)
+    at async execute (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:20:22)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/lazyRecipe.js:62:20
+    at async invokeRender (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:95:5)
+    at async WorkerReporter._render (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:147:7)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/reporter.js:179:19 rootId=uc48upwf9qkzpfg, id=uc48upwf9qkzpfg, fromEmitProfile=true
+2022-08-28T12:20:07.349Z - error: Rendering request 1 finished with error in 1956 ms rootId=uc48upwf9qkzpfg, id=uc48upwf9qkzpfg, fromEmitProfile=true
+2022-08-28T12:26:39.718Z - error: Error when processing render request 1 Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341). Error: Could not find expected browser (chrome) locally. Run `npm install` to download the correct Chromium revision (950341).
+    at ChromeLauncher.launch (/Users/bchahrazed/backend-erp-acsiome/node_modules/puppeteer/lib/cjs/puppeteer/node/Launcher.js:109:27)
+    at async createBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:98:26)
+    at async allocateBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:113:5)
+    at async getBrowser (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:23:30)
+    at async module.exports (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/conversion.js:11:19)
+    at async execute (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/chromePoolStrategy.js:20:22)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-chrome-pdf/lib/lazyRecipe.js:62:20
+    at async invokeRender (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:95:5)
+    at async WorkerReporter._render (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/render/render.js:147:7)
+    at async /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/worker/reporter.js:179:19 rootId=4gip6wqhjqgxy9i, id=4gip6wqhjqgxy9i, fromEmitProfile=true
+2022-08-28T12:26:39.730Z - error: Rendering request 1 finished with error in 1699 ms rootId=4gip6wqhjqgxy9i, id=4gip6wqhjqgxy9i, fromEmitProfile=true
+2022-09-01T10:13:53.153Z - error: Error when starting http server on port 5488 Error: listen EADDRINUSE: address already in use :::5488
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-01T10:13:53.156Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::5488
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-08T09:19:48.766Z - error: Error when starting http server on port 5500 Error: listen EADDRINUSE: address already in use :::5500
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-08T09:19:48.767Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::5500
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-09T20:05:54.205Z - error: Error when starting http server on port 6730 Error: listen EADDRINUSE: address already in use :::6730
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-09T20:05:54.308Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6730
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-09T20:09:03.399Z - error: Error when starting http server on port 6750 Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-09T20:09:03.407Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-15T11:41:12.866Z - error: Error when starting http server on port 6750 Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-15T11:41:12.869Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T18:05:30.500Z - error: Error when starting http server on port 6750 Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T18:05:30.504Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6750
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T18:37:14.189Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T18:37:14.192Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T21:24:09.304Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-09-17T21:24:09.308Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-10-05T21:46:06.784Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-10-05T21:46:06.785Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-10-06T09:31:00.703Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)
+2022-10-06T09:31:00.704Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:16:10)
+    at /Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:50:14
+    at Object.start (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:125:13)
+    at Object.<anonymous> (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-express/lib/main.js:327:30)
+    at ListenerCollection.fire (/Users/bchahrazed/backend-erp-acsiome/node_modules/@jsreport/jsreport-core/lib/shared/listenerCollection.js:157:21)

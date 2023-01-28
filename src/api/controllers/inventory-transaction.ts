@@ -10,6 +10,7 @@ import { round } from 'lodash';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
 import workOrderDetailService from '../../services/work-order-detail';
+import AddressService from '../../services/address';
 import sequelize from '../../loaders/sequelize';
 import Item from '../../models/item';
 import moment from 'moment';
@@ -17,10 +18,13 @@ import inventoryTransactionService from '../../services/inventory-transaction';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import SaleOrderService from '../../services/saleorder';
 import MobileService from '../../services/mobile-service';
+import { generatePdf } from '../../reporting/generator';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
 
+  console.log('\n\n Inventory transaction');
   logger.debug('Calling Create code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -226,7 +230,21 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
     }
-    return res.status(200).json({ message: 'Added succesfully', data: true });
+
+    const addressServiceInstance = Container.get(AddressService);
+    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr });
+
+    const pdfData = {
+      detail: detail,
+      it: it,
+      nlot: nlot,
+      adr: addr,
+    };
+
+    console.log('\n\n pdfData : ', pdfData);
+    const pdf = await generatePdf(pdfData, 'rct-unp');
+
+    return res.status(200).json({ message: 'Added succesfully', data: true, pdf: pdf.content });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -291,7 +309,20 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
     }
-    return res.status(200).json({ message: 'deleted succesfully', data: true });
+
+    const addressServiceInstance = Container.get(AddressService);
+    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr });
+
+    const pdfData = {
+      detail: detail,
+      it: it,
+      nlot: nlot,
+      adr: addr,
+    };
+
+    console.log('\n\n pdfData : ', pdfData);
+    const pdf = await generatePdf(pdfData, 'it-unp');
+    return res.status(200).json({ message: 'deleted succesfully', data: true, pdf: pdf.content });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -302,6 +333,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  code endpoint');
   const { user_code } = req.headers;
 
+  console.log('\n\n transfert');
   try {
     const { detail, it, nlot } = req.body;
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -415,7 +447,18 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
     }
-    return res.status(200).json({ message: 'deleted succesfully', data: true });
+
+    const pdfData = {
+      double: true,
+      detail: detail,
+      it: it,
+      nlot: nlot,
+    };
+
+    const pdf = await generatePdf(pdfData, 'it-tr');
+
+    //pdf
+    return res.status(200).json({ message: 'deleted succesfully', data: true, pdf: pdf.content });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1534,7 +1577,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
-console.log(req.body)
+    console.log(req.body);
     const parts = await inventoryTransactionServiceInstance.findSpecial({
       where: {
         tr_site: req.body.tr_site,

@@ -11,6 +11,9 @@ import { Container } from 'typedi';
 import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import purchaseOrderService from '../../services/purchase-order';
+import AddressService from '../../services/address';
+
+import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -162,6 +165,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
     }
+
+    const addressServiceInstance = Container.get(AddressService);
+    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend });
+    //console.log("\n\n req body : ", req.body)
+
+    const { detail, pr, prhnbr } = req.body;
+    const pdfData = {
+      pr: pr,
+      detail: detail,
+      prhnbr: prhnbr,
+      adr: addr,
+    };
+
+    //Console.log("\n\n pdf data", pdfData)
+    const pdf = await generatePdf(pdfData, 'prh');
     // const devise = await purchaseReceiveServiceInstance.create(req.body)
     return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
   } catch (e) {
