@@ -74,19 +74,19 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       };
       const po = await purchaseOrderServiceInstance.create(ent);
-      console.log(po.po_nbr);
+      //console.log(po.po_nbr);
 
       var line = 1;
       for (let obj of purchaseOrderDetail) {
         if (obj.qtycom > 0) {
-          console.log('hnahnahnahnahna', obj.part);
+        //  console.log('hnahnahnahnahna', obj.part);
           if (obj.vend == entry.vend) {
             var duedate = new Date();
 
             // add a day
             duedate.setDate(duedate.getDate() + 1);
             const pt = await itemServiceInstance.findOne({ pt_part: obj.part });
-            console.log(pt.taxe);
+          //  console.log(pt.taxe);
 
             let entr = {
               pod_nbr: po.po_nbr,
@@ -113,7 +113,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         }
       }
     }
-    console.log(purchaseOrder);
+    //console.log(purchaseOrder);
     return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
   } catch (e) {
     //#
