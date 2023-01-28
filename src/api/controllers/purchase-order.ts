@@ -55,7 +55,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
       const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
-      console.log(sequence);
+      //
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
@@ -64,7 +64,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         po_site: Site,
         po_ord_date: new Date(),
         po_vend: entry.vend,
-        po_stat: 'v',
+        po_stat: 'V',
         po_curr: 'DA',
         po_ex_rate: 1,
         po_ex_rate1: 1,
@@ -93,11 +93,11 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
               pod_line: line,
               pod_part: obj.part,
               pod_taxable: pt.pt_taxable,
-              pod_stat: 'v',
+              pod_stat: 'V',
               pod_tax_code: pt.pt_taxc,
               pod_taxc: pt.taxe.tx2_tax_pct,
               pod_qty_ord: obj.qtycom,
-              pod_site: pt.pt_site,
+              pod_site: Site,
               pod_loc: pt.pt_loc,
               pod_price: pt.pt_price,
               pod_um: pt.pt_um,
