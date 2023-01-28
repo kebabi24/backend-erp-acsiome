@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as template from './templates';
 import * as prep from './helpers';
-import { substring } from 'sequelize/types/lib/operators';
+//import { substring } from 'sequelize/types/lib/operators';
 import { indexOf } from 'lodash';
 import { Console } from 'console';
 
