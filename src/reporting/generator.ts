@@ -5,6 +5,7 @@ import * as template from './templates';
 import * as prep from './helpers';
 import { substring } from 'sequelize/types/lib/operators';
 import { indexOf } from 'lodash';
+import { Console } from 'console';
 
 export const generatePdf = async (rawData : any , name : string) => {
     let data = getData(rawData, name)
@@ -47,13 +48,14 @@ export const generatePdf = async (rawData : any , name : string) => {
             if(name != "it-unp" && name != "it-tr" && name != "rct-unp")
             {
                 reportGenerator.close()
-                if (!fs.existsSync("/Users/bchahrazed/desktop/acsiome/commandes")) {
-                    fs.mkdir("/Users/bchahrazed/desktop/acsiome/commandes", err => {
+                if (!fs.existsSync("/Users/Administrator/Desktop/acsiome/commandes")) {
+                    fs.mkdir("/Users/Administrator/Desktop/acsiome/commandes", err => {
                         if(err) return err;
                     })
                 }
                 console.log("NEW GEN", data)
-                const filePath = "/Users/bchahrazed/desktop/acsiome/commandes/" + data.titre + ".pdf";
+                const filePath = "/Users/Administrator/Desktop/acsiome/commandes/" + data.titre + ".pdf";
+                console.log(filePath)
                 await fs.writeFileSync(filePath, result.content)
             } 
             return result
