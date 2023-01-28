@@ -736,14 +736,13 @@ console.log(req.body)
     var i = 1;
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
-     
 
       const parttypes = await codeServiceInstance.findOne({
         code_fldname: 'pt_part_type',
         code_value: items.pt_part_type,
       });
-     // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
-     // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
+      // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
+      // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
       // console.log(parttypes,groups,promos)
       result.push({
         id: i,
@@ -755,9 +754,8 @@ console.log(req.body)
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: ord.pt_size //isNull(groups) ? null : groups.code_cmmt,
-       // promo: isNull(promos) ? null : promos.code_cmmt,
-       
+        group: ord.pt_size, //isNull(groups) ? null : groups.code_cmmt,
+        // promo: isNull(promos) ? null : promos.code_cmmt,
       });
       i = i + 1;
     }
