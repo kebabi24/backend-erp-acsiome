@@ -46,13 +46,13 @@ export const generatePdf = async (rawData: any, name: string) => {
 
   if (name != 'it-unp' && name != 'it-tr' && name != 'rct-unp') {
     reportGenerator.close();
-    if (!fs.existsSync('C:/Users/DELL/projects/backend-erp-acsiome/src/reporting/files')) {
-      fs.mkdir('C:/Users/DELL/projects/backend-erp-acsiome/src/reporting/files', err => {
+    if (!fs.existsSync('D:/ERP-AXIOM/backend/src/reporting/files')) {
+      fs.mkdir('D:/ERP-AXIOM/backend/src/reporting/files', err => {
         if (err) return err;
       });
     }
     console.log('NEW GEN', data);
-    const filePath = 'C:/Users/DELL/projects/backend-erp-acsiome/src/reporting/files/' + data.titre + '.pdf';
+    const filePath = 'D:/ERP-AXIOM/backend/src/reporting/files/' + data.titre + '.pdf';
     await fs.writeFileSync(filePath, result.content);
   }
   return result;

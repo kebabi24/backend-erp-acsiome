@@ -22,17 +22,19 @@ export const header_so = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
         <h2 style="margin-left : 30px;">Commande N° {{nbr}}</h2>
     </div>
@@ -216,17 +218,19 @@ export const header_psh = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
         <h2 style="margin-left : 30px;">Bon Livraison N° {{nbr}}</h2>
     </div>
@@ -259,17 +263,19 @@ export const header_po = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
         <h2 style="margin-left : 30px;">Bon Commande N° {{nbr}}</h2>
     </div>
@@ -303,17 +309,19 @@ export const header_ih = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
         <h2 style="margin-left : 30px;">Bon Facture N° {{nbr}}</h2>
     </div>
@@ -446,17 +454,19 @@ export const header_prh = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
         <h2 style="margin-left : 30px;">RC N° {{nbr}}</h2>
     </div>
@@ -502,17 +512,19 @@ export const header_itTr = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
 
         <h2 style="margin-left : 30px;">{{titre}}</h2>
@@ -632,17 +644,19 @@ export const header_it = `<html>
 <body>
     <div class = "header">
         <div style = "display: flex;">
-            <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
-            <h1 style = "margin-left : 40px;"> Sarl El Hamiz Gros Alimentaire 
-                <br> Production Boissons
-            </h1>
-        </div>
-        <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
-            <p style = "line-height: 1.6;"> Hai Ouled Brahim Local N°01 Hammadi Boumerdes
-                <br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640
-            </p>
-            <p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p>
-        </div>
+        <img src="{#asset ./src/reporting/assets/logo.png @encoding=dataURI}" style = "width : 20%; margin-left : 10px;" />
+        <h1 style = "margin-left : 40px;"> ABRACADABRA 
+            <br> LE KEBAB AUTHENTIQUE
+        </h1>
+    </div>
+    <div style = "font-family: 'Montserrat', sans-serif; letter-spacing  : 0,3 em;margin-left : 40px;">
+        <p style = "line-height: 1.6;"> Boulevard 11 décembre 1960, Résidence ZAAMOUM, App 29 2  étage
+        <br> Alger. Algérie
+        <br> Tel : +213(0)36 023 067 558
+            <!--<br> RC N°: 03 B 0964126-01/35    Art N° 353600562905  NIF : 000316096412640-->
+        </p>
+        <!--p style="color : blue;  margin-top : -10px; ">Banque BNA : 001 0649 0300 00034430 Tel/Fax : 024 860 287 E-Mailzima_rad@yahoo.fr</p-->
+    </div>
         <hr style = "background-color:#FFFF00; width : 100%; margin-left : 20px;"></hr>
 
         <h2 style="margin-left : 30px;">{{titre}}</h2>
