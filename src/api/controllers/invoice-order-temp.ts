@@ -9,10 +9,12 @@ import PayMethService from "../../services/pay-meth"
 import PayMethDetailService from "../../services/pay-meth-detail"
 import SaleShiperService from '../../services/sale-shiper';
 import GeneralLedgerService from "../../services/general-ledger"
+import AddressService from "../../services/address";
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {INTEGER, QueryTypes} from 'sequelize'
 import moment from 'moment';
+import { generatePdf } from "../../reporting/generator";
 
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -20,9 +22,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
 const{user_domain} = req.headers
 
+    console.log("INVOICE\n")
     logger.debug("Calling Create sequence endpoint")
     try {
         console.log(req.body)
+        
         const invoiceOrderServiceInstance = Container.get(InvoiceOrderTempService)
         const saleOrderServiceInstance = Container.get(SaleOrderService)
 
@@ -34,10 +38,12 @@ const{user_domain} = req.headers
         const ih = await invoiceOrderServiceInstance.create({...invoiceOrderTemp, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderTempDetail) {
+             
             entry = { ...entry, itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await invoiceOrderDetailServiceInstance.create(entry)
 
         }
+
         const so = await saleOrderServiceInstance.findOne({so_nbr: ih.ith_nbr })
             if(so) await saleOrderServiceInstance.update({so_invoiced : true,so_to_inv:false, so_inv_nbr: ih.ith_inv_nbr, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: so.id})
         
@@ -78,10 +84,25 @@ const{user_domain} = req.headers
             const sh = await saleShiperServiceInstance.findOne({psh_shiper: entry.itdh_ship, psh_part:entry.itdh_part, psh_nbr: entry.itdh_nbr,psh_line: entry.itdh_sad_line })
             if(sh) await saleShiperServiceInstance.update({psh_invoiced : true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
           }
+
+        
+        
+        const addressServiceInstance = Container.get(AddressService)
+        const addr = await addressServiceInstance.findOne({ ad_addr: invoiceOrderTemp.ith_bill});
+
+        const pdfData = {
+            ih : invoiceOrderTemp,
+            detail : invoiceOrderTempDetail,
+            ihnbr : ih.ith_inv_nbr,
+            adr : addr
+        }
+
+        console.log("\n\n Detail " , pdfData.detail)
+        let pdf = await generatePdf(pdfData, 'ih');
         
         return res
             .status(201)
-            .json({ message: "created succesfully", data: ih.ith_inv_nbr })
+            .json({ message: "created succesfully", data: ih.ith_inv_nbr, pdf : pdf.content})
     } catch (e) {
         //#
         logger.error("🔥 error: %o", e)
@@ -112,7 +133,7 @@ const{user_domain} = req.headers
         const ih = await invoiceOrderServiceInstance.create({...invoiceOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderDetail) {
-            entry = { ...entry, idh_inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, _inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await invoiceOrderDetailServiceInstance.create(entry)
 
         

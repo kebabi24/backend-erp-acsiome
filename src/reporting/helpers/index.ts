@@ -1,0 +1,7 @@
+export {prepareSoData } from './so'
+export {preparePoData} from './po'
+export {preparePshData} from './psh'
+export {prepareIhData} from './ih'
+export {preparePrhData} from './prh'
+export {prepareItTrData} from './itTr'
+export {prepareItData} from './it'
