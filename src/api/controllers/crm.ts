@@ -432,7 +432,11 @@ const { Op } = require('sequelize')
 
          const lines = await crmServiceInstance.getAllAgendaExecutionLines()
          const event_results = await crmServiceInstance.getEventResults()
-         const index_sat_result = event_results.findIndex((result)=>{return result.bool01 == false})
+         
+         const categories = await crmServiceInstance.getParamCategories()
+         const action_types = await crmServiceInstance.getActionTypes()
+         const methods_types = await crmServiceInstance.getMethods()
+         
          
          let data = {}
 
@@ -443,19 +447,23 @@ const { Op } = require('sequelize')
          const actions = _.mapValues(_.groupBy(lines, 'action'));
          const actions_filtered = [];
             for (const [key, value] of Object.entries(actions)) {
+                let label = getElementLabel(action_types,key)
                 actions_filtered.push({
                 action_code: key,
+                action_label : label,
                 action_nb : value.length,
                 // events: value,
             });
          } 
 
-         // METHODS
+         // METHODS  
          const methods = _.mapValues(_.groupBy(lines, 'method'));
          const methods_filtered = [];
             for (const [key, value] of Object.entries(methods)) {
+                let label = getElementLabel(methods_types,key)
                 methods_filtered.push({
                 method_code: key,
+                 method_label : label , 
                 method_nb : value.length,
                 // events: value,
             });
@@ -465,23 +473,54 @@ const { Op } = require('sequelize')
          const eventResults = _.mapValues(_.groupBy(lines, 'event_result'));
          const eventResults_filtered = [];
             for (const [key, value] of Object.entries(eventResults)) {
+                let label = getElementLabel(event_results,key)
                 eventResults_filtered.push({
                 event_result_code: key,
+                event_result_label: label,
                 event_result_nb : value.length,
                 // events: value,
             });
          } 
 
+          // EVENT RESULTS 2
+          const nb_events_categories = _.mapValues(_.groupBy(lines, 'category'));
+          const nb_events_categories_filterd = [];
+             for (const [key, value] of Object.entries(nb_events_categories)) {
+                let label = getElementLabel(categories,key)
+                nb_events_categories_filterd.push({
+                 category_code: key,
+                 category_label : label,
+                 nb_events : value.length,
+             });
+          } 
+
          // TAUX DE SATISFACTIONS
-         const index_satisfaction = eventResults_filtered.findIndex((result)=>{return result.event_result_code === event_results[index_sat_result].code_value})
-         const nb_events_satisfied = eventResults_filtered[index_satisfaction].event_result_nb
-         const taux = nb_events_satisfied/lines.length 
-         
-         
+         const index_sat_result = event_results.findIndex((result)=>{return result.bool01 == false})
+        //  const index_satisfaction = eventResults_filtered.findIndex((result)=>{return result.event_result_code === event_results[index_sat_result].code_value})
+         const sat_code = event_results[index_sat_result].code_value
+         //  const nb_events_satisfied = eventResults_filtered[index_satisfaction].event_result_nb
+        //  const taux = nb_events_satisfied/lines.length 
+        const lines_days = _.mapValues(_.groupBy(lines, 'event_day'));
+        const lines_days_filterd = [];
+            for (const [key, value] of Object.entries(lines_days)) {
+                let counter = 0 
+                value.forEach( line =>{
+                    if(line.event_result === sat_code  ) counter++
+                })
+                lines_days_filterd.push({
+                day: key,
+                nb_events : value.length,
+                percentage : (counter / value.length) * 100
+            });
+          
+        }
+        
+         // ADD RESULTS TO DATA OBJECT
+         data['rate'] = lines_days_filterd
          data['actions'] = actions_filtered
          data['methods'] = methods_filtered
          data['event_results'] = eventResults_filtered
-         data['taux'] = taux
+         data['events_categories'] = nb_events_categories_filterd
 
 
         
@@ -507,6 +546,13 @@ const { Op } = require('sequelize')
      }
     return  selectedIndexes
   }   
+
+  const getElementLabel = (source , element_code)=>{
+    let index = source.findIndex(element =>{
+        return element.code_value === element_code
+    })
+    return  source[index].code_desc
+  } 
 
 
 
