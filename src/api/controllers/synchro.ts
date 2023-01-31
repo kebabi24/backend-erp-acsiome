@@ -15,12 +15,13 @@ import bomPartService from '../../services/bom-part';
 import banksSercice from '../../services/bank';
 import UserService from '../../services/user';
 import employeService from '../../services/employe';
+import ProvidersSercice from '../../services/provider';
 const { Pool, Client } = require('pg');
 const pool = new Pool({
-  user: 'postgres',
-  host: '192.99.34.138',
-  database: 'abracadabraa',
-  password: 'postgres',
+  user: 'admin',
+  host: '146.59.157.107',
+  database: 'abraa',
+  password: 'admin',
   port: 5432,
 });
 const synchro = async (req: Request, res: Response, next: NextFunction) => {
@@ -43,107 +44,110 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
     const bkServiceInstance = Container.get(banksSercice);
     const userServiceInstance = Container.get(UserService);
     const empServiceInstance = Container.get(employeService);
+    const vendServiceInstance = Container.get(ProvidersSercice);
 
     const conn = await pool.connect();
-    // if (conn._connected) {
-    //   //   console.log(conn._connected);
-    //   //   console.log('server connected');
-    //   const site = await pool.query('SELECT * FROM si_mstr');
-    //   const loc = await pool.query('SELECT * FROM loc_mstr');
-    //   const profile = await pool.query('SELECT * FROM usrg_mstr');
-    //   const items = await pool.query('SELECT * FROM pt_mstr');
-    //   const bom = await pool.query('SELECT * FROM bom_mstr');
-    //   const bompart = await pool.query('SELECT * FROM ptb_det');
-    //   const ps = await pool.query('SELECT * FROM ps_mstr');
-    //   const codes = await pool.query('SELECT * FROM code_mstr');
-    //   const customers = await pool.query('SELECT * FROM cm_mstr');
-    //   const addresses = await pool.query('SELECT * FROM ad_mstr');
-    //   const sct = await pool.query('SELECT * FROM sct_det');
-    //   const bk = await pool.query('SELECT * FROM bk_mstr');
-    //   const userss = await userServiceInstance.findOne({ usrd_code: user_code });
-    //   console.log(userss);
-    //   const usrd_site = userss.usrd_site;
-    //   const users = await pool.query('SELECT * FROM usrd_det WHERE usrd_site=' + "'" + usrd_site + "'" + '');
-    //   const emps = await pool.query('SELECT * FROM emp_mstr WHERE emp_site=' + "'" + usrd_site + "'" + '');
-    //   for (const si of site.rows) {
-    //     await siteServiceInstance.upsert({
-    //       si,
-    //     });
-    //   }
-    //   for (const lc of loc.rows) {
-    //     await locServiceInstance.upsert({
-    //       lc,
-    //     });
-    //   }
-    //   for (const pr of profile.rows) {
-    //     await profileServiceInstance.upsert({
-    //       pr,
-    //     });
-    //   }
-    //   for (const it of items.rows) {
-    //     await itemServiceInstance.upsert({
-    //       it,
-    //     });
-    //   }
-    //   for (const bm of bom.rows) {
-    //     await bomServiceInstance.upsert({
-    //       bm,
-    //     });
-    //   }
-    //   for (const bm of bom.rows) {
-    //     await bomServiceInstance.upsert({
-    //       bm,
-    //     });
-    //   }
-    //   for (const pss of ps.rows) {
-    //     await psServiceInstance.upsert({
-    //       pss,
-    //     });
-    //   }
-    //   for (const ptb of bompart.rows) {
-    //     await bomPartServiceInstance.upsert({
-    //       ptb,
-    //     });
-    //   }
-    //   for (const code of codes.rows) {
-    //     await codeServiceInstance.upsert({
-    //       code,
-    //     });
-    //   }
-    //   for (const addresse of addresses.rows) {
-    //     await addresseServiceInstance.upsert({
-    //       addresse,
-    //     });
-    //   }
-    //   for (const customer of customers.rows) {
-    //     await customerServiceInstance.upsert({
-    //       customer,
-    //     });
-    //   }
-    //   for (const sc of sct.rows) {
-    //     await sctServiceInstance.upsert({
-    //       sc,
-    //     });
-    //   }
-    //   for (const bank of bk.rows) {
-    //     await bkServiceInstance.upsert({
-    //       bank,
-    //     });
-    //   }
-    //   for (const user of users.rows) {
-    //     await userServiceInstance.upsert({
-    //       user,
-    //     });
-    //   }
-    //   for (const emp of emps.rows) {
-    //     await empServiceInstance.upsert({
-    //       emp,
-    //     });
-    //   }
-    // } else {
-    //   console.log(conn._connected);
-    //   console.log('server not connected');
-    // }
+    if (conn._connected) {
+      //   console.log(conn._connected);
+      //   console.log('server connected');
+      const site = await pool.query('SELECT * FROM si_mstr');
+      const loc = await pool.query('SELECT * FROM loc_mstr');
+      const profile = await pool.query('SELECT * FROM usrg_mstr');
+      const items = await pool.query('SELECT * FROM pt_mstr');
+      const bom = await pool.query('SELECT * FROM bom_mstr');
+      const bompart = await pool.query('SELECT * FROM ptb_det');
+      const ps = await pool.query('SELECT * FROM ps_mstr');
+      const codes = await pool.query('SELECT * FROM code_mstr');
+      const customers = await pool.query('SELECT * FROM cm_mstr');
+      const addresses = await pool.query('SELECT * FROM ad_mstr');
+      const sct = await pool.query('SELECT * FROM sct_det');
+      const bk = await pool.query('SELECT * FROM bk_mstr');
+      const userss = await userServiceInstance.findOne({ usrd_code: user_code });
+      const usrd_site = userss.usrd_site;
+      const users = await pool.query('SELECT * FROM usrd_det WHERE usrd_site=' + "'" + usrd_site + "'" + '');
+      const emps = await pool.query('SELECT * FROM emp_mstr WHERE emp_site=' + "'" + usrd_site + "'" + '');
+      const vend = await pool.query('SELECT * FROM vd_mstr');
+      for (const si of site.rows) {
+        await siteServiceInstance.upsert({
+          si,
+        });
+      }
+      for (const lc of loc.rows) {
+        await locServiceInstance.upsert({
+          lc,
+        });
+      }
+      for (const pr of profile.rows) {
+        await profileServiceInstance.upsert({
+          pr,
+        });
+      }
+      for (const it of items.rows) {
+        await itemServiceInstance.upsert({
+          ...it,
+          pt_site: usrd_site,
+          pt_loc: usrd_site == '0901' ? 'MGM0010' : usrd_site,
+        });
+      }
+      for (const bm of bom.rows) {
+        await bomServiceInstance.upsert({
+          bm,
+        });
+      }
+      for (const pss of ps.rows) {
+        await psServiceInstance.upsert({
+          pss,
+        });
+      }
+      for (const ptb of bompart.rows) {
+        await bomPartServiceInstance.upsert({
+          ptb,
+        });
+      }
+      for (const code of codes.rows) {
+        await codeServiceInstance.upsert({
+          code,
+        });
+      }
+      for (const addresse of addresses.rows) {
+        await addresseServiceInstance.upsert({
+          addresse,
+        });
+      }
+      for (const customer of customers.rows) {
+        await customerServiceInstance.upsert({
+          customer,
+        });
+      }
+      for (const sc of sct.rows) {
+        await sctServiceInstance.upsert({
+          sc,
+        });
+      }
+      for (const bank of bk.rows) {
+        await bkServiceInstance.upsert({
+          bank,
+        });
+      }
+      for (const user of users.rows) {
+        await userServiceInstance.upsert({
+          user,
+        });
+      }
+      for (const emp of emps.rows) {
+        await empServiceInstance.upsert({
+          emp,
+        });
+      }
+      for (const vd of vend.rows) {
+        await vendServiceInstance.upsert({
+          vd,
+        });
+      }
+    } else {
+      console.log(conn._connected);
+      console.log('server not connected');
+    }
 
     const result = true;
 

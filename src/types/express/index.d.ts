@@ -130,6 +130,7 @@ declare global {
     export type posOrderroductSuppModel = S.Model;
     export type posOrderProductSauceModel = S.Model;
     export type posOrderProductIngModel = S.Model;
+    export type ordersHistory = S.Model;
     export type bkhModel = S.Model;
     export type emplyeTimeModel = S.Model;
     export type deliveryModel = S.Model;
@@ -138,7 +139,7 @@ declare global {
     export type SatisfactionModel = S.Model;
     export type invoiceModel = S.Model;
     export type forcastModel = S.Model;
-    // new models 
+    // new models
     export type ListPriceModel = S.Model;
     export type fidelityCardModel = S.Model;
     export type InventoryModel = S.Model;
@@ -146,7 +147,7 @@ declare global {
     export type cancelationReasonModel = S.Model;
     export type paymentModel = S.Model;
 
-    // CRM models 
+    // CRM models
     export type paramHeaderModel = S.Model;
     export type paramDetailsModel = S.Model;
     export type populationModel = S.Model;
