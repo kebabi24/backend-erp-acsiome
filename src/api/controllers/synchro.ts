@@ -15,6 +15,7 @@ import bomPartService from '../../services/bom-part';
 import banksSercice from '../../services/bank';
 import UserService from '../../services/user';
 import employeService from '../../services/employe';
+import ProvidersSercice from '../../services/provider';
 const { Pool, Client } = require('pg');
 const pool = new Pool({
   user: 'admin',
@@ -43,6 +44,7 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
     const bkServiceInstance = Container.get(banksSercice);
     const userServiceInstance = Container.get(UserService);
     const empServiceInstance = Container.get(employeService);
+    const vendServiceInstance = Container.get(ProvidersSercice);
 
     const conn = await pool.connect();
     if (conn._connected) {
@@ -61,10 +63,10 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
       const sct = await pool.query('SELECT * FROM sct_det');
       const bk = await pool.query('SELECT * FROM bk_mstr');
       const userss = await userServiceInstance.findOne({ usrd_code: user_code });
-      console.log(userss);
       const usrd_site = userss.usrd_site;
       const users = await pool.query('SELECT * FROM usrd_det WHERE usrd_site=' + "'" + usrd_site + "'" + '');
       const emps = await pool.query('SELECT * FROM emp_mstr WHERE emp_site=' + "'" + usrd_site + "'" + '');
+      const vend = await pool.query('SELECT * FROM vd_mstr');
       for (const si of site.rows) {
         await siteServiceInstance.upsert({
           si,
@@ -84,11 +86,7 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
         await itemServiceInstance.upsert({
           ...it,
           pt_site: usrd_site,
-        });
-      }
-      for (const bm of bom.rows) {
-        await bomServiceInstance.upsert({
-          bm,
+          pt_loc: usrd_site == '0901' ? 'MGM0010' : usrd_site,
         });
       }
       for (const bm of bom.rows) {
@@ -139,6 +137,11 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
       for (const emp of emps.rows) {
         await empServiceInstance.upsert({
           emp,
+        });
+      }
+      for (const vd of vend.rows) {
+        await vendServiceInstance.upsert({
+          vd,
         });
       }
     } else {

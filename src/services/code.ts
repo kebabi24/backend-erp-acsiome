@@ -152,4 +152,14 @@ export default class codeService {
       throw e;
     }
   }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const code = await this.codeModel.upsert(query.code);
+      this.logger.silly('update one code mstr');
+      return code;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }
