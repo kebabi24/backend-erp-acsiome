@@ -75,6 +75,42 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
         { seq_type: 'AP', seq_profile: user },
       );
+      for (const bank of detail) {
+        await bankServiceInstance.update(
+          {
+            bk_balance: bank.bk_balance,
+            bk_2000: bank.bk_2000,
+            bk_1000: bank.bk_1000,
+            bk_0500: bank.bk_0500,
+            bk_0200: bank.bk_0200,
+            bk_p200: bank.bk_p200,
+            bk_p100: bank.bk_p100,
+            bk_p050: bank.bk_p050,
+            bk_p020: bank.bk_p020,
+            bk_p010: bank.bk_p010,
+            bk_p005: bank.bk_p005,
+          },
+          { bk_code: bank.bk_code },
+        );
+        await bkhServiceInstance.create({
+          bkh_code: bank.bk_code,
+          bk_num_code: new Date(),
+          bkh_balance: bank.bk_balance,
+          bkh_date: new Date(),
+          bkh_type: 'O',
+          bk_2000: bank.bk_2000,
+          bk_1000: bank.bk_1000,
+          bk_0500: bank.bk_0500,
+          bk_0200: bank.bk_0200,
+          bk_p200: bank.bk_p200,
+          bk_p100: bank.bk_p100,
+          bk_p050: bank.bk_p050,
+          bk_p020: bank.bk_p020,
+          bk_p010: bank.bk_p010,
+          bk_p005: bank.bk_p005,
+          bkh_effdate: currentService.service_period_activate_date,
+        });
+      }
     } else {
       console.log(user);
       const service = await ServiceInstance.update(
@@ -106,7 +142,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           bk_num_code: new Date(),
           bkh_balance: bank.bk_balance,
           bkh_date: new Date(),
-          bkh_type: type,
+          bkh_type: 'C',
           bk_2000: bank.bk_2000,
           bk_1000: bank.bk_1000,
           bk_0500: bank.bk_0500,
@@ -124,6 +160,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
       await SequenceServiceInstance.update({ seq_curr_val: 1 }, { seq_type: 'OF', seq_profile: user });
       console.log('aprés');
     }
+
     // console.log(bk)
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -149,15 +186,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     console.log(cart);
     console.log(user_name);
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
-    console.log(currentService.service_period_activate_date);
-    // await bankhDetailerviceInstance.create({
-    //   bkh_code: 'CR0901',
-    //   bkh_date: new Date(),
-    //   bkh_balance: 100,
-    //   bkh_type: 'R',
-    //   dec01: 20,
-    //   bkh_effdate: currentService.service_period_activate_date,
-    // });
+    console.log(bank);
     if (bank) {
       await bankhDetailerviceInstance.create({
         bkh_code: bank.bk_code,

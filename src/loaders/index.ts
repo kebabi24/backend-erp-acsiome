@@ -160,7 +160,7 @@ export default async ({ expressApp }) => {
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
-
+      { name: 'ordersHistoryModel', model: require('../models/order-history').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
 
@@ -806,8 +806,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-   //await sequelizeConnection.sync();
-  // await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
+  await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

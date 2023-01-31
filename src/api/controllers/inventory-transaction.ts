@@ -19,6 +19,7 @@ import SaleOrderDetailService from '../../services/saleorder-detail';
 import SaleOrderService from '../../services/saleorder';
 import MobileService from '../../services/mobile-service';
 import { generatePdf } from '../../reporting/generator';
+import serviceMobile from '../../services/mobile-service';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -78,6 +79,25 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const devise = await inventoryTransactionServiceInstance.findOne({ ...req.body });
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findByOneinv = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  try {
+    const ServiceInstance = Container.get(serviceMobile);
+    const { role_code, type } = req.body;
+    const currentService = await ServiceInstance.findOne({ role_code: role_code, service_open: true });
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const inv = await inventoryTransactionServiceInstance.findOne({
+      tr_type: type,
+      tr_effdate: currentService.service_period_activate_date,
+    });
+    return res.status(200).json({ message: 'fetched succesfully', data: inv });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1895,4 +1915,5 @@ export default {
   cycRcnt,
   findDayly,
   findDayly1,
+  findByOneinv,
 };
