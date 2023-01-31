@@ -30,7 +30,7 @@ export const preparePoData = (rawData : any) => {
 
         mt : numberToLetters(mt, rawData.po.po_curr),
     };
-    console.log("\n\n FROM PREP", data_po)
+   // console.log("\n\n FROM PREP", data_po)
     return data_po
 }
 

@@ -386,7 +386,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrder = await purchaseOrderServiceInstance.findOne({
       ...req.body,
     });
-    console.log(purchaseOrder);
+   // console.log(purchaseOrder);
     if (purchaseOrder) {
       const details = await purchaseOrderDetailServiceInstance.find({
         pod_nbr: purchaseOrder.po_nbr,
