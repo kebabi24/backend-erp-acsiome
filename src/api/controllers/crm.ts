@@ -534,6 +534,35 @@ const { Op } = require('sequelize')
     }
   }
 
+  const createAgendaEventOrderZero = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getCustomerData endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+        const sequenceServiceInstance = Container.get(SequenceService);
+
+        const { category_code , phone } = req.body;
+        
+        
+        const param = await crmServiceInstance.getParamFilterd(category_code)
+        let addLine;
+        if(param){
+            const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+            addLine = await crmServiceInstance.createAgendaLineOrder0(phone,param,paramDetails, sequence)   
+        }
+        
+        return res
+            .status(200)
+            .json({ message: "got all agenda execution lines", data:addLine })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
+
+
   // FOR CRM : RANDOM : to select nb random unique indexes between 0 and max_value
   const selectRandomIndexes = (max_value , nb)=>{
     let selectedIndexes = []
@@ -572,5 +601,6 @@ export default {
     getCustomerData,
     createAgendaExecutionLine,
     createOneAgendaLine,
-    getCRMDashboardData
+    getCRMDashboardData,
+    createAgendaEventOrderZero
 }
