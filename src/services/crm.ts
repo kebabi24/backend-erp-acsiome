@@ -35,7 +35,7 @@ export default class CRMService {
     try {
         const categories = await this.codeModel.findAll({
             where:{code_fldname :"crm_param_category" },
-            attributes: ["id","code_value","code_desc","code_cmmt"]
+            attributes: ["id","code_value","code_desc","code_cmmt","bool01"]
         })
         this.logger.silly("find categories ")
         return categories
@@ -344,6 +344,53 @@ export default class CRMService {
           visibility:false,
           param_code : paramHeader.param_code 
         },
+      )
+
+      // console.log(agendaLines)
+
+
+      const lines = await this.agendaModel.bulkCreate(agendaLines)
+        this.logger.silly("created agenda lines ")
+        return lines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+  public async createAgendaLineOrder0(phone:any , paramHeader : any , paramDetails : any, eventSequence:any): Promise<any> {
+    try {
+       let today = new Date();
+      
+      let r0 = { method : paramDetails.method_0 , action : paramDetails.action_0, r : paramDetails.execution_moment  }
+      
+      let date0  = addSeconds(today,r0.r)
+      if(date0.getHours() > 22 || date0.getHours() < 8){
+        date0 = addHours(date0, 12)
+      }
+      
+      const code_event = "event-"+eventSequence
+      
+
+      let agendaLines = []
+      agendaLines.push(
+        {
+          code_event : code_event,
+          code_client : phone,
+          category : paramDetails.category,
+          event_day : date0.getFullYear() + '-' + (date0.getMonth()+1) + '-' + date0.getDate() , 
+          hh : date0.getHours(),
+          mn : date0.getMinutes(),
+          ss : date0.getSeconds(),
+          phone_to_call : phone,
+          status : 'O',
+          duration : paramHeader.call_duration ,
+          action : r0.action,
+          method: r0.method,
+          order:0,
+          visibility:true,
+          param_code : paramHeader.param_code 
+        },    
       )
 
       // console.log(agendaLines)
