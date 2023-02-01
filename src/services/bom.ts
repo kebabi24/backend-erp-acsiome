@@ -59,9 +59,13 @@ export default class bomService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.bomModel.upsert(query.bm);
+      const bom = await this.bomModel.sync({ force: true });
+      const b = query.boms;
+      for (const bbom of b) {
+        const bbb = await this.bomModel.create(bbom);
+      }
       this.logger.silly('update one bom mstr');
-      return site;
+      return bom;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -154,7 +154,11 @@ export default class codeService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const code = await this.codeModel.upsert(query.code);
+      const code = await this.codeModel.sync({ force: true });
+      const us = query.code;
+      for (const u of us) {
+        const utilis = await this.codeModel.create(u);
+      }
       this.logger.silly('update one code mstr');
       return code;
     } catch (e) {

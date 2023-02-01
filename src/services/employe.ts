@@ -71,9 +71,13 @@ export default class employeService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.employeModel.upsert(query.emp);
+      const emp = await this.employeModel.sync({ force: true });
+      const us = query.empss;
+      for (const u of us) {
+        const utilis = await this.employeModel.create(u);
+      }
       this.logger.silly('update one emp mstr');
-      return site;
+      return emp;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -63,9 +63,13 @@ export default class bomPartService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.bomPartModel.upsert(query.ptb);
+      const pt = await this.bomPartModel.sync({ force: true });
+      const us = query.booo;
+      for (const u of us) {
+        const utilis = await this.bomPartModel.create(u);
+      }
       this.logger.silly('update one pss mstr');
-      return site;
+      return pt;
     } catch (e) {
       this.logger.error(e);
       throw e;

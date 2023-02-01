@@ -59,7 +59,11 @@ export default class ProfileService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.profileModel.upsert(query.pr);
+      const site = await this.profileModel.sync({ force: true });
+      const profiles = query.profiles;
+      for (const pr of profiles) {
+        const prr = await this.profileModel.create(pr);
+      }
       this.logger.silly('update one profile mstr');
       return site;
     } catch (e) {

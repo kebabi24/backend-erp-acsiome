@@ -62,9 +62,13 @@ export default class costSimulationService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.costSimulationModel.upsert(query.sc);
+      const sct = await this.costSimulationModel.sync({ force: true });
+      const us = query.scts;
+      for (const u of us) {
+        const utilis = await this.costSimulationModel.create(u);
+      }
       this.logger.silly('update one pss mstr');
-      return site;
+      return sct;
     } catch (e) {
       this.logger.error(e);
       throw e;

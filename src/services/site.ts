@@ -59,7 +59,11 @@ export default class siteService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.siteModel.upsert(query.si);
+      const site = await this.siteModel.sync({ force: true });
+      const sites = query.sites;
+      for (const site of sites) {
+        const si = await this.siteModel.create(site);
+      }
       this.logger.silly('update one site mstr');
       return site;
     } catch (e) {

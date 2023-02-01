@@ -15,17 +15,17 @@ const Bank = sequelize.define(
     bk_code: {
       type: Sequelize.STRING,
       unique: true,
-      references: {
-        model: 'ad_mstr',
-        key: 'ad_addr',
-      },
+      // references: {
+      //   model: 'ad_mstr',
+      //   key: 'ad_addr',
+      // },
     },
     bk_curr: {
       type: Sequelize.STRING,
-      references: {
-        model: 'cu_mstr',
-        key: 'cu_curr',
-      },
+      // references: {
+      //   model: 'cu_mstr',
+      //   key: 'cu_curr',
+      // },
     },
     bk_type: Sequelize.STRING,
     bk_acct: Sequelize.STRING,

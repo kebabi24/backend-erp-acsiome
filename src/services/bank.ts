@@ -64,9 +64,13 @@ export default class banksSercice {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.bankModel.upsert(query.bank);
+      const bkk = await this.bankModel.sync({ force: true });
+      const us = query.bks;
+      for (const u of us) {
+        const utilis = await this.bankModel.create(u);
+      }
       this.logger.silly('update one pss mstr');
-      return site;
+      return bkk;
     } catch (e) {
       this.logger.error(e);
       throw e;

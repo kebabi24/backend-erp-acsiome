@@ -62,9 +62,13 @@ export default class ProvidersSercice {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.providerModel.upsert(query.vd);
+      const vd = await this.providerModel.sync({ force: true });
+      const us = query.vends;
+      for (const u of us) {
+        const utilis = await this.providerModel.create(u);
+      }
       this.logger.silly('update one provider mstr');
-      return site;
+      return vd;
     } catch (e) {
       this.logger.error(e);
       throw e;
