@@ -29,7 +29,16 @@ export default class inventoryTransactionService {
             throw e
         }
     }
-
+    public async findOneI(query: any): Promise<any> {
+        try {
+            const inventoryTransaction = await this.inventoryTransactionModel.findOne({ where: query })
+            this.logger.silly("find one inventoryTransaction mstr")
+            return inventoryTransaction
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async find(query: any): Promise<any> {
         try {
             const inventoryTransactions = await this.inventoryTransactionModel.findAll({ where: query })
@@ -55,6 +64,27 @@ export default class inventoryTransactionService {
     public async findSpecial(query: any): Promise<any> {
         try {
             const inventoryTransactions = await this.inventoryTransactionModel.findAll(query)
+            this.logger.silly("find All inventoryTransactions mstr")
+            return inventoryTransactions
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async max(query: any): Promise<any> {
+        try {
+            const inventoryTransactions = await this.inventoryTransactionModel.max('id',{where: query})
+            this.logger.silly("find All inventoryTransactions mstr")
+            return inventoryTransactions
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async min(query: any): Promise<any> {
+        try {
+            const inventoryTransactions = await this.inventoryTransactionModel.min('id',{where: query})
             this.logger.silly("find All inventoryTransactions mstr")
             return inventoryTransactions
         } catch (e) {
