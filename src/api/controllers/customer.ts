@@ -312,9 +312,7 @@ const findCustomer = async (req: Request, res: Response, next: NextFunction) => 
       const customerServiceInstance = Container.get(CustomerService)
       
       const {phone} = req.params
-      console.log(req.params)
       const customer = await customerServiceInstance.findCustomer(phone)
-      console.log(customer)
       return res
           .status(200)
           .json({ message: "fetched succesfully", data: customer  })

@@ -150,7 +150,6 @@ export default class customersSercice {
       });
       const fileterd = _.mapValues(_.groupBy(causes, 'code_cmmt'));
       const filtered_causes = [];
-      console.log(Object.keys(fileterd));
       for (const [key, value] of Object.entries(fileterd)) {
         filtered_causes.push({
           groupe_titel: key,

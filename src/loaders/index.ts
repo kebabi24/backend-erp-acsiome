@@ -185,6 +185,7 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
+      { name: 'agendaExecutionDetailsModel', model: require('../models/mobile_models/agenda_execution_details').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -806,8 +807,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
   await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

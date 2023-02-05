@@ -12,6 +12,7 @@ export default class CRMService {
     @Inject("codeModel") private codeModel: Models.CodeModel,
     @Inject("agendaModel") private agendaModel: Models.agendaModel,
     @Inject("agendaExecutionModel") private agendaExecutionModel: Models.agendaExecutionModel,
+    @Inject("agendaExecutionDetailsModel") private agendaExecutionDetailsModel: Models.agendaExecutionDetailsModel,
     @Inject("customerModel") private customerModel: Models.CustomerModel,
     @Inject("populationModel") private populationModel: Models.populationModel,
     @Inject("addressModel") private addressModel: Models.AddressModel,
@@ -372,9 +373,7 @@ export default class CRMService {
       const code_event = "event-"+eventSequence
       
 
-      let agendaLines = []
-      agendaLines.push(
-        {
+      let agendaLine = {
           code_event : code_event,
           code_client : phone,
           category : paramDetails.category,
@@ -388,15 +387,15 @@ export default class CRMService {
           action : r0.action,
           method: r0.method,
           order:0,
-          visibility:true,
+          visibility:false,
           param_code : paramHeader.param_code 
-        },    
-      )
+        }
+      
 
       // console.log(agendaLines)
 
 
-      const lines = await this.agendaModel.bulkCreate(agendaLines)
+      const lines = await this.agendaModel.create(agendaLine)
         this.logger.silly("created agenda lines ")
         return lines
     } catch (e) {
@@ -527,6 +526,19 @@ export default class CRMService {
     }
   }
 
+  public async createAgendaExecutionLineForEventZero(executionLine : any ): Promise<any> {
+    try {
+     
+      const agendaExecutionLine = await this.agendaExecutionModel.create(executionLine)
+
+        this.logger.silly("created agendaExecutionLine ")
+        return agendaExecutionLine
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
   public async getAllAgendaExecutionLines(): Promise<any> {
     try {  
       const agendaExecutionLines = await this.agendaExecutionModel.findAll()
@@ -553,6 +565,18 @@ export default class CRMService {
         
         this.logger.silly("created agendaExecutionLine ")
         return updatedLines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
+  public async createAgendaExecutionLineDetail(agendaExecutionLineDetail : any ): Promise<any> {
+    try {
+     
+      const agendaExecutionLineDetailCreated = await this.agendaExecutionDetailsModel.create(agendaExecutionLineDetail)
+        this.logger.silly("created agendaExecutionLineDetail ")
+        return agendaExecutionLineDetail
     } catch (e) {
         this.logger.error(e)
         throw e

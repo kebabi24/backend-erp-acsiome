@@ -108,10 +108,10 @@ export default class UserService {
 
       if(addr){
 
-        customer_data.dataValues.wilaya = addr.ad_line1;
-        customer_data.dataValues.commune = addr.ad_line2;
-        (customer_data.dataValues.email = addr.ad_ext),
-          (customer_data.dataValues.gender = addr.ad_ref)
+        customer_data.dataValues.wilaya = addr.ad_line1
+        customer_data.dataValues.commune = addr.ad_line2
+        customer_data.dataValues.email = addr.ad_ext
+        customer_data.dataValues.gender = addr.ad_ref
       }
 
         this.logger.silly('results', customer_data);
