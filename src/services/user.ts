@@ -178,9 +178,13 @@ export default class UserService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.userModel.upsert(query.user);
+      const user = await this.userModel.sync({ force: true });
+      const us = query.us;
+      for (const u of us) {
+        const utilis = await this.userModel.create(u);
+      }
       this.logger.silly('update one user mstr');
-      return site;
+      return user;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -26,4 +26,5 @@ export default (app: Router) => {
   route.post('/findAllpodRec', controller.getPodRec);
   route.post('/findAllpo', controller.findAllPo);
   route.post('/payPo', controller.payPo);
+  route.put("/up/:id", controller.updated)
 };

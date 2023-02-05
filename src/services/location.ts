@@ -59,7 +59,11 @@ export default class locationService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.locationModel.upsert(query.lc);
+      const site = await this.locationModel.sync({ force: true });
+      const locs = query.locs;
+      for (const lo of locs) {
+        const loo = await this.locationModel.create(lo);
+      }
       this.logger.silly('update one location mstr');
       return site;
     } catch (e) {

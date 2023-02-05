@@ -102,7 +102,13 @@ export default class ItemService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.itemModel.upsert(query.it);
+      const site = await this.itemModel.sync({ force: true });
+      const it = query.it;
+      const pt_site = query.pt_site;
+      const pt_loc = query.pt_loc;
+      for (const itt of it) {
+        const b = await this.itemModel.create({ ...itt, pt_site: pt_site, pt_loc: pt_loc });
+      }
       this.logger.silly('update one item mstr');
       return site;
     } catch (e) {

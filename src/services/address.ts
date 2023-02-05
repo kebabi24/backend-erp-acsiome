@@ -56,9 +56,13 @@ export default class addressService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.addressModel.upsert(query.addresse);
+      const zdd = await this.addressModel.sync({ force: true });
+      const us = query.add;
+      for (const u of us) {
+        const utilis = await this.addressModel.create(u);
+      }
       this.logger.silly('update one pss mstr');
-      return site;
+      return zdd;
     } catch (e) {
       this.logger.error(e);
       throw e;

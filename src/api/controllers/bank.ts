@@ -8,7 +8,8 @@ import { Container } from 'typedi';
 import sequenceService from '../../services/sequence';
 import serviceMobile from '../../services/mobile-service';
 import { Op, Sequelize } from 'sequelize';
-
+'use strict';
+const nodemailer = require('nodemailer');
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const logger = Container.get('logger');
@@ -56,13 +57,12 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const SequenceServiceInstance = Container.get(sequenceService);
     const ServiceInstance = Container.get(serviceMobile);
-    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'AP', seq_profile: user });
-    const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
-    let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'SR', seq_profile: user });
 
     console.log(user_code);
 
     if (type === 'O') {
+      let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
       const service = await ServiceInstance.create({
         service_code: nbr,
         service_period_activate_date: new Date(),
@@ -73,8 +73,9 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
       });
       await SequenceServiceInstance.update(
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
-        { seq_type: 'AP', seq_profile: user },
+        { seq_type: 'SR', seq_profile: user },
       );
+      const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
       for (const bank of detail) {
         await bankServiceInstance.update(
           {
@@ -120,6 +121,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         },
         { role_code: user_code, service_open: true },
       );
+      const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
       for (const bank of detail) {
         await bankServiceInstance.update(
           {
@@ -182,9 +184,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const ServiceInstance = Container.get(serviceMobile);
     const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
     const { cart, type, user_name } = req.body;
-    // console.log(cart);
-    console.log(cart);
-    console.log(user_name);
+
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
     console.log(bank);
     if (bank) {

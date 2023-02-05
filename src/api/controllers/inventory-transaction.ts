@@ -1602,6 +1602,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
+    
       },
       attributes: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
@@ -1625,7 +1626,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
       raw: true,
     });
-
+ //console.log(parts)
     let result = [];
     var i = 1;
     for (let part of parts) {
@@ -1654,19 +1655,74 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
 
       let qtyso = 0;
       let qtywo = 0;
+     
+      const trcycmax = await inventoryTransactionServiceInstance.max({
+        
+          tr_site: req.body.tr_site,
+          tr_effdate: req.body.tr_effdate,
+          tr_part: part.tr_part,
+          tr_serial: part.tr_serial,
+          tr_type: 'CYC-CNT',
+        
+      });
+      const trcycmin = await inventoryTransactionServiceInstance.min({
+        
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: 'CYC-CNT',
+      
+      
+    });
+
+    
+      const cntmax = await inventoryTransactionServiceInstance.findOneI({id:trcycmax})
+      const cntmin = await inventoryTransactionServiceInstance.findOneI({id:trcycmin})
+      const trrcycmax = await inventoryTransactionServiceInstance.max({
+        
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: 'CYC-RCNT',
+      
+    });
+    const trrcycmin = await inventoryTransactionServiceInstance.min({
+      
+      tr_site: req.body.tr_site,
+      tr_effdate: req.body.tr_effdate,
+      tr_part: part.tr_part,
+      tr_serial: part.tr_serial,
+      tr_type: 'CYC-RCNT',
+    
+    
+  });
+
+  
+    const rcntmax = await inventoryTransactionServiceInstance.findOneI({id:trrcycmax})
+    const rcntmin = await inventoryTransactionServiceInstance.findOneI({id:trrcycmin})
+
+
       issso >= 0 ? (qtyso = -Number(tr[issso].qty)) : 0, isswo >= 0 ? (qtywo = -Number(tr[isswo].qty)) : 0;
+
+      
+      
 
       result.push({
         id: i,
         part: part.tr_part,
         desc: items.pt_desc1,
         serial: part.serial,
-        qtyinvbeg: cycrcnt >= 0 ? Number(tr[cycrcnt].qtybeg) : 0,
-        qtyinvdeb: cycrcnt >= 0 ? Number(tr[cycrcnt].qtychg) : 0,
+        qtyinvbeg: cycrcnt >= 0 ? Number(rcntmin.tr_loc_begin ) : 0,
+        qtyinvdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg ) : 0,
+        ecartdeb: (cycrcnt >= 0) ? (Number(rcntmax.tr_qty_chg ) - Number(rcntmin.tr_loc_begin ) ) : 0,
         qtyrec: rctpo >= 0 ? Number(tr[rctpo].qty) : 0,
         qtyiss: Number(qtyso) + Number(qtywo),
-        qtyrest: cyccnt >= 0 ? Number(tr[cyccnt].qtybeg) : 0,
-        qtyinvfin: cyccnt >= 0 ? Number(tr[cyccnt].qtychg) : 0,
+        qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin ) : 0,
+        qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0,
+        ecartfin: (cyccnt >= 0) ? (Number(cntmax.tr_qty_chg ) - Number(cntmin.tr_loc_begin ) ) : 0,
+
       });
       i = i + 1;
     }

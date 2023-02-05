@@ -24,10 +24,10 @@ const Item = sequelize.define(
     pt_draw: Sequelize.STRING,
     pt_prod_line: {
       type: Sequelize.STRING,
-      references: {
-        model: 'pl_mstr',
-        key: 'pl_prod_line',
-      },
+      // references: {
+      //   model: 'pl_mstr',
+      //   key: 'pl_prod_line',
+      // },
     },
     pt_group: Sequelize.STRING,
     pt_part_type: Sequelize.STRING,

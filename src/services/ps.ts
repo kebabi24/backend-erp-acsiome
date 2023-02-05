@@ -124,9 +124,13 @@ export default class psService {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const site = await this.psModel.upsert(query.pss);
+      const ps = await this.psModel.sync({ force: true });
+      const pss = query.pss;
+      for (const u of pss) {
+        const psss = await this.psModel.create(u);
+      }
       this.logger.silly('update one pss mstr');
-      return site;
+      return ps;
     } catch (e) {
       this.logger.error(e);
       throw e;
