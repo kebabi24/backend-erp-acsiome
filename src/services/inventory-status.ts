@@ -70,4 +70,18 @@ export default class inventoryStatusService {
       throw e;
     }
   }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const is = await this.inventoryStatusModel.sync({ force: true });
+      const iss = query.iss;
+      for (const u of iss) {
+        const utilis = await this.inventoryStatusModel.create(u);
+      }
+      this.logger.silly('update one code mstr');
+      return is;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

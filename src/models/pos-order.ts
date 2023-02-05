@@ -21,7 +21,7 @@ const OrderPos = sequelize.define(
     site_loc: Sequelize.STRING,
     order_emp: Sequelize.STRING,
     status: Sequelize.STRING,
-    loy_num: Sequelize.INTEGER,
+    loy_num: Sequelize.STRING,
     disc_amt: Sequelize.DECIMAL,
     del_comp: Sequelize.STRING,
     usrd_site: Sequelize.STRING,

@@ -21,6 +21,10 @@ import posCategoriesService from '../../services/pos-categories';
 /* eslint-disable prettier/prettier */
 import dotenv from 'dotenv';
 import RoleService from '../../services/role';
+import InventoryStatus from '../../models/inventory-status';
+import InventoryStatusDetails from '../../models/inventory-status-details';
+import inventoryStatusService from '../../services/inventory-status';
+import inventoryStatusDetailService from '../../services/inventory-status-details';
 const { Pool, Client } = require('pg');
 const pool = new Pool({
   user: 'admin',
@@ -53,6 +57,8 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
     const seQserviceInstance = Container.get(sequenceService);
     const categoriesServiceInstance = Container.get(posCategoriesService);
     const roleServiceInstance = Container.get(RoleService);
+    const isServiceInstance = Container.get(inventoryStatusService);
+    const isdServiceInstance = Container.get(inventoryStatusDetailService);
     var s = process.env.site;
     const conn = await pool.connect();
     if (conn._connected) {
@@ -76,6 +82,8 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
       const vend = await pool.query('SELECT * FROM vd_mstr');
       const seqs = await pool.query('SELECT * FROM seq_mstr');
       const categorie = await pool.query('SELECT * FROM bb_pos_category');
+      const is = await pool.query('SELECT * FROM is_mstr');
+      const isd = await pool.query('SELECT * FROM isd_det');
 
       const profiles = profile.rows;
       await profileServiceInstance.upsert({
@@ -139,6 +147,18 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
 
       await codeServiceInstance.upsert({
         code,
+      });
+
+      const iss = is.rows;
+
+      await isServiceInstance.upsert({
+        iss,
+      });
+
+      const isdd = isd.rows;
+
+      await isdServiceInstance.upsert({
+        isdd,
       });
 
       const add = addresses.rows;
