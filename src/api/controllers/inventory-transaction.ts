@@ -1716,10 +1716,13 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
         serial: part.serial,
         qtyinvbeg: cycrcnt >= 0 ? Number(rcntmin.tr_loc_begin ) : 0,
         qtyinvdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg ) : 0,
+        ecartdeb: (cycrcnt >= 0) ? (Number(rcntmax.tr_qty_chg ) - Number(rcntmin.tr_loc_begin ) ) : 0,
         qtyrec: rctpo >= 0 ? Number(tr[rctpo].qty) : 0,
         qtyiss: Number(qtyso) + Number(qtywo),
         qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin ) : 0,
         qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0,
+        ecartfin: (cyccnt >= 0) ? (Number(cntmax.tr_qty_chg ) - Number(cntmin.tr_loc_begin ) ) : 0,
+
       });
       i = i + 1;
     }
