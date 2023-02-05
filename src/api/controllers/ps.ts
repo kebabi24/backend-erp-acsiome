@@ -5,6 +5,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
 import costSimulationService from '../../services/cost-simulation';
+import { INTEGER } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -162,6 +163,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         qtyc = res.qty - ldqty + Number(item.pt_sfty_stk);
       } else qtyc = 0;
       //console.log(Number(p.ps_qty_per) * Number(obj.prod_qty),ldqty,item.pt_sfty_stk,qtyc)
+      //console.log( Math.ceil(qtyc))
       dat.push({
         id: res.id,
         part: res.part,
@@ -172,6 +174,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         qtyoh: ldqty,
         sftystk: item.pt_sfty_stk,
         qtycom: qtyc,
+        qtyval: Math.ceil(qtyc),
       });
     }
     //  for(let res of result){

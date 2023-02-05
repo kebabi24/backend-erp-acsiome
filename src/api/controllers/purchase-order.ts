@@ -126,7 +126,8 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
             duedate.setDate(duedate.getDate() + 1);
             const pt = await itemServiceInstance.findOne({ pt_part: obj.part });
           //  console.log(pt.taxe);
-
+          var loc = null
+          if (Site == "0901") { loc = "MGM0010" } else loc = Site
             let entr = {
               pod_nbr: po.po_nbr,
               pod_line: line,
@@ -135,9 +136,10 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
               pod_stat: 'V',
               pod_tax_code: pt.pt_taxc,
               pod_taxc: pt.taxe.tx2_tax_pct,
-              pod_qty_ord: obj.qtycom,
+              pod_qty_ord: obj.qtyval,
+              pod_qty_chg: obj.qtycom,
               pod_site: Site,
-              pod_loc: pt.pt_loc,
+              pod_loc: loc,
               pod_price: pt.pt_price,
               pod_um: pt.pt_um,
               pod_due_date: duedate,
@@ -883,6 +885,35 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const updated = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling update one  purchaseOrder endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const { id } = req.params;
+    console.log(req.body);
+    // const purchaseOrder = await purchaseOrderServiceInstance.update(
+    //   { ...req.body, last_modified_by: user_code },
+    //   { id },
+    // );
+    const purchase = await purchaseOrderServiceInstance.findOne({ id });
+    console.log(purchase.po_nbr);
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_nbr: purchase.po_nbr });
+    for (const pod of req.body.detail) {
+      const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
+        { pod_qty_ord:pod.pod_qty_ord,pod_price:pod.pod_price, last_modified_by: user_code },
+        { id: pod.id },
+      );
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: id });
+  } catch (e) {
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
 
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -936,6 +967,7 @@ export default {
   findByStat,
   findAllSite,
   update,
+  updated,
   findAllwithDetails,
   findAllwithDetailsite,
   findByrange,
