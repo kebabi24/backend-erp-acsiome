@@ -20,6 +20,7 @@ import SaleOrderService from '../../services/saleorder';
 import MobileService from '../../services/mobile-service';
 import { generatePdf } from '../../reporting/generator';
 import serviceMobile from '../../services/mobile-service';
+import { type } from 'os';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -1945,7 +1946,89 @@ const findTrType = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findByInv = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  if (req.body.site != '*') {
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    
+   
+    const tr = await inventoryTransactionServiceInstance.finditem({ tr_site: req.body.site, tr_type: req.body.type,tr_effdate: req.body.date});
+    for(let t of tr) {
+      t.tr_desc = t.item.pt_desc1,
+      t.tr_um = t.item.pt_um
+    }
+    //console.log(tr)
+    return res.status(200).json({ message: 'fetched succesfully', data: tr });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+} else {
+  try {
+  const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    
+   
+  const tr = await inventoryTransactionServiceInstance.finditem({  tr_type: req.body.type,tr_effdate: req.body.date });
+  for(let t of tr) {
+    t.tr_desc = t.item.pt_desc1,
+    t.tr_um = t.item.pt_um
+  }
+  return res.status(200).json({ message: 'fetched succesfully', data: tr });
+} catch (e) {
+  logger.error('🔥 error: %o', e);
+  return next(e);
+}
+}
+};
+const findByRct = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  console.log(req.body,"hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee")
+  if (req.body.site != '*') {
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const itemServiceInstance = Container.get(itemService);
+    
+   console.log(req.body,"hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee")
+    const tr = await inventoryTransactionServiceInstance.findbetw({where: { tr_site: req.body.site, tr_type: req.body.type,
+      tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} }
+      });
+      //console.log(tr)
+    for(let t of tr) {
+      const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
+      t.tr_desc = item.pt_desc1,
+      t.tr_um = item.pt_um,
+      t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
+    }
+    //console.log(tr)
+    return res.status(200).json({ message: 'fetched succesfully', data: tr });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+} else {
+  try {
+  const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+  const itemServiceInstance = Container.get(itemService);  
+   
+  const tr = await inventoryTransactionServiceInstance.findbetw({where: {  tr_type: req.body.type,
+    tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} }
+    });
+  for(let t of tr) {
+    const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
+      t.tr_desc = item.pt_desc1,
+      t.tr_um = item.pt_um,
+      t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
+  }
+  return res.status(200).json({ message: 'fetched succesfully', data: tr });
+} catch (e) {
+  logger.error('🔥 error: %o', e);
+  return next(e);
+}
+}
+};
 export default {
   create,
   findOne,
@@ -1972,4 +2055,6 @@ export default {
   findDayly,
   findDayly1,
   findByOneinv,
+  findByInv,
+  findByRct,
 };

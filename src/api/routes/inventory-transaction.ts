@@ -31,4 +31,6 @@ export default (app: Router) => {
   route.post('/dayly', controller.findDayly);
   route.post('/dayly1', controller.findDayly1);
   route.post('/findByOneinv', controller.findByOneinv);
+  route.post('/findinv', controller.findByInv);
+  route.post('/findrct', controller.findByRct);
 };

@@ -50,7 +50,27 @@ export default class inventoryTransactionService {
             throw e
         }
     }
-
+    public async finditem(query: any): Promise<any> {
+        try {
+            const inventoryTransactions = await this.inventoryTransactionModel.findAll({ where: query 
+            ,include: this.itemModel})
+            this.logger.silly("find All inventoryTransactions mstr")
+            return inventoryTransactions
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async findbetw(query: any): Promise<any> {
+        try {
+            const inventoryTransactions = await this.inventoryTransactionModel.findAll(  query )
+            this.logger.silly("find All inventoryTransactions mstr")
+            return inventoryTransactions
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async findSpec(query: any): Promise<any> {
         try {
             const inventoryTransactions = await this.inventoryTransactionModel.findAll({where: query})
