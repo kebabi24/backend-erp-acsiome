@@ -153,5 +153,6 @@ declare global {
     export type populationModel = S.Model;
     export type agendaModel = S.Model;
     export type agendaExecutionModel = S.Model;
+    export type agendaExecutionDetailsModel = S.Model;
   }
 }

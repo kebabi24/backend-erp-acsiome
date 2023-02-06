@@ -8,6 +8,7 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { print } from "util";
 import _ from "lodash";
+import { exec } from "child_process";
 const { Op } = require('sequelize')
 
   const getParamCategories = async (req: Request, res: Response, next: NextFunction) => {
@@ -396,15 +397,13 @@ const { Op } = require('sequelize')
     try {
         const crmServiceInstance = Container.get(CRMService)
         const { executionLine , eventHeader ,recreateEvent} = req.body;
-        console.log(recreateEvent)
-        console.log(eventHeader)
-        console.log(executionLine)
+        
 
         const agendaExecutionLine = await crmServiceInstance.createAgendaExecutionLine(executionLine,eventHeader)
 
         if(recreateEvent){
             const sequenceServiceInstance = Container.get(SequenceService);
-            console.log("recreating the event")
+           
             const param = await crmServiceInstance.getParamByCode(eventHeader.param_code)
             const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
             const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
@@ -414,7 +413,6 @@ const { Op } = require('sequelize')
 
 
         
-        console.log
         return res
             .status(200)
             .json({ message: "agendaExecutionLine created succesfully", data: agendaExecutionLine  })
@@ -542,8 +540,10 @@ const { Op } = require('sequelize')
         const sequenceServiceInstance = Container.get(SequenceService);
 
         const { category_code , phone } = req.body;
+
+        let executionLine = {}
         
-        
+        // CREATE EVENT 0 IN AGENDA 
         const param = await crmServiceInstance.getParamFilterd(category_code)
         let addLine;
         if(param){
@@ -551,10 +551,68 @@ const { Op } = require('sequelize')
             const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
             addLine = await crmServiceInstance.createAgendaLineOrder0(phone,param,paramDetails, sequence)   
         }
-        
+        //     method: depend 
+        let today = new Date(); 
+
+        executionLine['event_day'] = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate()
+        executionLine['phone_to_call'] = phone
+        executionLine['status'] = "T"
+        executionLine['action'] = "call"
+        executionLine['event_code'] = addLine.dataValues.code_event
+        executionLine['category'] = category_code
+        executionLine['event_result'] = "result_6"
+        if(category_code ==="complaint"){
+            executionLine['method']= "method_6"
+        }else if(category_code ==="pos_call_order"){
+            executionLine['method']= "method_7"
+        }else if(category_code ==="application"){
+            executionLine['method']= "method_8"
+        }
+        else{
+            executionLine['method']= "method_5" 
+            // const param = await crmServiceInstance.getParamFilterd(category_code)
+            // if(param){
+            //     const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+            //     const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+            //     addLine = await crmServiceInstance.createAgendaLine(phone,param,paramDetails, sequence)   
+            // }
+        }
+        if(category_code != "pos_call_order" && category_code != "complaint"  ){
+            const param = await crmServiceInstance.getParamFilterd(category_code)
+            if(param){
+                const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+                const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                addLine = await crmServiceInstance.createAgendaLine(phone,param,paramDetails, sequence)   
+            }
+        }
+        const executionLineSaved = await crmServiceInstance.createAgendaExecutionLineForEventZero(executionLine)
+
+
+
         return res
             .status(200)
             .json({ message: "got all agenda execution lines", data:addLine })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
+  const createAgendaExecutionLineDetail= async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling createAgendaExecutionLine endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+        const { agendaExecutionLineDetail  } = req.body;
+       
+        console.log(agendaExecutionLineDetail)
+
+        const agendaExecutionLineDetailCreated = await crmServiceInstance.createAgendaExecutionLineDetail(agendaExecutionLineDetail)
+
+    
+        return res
+            .status(200)
+            .json({ message: "agendaExecutionLine created succesfully", data: agendaExecutionLineDetailCreated  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -602,5 +660,6 @@ export default {
     createAgendaExecutionLine,
     createOneAgendaLine,
     getCRMDashboardData,
-    createAgendaEventOrderZero
+    createAgendaEventOrderZero,
+    createAgendaExecutionLineDetail
 }

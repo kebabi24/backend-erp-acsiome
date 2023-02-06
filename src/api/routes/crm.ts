@@ -16,6 +16,7 @@ export default (app: Router) => {
     route.get("/getEventsByDay", controller.getEventsByDay)
     route.post("/createParam", controller.createParam)
     route.post("/createExecutionLine", controller.createAgendaExecutionLine)
+    route.post("/createExecutionLineDetail", controller.createAgendaExecutionLineDetail)
     route.post("/getCustomers", controller.getCustomers)
     route.post("/createPopulation", controller.createPopulation)
     route.post("/createOneAgendaLine", controller.createOneAgendaLine)
