@@ -1,5 +1,6 @@
 import PosOrder from '../../services/pos-order';
 import PosOrderDetail from '../../services/pos-order-detail-product';
+import PosOrderDetailSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSupp from '../../services/pos-order-product-supp';
 import PosOrderProductIng from '../../services/pos-order-product-ing';
@@ -681,6 +682,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const PosOrderDetailSauseServiceInstance = Container.get(PosOrderDetailSauce);
     const itemServiceInstance = Container.get(ItemService);
     //console.log( "here",req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({
@@ -709,6 +711,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
       });
       i = i + 1;
     }
+    
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -920,6 +923,24 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
+
+
+        const ords = await PosOrderDetailServiceInstance.findgrp({
+          where: {
+            created_date: ord.created_date,
+            usrd_site: ord.usrd_site,
+            status: "N"
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'created_date',
+            'usrd_site',
+            [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_N'],
+          ],
+          group: ['created_date', 'usrd_site'],
+          raw: true,
+        });
+
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
@@ -951,11 +972,14 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         var recu = banks.length > 0 ? banks[0].total_rec : 0;
         var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        var namt = ords.length > 0 ? ords[0].total_N : 0;
+//        console.log(ords)
         result.push({
           id: i,
           effdate: ord.created_date,
           site: ord.usrd_site,
           amt: ord.total_amt,
+          N_amt: namt,
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
@@ -987,10 +1011,28 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
+        
+        const ords = await PosOrderDetailServiceInstance.findgrp({
+          where: {
+            created_date: ord.created_date,
+            usrd_site: ord.usrd_site,
+            status: "N"
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'created_date',
+            'usrd_site',
+            [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_N'],
+          ],
+          group: ['created_date', 'usrd_site'],
+          raw: true,
+        });
+
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
             bkh_type: 'R',
+            bkh_site: ord.usrd_site
           },
           attributes: [
             //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -1017,11 +1059,14 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         var recu = banks.length > 0 ? banks[0].total_rec : 0;
         var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        var namt = ords.length > 0 ? ords[0].total_N : 0;
+
         result.push({
           id: i,
           effdate: ord.created_date,
           site: ord.usrd_site,
           amt: ord.total_amt,
+          N_amt: namt,
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,

@@ -1709,7 +1709,9 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
 
       
       
-
+var qtyinv = cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg ) : 0
+var qtyrecu =rctpo >= 0 ? Number(tr[rctpo].qty) : 0
+var qtyinvf = cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0
       result.push({
         id: i,
         part: part.tr_part,
@@ -1720,6 +1722,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
         ecartdeb: (cycrcnt >= 0) ? (Number(rcntmax.tr_qty_chg ) - Number(rcntmin.tr_loc_begin ) ) : 0,
         qtyrec: rctpo >= 0 ? Number(tr[rctpo].qty) : 0,
         qtyiss: Number(qtyso) + Number(qtywo),
+        qtyissr: qtyinv + qtyrecu - qtyinvf,
         qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin ) : 0,
         qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0,
         ecartfin: (cyccnt >= 0) ? (Number(cntmax.tr_qty_chg ) - Number(cntmin.tr_loc_begin ) ) : 0,
@@ -2000,6 +2003,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
       t.tr_desc = item.pt_desc1,
       t.tr_um = item.pt_um,
+      t.tr_addr = item.pt_vend,
       t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
     }
     //console.log(tr)
@@ -2020,6 +2024,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
     const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
       t.tr_desc = item.pt_desc1,
       t.tr_um = item.pt_um,
+      t.tr_addr = item.pt_vend,
       t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
   }
   return res.status(200).json({ message: 'fetched succesfully', data: tr });
