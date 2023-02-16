@@ -223,7 +223,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         prh_line: po.pod_line,
         prh_part: po.pod_part,
         prh_serial: po.pod_serial,
-        prh_rcvd: po.qty_rcvd,
+        prh_rcvd: po.pod_qty_rcvd,
         prh_qty_ord: po.pod_qty_ord,
         prh_pur_cost: po.pod_price,
 

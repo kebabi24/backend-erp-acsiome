@@ -1603,7 +1603,6 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
-    
       },
       attributes: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_serial'],
@@ -1627,7 +1626,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial'],
       raw: true,
     });
- //console.log(parts)
+    //console.log(parts)
     let result = [];
     var i = 1;
     for (let part of parts) {
@@ -1656,74 +1655,57 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
 
       let qtyso = 0;
       let qtywo = 0;
-     
+
       const trcycmax = await inventoryTransactionServiceInstance.max({
-        
-          tr_site: req.body.tr_site,
-          tr_effdate: req.body.tr_effdate,
-          tr_part: part.tr_part,
-          tr_serial: part.tr_serial,
-          tr_type: 'CYC-CNT',
-        
-      });
-      const trcycmin = await inventoryTransactionServiceInstance.min({
-        
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
         tr_serial: part.tr_serial,
         tr_type: 'CYC-CNT',
-      
-      
-    });
+      });
+      const trcycmin = await inventoryTransactionServiceInstance.min({
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: 'CYC-CNT',
+      });
 
-    
-      const cntmax = await inventoryTransactionServiceInstance.findOneI({id:trcycmax})
-      const cntmin = await inventoryTransactionServiceInstance.findOneI({id:trcycmin})
+      const cntmax = await inventoryTransactionServiceInstance.findOneI({ id: trcycmax });
+      const cntmin = await inventoryTransactionServiceInstance.findOneI({ id: trcycmin });
       const trrcycmax = await inventoryTransactionServiceInstance.max({
-        
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
         tr_serial: part.tr_serial,
         tr_type: 'CYC-RCNT',
-      
-    });
-    const trrcycmin = await inventoryTransactionServiceInstance.min({
-      
-      tr_site: req.body.tr_site,
-      tr_effdate: req.body.tr_effdate,
-      tr_part: part.tr_part,
-      tr_serial: part.tr_serial,
-      tr_type: 'CYC-RCNT',
-    
-    
-  });
+      });
+      const trrcycmin = await inventoryTransactionServiceInstance.min({
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.tr_effdate,
+        tr_part: part.tr_part,
+        tr_serial: part.tr_serial,
+        tr_type: 'CYC-RCNT',
+      });
 
-  
-    const rcntmax = await inventoryTransactionServiceInstance.findOneI({id:trrcycmax})
-    const rcntmin = await inventoryTransactionServiceInstance.findOneI({id:trrcycmin})
-
+      const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
+      const rcntmin = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmin });
 
       issso >= 0 ? (qtyso = -Number(tr[issso].qty)) : 0, isswo >= 0 ? (qtywo = -Number(tr[isswo].qty)) : 0;
-
-      
-      
 
       result.push({
         id: i,
         part: part.tr_part,
         desc: items.pt_desc1,
         serial: part.serial,
-        qtyinvbeg: cycrcnt >= 0 ? Number(rcntmin.tr_loc_begin ) : 0,
-        qtyinvdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg ) : 0,
-        ecartdeb: (cycrcnt >= 0) ? (Number(rcntmax.tr_qty_chg ) - Number(rcntmin.tr_loc_begin ) ) : 0,
+        qtyinvbeg: cycrcnt >= 0 ? Number(rcntmin.tr_loc_begin) : 0,
+        qtyinvdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg) : 0,
+        ecartdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg) - Number(rcntmin.tr_loc_begin) : 0,
         qtyrec: rctpo >= 0 ? Number(tr[rctpo].qty) : 0,
         qtyiss: Number(qtyso) + Number(qtywo),
-        qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin ) : 0,
-        qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0,
-        ecartfin: (cyccnt >= 0) ? (Number(cntmax.tr_qty_chg ) - Number(cntmin.tr_loc_begin ) ) : 0,
-
+        qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin) : 0,
+        qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg) : 0,
+        ecartfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg) - Number(cntmin.tr_loc_begin) : 0,
       });
       i = i + 1;
     }
@@ -1950,84 +1932,87 @@ const findByInv = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
   if (req.body.site != '*') {
-  try {
-    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    
-   
-    const tr = await inventoryTransactionServiceInstance.finditem({ tr_site: req.body.site, tr_type: req.body.type,tr_effdate: req.body.date});
-    for(let t of tr) {
-      t.tr_desc = t.item.pt_desc1,
-      t.tr_um = t.item.pt_um
+    try {
+      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+
+      const tr = await inventoryTransactionServiceInstance.finditem({
+        tr_site: req.body.site,
+        tr_type: req.body.type,
+        tr_effdate: req.body.date,
+      });
+      for (let t of tr) {
+        (t.tr_desc = t.item.pt_desc1), (t.tr_um = t.item.pt_um);
+      }
+      //console.log(tr)
+      return res.status(200).json({ message: 'fetched succesfully', data: tr });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
     }
-    //console.log(tr)
-    return res.status(200).json({ message: 'fetched succesfully', data: tr });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
+  } else {
+    try {
+      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+
+      const tr = await inventoryTransactionServiceInstance.finditem({
+        tr_type: req.body.type,
+        tr_effdate: req.body.date,
+      });
+      for (let t of tr) {
+        (t.tr_desc = t.item.pt_desc1), (t.tr_um = t.item.pt_um);
+      }
+      return res.status(200).json({ message: 'fetched succesfully', data: tr });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
   }
-} else {
-  try {
-  const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    
-   
-  const tr = await inventoryTransactionServiceInstance.finditem({  tr_type: req.body.type,tr_effdate: req.body.date });
-  for(let t of tr) {
-    t.tr_desc = t.item.pt_desc1,
-    t.tr_um = t.item.pt_um
-  }
-  return res.status(200).json({ message: 'fetched succesfully', data: tr });
-} catch (e) {
-  logger.error('🔥 error: %o', e);
-  return next(e);
-}
-}
 };
 const findByRct = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  console.log(req.body,"hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee")
+  console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
   if (req.body.site != '*') {
-  try {
-    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const itemServiceInstance = Container.get(itemService);
-    
-   console.log(req.body,"hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee")
-    const tr = await inventoryTransactionServiceInstance.findbetw({where: { tr_site: req.body.site, tr_type: req.body.type,
-      tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} }
+    try {
+      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+      const itemServiceInstance = Container.get(itemService);
+
+      console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
+      const tr = await inventoryTransactionServiceInstance.findbetw({
+        where: {
+          tr_site: req.body.site,
+          tr_type: req.body.type,
+          tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+        },
       });
       //console.log(tr)
-    for(let t of tr) {
-      const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
-      t.tr_desc = item.pt_desc1,
-      t.tr_um = item.pt_um,
-      t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
+      for (let t of tr) {
+        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
+        (t.tr_desc = item.pt_desc1), (t.tr_um = item.pt_um), (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
+      }
+      //console.log(tr)
+      return res.status(200).json({ message: 'fetched succesfully', data: tr });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
     }
-    //console.log(tr)
-    return res.status(200).json({ message: 'fetched succesfully', data: tr });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
+  } else {
+    try {
+      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+      const itemServiceInstance = Container.get(itemService);
+
+      const tr = await inventoryTransactionServiceInstance.findbetw({
+        where: { tr_type: req.body.type, tr_effdate: { [Op.between]: [req.body.date, req.body.date1] } },
+      });
+      for (let t of tr) {
+        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
+        (t.tr_desc = item.pt_desc1), (t.tr_um = item.pt_um), (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
+      }
+      return res.status(200).json({ message: 'fetched succesfully', data: tr });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
   }
-} else {
-  try {
-  const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-  const itemServiceInstance = Container.get(itemService);  
-   
-  const tr = await inventoryTransactionServiceInstance.findbetw({where: {  tr_type: req.body.type,
-    tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} }
-    });
-  for(let t of tr) {
-    const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
-      t.tr_desc = item.pt_desc1,
-      t.tr_um = item.pt_um,
-      t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
-  }
-  return res.status(200).json({ message: 'fetched succesfully', data: tr });
-} catch (e) {
-  logger.error('🔥 error: %o', e);
-  return next(e);
-}
-}
 };
 export default {
   create,

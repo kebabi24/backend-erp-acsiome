@@ -104,6 +104,18 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByWeek = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const locationDetails = await locationDetailServiceInstance.findByWeek({ ...req.body });
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
@@ -289,4 +301,5 @@ export default {
   findByAll,
   findOtherStatus,
   findByFifo,
+  findByWeek,
 };

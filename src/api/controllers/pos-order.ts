@@ -184,6 +184,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_article,
           line,
           pt_loc,
+          pt_group,
+          pt_promo,
+          pt_part_type,
+          pt_dsgn_grp,
         } = product;
         // console.log('pt_loc', pt_loc);
         if (cart.plateforme !== 'CALL CENTER') {
@@ -204,6 +208,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               : product.pt_price - (product.pt_price * Number(cart.disc_amt)) / 100,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
+            pt_group: pt_group,
+            pt_promo: pt_promo,
+            pt_part_type: pt_part_type,
+            pt_dsgn_grp: pt_dsgn_grp,
           });
         }
         await workOrderServiceInstance.create({

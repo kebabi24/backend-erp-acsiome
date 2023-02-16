@@ -85,120 +85,120 @@ const synchro = async (req: Request, res: Response, next: NextFunction) => {
       const is = await pool.query('SELECT * FROM is_mstr');
       const isd = await pool.query('SELECT * FROM isd_det');
 
-      const profiles = profile.rows;
-      await profileServiceInstance.upsert({
-        profiles,
-      });
+      //   const profiles = profile.rows;
+      //   await profileServiceInstance.upsert({
+      //     profiles,
+      //   });
 
-      const us = users.rows;
-      await userServiceInstance.upsert({
-        us,
-      });
+      //   const us = users.rows;
+      //   await userServiceInstance.upsert({
+      //     us,
+      //   });
 
-      const ro = roles.rows;
-      await roleServiceInstance.upsert({
-        ro,
-      });
+      //   const ro = roles.rows;
+      //   await roleServiceInstance.upsert({
+      //     ro,
+      //   });
 
-      const categories = categorie.rows;
-      await categoriesServiceInstance.upsert({
-        categories,
-      });
+      //   const categories = categorie.rows;
+      //   await categoriesServiceInstance.upsert({
+      //     categories,
+      //   });
 
-      const sites = site.rows;
-      await siteServiceInstance.upsert({
-        sites,
-      });
+      //   const sites = site.rows;
+      //   await siteServiceInstance.upsert({
+      //     sites,
+      //   });
 
-      const locs = loc.rows;
-      await locServiceInstance.upsert({
-        locs,
-      });
+      //   const locs = loc.rows;
+      //   await locServiceInstance.upsert({
+      //     locs,
+      //   });
 
-      const sequences = seqs.rows;
-      await seQserviceInstance.upsert({
-        sequences,
-      });
+      //   // const sequences = seqs.rows;
+      //   // await seQserviceInstance.upsert({
+      //   //   sequences,
+      //   // });
 
-      console.log('site', s);
-      const it = items.rows;
-      await itemServiceInstance.upsert({
-        it,
-        pt_site: s,
-        pt_loc: s == '0901' ? 'MGM0010' : s,
-      });
+      //   console.log('site', s);
+      //   const it = items.rows;
+      //   await itemServiceInstance.upsert({
+      //     it,
+      //     pt_site: s,
+      //     pt_loc: s == '0901' ? 'MGM0010' : s,
+      //   });
 
-      const boms = bom.rows;
-      await bomServiceInstance.upsert({
-        boms,
-      });
+      //   const boms = bom.rows;
+      //   await bomServiceInstance.upsert({
+      //     boms,
+      //   });
 
-      const pss = ps.rows;
-      await psServiceInstance.upsert({
-        pss,
-      });
+      //   const pss = ps.rows;
+      //   await psServiceInstance.upsert({
+      //     pss,
+      //   });
 
-      const booo = bompart.rows;
-      await bomPartServiceInstance.upsert({
-        booo,
-      });
+      //   const booo = bompart.rows;
+      //   await bomPartServiceInstance.upsert({
+      //     booo,
+      //   });
 
-      const code = codes.rows;
+      //   const code = codes.rows;
 
-      await codeServiceInstance.upsert({
-        code,
-      });
+      //   await codeServiceInstance.upsert({
+      //     code,
+      //   });
 
-      const iss = is.rows;
+      //   const iss = is.rows;
 
-      await isServiceInstance.upsert({
-        iss,
-      });
+      //   await isServiceInstance.upsert({
+      //     iss,
+      //   });
 
-      const isdd = isd.rows;
+      //   const isdd = isd.rows;
 
-      await isdServiceInstance.upsert({
-        isdd,
-      });
+      //   await isdServiceInstance.upsert({
+      //     isdd,
+      //   });
 
-      const add = addresses.rows;
+      //   const add = addresses.rows;
 
-      await addresseServiceInstance.upsert({
-        add,
-      });
+      //   await addresseServiceInstance.upsert({
+      //     add,
+      //   });
 
-      const custs = customers.rows;
+      //   const custs = customers.rows;
 
-      await customerServiceInstance.upsert({
-        custs,
-      });
+      //   await customerServiceInstance.upsert({
+      //     custs,
+      //   });
 
-      const scts = sct.rows;
+      //   const scts = sct.rows;
 
-      await sctServiceInstance.upsert({
-        scts,
-      });
+      //   await sctServiceInstance.upsert({
+      //     scts,
+      //   });
 
-      const bks = bk.rows;
+      //   const bks = bk.rows;
 
-      await bkServiceInstance.upsert({
-        bks,
-      });
+      //   await bkServiceInstance.upsert({
+      //     bks,
+      //   });
 
-      const empss = emps.rows;
+      //   const empss = emps.rows;
 
-      await empServiceInstance.upsert({
-        empss,
-      });
+      //   await empServiceInstance.upsert({
+      //     empss,
+      //   });
 
-      const vends = vend.rows;
+      //   const vends = vend.rows;
 
-      await vendServiceInstance.upsert({
-        vends,
-      });
-    } else {
-      console.log(conn._connected);
-      console.log('server not connected');
+      //   await vendServiceInstance.upsert({
+      //     vends,
+      //   });
+      // } else {
+      //   console.log(conn._connected);
+      //   console.log('server not connected');
     }
 
     const result = true;

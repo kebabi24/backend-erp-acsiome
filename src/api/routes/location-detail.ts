@@ -17,4 +17,5 @@ export default (app: Router) => {
   route.post('/findother', controller.findOtherStatus);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
+  route.post('/findWeekProduct', controller.findByWeek);
 };
