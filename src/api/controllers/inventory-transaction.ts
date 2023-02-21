@@ -1693,14 +1693,11 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
 
       issso >= 0 ? (qtyso = -Number(tr[issso].qty)) : 0, isswo >= 0 ? (qtywo = -Number(tr[isswo].qty)) : 0;
 
-<<<<<<< HEAD
       
       
 var qtyinv = cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg ) : 0
 var qtyrecu =rctpo >= 0 ? Number(tr[rctpo].qty) : 0
 var qtyinvf = cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0
-=======
->>>>>>> 22403fb02c12ec89ac859dd877160ce42e8813f7
       result.push({
         id: i,
         part: part.tr_part,
@@ -1711,17 +1708,11 @@ var qtyinvf = cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0
         ecartdeb: cycrcnt >= 0 ? Number(rcntmax.tr_qty_chg) - Number(rcntmin.tr_loc_begin) : 0,
         qtyrec: rctpo >= 0 ? Number(tr[rctpo].qty) : 0,
         qtyiss: Number(qtyso) + Number(qtywo),
-<<<<<<< HEAD
         qtyissr: qtyinv + qtyrecu - qtyinvf,
         qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin ) : 0,
         qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg ) : 0,
         ecartfin: (cyccnt >= 0) ? (Number(cntmax.tr_qty_chg ) - Number(cntmin.tr_loc_begin ) ) : 0,
 
-=======
-        qtyrest: cyccnt >= 0 ? Number(cntmin.tr_loc_begin) : 0,
-        qtyinvfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg) : 0,
-        ecartfin: cyccnt >= 0 ? Number(cntmax.tr_qty_chg) - Number(cntmin.tr_loc_begin) : 0,
->>>>>>> 22403fb02c12ec89ac859dd877160ce42e8813f7
       });
       i = i + 1;
     }
@@ -2001,44 +1992,18 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
         },
       });
       //console.log(tr)
-<<<<<<< HEAD
     for(let t of tr) {
       const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
       t.tr_desc = item.pt_desc1,
       t.tr_um = item.pt_um,
       t.tr_addr = item.pt_vend,
       t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price)
-=======
-      for (let t of tr) {
-        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
-        (t.tr_desc = item.pt_desc1), (t.tr_um = item.pt_um), (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
-      }
-      //console.log(tr)
-      return res.status(200).json({ message: 'fetched succesfully', data: tr });
-    } catch (e) {
-      logger.error('🔥 error: %o', e);
-      return next(e);
-    }
-  } else {
-    try {
-      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-      const itemServiceInstance = Container.get(itemService);
-
-      const tr = await inventoryTransactionServiceInstance.findbetw({
-        where: { tr_type: req.body.type, tr_effdate: { [Op.between]: [req.body.date, req.body.date1] } },
-      });
-      for (let t of tr) {
-        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
-        (t.tr_desc = item.pt_desc1), (t.tr_um = item.pt_um), (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
-      }
-      return res.status(200).json({ message: 'fetched succesfully', data: tr });
-    } catch (e) {
-      logger.error('🔥 error: %o', e);
-      return next(e);
->>>>>>> 22403fb02c12ec89ac859dd877160ce42e8813f7
     }
   }
-<<<<<<< HEAD
+  catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }  
 } else {
   try {
   const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -2060,8 +2025,6 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
   return next(e);
 }
 }
-=======
->>>>>>> 22403fb02c12ec89ac859dd877160ce42e8813f7
 };
 export default {
   create,
