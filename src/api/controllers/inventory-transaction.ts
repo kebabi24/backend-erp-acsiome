@@ -1857,7 +1857,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
           tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
         },
       });
-      console.log(tr)
+      //console.log(tr)
     for(let t of tr) {
       const item =  await itemServiceInstance.findOne({ pt_part: t.tr_part})
       t.tr_desc = item.pt_desc1,
