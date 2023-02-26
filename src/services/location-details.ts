@@ -45,7 +45,19 @@ export default class locationDetailService {
       throw e;
     }
   }
+  public async findall(query: any): Promise<any> {
+    try {
+      console.log(query);
+      const locationDetails = await this.locationDetailModel.findAll({ where: query, include: this.itemModel });
 
+      
+      this.logger.silly('find All locationDetails mstr');
+      return locationDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findByWeek(query: any): Promise<any> {
     try {
       console.log(query);

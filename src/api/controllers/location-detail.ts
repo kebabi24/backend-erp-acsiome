@@ -84,7 +84,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.find({});
+    const locationDetails = await locationDetailServiceInstance.findall({});
+    console.log(locationDetails)
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
