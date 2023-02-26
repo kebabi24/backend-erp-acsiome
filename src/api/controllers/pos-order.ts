@@ -312,15 +312,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_ip_adr: req.headers.origin,
           };
           await workOrderDetailServiceInstance.create(elem_wod);
+          console.log();
           detail.push(elem_wod);
         }
         // console.log(sauce);
         for (const sa of sauce) {
           if (cart.plateforme !== 'CALL CENTER') {
+            console.log(pt_part);
+            console.log(sa.pt_part);
             await PosOrderProductSauceServiceInstance.create({
               order_code: currentProduct.order_code,
               pt_part: pt_part,
-              pt_pt_part: sa.pt_part,
+              pt_pt_part: sa.pt_pt_part,
               pt_desc1: sa.pt_desc1,
               pt_desc2: sa.pt_desc2,
               pt_loc: sa.pt_loc,
@@ -330,6 +333,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               line: line,
               usrd_site: cart.usrd_site,
               created_date: currentService.service_period_activate_date,
+              bool05: false,
             });
           }
 
@@ -337,7 +341,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: sa.pt_loc,
-            wod_part: sa.pt_part,
+            wod_part: sa.pt_pt_part,
             wod_price: sa.pt_price,
             wod_site: cart.usrd_site,
             wod_qty_req: sa.pt_net_wt * product.pt_qty,
@@ -435,7 +439,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     // update = false;
-    console.log(cart);
+    // console.log(cart);
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -719,7 +723,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
       });
       i = i + 1;
     }
-    
+
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -913,6 +917,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
   const bkhServiceInstance = Container.get(BkhService);
   const forcastServiceInstance = Container.get(ForcastService);
   if (req.body.site != '*') {
+    console.log(req.body);
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
@@ -931,13 +936,11 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
-
-
         const ords = await PosOrderDetailServiceInstance.findgrp({
           where: {
             created_date: ord.created_date,
             usrd_site: ord.usrd_site,
-            status: "N"
+            status: 'N',
           },
           attributes: [
             //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -981,7 +984,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         var recu = banks.length > 0 ? banks[0].total_rec : 0;
         var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
         var namt = ords.length > 0 ? ords[0].total_N : 0;
-//        console.log(ords)
+        //        console.log(ords)
         result.push({
           id: i,
           effdate: ord.created_date,
@@ -1002,6 +1005,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       return next(e);
     }
   } else {
+    console.log('hhhhhere');
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
@@ -1019,12 +1023,11 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
-        
         const ords = await PosOrderDetailServiceInstance.findgrp({
           where: {
             created_date: ord.created_date,
             usrd_site: ord.usrd_site,
-            status: "N"
+            status: 'N',
           },
           attributes: [
             //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -1040,7 +1043,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           where: {
             bkh_effdate: ord.created_date,
             bkh_type: 'R',
-            bkh_site: ord.usrd_site
+            bkh_site: ord.usrd_site,
           },
           attributes: [
             //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
