@@ -1093,6 +1093,54 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
     }
   }
 };
+const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const itemServiceInstance = Container.get(ItemService);
+    const codeServiceInstance = Container.get(CodeService);
+    console.log(req.body);
+    
+      var sansbo = await PosOrderDetailServiceInstance.findspec({
+        where: { 
+          created_date: req.body.created_date, 
+          usrd_site: req.body.tr_site,
+          pt_part_type: { [Op.ne]: 'BO' },
+          },
+        attributes: [
+          // 'pt_part',
+          //  'usrd_site',
+          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'amt_sansbo'],
+        ],
+        // group: ['usrd_site'],
+        raw: true,
+      });
+   
+      var avecbo = await PosOrderDetailServiceInstance.findspec({
+        where: { 
+          created_date: req.body.created_date, 
+          usrd_site: req.body.tr_site,
+          //pt_part_type: 'BO' 
+          },
+        attributes: [
+          // 'pt_part',
+          //  'usrd_site',
+          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
+        ],
+        // group: ['usrd_site'],
+        raw: true,
+      });
+    console.log(sansbo[0].amt_sansbo,avecbo)
+    return res.status(200).json({ message: 'fetched succesfully', data: {casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -1101,6 +1149,7 @@ export default {
   findSumQty,
   findSumQtyPs,
   findSumAmt,
+  findGlobAmt,
   findByOrd,
   update,
   deleteOne,

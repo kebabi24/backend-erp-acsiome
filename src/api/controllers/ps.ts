@@ -109,9 +109,10 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     var j = 1;
     for (let obj of details) {
       //console.log(obj.part, obj.prod_qty, obj.bom);
-      const ps = await psServiceInstance.find({ ps_parent: obj.bom });
+      const ps = await psServiceInstance.finds({ ps_parent: obj.bom });
 
       for (let p of ps) {
+        console.log(p.ps_comp)
         var bool = false;
         for (var i = 0; i < result.length; i++) {
           if (result[i].part == p.ps_comp) {
