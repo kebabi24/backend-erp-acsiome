@@ -12,11 +12,15 @@ export default (app: Router) => {
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
   route.post('/findsumqty', controller.findSumQty);
+  route.post('/findposgrp', controller.findPosGrp);
+  route.post('/findbysite', controller.findBySite);
   route.post('/findsumqtyps', controller.findSumQtyPs);
   route.post('/findsumamt', controller.findSumAmt);
+  route.post('/findglobamt', controller.findGlobAmt);
   route.post('/findsomeorders', controller.findByOrd);
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/findorder', controller.findByOrd);
   route.post('/createCallCenterOrder', controller.createCALLCenterORDER);
+  route.post('/createorder', controller.createOrder);
 };

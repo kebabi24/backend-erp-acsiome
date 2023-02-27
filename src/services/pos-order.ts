@@ -47,7 +47,16 @@ export default class posOrderService {
       throw e;
     }
   }
-
+  public async findgrp(query: any): Promise<any> {
+    try {
+      const orders = await this.posOrderModel.findAll(query);
+      this.logger.silly('find All orders mstr');
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findW(query: any): Promise<any> {
     try {
       const orders = await this.posOrderModel.findAll();
@@ -69,11 +78,11 @@ export default class posOrderService {
       });
 
       const service_date = service.dataValues.service_period_activate_date;
-      console.log(service_date);
+      // console.log(service_date);
       const orders = await this.posOrderModel.findOne({
         where: { order_code: order_code, created_date: service_date, usrd_site: usrd_site },
       });
-      console.log(orders);
+      // console.log(orders);
       const o = orders.dataValues;
       // console.log(o.created_date);
       const currentOrder = {
@@ -84,14 +93,14 @@ export default class posOrderService {
         total_price: o.total_price,
         created_date: o.created_date,
         products: [],
-        from: o.from,
+        plateforme: o.plateforme,
       };
       const pro = await this.posOrderDetailProductModel.findAll({
         where: { order_code: o.order_code, created_date: service_date, usrd_site: usrd_site },
       });
       // console.log(pro);
       for (const p of pro) {
-        console.log(p);
+        // console.log(p);
         const product = {
           id: '',
           pt_part: '',
@@ -109,6 +118,10 @@ export default class posOrderService {
           suppliments: [],
           ingredients: [],
           sauces: [],
+          pt_promo: '',
+          pt_dsgn_grp: '',
+          pt_part_type: '',
+          pt_group: '',
         };
         (product.id = p.id),
           (product.pt_part = p.pt_part),
@@ -122,16 +135,39 @@ export default class posOrderService {
           (product.pt_price = p.pt_price_pos),
           (product.pt_qty = p.pt_qty_ord_pos),
           (product.pt_loc = p.pt_loc);
+        product.pt_group = p.pt_group;
+        product.pt_dsgn_grp = p.pt_dsgn_grp;
+        product.pt_promo = p.pt_promo;
+        product.pt_part_type = p.pt_part_type;
         const supp = await this.orderPosProductSuppModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
         product.suppliments = supp;
         const sauces = await this.orderPosProductSauceModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
+        console.log(sauces);
         product.sauces = sauces;
         const ing = await this.orderPosProductIngModel.findAll({
-          where: { order_code: o.order_code, pt_part: p.pt_part, created_date: service_date, usrd_site: usrd_site },
+          where: {
+            order_code: o.order_code,
+            pt_part: p.pt_part,
+            line: p.line,
+            created_date: service_date,
+            usrd_site: usrd_site,
+          },
         });
         product.ingredients = ing;
         currentOrder.products.push(product);

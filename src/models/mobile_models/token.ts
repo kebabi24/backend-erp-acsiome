@@ -37,11 +37,11 @@ const TokenSerie = sequelize.define(
         load_request_prefix :{type: Sequelize.STRING ,unique:true},
         load_request_next_number :{type : Sequelize.INTEGER},
 
-    
-        
 
-        
-        
+        // NEEDS ALTER
+        inventory_prefix :{type: Sequelize.STRING ,unique:true},
+        inventory_next_number :{type : Sequelize.INTEGER},
+
         // squote_prefix: { type: Sequelize.STRING ,unique:true},
         // squote_next_number :{type : Sequelize.INTEGER},
 
@@ -50,11 +50,6 @@ const TokenSerie = sequelize.define(
 
         // sinvoice_prefix :{type: Sequelize.STRING ,unique:true},
         // sinvoice_next_number :{type : Sequelize.INTEGER},
-
-
-        
-        // inventory_prefix :{type: Sequelize.STRING ,unique:true},
-        // inventory_next_number :{type : Sequelize.INTEGER},
 
         // payment_prefix :{type: Sequelize.STRING ,unique:true},
         // payment_next_number :{type : Sequelize.INTEGER},

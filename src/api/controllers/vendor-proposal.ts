@@ -6,7 +6,8 @@ import { Container } from 'typedi';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -122,7 +123,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 };
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling update one  vendorProposal endpoint');
   try {

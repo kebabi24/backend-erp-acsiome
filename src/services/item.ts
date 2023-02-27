@@ -63,8 +63,7 @@ export default class ItemService {
     try {
       const item = await this.itemModel.findOne({
         where: query,
-        attributes: [
-          'pt_desc1'],
+        attributes: ['pt_desc1'],
         raw: true,
       });
       this.logger.silly('find one item mstr');
@@ -96,6 +95,22 @@ export default class ItemService {
       const item = await this.itemModel.update(data, { where: query, include: this.taxeModel });
       this.logger.silly('update one item mstr');
       return item;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async upsert(query: any): Promise<any> {
+    try {
+      const site = await this.itemModel.sync({ force: true });
+      const it = query.it;
+      const pt_site = query.pt_site;
+      const pt_loc = query.pt_loc;
+      for (const itt of it) {
+        const b = await this.itemModel.create({ ...itt, pt_site: pt_site, pt_loc: pt_loc });
+      }
+      this.logger.silly('update one item mstr');
+      return site;
     } catch (e) {
       this.logger.error(e);
       throw e;

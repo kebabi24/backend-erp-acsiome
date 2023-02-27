@@ -9,6 +9,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.get('/:id', controller.findOne);
+  route.get('/findCategoryByCode/:code', controller.findOneByCode);
   route.post('/find', controller.findBy);
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);

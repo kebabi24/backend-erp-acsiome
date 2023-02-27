@@ -12,7 +12,8 @@ import locationService from '../../services/location';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -72,7 +73,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const createnew = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get("logger")
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug("Calling Create sequence endpoint")
   try {
@@ -191,7 +193,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 };
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling update one  tag endpoint');
   try {
@@ -208,7 +211,8 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 };
 const Reupdate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling update one  tag endpoint');
   try {
@@ -263,7 +267,8 @@ const gap = async (req: Request, res: Response, next: NextFunction) => {
 
 const freeze = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -312,7 +317,8 @@ const freeze = async (req: Request, res: Response, next: NextFunction) => {
 const validateTag = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const{user_code} = req.headers
+  const{user_code} = req.headers 
+const{user_domain} = req.headers
 
   logger.debug('Calling find by  all tag endpoint');
   try {

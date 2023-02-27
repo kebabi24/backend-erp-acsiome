@@ -118,6 +118,7 @@ export default async ({ expressApp }) => {
       { name: 'costsubModel', model: require('../models/costsub').default },
       { name: 'costaccountModel', model: require('../models/costaccount').default },
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
+      { name: 'forcastModel', model: require('../models/forcast').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -127,28 +128,29 @@ export default async ({ expressApp }) => {
       { name: 'menuModel', model: require('../models/mobile_models/menu').default },
       { name: 'itineraryModel', model: require('../models/mobile_models/itinerary').default },
       { name: 'serviceModel', model: require('../models/mobile_models/service').default },
-      { name: 'customerMobileModel', model: require('../models/mobile_models/customer').default },
       { name: 'checklistModel', model: require('../models/mobile_models/checklist').default },
-      { name: 'codeMobileModel', model: require('../models/mobile_models/codes').default },
       { name: 'tokenSerieModel', model: require('../models/mobile_models/token').default },
       { name: 'parameterModel', model: require('../models/mobile_models/parameter').default },
-      { name: 'categoryModel', model: require('../models/mobile_models/category').default },
-      { name: 'categoryTypeModel', model: require('../models/mobile_models/category_type').default },
       { name: 'clusterModel', model: require('../models/mobile_models/cluster').default },
       { name: 'subClusterModel', model: require('../models/mobile_models/cluster_sub').default },
-      { name: 'visitresultModel', model: require('../models/mobile_models/visitresult').default },
+      { name: 'categoryModel', model: require('../models/mobile_models/category').default },
+      { name: 'categoryTypeModel', model: require('../models/mobile_models/category_type').default },
       { name: 'salesChannelModel', model: require('../models/mobile_models/sales_channel').default },
+      { name: 'customerMobileModel', model: require('../models/mobile_models/customer').default },
+      { name: 'codeMobileModel', model: require('../models/mobile_models/codes').default },
+      { name: 'visitresultModel', model: require('../models/mobile_models/visitresult').default },
       { name: 'productPageModel', model: require('../models/mobile_models/product_page').default },
       { name: 'loadRequestModel', model: require('../models/mobile_models/load_request').default },
       { name: 'loadRequestLineModel', model: require('../models/mobile_models/load_request_line').default },
       { name: 'loadRequestDetailsModel', model: require('../models/mobile_models/load_request_details').default },
-
+      { name: 'paymentMethodModel', model: require('../models/mobile_models/payment_method').default },
       //
       { name: 'profile_menuModel', model: require('../models/mobile_models/profile_menu').default },
       { name: 'role_itineraryModel', model: require('../models/mobile_models/role_itinerary').default },
       { name: 'itinerary_CustomerModel', model: require('../models/mobile_models/itinerary_customer').default },
       { name: 'productPageDetailsModel', model: require('../models/mobile_models/product_page_details').default },
       { name: 'profileProductPageModel', model: require('../models/mobile_models/profile_product_page').default },
+
       { name: 'posCategoryModel', model: require('../models/pos-categories').default },
       { name: 'posCategoryProductModel', model: require('../models/pos-category-product').default },
       { name: 'posProductModel', model: require('../models/pos-product').default },
@@ -156,15 +158,34 @@ export default async ({ expressApp }) => {
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'bkhModel', model: require('../models/bkh').default },
-
+      { name: 'ordersHistoryModel', model: require('../models/order-history').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
+      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
 
       { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
       { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
       { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
-      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
-      { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
+
+      { name: 'priceListModel', model: require('../models/mobile_models/price_list').default },
+      { name: 'fidelityCardModel', model: require('../models/mobile_models/fidelity_card').default },
+      { name: 'cancelationReasonModel', model: require('../models/mobile_models/cancelation_reason').default },
+      { name: 'paymentModel', model: require('../models/mobile_models/payment').default },
+      { name: 'invoiceModel', model: require('../models/mobile_models/invoice').default },
+      { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
+
+      // WAS ALREADY COMMENTED
+      // { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
+      // { name: 'InventoryLineModel', model: require('../mobile_models/inventory_line').default },
+
+      // CRM
+      { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
+      { name: 'agendaExecutionModel', model: require('../models/mobile_models/agenda_execution').default },
+      { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
+      { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
+      { name: 'populationModel', model: require('../models/mobile_models/population').default },
+      { name: 'agendaExecutionDetailsModel', model: require('../models/mobile_models/agenda_execution_details').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -265,7 +286,35 @@ export default async ({ expressApp }) => {
     { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
   );
 
-  // associtations pos
+  // 03 / 12 / 2022 NEW RELATIONS
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'service_code',
+    sourceKey: 'service_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'service_code',
+    targetKey: 'service_code',
+  });
+
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'role_code',
+    sourceKey: 'role_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/role').default, {
+    foreignKey: 'role_code',
+    targetKey: 'role_code',
+  });
+
+  require('../models/mobile_models/invoice').default.hasOne(require('../models/mobile_models/invoice_line').default, {
+    foreignKey: 'invoice_code',
+    sourceKey: 'invoice_code',
+  });
+  require('../models/mobile_models/invoice_line').default.belongsTo(
+    require('../models/mobile_models/invoice').default,
+    { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
+  );
+
+  // associations pos
 
   // require('../models/pos-categories').default.hasMany(require('../models/item').default, { foreignKey: 'pt_page' });
   // require('../models/item').default.belongsTo(require('../models/pos-categories').default, { foreignKey: 'pt_page' });
@@ -315,6 +364,7 @@ export default async ({ expressApp }) => {
     foreignKey: 'rqm_category',
     targetKey: 'seq_seq',
   });
+
   require('../models/provider').default.hasOne(require('../models/requisition').default, {
     foreignKey: 'rqm_vend',
     sourceKey: 'vd_addr',
@@ -453,11 +503,13 @@ export default async ({ expressApp }) => {
     foreignKey: 'pt_loc',
     targetKey: 'loc_loc',
   });
+
   // require('../models/exchange-rate').default.hasOne(require('../models/currency').default,{foreignKey: 'cu_curr',sourceKey: 'exr_curr1'})
   // require('../models/currency').default.belongsTo(require('../models/exchange-rate').default,{  foreignKey: 'cu_curr', targetKey: 'exr_curr1'})
 
   // require('../models/exchange-rate').default.hasOne(require('../models/currency').default,{foreignKey: 'cu_curr',sourceKey: 'exr_curr2'})
   // require('../models/currency').default.belongsTo(require('../models/exchange-rate').default,{  foreignKey: 'cu_curr', targetKey: 'exr_curr2'})
+
   require('../models/sale-shiper').default.belongsTo(require('../models/item').default, {
     foreignKey: 'psh_part',
     targetKey: 'pt_part',
@@ -752,8 +804,6 @@ export default async ({ expressApp }) => {
     foreignKey: 'empt_code',
     targetKey: 'emp_addr',
   });
-
-  
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models

@@ -6,6 +6,7 @@ import InvoiceOrderService from '../../services/invoice-order';
 import AccountReceivableService from '../../services/account-receivable';
 import accountShiperService from '../../services/account-shiper';
 import costSimulationService from '../../services/cost-simulation';
+import AddressService from '../../services/address';
 import itemService from '../../services/item';
 import locationDetailService from '../../services/location-details';
 import inventoryTransactionService from '../../services/inventory-transaction';
@@ -13,6 +14,8 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import { DATE, Op } from 'sequelize';
+
+import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -40,6 +43,48 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       };
       await saleOrderDetailServiceInstance.create(entry);
+      logger.debug('Calling Create sequence endpoint');
+      try {
+        const saleOrderServiceInstance = Container.get(SaleOrderService);
+        const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+        const { saleOrder, saleOrderDetail } = req.body;
+        const so = await saleOrderServiceInstance.create({
+          ...saleOrder,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+        for (let entry of saleOrderDetail) {
+          entry = {
+            ...entry,
+            sod_nbr: so.so_nbr,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          };
+          await saleOrderDetailServiceInstance.create(entry);
+        }
+        const addressServiceInstance = Container.get(AddressService);
+        const addr = await addressServiceInstance.findOne({ ad_addr: saleOrder.so_cust });
+
+        const pdfData = {
+          so: so,
+          sod: saleOrderDetail,
+          adr: addr,
+        };
+
+        console.log('pdfData', pdfData);
+
+        let pdf = await generatePdf(pdfData, 'so');
+
+        return res.status(201).json({ message: 'created succesfully', data: so, pdf: pdf.content });
+      } catch (e) {
+        //#
+        logger.error('🔥 error: %o', e);
+        return next(e);
+      }
     }
     return res.status(201).json({ message: 'created succesfully', data: so });
   } catch (e) {
@@ -209,7 +254,6 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  saleOrder endpoint');
@@ -258,12 +302,12 @@ const findByAllSo = async (req: Request, res: Response, next: NextFunction) => {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
     const sos = await saleOrderServiceInstance.find({ ...req.body });
-   let result = []
-   var i = 1;
+    let result = [];
+    var i = 1;
     for (let so of sos) {
-      var amt = Number(so.so_amt) + Number(so.so_trl1_amt) + Number(so.so_tax_amt)
-      result.push({id:i, soid:so.id,so_nbr:so.so_nbr, so_cust: so.so_cust,amt})
-      i = i + 1
+      var amt = Number(so.so_amt) + Number(so.so_trl1_amt) + Number(so.so_tax_amt);
+      result.push({ id: i, soid: so.id, so_nbr: so.so_nbr, so_cust: so.so_cust, amt });
+      i = i + 1;
     }
     console.log(result);
     return res.status(202).json({
@@ -567,110 +611,107 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
     );
     console.log(so.so_nbr);
     //await saleOrderDetailServiceInstance.delete({ sod_nbr: saleOrder.so_nbr });
-console.log(soddetails)
+    console.log(soddetails);
     for (let entry of soddetails) {
       if (entry.soup == true) {
-       console.log("idsod", entry.id, entry.sod_confirm)
-      const details = await saleOrderDetailServiceInstance.findOne({
-        id: entry.id
-      });
-      entry = {
-        sod_confirm : entry.sod_confirm,
-        updated_by: user_code,
-        updated_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      };
-      await saleOrderDetailServiceInstance.update({...entry},{id:details.id});
-
-
-      /*kamel*/
-      const sctdet = await costSimulationServiceInstance.findOne({
-        sct_part: details.sod_part,
-        sct_site: details.sod_site,
-        sct_sim: 'STDCG',
-      });
-      const pt = await itemServiceInstance.findOne({ pt_part: details.sod_part });
-      console.log(details.sod_part, details.sod_site);
-
-      //console.log(remain.qty_oh);
-      console.log(sctdet.sct_cst_tot);
-      await inventoryTransactionServiceInstance.create({
-        tr_status: details.sod_status,
-        tr_expire: details.sod_expire,
-        tr_line: details.sod_line,
-        tr_part: details.sod_part,
-        tr_prod_line: pt.pt_prod_line,
-        tr_qty_loc: Number(details.sod_qty_ord),
-        tr_um: details.sod_um,
-        tr_um_conv: 1,
-        tr_ship_type: details.sod_type,
-        tr_price: details.sod_price,
-        tr_site: details.sod_site,
-        tr_loc: details.sod_loc,
-        tr_serial: details.sod_serial,
-        tr_nbr: details.sod_nbr,
-        tr_lot: null,
-        tr_addr: so.so_cust,
-        tr_effdate: so.so_ord_date,
-        tr_so_job: null,
-        tr_curr: so.so_curr,
-        tr_ex_rate: so.so_ex_rate,
-        tr_ex_rate2: so.so_ex_rate2,
-        tr_rmks: so.so_rmks,
-        tr_type: 'ISS-SO',
-        tr_qty_chg: Number(details.sod_qty_ord),
-        //tr_loc_begin: Number(details.qty_oh),
-        tr_gl_amt: Number(details.sod_qty_ord) * sctdet.sct_cst_tot,
-        tr_date: new Date(),
-        tr_mtl_std: sctdet.sct_mtl_tl,
-        tr_lbr_std: sctdet.sct_lbr_tl,
-        tr_bdn_std: sctdet.sct_bdn_tl,
-        tr_ovh_std: sctdet.sct_ovh_tl,
-        tr_sub_std: sctdet.sct_sub_tl,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
-
-      if (details.sod_type != 'M') {
-        const ld = await locationDetailServiceInstance.findOne({
-          ld_part: details.sod_part,
-          ld_lot: details.sod_serial,
-          ld_site: details.sod_site,
-          ld_loc: details.sod_loc,
+        console.log('idsod', entry.id, entry.sod_confirm);
+        const details = await saleOrderDetailServiceInstance.findOne({
+          id: entry.id,
         });
-        if (ld)
-          await locationDetailServiceInstance.update(
-            {
-              ld_qty_oh: Number(ld.ld_qty_oh) - Number(details.sod_qty_ord) * Number(1),
-              ld_expire: details.sod_expire,
-              last_modified_by: user_code,
-              last_modified_ip_adr: req.headers.origin,
-            },
-            { id: ld.id },
-          );
-        else
-          await locationDetailServiceInstance.create({
+        entry = {
+          sod_confirm: entry.sod_confirm,
+          updated_by: user_code,
+          updated_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        };
+        await saleOrderDetailServiceInstance.update({ ...entry }, { id: details.id });
+
+        /*kamel*/
+        const sctdet = await costSimulationServiceInstance.findOne({
+          sct_part: details.sod_part,
+          sct_site: details.sod_site,
+          sct_sim: 'STDCG',
+        });
+        const pt = await itemServiceInstance.findOne({ pt_part: details.sod_part });
+        console.log(details.sod_part, details.sod_site);
+
+        //console.log(remain.qty_oh);
+        console.log(sctdet.sct_cst_tot);
+        await inventoryTransactionServiceInstance.create({
+          tr_status: details.sod_status,
+          tr_expire: details.sod_expire,
+          tr_line: details.sod_line,
+          tr_part: details.sod_part,
+          tr_prod_line: pt.pt_prod_line,
+          tr_qty_loc: Number(details.sod_qty_ord),
+          tr_um: details.sod_um,
+          tr_um_conv: 1,
+          tr_ship_type: details.sod_type,
+          tr_price: details.sod_price,
+          tr_site: details.sod_site,
+          tr_loc: details.sod_loc,
+          tr_serial: details.sod_serial,
+          tr_nbr: details.sod_nbr,
+          tr_lot: null,
+          tr_addr: so.so_cust,
+          tr_effdate: so.so_ord_date,
+          tr_so_job: null,
+          tr_curr: so.so_curr,
+          tr_ex_rate: so.so_ex_rate,
+          tr_ex_rate2: so.so_ex_rate2,
+          tr_rmks: so.so_rmks,
+          tr_type: 'ISS-SO',
+          tr_qty_chg: Number(details.sod_qty_ord),
+          //tr_loc_begin: Number(details.qty_oh),
+          tr_gl_amt: Number(details.sod_qty_ord) * sctdet.sct_cst_tot,
+          tr_date: new Date(),
+          tr_mtl_std: sctdet.sct_mtl_tl,
+          tr_lbr_std: sctdet.sct_lbr_tl,
+          tr_bdn_std: sctdet.sct_bdn_tl,
+          tr_ovh_std: sctdet.sct_ovh_tl,
+          tr_sub_std: sctdet.sct_sub_tl,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+
+        if (details.sod_type != 'M') {
+          const ld = await locationDetailServiceInstance.findOne({
             ld_part: details.sod_part,
-            ld_date: new Date(),
             ld_lot: details.sod_serial,
             ld_site: details.sod_site,
             ld_loc: details.sod_loc,
-            ld_qty_oh: -(Number(details.sod_qty_ord) * Number(1)),
-            ld_expire: details.sod_expire,
-            ld_status: details.sod_status,
-            created_by: user_code,
-            created_ip_adr: req.headers.origin,
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
           });
+          if (ld)
+            await locationDetailServiceInstance.update(
+              {
+                ld_qty_oh: Number(ld.ld_qty_oh) - Number(details.sod_qty_ord) * Number(1),
+                ld_expire: details.sod_expire,
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+              },
+              { id: ld.id },
+            );
+          else
+            await locationDetailServiceInstance.create({
+              ld_part: details.sod_part,
+              ld_date: new Date(),
+              ld_lot: details.sod_serial,
+              ld_site: details.sod_site,
+              ld_loc: details.sod_loc,
+              ld_qty_oh: -(Number(details.sod_qty_ord) * Number(1)),
+              ld_expire: details.sod_expire,
+              ld_status: details.sod_status,
+              created_by: user_code,
+              created_ip_adr: req.headers.origin,
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            });
+        }
       }
-    
-    }
-    /*kamel*/
-
+      /*kamel*/
     }
     return res.status(200).json({ message: 'fetched succesfully', data: so });
   } catch (e) {

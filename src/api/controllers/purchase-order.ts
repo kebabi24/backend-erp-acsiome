@@ -11,6 +11,12 @@ import { QueryTypes } from 'sequelize';
 import { DATE, Op } from 'sequelize';
 import ItemService from '../../services/item';
 import taxeService from '../../services/taxe';
+import BankService from '../../services/bank';
+import BkhService from '../../services/bkh';
+
+import AddressService from '../../services/address';
+
+import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -31,6 +37,41 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     for (let entry of purchaseOrderDetail) {
       entry = { ...entry, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
+      logger.debug('Calling Create sequence endpoint');
+      try {
+        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+        const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+        const { purchaseOrder, purchaseOrderDetail } = req.body;
+        const po = await purchaseOrderServiceInstance.create({
+          ...purchaseOrder,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+        for (let entry of purchaseOrderDetail) {
+          entry = { ...entry, pod_nbr: po.po_nbr };
+          await purchaseOrderDetailServiceInstance.create(entry);
+        }
+
+        const addressServiceInstance = Container.get(AddressService);
+        const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+
+        const pdfData = {
+          pod: purchaseOrderDetail,
+          po: po,
+          adr: addr,
+        };
+        console.log('\n\n', pdfData);
+
+        let pdf = await generatePdf(pdfData, 'po');
+
+        return res.status(201).json({ message: 'created succesfully', data: po, pdf: pdf.content });
+      } catch (e) {
+        //#
+        logger.error('🔥 error: %o', e);
+        return next(e);
+      }
     }
     return res.status(201).json({ message: 'created succesfully', data: po });
   } catch (e) {
@@ -53,7 +94,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
       const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
-      console.log(sequence);
+      //
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
@@ -62,7 +103,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         po_site: Site,
         po_ord_date: new Date(),
         po_vend: entry.vend,
-        po_stat: 'v',
+        po_stat: 'V',
         po_curr: 'DA',
         po_ex_rate: 1,
         po_ex_rate1: 1,
@@ -72,32 +113,34 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       };
       const po = await purchaseOrderServiceInstance.create(ent);
-      console.log(po.po_nbr);
+      //console.log(po.po_nbr);
 
       var line = 1;
       for (let obj of purchaseOrderDetail) {
         if (obj.qtycom > 0) {
-          console.log('hnahnahnahnahna', obj.part);
+        //  console.log('hnahnahnahnahna', obj.part);
           if (obj.vend == entry.vend) {
             var duedate = new Date();
 
             // add a day
             duedate.setDate(duedate.getDate() + 1);
             const pt = await itemServiceInstance.findOne({ pt_part: obj.part });
-            console.log(pt.taxe);
-
+          //  console.log(pt.taxe);
+          var loc = null
+          if (Site == "0901") { loc = "MGM0010" } else loc = Site
             let entr = {
               pod_nbr: po.po_nbr,
               pod_line: line,
               pod_part: obj.part,
               pod_taxable: pt.pt_taxable,
-              pod_stat: 'v',
+              pod_stat: 'V',
               pod_tax_code: pt.pt_taxc,
               pod_taxc: pt.taxe.tx2_tax_pct,
-              pod_qty_ord: obj.qtycom,
-              pod_site: pt.pt_site,
-              pod_loc: pt.pt_loc,
-              pod_price: pt.pt_price,
+              pod_qty_ord: obj.qtyval,
+              pod_qty_chg: obj.qtycom,
+              pod_site: Site,
+              pod_loc: loc,
+              pod_price: pt.pt_pur_price,
               pod_um: pt.pt_um,
               pod_due_date: duedate,
               created_by: user_code,
@@ -111,7 +154,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         }
       }
     }
-    console.log(purchaseOrder);
+    //console.log(purchaseOrder);
     return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
   } catch (e) {
     //#
@@ -181,7 +224,7 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
             pod_qty_ord: obj.pt_ord_qty,
             pod_site: pt.pt_site,
             pod_loc: pt.pt_loc,
-            pod_price: obj.pt_price,
+            pod_price: obj.pt_pur_price,
             pod_um: pt.pt_um,
             pod_due_date: duedate,
             created_by: user_code,
@@ -227,6 +270,7 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
         po_site: Site,
         po_ord_date: new Date(),
         po_vend: entry.pt_vend,
+        po_amt: entry.pt_pur_price,
         po_stat: 'p',
         po_curr: 'DA',
         po_ex_rate: 1,
@@ -260,7 +304,7 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
         pod_qty_ord: entry.pt_ord_qty,
         pod_site: pt.pt_site,
         pod_loc: pt.pt_loc,
-        pod_price: entry.pt_price,
+        pod_price: entry.pt_pur_price,
         pod_um: pt.pt_um,
         pod_due_date: duedate,
         created_by: user_code,
@@ -279,6 +323,60 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
     return next(e);
   }
 };
+const payPo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const itemServiceInstance = Container.get(ItemService);
+    const taxeServiceInstance = Container.get(taxeService);
+    const bankServiceInstance = Container.get(BankService);
+    const bkhServiceInstance = Container.get(BkhService);
+
+    const { Site, details } = req.body;
+    for (const item of details) {
+      if (item.po_amt == item.po_pai) {
+        await purchaseOrderServiceInstance.update({ po_stat: 'C' }, { po_nbr: item.po_nbr, po_site: item.po_site });
+      } else {
+        console.log(typeof item.po_pai);
+        console.log(typeof item.po_amt);
+        if (item.po_pai) {
+          await purchaseOrderServiceInstance.update(
+            { po_amt: Number(item.po_amt) - Number(item.po_pai) },
+            { po_nbr: item.po_nbr, po_site: item.po_site },
+          );
+        }
+      }
+      const bk = await bankServiceInstance.findOne({ bk_userid: user_code, bk_type: item.po_blanket });
+      if (bk) {
+        if (item.po_pai) {
+          await bankServiceInstance.update(
+            { bk_balance: Number(bk.bk_balance) - Number(item.po_pai) },
+            { bk_userid: user_code, bk_type: item.po_blanket },
+          );
+          await bkhServiceInstance.create({
+            bkh_code: bk.bk_code,
+            bkh_num_doc: item.po_nbr,
+            bkh_date: new Date(),
+            bkh_balance: Number(bk.bk_balance) - Number(item.po_pai),
+            bkh_type: 'D',
+            dec01: item.po_pai,
+          });
+        }
+      }
+    }
+
+    return res.status(201).json({ message: 'created succesfully', data: null });
+  } catch (e) {
+    //#
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -290,6 +388,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrder = await purchaseOrderServiceInstance.findOne({
       ...req.body,
     });
+   // console.log(purchaseOrder);
     if (purchaseOrder) {
       const details = await purchaseOrderDetailServiceInstance.find({
         pod_nbr: purchaseOrder.po_nbr,
@@ -304,6 +403,26 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         data: { purchaseOrder, details: null },
       });
     }
+  } catch (e) {
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
+const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  logger.debug('Calling find by  all purchaseOrder endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const purchaseOrder = await purchaseOrderServiceInstance.find({
+      ...req.body,
+    });
+
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data: purchaseOrder,
+    });
   } catch (e) {
     logger.error('ðŸ”¥ error: %o', e);
     return next(e);
@@ -656,7 +775,7 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
     const pos = await purchaseOrderServiceInstance.find({ ...req.body });
-
+console.log(pos)
     return res.status(202).json({
       message: 'sec',
       data: pos,
@@ -766,6 +885,35 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const updated = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling update one  purchaseOrder endpoint');
+  try {
+    const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
+    const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const { id } = req.params;
+    console.log(req.body);
+    // const purchaseOrder = await purchaseOrderServiceInstance.update(
+    //   { ...req.body, last_modified_by: user_code },
+    //   { id },
+    // );
+    const purchase = await purchaseOrderServiceInstance.findOne({ id });
+    console.log(purchase.po_nbr);
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_nbr: purchase.po_nbr });
+    for (const pod of req.body.detail) {
+      const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
+        { pod_qty_ord:pod.pod_qty_ord,pod_price:pod.pod_price, last_modified_by: user_code },
+        { id: pod.id },
+      );
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: id });
+  } catch (e) {
+    logger.error('ðŸ”¥ error: %o', e);
+    return next(e);
+  }
+};
 
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -819,6 +967,7 @@ export default {
   findByStat,
   findAllSite,
   update,
+  updated,
   findAllwithDetails,
   findAllwithDetailsite,
   findByrange,
@@ -828,4 +977,6 @@ export default {
   createPosUnp,
   getPodRec,
   createPosUnpp,
+  findAllPo,
+  payPo,
 };

@@ -21,10 +21,12 @@ const ComplaintDetails = sequelize.define(
         complaint_code:{
             type:Sequelize.STRING,
             primaryKey:true,
-            unique:true,
+           
         },
-        code_value:{type:Sequelize.STRING},
-        observation:{type:Sequelize.STRING}
+        code_value:{type:Sequelize.STRING}, // code of cause 
+        observation:{type:Sequelize.STRING},
+        method : {type:Sequelize.STRING},
+
 
         // ...base,
     },

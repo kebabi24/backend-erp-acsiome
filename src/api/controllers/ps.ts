@@ -5,6 +5,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
 import costSimulationService from '../../services/cost-simulation';
+import { INTEGER } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -103,14 +104,15 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const psServiceInstance = Container.get(PsService);
     const itemServiceInstance = Container.get(ItemService);
     const ldServiceInstance = Container.get(LocationDetailService);
-    console.log(req.body);
+    //console.log(req.body);
     const result = [];
     var j = 1;
     for (let obj of details) {
-      console.log(obj.part, obj.prod_qty, obj.bom);
-      const ps = await psServiceInstance.find({ ps_parent: obj.bom });
+      //console.log(obj.part, obj.prod_qty, obj.bom);
+      const ps = await psServiceInstance.finds({ ps_parent: obj.bom });
 
       for (let p of ps) {
+        console.log(p.ps_comp)
         var bool = false;
         for (var i = 0; i < result.length; i++) {
           if (result[i].part == p.ps_comp) {
@@ -162,6 +164,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         qtyc = res.qty - ldqty + Number(item.pt_sfty_stk);
       } else qtyc = 0;
       //console.log(Number(p.ps_qty_per) * Number(obj.prod_qty),ldqty,item.pt_sfty_stk,qtyc)
+      //console.log( Math.ceil(qtyc))
       dat.push({
         id: res.id,
         part: res.part,
@@ -172,12 +175,13 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         qtyoh: ldqty,
         sftystk: item.pt_sfty_stk,
         qtycom: qtyc,
+        qtyval: Math.ceil(qtyc),
       });
     }
     //  for(let res of result){
     //      res.qtycom = res.qty - res.qtyoh
     //  }
-    console.log(dat);
+//    console.log(dat);
     //const psServiceInstance = Container.get(PsService)
     //  const ps = await psServiceInstance.find({...req.body})
     return res.status(200).json({ message: 'fetched succesfully', data: dat });

@@ -11,6 +11,9 @@ import { Container } from 'typedi';
 import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import purchaseOrderService from '../../services/purchase-order';
+import AddressService from '../../services/address';
+
+import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -162,6 +165,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
     }
+
+    const addressServiceInstance = Container.get(AddressService);
+    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend });
+    //console.log("\n\n req body : ", req.body)
+
+    const { detail, pr, prhnbr } = req.body;
+    const pdfData = {
+      pr: pr,
+      detail: detail,
+      prhnbr: prhnbr,
+      adr: addr,
+    };
+
+    //Console.log("\n\n pdf data", pdfData)
+    const pdf = await generatePdf(pdfData, 'prh');
     // const devise = await purchaseReceiveServiceInstance.create(req.body)
     return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
   } catch (e) {
@@ -205,9 +223,9 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         prh_line: po.pod_line,
         prh_part: po.pod_part,
         prh_serial: po.pod_serial,
-        prh_rcvd: po.qty_rcvd,
+        prh_rcvd: po.pod_qty_rcvd,
         prh_qty_ord: po.pod_qty_ord,
-        prh_pur_cost: po.pod_pur_cost,
+        prh_pur_cost: po.pod_price,
 
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -237,7 +255,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         tr_qty_loc: po.pod_qty_rcvd,
         tr_um: po.item.pt_um,
         tr_um_conv: 1,
-        tr_price: po.pod_pur_cost,
+        tr_price: po.pod_price,
         tr_site: po.pod_site,
         tr_loc: po.item.pt_loc,
         tr_serial: po.pod_serial,
@@ -273,7 +291,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         qty += Number(elem.ld_qty_oh);
       });
       const new_price = round(
-        qty * Number(sct_mtl_tl) + Number(po.pod_qty_rcvd) * Number(po.pod_pur_cost) * (qty + Number(po.pod_qty_rcvd)),
+        qty * Number(sct_mtl_tl) + Number(po.pod_qty_rcvd) * Number(po.pod_price) * (qty + Number(po.pod_qty_rcvd)),
       );
       await costSimulationServiceInstance.update(
         {

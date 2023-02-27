@@ -31,6 +31,17 @@ export default class posCategoriesService {
     }
   }
 
+  public async findOneByCode(query: any): Promise<any> {
+    try {
+      const category = await this.posCategoryModel.findOne({ where: { category_code: query } });
+      this.logger.silly('find one category mstr');
+      return category;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async find(query: any): Promise<any> {
     try {
       // const categories = await this.posCategoryModel.findAll({ where: query });
@@ -61,6 +72,21 @@ export default class posCategoriesService {
       const category = await this.posCategoryModel.destroy({ where: query });
       this.logger.silly('delete one category mstr');
       return category;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async upsert(query: any): Promise<any> {
+    try {
+      const ct = await this.posCategoryModel.sync({ force: true });
+      const us = query.categories;
+      for (const u of us) {
+        const utilis = await this.posCategoryModel.create(u);
+      }
+      this.logger.silly('update one pss mstr');
+      return ct;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -11,7 +11,8 @@ import {QueryTypes} from 'sequelize'
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -34,6 +35,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             const sh = await saleShiperServiceInstance.findOne({psh_shiper: entry.idh_ship, psh_part:entry.idh_part, psh_nbr: entry.idh_nbr,psh_line: entry.idh_sad_line })
             if(sh) await saleShiperServiceInstance.update({psh_invoiced : true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
         }
+
         
         await accountReceivableServiceInstance.create({
          ar_nbr : ih.ih_inv_nbr,
@@ -66,7 +68,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 }
 const createdirect = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -221,7 +224,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 }
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    const{user_code} = req.headers
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
 
     logger.debug("Calling update one  invoiceOrder endpoint")
     try {

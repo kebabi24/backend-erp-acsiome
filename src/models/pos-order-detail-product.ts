@@ -47,6 +47,19 @@ const OrderPosProductDetail = sequelize.define(
     pt_price_pos: Sequelize.DECIMAL,
     usrd_site: Sequelize.STRING,
     created_date: Sequelize.DATEONLY,
+    bool05: Sequelize.BOOLEAN,
+    pt_promo: {
+      type: Sequelize.STRING,
+    },
+    pt_group: {
+      type: Sequelize.STRING,
+    },
+    pt_part_type: {
+      type: Sequelize.STRING,
+    },
+    pt_dsgn_grp: {
+      type: Sequelize.STRING,
+    },
   },
   {
     tableName: 'bb_order_pos_detail_product',

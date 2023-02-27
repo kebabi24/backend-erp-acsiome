@@ -24,8 +24,16 @@ export default (app: Router) => {
   route.post('/rct-wo', controller.rctWo);
   route.post('/iss-wo', controller.issWo);
   // route.post('/iss-so', controller.issSo);
+  route.post('/findtrdate', controller.findtrDate);
+  route.post('/findtrtype', controller.findTrType);
   route.post('/cyc-cnt', controller.cycCnt);
   route.post('/cyc-rcnt', controller.cycRcnt);
-  route.post('/dayly', controller.findDayly);
+  
   route.post('/dayly1', controller.findDayly1);
+  route.post('/consoreport', controller.consoReport);
+  route.post('/consorange', controller.consoRange);
+  route.post('/findByOneinv', controller.findByOneinv);
+  route.post('/findinv', controller.findByInv);
+  route.post('/findrct', controller.findByRct);
+  route.post("/findoa", controller.findBySpec)
 };
