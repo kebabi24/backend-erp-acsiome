@@ -22,7 +22,8 @@ const ParamHeader = sequelize.define(
         validity_date_start : {type:Sequelize.DATEONLY},
         validity_date_end : {type:Sequelize.DATEONLY},
         description:{type:Sequelize.STRING},
-        call_duration:{type:Sequelize.INTEGER} // call duration 
+        call_duration:{type:Sequelize.INTEGER},  // call duration
+        profile_code : {type:Sequelize.STRING},
     },
     {
         tableName: "aa_paramHeader",

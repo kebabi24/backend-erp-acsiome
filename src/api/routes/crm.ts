@@ -23,6 +23,7 @@ export default (app: Router) => {
     route.get("/getPopulations", controller.getPopulations)
     route.get("/getCRMDashboardData", controller.getCRMDashboardData)
     route.post("/createEventOrderZero", controller.createAgendaEventOrderZero)
+    route.get("/allProfiles", controller.getAllProfiles)
 
   
 }

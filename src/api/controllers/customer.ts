@@ -302,6 +302,9 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
     const complaintDetailsData = req.body.complaintDetailsData;
     const req_code = await customerServiceInstance.getRecSeqNB();
 
+    let makeTest = true 
+    let createAgendaEvents = false
+
     let today = new Date();
     let now =
       today.getMonth() +
@@ -317,7 +320,6 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
       ':' +
       String(today.getSeconds()).padStart(2, '0');
     let complaint_date = now + '.955+00';
-    console.log('complaint_date in controller : ' + complaint_date);
     let date_code = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
     let complaint_code = date_code + '-' + req_code.toString();
 
@@ -333,7 +335,17 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
     // CREATE COMPLAINT DETAILS
     if (complaintDetailsData != null) {
       complaintDetailsData.forEach(detail => {
+
+        if(makeTest){
+          if(detail.method === ""){
+            createAgendaEvents = true
+            makeTest = false
+            console.log("createAgendaEvents is true")
+          }
+        }
+
         detail.complaint_code = complaint_code;
+
       });
       const complaintDetails = await customerServiceInstance.createComplaintDetails(complaintDetailsData);
     }
@@ -346,14 +358,19 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
     }
 
     // ADD TO AGENDA
-    let searchDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if(createAgendaEvents){
+      let searchDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  
+      const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
+      const param = await crmServiceInstance.getParamFilterd("complaint")
+      const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
+      const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone, param, paramDetails, sequence);
 
-    const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
-    const param = await crmServiceInstance.getParam(searchDate);
-    const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
-    const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone, param, paramDetails, sequence);
+      console.log(addLine)
+      
+    }
 
-    return res.status(201).json({ message: 'created succesfully', data: { complaint, param, paramDetails, addLine } });
+    return res.status(201).json({ message: 'created succesfully', data: { complaint } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

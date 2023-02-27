@@ -37,6 +37,8 @@ const Agenda = sequelize.define(
 
         // to re-create the 4 events , if the finale one (4) reaches and with status != SATISFIED
         param_code: {type: Sequelize.STRING},
+
+        profile_code: {type: Sequelize.STRING},
     },
     {
         tableName: "aa_agenda",

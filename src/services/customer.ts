@@ -145,7 +145,7 @@ export default class customersSercice {
     try {
       const causes = await this.codeModel.findAll({
         where: { code_fldname: 'reclamation_cause' },
-        attributes: ['id', 'code_value', 'code_desc', 'code_cmmt','bool01'],
+        attributes: ['id', 'code_value', 'code_desc', 'code_cmmt','bool01','chr01'],
         group: ['code_cmmt', 'id'],
       });
       const fileterd = _.mapValues(_.groupBy(causes, 'code_cmmt'));
