@@ -3,6 +3,8 @@ import CRMService from "../../services/crm"
 import codeService from '../../services/code';
 import customersSercice from '../../services/customer';
 import SequenceService from '../../services/sequence';
+import ProfileService from "../../services/profile"
+import UserService from "../../services/user"
 
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
@@ -99,6 +101,10 @@ const { Op } = require('sequelize')
         const paramHeaderData = req.body.paramHeaderData
         const paramDetails = req.body.paramDetails
 
+        const { user_code } = req.headers;
+
+        console.log(user_code)
+
        
 
         let date1 = new Date(paramHeaderData.validity_date_start)
@@ -159,7 +165,7 @@ const { Op } = require('sequelize')
                     const sequenceServiceInstance = Container.get(SequenceService);
                     const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
                     const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence)   
-                    console.log(addLine)
+                    
                 }
             }
         }
@@ -202,7 +208,7 @@ const { Op } = require('sequelize')
              const param = await crmServiceInstance.getParamFilterd("random")
              const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
              const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
-             console.log(paramDetails.dataValues.population_nb)
+             
              const max_value = elements.length 
              const nb = paramDetails.dataValues.population_nb
              let selected_random_indexes = selectRandomIndexes(max_value, nb) 
@@ -215,8 +221,8 @@ const { Op } = require('sequelize')
              
         }
 
-
-        const events = await crmServiceInstance.getEventsByDay()
+        const { user_code } = req.headers;
+        const events = await crmServiceInstance.getEventsByDay(user_code)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: events  })
@@ -235,7 +241,7 @@ const { Op } = require('sequelize')
 
         const {newEventData} = req.body
 
-        console.log(req.body)
+        
       
         const addLine = await crmServiceInstance.createOneAgendaLine(newEventData) 
         
@@ -287,10 +293,10 @@ const { Op } = require('sequelize')
     //           }
     //     })
 
-        console.log(query)
+        
         
         const customers = await crmServiceInstance.getCustomers(query)
-        console.log(customers.length)
+        
 
         return res
             .status(200)
@@ -308,7 +314,7 @@ const { Op } = require('sequelize')
         const crmServiceInstance = Container.get(CRMService)
         const populationData = req.body
         
-        console.log(populationData)
+        
 
         const population = await crmServiceInstance.createPopulation(populationData)
 
@@ -337,14 +343,14 @@ const { Op } = require('sequelize')
         });
 
         // FILTER UNIQUE POPULATIONS
-        console.log(populatiosData)
+        
         const unique = Array.from(new Set(populatiosData.map(pop =>pop.population_code ))).map(code=>{
             return{
                 population_code : code,
                 population_desc : populatiosData.find(elem => elem.population_code === code).population_desc
             }
         })
-        console.log
+        
         return res
             .status(200)
             .json({ message: "populations found succesfully", data: unique  })
@@ -379,9 +385,6 @@ const { Op } = require('sequelize')
         const { phone } = req.params;
 
         const customer = await crmServiceInstance.getCustomerData({ad_addr : phone})
-
-        
-        console.log
         return res
             .status(200)
             .json({ message: "populations found succesfully", data: customer  })
@@ -605,7 +608,7 @@ const { Op } = require('sequelize')
         const crmServiceInstance = Container.get(CRMService)
         const { agendaExecutionLineDetail  } = req.body;
        
-        console.log(agendaExecutionLineDetail)
+        
 
         const agendaExecutionLineDetailCreated = await crmServiceInstance.createAgendaExecutionLineDetail(agendaExecutionLineDetail)
 
@@ -619,7 +622,21 @@ const { Op } = require('sequelize')
     }
   }
 
+  const getAllProfiles = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getCustomerData endpoint")
+    try {
+        const userServiceInstance = Container.get(UserService)
 
+        const profiles = await userServiceInstance.findAll()
+        return res
+            .status(200)
+            .json({ message: "profiles found succesfully", data: profiles  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
 
   // FOR CRM : RANDOM : to select nb random unique indexes between 0 and max_value
   const selectRandomIndexes = (max_value , nb)=>{
@@ -641,6 +658,8 @@ const { Op } = require('sequelize')
     return  source[index].code_desc
   } 
 
+   
+
 
 
 
@@ -661,5 +680,6 @@ export default {
     createOneAgendaLine,
     getCRMDashboardData,
     createAgendaEventOrderZero,
-    createAgendaExecutionLineDetail
+    createAgendaExecutionLineDetail,
+    getAllProfiles,
 }

@@ -71,4 +71,20 @@ export default class ProfileService {
       throw e;
     }
   }
+
+  public async findAllProfiles(): Promise<any> {
+    try {
+      const profiles = await this.profileModel.findAll({
+        attributes: [
+           "id","usrg_code","usrg_description"
+        ],
+      });
+      this.logger.silly('find All profiles mstr');
+      return profiles;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
 }

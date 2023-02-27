@@ -46,6 +46,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const bkhTr = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const { bank, bankDetails } = req.body;
+    console.log(req.body);
+    const bk = await bkhServiceInstance.create({
+      bkh_effdate: req.body.date,
+      bkh_type: 'T',
+      bkh_balance: req.body.amt_tr,
+      bk_2000: req.body.amt_rl,
+      bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    // console.log(bk)
+    return res.status(201).json({ message: 'created succesfully', data: bk });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const Bk = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const logger = Container.get('logger');
@@ -571,4 +600,5 @@ export default {
   proccesPayement,
   createFRequest,
   findBkhGrp,
+  bkhTr,
 };

@@ -190,4 +190,17 @@ export default class UserService {
       throw e;
     }
   }
+
+  public async findAll(): Promise<any> {
+    try {
+      const users = await this.userModel.findAll({ 
+        attributes :['usrd_code','usrd_name','usrd_user_name']
+       });
+      this.logger.silly('find All users mstr');
+      return users;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

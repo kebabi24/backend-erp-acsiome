@@ -99,11 +99,20 @@ const createCustomer = async (req: Request, res: Response, next: NextFunction) =
         const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
         const addLine = await crmServiceInstance.createAgendaLine(data.phone,param,paramDetails, sequence)   
         
-        console.log(addLine)
+        
+
+        let returned_client = {
+            cm_addr: customerr.cm_addr,
+            cm_sort: customerr.cm_sort,
+            cm_high_date: customerr.cm_high_date,
+            cm_promo : customerr.cm_promo,
+            cm_disc_pct: customerr.cm_disc_pct,
+            cm_type: 'OPN',   
+        }
 
         return res
                 .status(200)
-                .json({ message: "customer created", data: customerr })
+                .json({ message: "customer created", data: returned_client })
 
        
     } catch (e) {

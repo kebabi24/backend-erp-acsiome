@@ -124,7 +124,7 @@ export default class CRMService {
     }
   }
 
-  public async getEventsByDay(): Promise<any> {
+  public async getEventsByDay(profile_code): Promise<any> {
     try {
         let date =  Date.now()
         let today = new Date(date)
@@ -133,7 +133,8 @@ export default class CRMService {
         const events = await this.agendaModel.findAll({
             where:{
               status : "O",
-              visibility:true
+              visibility:true,
+              profile_code : profile_code
               // event_day :  {[Op.eq]:new Date(dt)}      
             }
         })
@@ -292,7 +293,8 @@ export default class CRMService {
           method: r0.method,
           order:1,
           visibility:true,
-          param_code : paramHeader.param_code 
+          param_code : paramHeader.param_code ,
+          profile_code : paramHeader.profile_code
         },
         {
           code_event : code_event,
@@ -309,7 +311,8 @@ export default class CRMService {
           method: r1.method,
           order:2,
           visibility:false,
-          param_code : paramHeader.param_code 
+          param_code : paramHeader.param_code ,
+          profile_code : paramHeader.profile_code,
         },
         {
           code_event : code_event,
@@ -326,7 +329,8 @@ export default class CRMService {
           method: r2.method,
           order:3,
           visibility:false,
-          param_code : paramHeader.param_code 
+          param_code : paramHeader.param_code ,
+          profile_code : paramHeader.profile_code
         },
         {
           code_event : code_event,
@@ -343,7 +347,8 @@ export default class CRMService {
           method: r3.method,
           order:4,
           visibility:false,
-          param_code : paramHeader.param_code 
+          param_code : paramHeader.param_code ,
+          profile_code : paramHeader.profile_code
         },
       )
 
@@ -388,7 +393,8 @@ export default class CRMService {
           method: r0.method,
           order:0,
           visibility:false,
-          param_code : paramHeader.param_code 
+          param_code : paramHeader.param_code ,
+          profile_code : paramHeader.profile_code
         }
       
 
@@ -513,7 +519,6 @@ export default class CRMService {
                 code_event : eventHeader.code_event,
                 order : eventHeader.order+1
               }})
-              console.log(updatedAgendaLine2)
          }
        }
 
@@ -594,7 +599,6 @@ function addSeconds(date, seconds) {
 }
 
 function addHours(date, hours) {
-  console.log("called")
   let d  = new Date(date)
   d.setHours(d.getHours() + hours);
   let t = new Date(d)
