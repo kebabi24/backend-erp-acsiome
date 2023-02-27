@@ -118,6 +118,10 @@ export default class posOrderService {
           suppliments: [],
           ingredients: [],
           sauces: [],
+          pt_promo: '',
+          pt_dsgn_grp: '',
+          pt_part_type: '',
+          pt_group: '',
         };
         (product.id = p.id),
           (product.pt_part = p.pt_part),
@@ -131,6 +135,10 @@ export default class posOrderService {
           (product.pt_price = p.pt_price_pos),
           (product.pt_qty = p.pt_qty_ord_pos),
           (product.pt_loc = p.pt_loc);
+        product.pt_group = p.pt_group;
+        product.pt_dsgn_grp = p.pt_dsgn_grp;
+        product.pt_promo = p.pt_promo;
+        product.pt_part_type = p.pt_part_type;
         const supp = await this.orderPosProductSuppModel.findAll({
           where: {
             order_code: o.order_code,
@@ -150,6 +158,7 @@ export default class posOrderService {
             usrd_site: usrd_site,
           },
         });
+        console.log(sauces);
         product.sauces = sauces;
         const ing = await this.orderPosProductIngModel.findAll({
           where: {

@@ -156,7 +156,6 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const customerServiceInstance = Container.get(CustomerService);
     const { id } = req.params;
     const customer = await customerServiceInstance.findOne({ id });
-    console.log(customer);
     return res.status(200).json({ message: 'fetched succesfully', data: customer });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -170,6 +169,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerServiceInstance = Container.get(CustomerService);
     const customers = await customerServiceInstance.find({});
+
     return res.status(200).json({ message: 'fetched succesfully', data: customers });
   } catch (e) {
     logger.error('🔥 error: %o', e);

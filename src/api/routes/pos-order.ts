@@ -16,6 +16,7 @@ export default (app: Router) => {
   route.post('/findbysite', controller.findBySite);
   route.post('/findsumqtyps', controller.findSumQtyPs);
   route.post('/findsumamt', controller.findSumAmt);
+  route.post('/findglobamt', controller.findGlobAmt);
   route.post('/findsomeorders', controller.findByOrd);
   route.post('/update', controller.update);
   route.delete('/:id', controller.deleteOne);

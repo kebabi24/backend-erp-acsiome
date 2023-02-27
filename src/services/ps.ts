@@ -56,7 +56,31 @@ export default class psService {
       throw e;
     }
   }
+  public async finds(query: any): Promise<any> {
+    const sequelize = new Sequelize(config.databaseURL, { logging: false });
+    try {
+      const pss = await this.psModel.findAll({
+        where: query,
+        // include: this.itemModel,
+        include: [
+        { model: this.itemModel, where: { pt_cyc_int: 1 }, required: true, right: false, left:true }],
+        attributes: ['id', 'ps_parent', 'ps_comp', 'ps_qty_per', 'ps_scrp_pct'],
+      });
+      // const t = await sequelize.query(
+      //   "SELECT ps_parent, ps_comp, ps_ref, ps_qty_per, ld_qty_oh FROM ps_mstr as P JOIN ld_det as L ON P.ps_comp = L.ld_part WHERE ps_parent = '10105'",
+      //   {
+      //     type: QueryTypes.SELECT,
+      //   },
+      // );
+      // console.log(t);
+      this.logger.silly('find All pss mstr');
 
+      return pss;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findQtyOnStock(query: any): Promise<any> {
     const sequelize = new Sequelize(config.databaseURL, { logging: false });
     try {

@@ -84,7 +84,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.find({});
+    const locationDetails = await locationDetailServiceInstance.findall({});
+    console.log(locationDetails)
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -98,6 +99,18 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const locationDetails = await locationDetailServiceInstance.find({ ...req.body });
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByWeek = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const locationDetails = await locationDetailServiceInstance.findByWeek({ ...req.body });
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -289,4 +302,5 @@ export default {
   findByAll,
   findOtherStatus,
   findByFifo,
+  findByWeek,
 };

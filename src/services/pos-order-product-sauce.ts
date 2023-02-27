@@ -17,7 +17,18 @@ export default class posOrderProductSauceService {
       throw e;
     }
   }
-
+  public async findspec(query: any): Promise<any> {
+    try {
+      const ordersDetail = await this.orderPosProductSauceModel.findAll(
+        query,
+      );
+      this.logger.silly('find All orders detail mstr');
+      return ordersDetail;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findOne(query: any): Promise<any> {
     try {
       const orderDetail = await this.orderPosProductSauceModel.findOne({ where: query });

@@ -71,6 +71,7 @@ const Item = sequelize.define(
     pt_run_ll: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_run: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_price: { type: Sequelize.DECIMAL, defaultValue: 0 },
+    pt_pur_price: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_xmtl_tl: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_xlbr_tl: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_xbdn_tl: { type: Sequelize.DECIMAL, defaultValue: 0 },

@@ -1,5 +1,6 @@
 import PosOrder from '../../services/pos-order';
 import PosOrderDetail from '../../services/pos-order-detail-product';
+import PosOrderDetailSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSupp from '../../services/pos-order-product-supp';
 import PosOrderProductIng from '../../services/pos-order-product-ing';
@@ -184,6 +185,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           pt_article,
           line,
           pt_loc,
+          pt_group,
+          pt_promo,
+          pt_part_type,
+          pt_dsgn_grp,
         } = product;
         // console.log('pt_loc', pt_loc);
         if (cart.plateforme !== 'CALL CENTER') {
@@ -204,6 +209,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               : product.pt_price - (product.pt_price * Number(cart.disc_amt)) / 100,
             usrd_site: cart.usrd_site,
             created_date: currentService.service_period_activate_date,
+            pt_group: pt_group,
+            pt_promo: pt_promo,
+            pt_part_type: pt_part_type,
+            pt_dsgn_grp: pt_dsgn_grp,
           });
         }
         await workOrderServiceInstance.create({
@@ -303,15 +312,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_ip_adr: req.headers.origin,
           };
           await workOrderDetailServiceInstance.create(elem_wod);
+          console.log();
           detail.push(elem_wod);
         }
         // console.log(sauce);
         for (const sa of sauce) {
           if (cart.plateforme !== 'CALL CENTER') {
+            console.log(pt_part);
+            console.log(sa.pt_part);
             await PosOrderProductSauceServiceInstance.create({
               order_code: currentProduct.order_code,
               pt_part: pt_part,
-              pt_pt_part: sa.pt_part,
+              pt_pt_part: sa.pt_pt_part,
               pt_desc1: sa.pt_desc1,
               pt_desc2: sa.pt_desc2,
               pt_loc: sa.pt_loc,
@@ -321,6 +333,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               line: line,
               usrd_site: cart.usrd_site,
               created_date: currentService.service_period_activate_date,
+              bool05: false,
             });
           }
 
@@ -328,7 +341,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: sa.pt_loc,
-            wod_part: sa.pt_part,
+            wod_part: sa.pt_pt_part,
             wod_price: sa.pt_price,
             wod_site: cart.usrd_site,
             wod_qty_req: sa.pt_net_wt * product.pt_qty,
@@ -426,7 +439,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     // update = false;
-    console.log(cart);
+    // console.log(cart);
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -681,6 +694,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const PosOrderDetailSauseServiceInstance = Container.get(PosOrderDetailSauce);
     const itemServiceInstance = Container.get(ItemService);
     //console.log( "here",req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({
@@ -709,6 +723,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
       });
       i = i + 1;
     }
+
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -902,6 +917,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
   const bkhServiceInstance = Container.get(BkhService);
   const forcastServiceInstance = Container.get(ForcastService);
   if (req.body.site != '*') {
+    console.log(req.body);
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
@@ -920,6 +936,22 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
+        const ords = await PosOrderDetailServiceInstance.findgrp({
+          where: {
+            created_date: ord.created_date,
+            usrd_site: ord.usrd_site,
+            status: 'N',
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'created_date',
+            'usrd_site',
+            [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_N'],
+          ],
+          group: ['created_date', 'usrd_site'],
+          raw: true,
+        });
+
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
@@ -951,11 +983,14 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         var recu = banks.length > 0 ? banks[0].total_rec : 0;
         var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        var namt = ords.length > 0 ? ords[0].total_N : 0;
+        //        console.log(ords)
         result.push({
           id: i,
           effdate: ord.created_date,
           site: ord.usrd_site,
           amt: ord.total_amt,
+          N_amt: namt,
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
@@ -970,6 +1005,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       return next(e);
     }
   } else {
+    console.log('hhhhhere');
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
@@ -987,10 +1023,27 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       let result = [];
       var i = 1;
       for (let ord of orders) {
+        const ords = await PosOrderDetailServiceInstance.findgrp({
+          where: {
+            created_date: ord.created_date,
+            usrd_site: ord.usrd_site,
+            status: 'N',
+          },
+          attributes: [
+            //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+            'created_date',
+            'usrd_site',
+            [Sequelize.fn('sum', Sequelize.col('total_price')), 'total_N'],
+          ],
+          group: ['created_date', 'usrd_site'],
+          raw: true,
+        });
+
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
             bkh_type: 'R',
+            bkh_site: ord.usrd_site,
           },
           attributes: [
             //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -1017,11 +1070,14 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         var recu = banks.length > 0 ? banks[0].total_rec : 0;
         var objc = objcts.length > 0 ? objcts[0].total_obj : 0;
+        var namt = ords.length > 0 ? ords[0].total_N : 0;
+
         result.push({
           id: i,
           effdate: ord.created_date,
           site: ord.usrd_site,
           amt: ord.total_amt,
+          N_amt: namt,
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
@@ -1037,6 +1093,54 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
     }
   }
 };
+const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all order endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const itemServiceInstance = Container.get(ItemService);
+    const codeServiceInstance = Container.get(CodeService);
+    console.log(req.body);
+    
+      var sansbo = await PosOrderDetailServiceInstance.findspec({
+        where: { 
+          created_date: req.body.created_date, 
+          usrd_site: req.body.tr_site,
+          pt_part_type: { [Op.ne]: 'BO' },
+          },
+        attributes: [
+          // 'pt_part',
+          //  'usrd_site',
+          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'amt_sansbo'],
+        ],
+        // group: ['usrd_site'],
+        raw: true,
+      });
+   
+      var avecbo = await PosOrderDetailServiceInstance.findspec({
+        where: { 
+          created_date: req.body.created_date, 
+          usrd_site: req.body.tr_site,
+          //pt_part_type: 'BO' 
+          },
+        attributes: [
+          // 'pt_part',
+          //  'usrd_site',
+          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
+        ],
+        // group: ['usrd_site'],
+        raw: true,
+      });
+    console.log(sansbo[0].amt_sansbo,avecbo)
+    return res.status(200).json({ message: 'fetched succesfully', data: {casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -1045,6 +1149,7 @@ export default {
   findSumQty,
   findSumQtyPs,
   findSumAmt,
+  findGlobAmt,
   findByOrd,
   update,
   deleteOne,

@@ -28,7 +28,12 @@ export default (app: Router) => {
   route.post('/findtrtype', controller.findTrType);
   route.post('/cyc-cnt', controller.cycCnt);
   route.post('/cyc-rcnt', controller.cycRcnt);
-  route.post('/dayly', controller.findDayly);
+  
   route.post('/dayly1', controller.findDayly1);
+  route.post('/consoreport', controller.consoReport);
+  route.post('/consorange', controller.consoRange);
   route.post('/findByOneinv', controller.findByOneinv);
+  route.post('/findinv', controller.findByInv);
+  route.post('/findrct', controller.findByRct);
+  route.post("/findoa", controller.findBySpec)
 };

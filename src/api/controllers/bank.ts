@@ -46,6 +46,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const bkhTr = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const { bank, bankDetails } = req.body;
+    console.log(req.body);
+    const bk = await bkhServiceInstance.create({
+      bkh_effdate: req.body.date,
+      bkh_type: 'T',
+      bkh_balance: req.body.amt_tr,
+      bk_2000: req.body.amt_rl,
+      bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    // console.log(bk)
+    return res.status(201).json({ message: 'created succesfully', data: bk });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const Bk = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const logger = Container.get('logger');
@@ -114,13 +143,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
       }
     } else {
       console.log(user);
-      const service = await ServiceInstance.update(
-        {
-          service_closing_date: new Date(),
-          service_open: false,
-        },
-        { role_code: user_code, service_open: true },
-      );
+
       const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
       for (const bank of detail) {
         await bankServiceInstance.update(
@@ -157,6 +180,13 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           bk_p005: bank.bk_p005,
           bkh_effdate: currentService.service_period_activate_date,
         });
+        const service = await ServiceInstance.update(
+          {
+            service_closing_date: new Date(),
+            service_open: false,
+          },
+          { role_code: user_code, service_open: true },
+        );
       }
       console.log('avant');
       await SequenceServiceInstance.update({ seq_curr_val: 1 }, { seq_type: 'OF', seq_profile: user });
@@ -185,34 +215,39 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const currentService = await ServiceInstance.findOne({ role_code: user_code, service_open: true });
     const { cart, type, user_name } = req.body;
 
-    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_userid: user_code });
+    const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_code });
     console.log(bank);
+    console.log(cart);
     if (bank) {
-      await bankhDetailerviceInstance.create({
-        bkh_code: bank.bk_code,
-        bkh_date: new Date(),
-        bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
-        bkh_type: 'R',
-        dec01: Number(cart.total_price),
-        bkh_effdate: currentService.service_period_activate_date,
-      });
-      await bankServiceInstance.update(
-        {
-          bk_balance: Number(bank.bk_balance) + Number(cart.total_price),
+      if (cart.products.length > 0) {
+        await bankhDetailerviceInstance.create({
+          bkh_code: bank.bk_code,
+          bkh_date: new Date(),
+          bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
+          bkh_type: 'R',
+          dec01: Number(cart.total_price),
+          bkh_num_doc: cart.order_code,
+          bkh_site: cart.usrd_site,
+          bkh_effdate: currentService.service_period_activate_date,
+        });
+        await bankServiceInstance.update(
+          {
+            bk_balance: Number(bank.bk_balance) + Number(cart.total_price),
 
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        },
-        { bk_type: type, bk_user1: user_name },
-      );
-      // console.log(cart.order_code, user_name);
-      await PosOrderServiceInstance.update(
-        {
-          status: 'P',
-        },
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { bk_type: type, bk_user1: user_name },
+        );
+        // console.log(cart.order_code, user_name);
+        await PosOrderServiceInstance.update(
+          {
+            status: 'P',
+          },
 
-        { order_code: cart.order_code, usrd_site: cart.usrd_site },
-      );
+          { order_code: cart.order_code, usrd_site: cart.usrd_site },
+        );
+      }
     }
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
@@ -565,4 +600,5 @@ export default {
   proccesPayement,
   createFRequest,
   findBkhGrp,
+  bkhTr,
 };
