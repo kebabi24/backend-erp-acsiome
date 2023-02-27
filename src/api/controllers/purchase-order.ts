@@ -39,21 +39,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       await purchaseOrderDetailServiceInstance.create(entry);
       logger.debug('Calling Create sequence endpoint');
       try {
-        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
-        const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-        const { purchaseOrder, purchaseOrderDetail } = req.body;
-        const po = await purchaseOrderServiceInstance.create({
-          ...purchaseOrder,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
-        for (let entry of purchaseOrderDetail) {
-          entry = { ...entry, pod_nbr: po.po_nbr };
-          await purchaseOrderDetailServiceInstance.create(entry);
-        }
-
+       
         const addressServiceInstance = Container.get(AddressService);
         const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
 
@@ -117,7 +103,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
 
       var line = 1;
       for (let obj of purchaseOrderDetail) {
-        if (obj.qtycom > 0) {
+        if (obj.qtyval > 0) {
         //  console.log('hnahnahnahnahna', obj.part);
           if (obj.vend == entry.vend) {
             var duedate = new Date();
