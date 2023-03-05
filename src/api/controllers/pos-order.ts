@@ -746,10 +746,15 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         attributes: [
           'pt_part',
           'usrd_site',
+          'pt_size',
+          'pt_part_type',
+          'pt_promo',
+          'pt_dsgn_grp',
+          'pt_group',
           [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
           [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
         ],
-        group: ['pt_part', 'usrd_site'],
+        group: ['pt_part', 'usrd_site','pt_size','pt_part_type','pt_promo','pt_dsgn_grp','pt_group'],
         raw: true,
       });
     } else {
@@ -758,10 +763,15 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         attributes: [
           'pt_part',
           'usrd_site',
+          'pt_size',
+          'pt_part_type',
+          'pt_promo',
+          'pt_dsgn_grp',
+          'pt_group',
           [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
           [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
         ],
-        group: ['pt_part', 'usrd_site'],
+        group: ['pt_part', 'usrd_site','pt_size','pt_part_type','pt_promo','pt_dsgn_grp','pt_group'],
         raw: true,
       });
     }
@@ -788,8 +798,10 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: ord.pt_size, //isNull(groups) ? null : groups.code_cmmt,
-        // promo: isNull(promos) ? null : promos.code_cmmt,
+        group: isNull(ord.pt_group) ? "" : ord.pt_group,
+        promo: isNull(ord.pt_promo) ? "" : ord.pt_promo,
+        size: isNull(ord.pt_size) ? "" : ord.pt_size,
+        dsgn_grp: isNull(ord.pt_dsgn_grp) ? "" : ord.pt_dsgn_grp,
       });
       i = i + 1;
     }
@@ -915,7 +927,9 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
   const bkhServiceInstance = Container.get(BkhService);
+  const itemServiceInstance = Container.get(ItemService);
   const forcastServiceInstance = Container.get(ForcastService);
+  const PosOrderDetailProductServiceInstance = Container.get(PosOrderDetail);
   if (req.body.site != '*') {
     console.log(req.body);
     try {
@@ -952,6 +966,29 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           raw: true,
         });
 
+        const loys = await PosOrderDetailServiceInstance.find({
+          
+            created_date: ord.created_date,
+            usrd_site: ord.usrd_site,
+            loy_num: '000'
+          
+        });
+        var sumloy = 0
+        for(let loy of loys) {
+         
+          const detords = await PosOrderDetailProductServiceInstance.find({
+             created_date: loy.created_date,
+             order_code : loy.order_code,
+             usrd_site: loy.usrd_site,
+            
+          });
+         
+         for (let detord of detords) {
+           const part = await itemServiceInstance.findOne({pt_part:detord.pt_part})
+           sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos) ;
+         } 
+          /*kamel*/
+        }
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
@@ -994,6 +1031,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
+          loyamt : sumloy,
           cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
         });
         i = i + 1;
@@ -1039,6 +1077,30 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           raw: true,
         });
 
+        const loys = await PosOrderDetailServiceInstance.find({
+          
+          created_date: ord.created_date,
+          usrd_site: ord.usrd_site,
+          loy_num: '000'
+        
+      });
+      var sumloy = 0
+      for(let loy of loys) {
+       
+        const detords = await PosOrderDetailProductServiceInstance.find({
+           created_date: loy.created_date,
+           order_code : loy.order_code,
+           usrd_site: loy.usrd_site,
+          
+        });
+       
+       for (let detord of detords) {
+         const part = await itemServiceInstance.findOne({pt_part:detord.pt_part})
+         sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos) ;
+       } 
+        /*kamel*/
+      }
+      
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
@@ -1081,6 +1143,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
+          loyamt : sumloy,
           cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
         });
         i = i + 1;

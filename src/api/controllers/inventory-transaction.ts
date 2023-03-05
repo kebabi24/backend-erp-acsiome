@@ -1973,10 +1973,10 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       const purprice = await inventoryTransactionServiceInstance.findOneI({ tr_part:items.pt_part , tr_type: "RCT-PO" , tr_effdate: req.body.created_date});
 
       let cnt = (cntmax != null) ? Number(cntmax.tr_qty_chg) : 0
-      let invt = rctpo != null ?  Number(rcntmax.tr_qty_chg) : 0
-      let achatt = rctpo != null ? Number(rctpo.tr_qty_loc) : 0
+      let invt = (rcntmax != null) ?  Number(rcntmax.tr_qty_chg) : 0
+      let achatt = (rctpo != null) ? Number(rctpo.tr_qty_loc) : 0
       let cons = invt + achatt - cnt
-      let price = purprice != null ? purprice.tr_price: items.pt_pur_price
+      let price = (purprice != null) ? purprice.tr_price: items.pt_pur_price
 
       const trs = await inventoryTransactionServiceInstance.findSpecial({
         where: {
@@ -1994,6 +1994,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       });
       let trsv = (trs != null) ? -Number(trs[0].qty) : 0
 //console.log("here",trs)
+if (achatt != 0 || invt != 0 || cons != 0 || trsv != 0 ) { 
       results.push({
         id: i,
         famille: codes.code_cmmt,
@@ -2008,9 +2009,11 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         vendue:trsv,
         ecart: Number(trsv) -Number(cons),
         vecart: (Number(trsv) - Number(cons)) * price ,
-        persent: Number(cons) * Number(price) / Number (sansbo[0].amt_sansbo)
+        persent: Number(cons) * Number(price) / Number (sansbo[0].amt_sansbo),
+        rank: items.int01,
       });
       i = i + 1;
+      }
     }
    // console.log(results)
     return res.status(200).json({ message: 'fetched succesfully', data:{detail: results,casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
@@ -2056,8 +2059,8 @@ const consoRange = async (req: Request, res: Response, next: NextFunction) => {
         um: items.pt_um,        
         qty: - Number(tr.qty),
         add_qty: 0,
-        prod_qty: - Number(tr.qty)
-        
+        prod_qty: - Number(tr.qty),
+       
       });
       i = i + 1;
     }
