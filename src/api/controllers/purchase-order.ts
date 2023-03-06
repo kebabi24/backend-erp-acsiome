@@ -41,18 +41,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       try {
        
         const addressServiceInstance = Container.get(AddressService);
-        const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+        // const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
 
-        const pdfData = {
-          pod: purchaseOrderDetail,
-          po: po,
-          adr: addr,
-        };
-        console.log('\n\n', pdfData);
+        // const pdfData = {
+        //   pod: purchaseOrderDetail,
+        //   po: po,
+        //   adr: addr,
+        // };
+        // console.log('\n\n', pdfData);
 
-        let pdf = await generatePdf(pdfData, 'po');
+        // let pdf = await generatePdf(pdfData, 'po');
 
-        return res.status(201).json({ message: 'created succesfully', data: po, pdf: pdf.content });
+        return res.status(201).json({ message: 'created succesfully', data: po, /*pdf: pdf.content*/ });
       } catch (e) {
         //#
         logger.error('🔥 error: %o', e);

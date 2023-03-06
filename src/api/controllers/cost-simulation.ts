@@ -20,7 +20,7 @@ const{user_domain} = req.headers
 
         for(let site of sites) {
             if(site.si_site != req.body.sct_site){
-            const sct1 = await costSimulationServiceInstance.create({sct_site: site.si_site,sct_sim:req.body.sct_sim, sct_part:req.body.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            const sct1 = await costSimulationServiceInstance.create({sct_site: site.si_site,sct_sim:req.body.sct_sim, sct_part:req.body.sct_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
             }
 
         }

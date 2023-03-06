@@ -1368,7 +1368,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
     console.log(currentService.service_period_activate_date);
     for (const item of detail) {
       const { ...remain } = item;
-      console.log(remain.tag_cnt_qty);
+      console.log(remain.tag_cnt_qty, "herehouna");
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_part: remain.ld_part,
         sct_site: remain.ld_site,
@@ -1428,7 +1428,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         });
         if (ld) {
           let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
-          console.log(Number(remain.tag_cnt_qty));
+         // console.log(Number(remain.tag_cnt_qty));
           await locationDetailServiceInstance.update(
             {
               ld_qty_oh: Number(qty),
@@ -1499,7 +1499,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
     const currentService = await service.findOne({ role_code: user_code, service_open: true });
     for (const item of detail) {
       const { ...remain } = item;
-      console.log(remain.tag_cnt_qty);
+      console.log(remain.tag_cnt_qty, "here");
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_part: remain.ld_part,
         sct_site: remain.ld_site,
@@ -1560,7 +1560,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
 
         if (ld) {
           let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
-          console.log(Number(remain.tag_cnt_qty));
+//          console.log(Number(remain.tag_cnt_qty));
           await locationDetailServiceInstance.update(
             {
               ld_qty_oh: Number(qty),
@@ -1951,9 +1951,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         tr_part: items.pt_part,
         tr_type: 'CYC-RCNT',
       });
-
       const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
-
       const rctpo = await inventoryTransactionServiceInstance.findOneI({
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
@@ -1973,10 +1971,10 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       const purprice = await inventoryTransactionServiceInstance.findOneI({ tr_part:items.pt_part , tr_type: "RCT-PO" , tr_effdate: req.body.created_date});
 
       let cnt = (cntmax != null) ? Number(cntmax.tr_qty_chg) : 0
-      let invt = rctpo != null ?  Number(rcntmax.tr_qty_chg) : 0
-      let achatt = rctpo != null ? Number(rctpo.tr_qty_loc) : 0
+      let invt = (rcntmax != null) ?  Number(rcntmax.tr_qty_chg) : 0
+      let achatt = (rctpo != null) ? Number(rctpo.tr_qty_loc) : 0
       let cons = invt + achatt - cnt
-      let price = purprice != null ? purprice.tr_price: items.pt_pur_price
+      let price = (purprice != null) ? purprice.tr_price: items.pt_pur_price
 
       const trs = await inventoryTransactionServiceInstance.findSpecial({
         where: {
@@ -1993,7 +1991,8 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         raw: true,
       });
       let trsv = (trs != null) ? -Number(trs[0].qty) : 0
-//console.log("here",trs)
+//console.log(items.pt_desc1, achatt, invt, cons,trsv)
+if (achatt != 0 || invt != 0 || cons != 0 || trsv != 0 ) { 
       results.push({
         id: i,
         famille: codes.code_cmmt,
@@ -2008,12 +2007,92 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         vendue:trsv,
         ecart: Number(trsv) -Number(cons),
         vecart: (Number(trsv) - Number(cons)) * price ,
-        persent: Number(cons) * Number(price) / Number (sansbo[0].amt_sansbo)
+        persent: Number(cons) * Number(price) / Number (sansbo[0].amt_sansbo),
+        rank: items.int01,
       });
       i = i + 1;
+      }
+    }
+
+/*boisson*/
+    const boparts = await itemServiceInstance.find({pt_cyc_int: 1, pt_part_type: 'BO' })
+    let boresults = []
+    var j = 1
+    for (let boitems of boparts) {
+      const codes = await codeServiceInstance.findOne({code_fldname: "pt_part_type", code_value : boitems.pt_part_type})
+      if (codes == null) { console.log(boitems.pt_part, "part")}
+      const trrcycmax = await inventoryTransactionServiceInstance.max({
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.created_date,
+        tr_part: boitems.pt_part,
+        tr_type: 'CYC-RCNT',
+      });
+
+      const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
+
+      const rctpo = await inventoryTransactionServiceInstance.findOneI({
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.created_date,
+        tr_part: boitems.pt_part,
+        tr_type: 'RCT-PO',
+      });
+
+
+      const trcycmax = await inventoryTransactionServiceInstance.max({
+        tr_site: req.body.tr_site,
+        tr_effdate: req.body.created_date,
+        tr_part: boitems.pt_part,
+        tr_type: 'CYC-CNT',
+      });
+
+      const cntmax = await inventoryTransactionServiceInstance.findOneI({ id: trcycmax });
+      const purprice = await inventoryTransactionServiceInstance.findOneI({ tr_part:boitems.pt_part , tr_type: "RCT-PO" , tr_effdate: req.body.created_date});
+
+      let cnt = (cntmax != null) ? Number(cntmax.tr_qty_chg) : 0
+      let invt = (rcntmax != null) ?  Number(rcntmax.tr_qty_chg) : 0
+      let achatt = (rctpo != null) ? Number(rctpo.tr_qty_loc) : 0
+      let cons = invt + achatt - cnt
+      let price = (purprice != null) ? purprice.tr_price: boitems.pt_pur_price
+
+      const trs = await inventoryTransactionServiceInstance.findSpecial({
+        where: {
+          tr_effdate:req.body.created_date, 
+          tr_site: req.body.tr_site,
+          tr_part: boitems.pt_part,
+          tr_type: "ISS-WO",
+        },
+        attributes: [
+          [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+        
+        ],
+        //group: ['tr_part', 'tr_site', 'tr_effdate', 'tr_type', 'tr_serial', 'tr_expire'],
+        raw: true,
+      });
+      let trsv = (trs != null) ? -Number(trs[0].qty) : 0
+//console.log("here",trs)
+if (achatt != 0 || invt != 0 || cons != 0 || trsv != 0 ) { 
+  boresults.push({
+        id: j,
+        bofamille: codes.code_cmmt,
+        bopart: boitems.pt_part,
+        bodesc: boitems.pt_desc1,
+        boum: boitems.pt_um,
+        bopu: price,
+        boachat: achatt,
+        boinv: invt,
+        boavarie:0,
+        boconso: cons,
+        bovendue:trsv,
+        boecart: Number(trsv) -Number(cons),
+        bovecart: (Number(trsv) - Number(cons)) * price ,
+        bopersent: Number(cons) * Number(price) / Number (avecbo[0].total_amt),
+        borank: boitems.int01,
+      });
+      j = j + 1;
+      }
     }
    // console.log(results)
-    return res.status(200).json({ message: 'fetched succesfully', data:{detail: results,casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
+    return res.status(200).json({ message: 'fetched succesfully', data:{detail: results, bodetail:boresults,casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -2056,8 +2135,8 @@ const consoRange = async (req: Request, res: Response, next: NextFunction) => {
         um: items.pt_um,        
         qty: - Number(tr.qty),
         add_qty: 0,
-        prod_qty: - Number(tr.qty)
-        
+        prod_qty: - Number(tr.qty),
+       
       });
       i = i + 1;
     }
