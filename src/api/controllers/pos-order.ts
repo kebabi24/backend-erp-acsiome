@@ -854,6 +854,32 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const set = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling update one  product endpoint');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
+    const items = await itemServiceInstance.find({});
+    for (const item of items) {
+      await PosOrderDetailServiceInstance.update(
+        {
+          pt_group: item.pt_group,
+          pt_part_type: item.pt_part_type,
+          pt_promo: item.pt_promo,
+          pt_dsgn_grp: item.pt_dsgn_grp,
+        },
+        { pt_part: item.pt_part },
+      );
+    }
+    console.log('all right');
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const createOrder = (socket, data) => {
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
   console.log('socket connected');
@@ -1102,40 +1128,42 @@ const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
     console.log(req.body);
-    
-      var sansbo = await PosOrderDetailServiceInstance.findspec({
-        where: { 
-          created_date: req.body.created_date, 
-          usrd_site: req.body.tr_site,
-          pt_part_type: { [Op.ne]: 'BO' },
-          },
-        attributes: [
-          // 'pt_part',
-          //  'usrd_site',
-          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
-          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'amt_sansbo'],
-        ],
-        // group: ['usrd_site'],
-        raw: true,
-      });
-   
-      var avecbo = await PosOrderDetailServiceInstance.findspec({
-        where: { 
-          created_date: req.body.created_date, 
-          usrd_site: req.body.tr_site,
-          //pt_part_type: 'BO' 
-          },
-        attributes: [
-          // 'pt_part',
-          //  'usrd_site',
-          // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
-          [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
-        ],
-        // group: ['usrd_site'],
-        raw: true,
-      });
-    console.log(sansbo[0].amt_sansbo,avecbo)
-    return res.status(200).json({ message: 'fetched succesfully', data: {casansbo:sansbo[0].amt_sansbo,ca:avecbo[0].total_amt} });
+
+    var sansbo = await PosOrderDetailServiceInstance.findspec({
+      where: {
+        created_date: req.body.created_date,
+        usrd_site: req.body.tr_site,
+        pt_part_type: { [Op.ne]: 'BO' },
+      },
+      attributes: [
+        // 'pt_part',
+        //  'usrd_site',
+        // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+        [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'amt_sansbo'],
+      ],
+      // group: ['usrd_site'],
+      raw: true,
+    });
+
+    var avecbo = await PosOrderDetailServiceInstance.findspec({
+      where: {
+        created_date: req.body.created_date,
+        usrd_site: req.body.tr_site,
+        //pt_part_type: 'BO'
+      },
+      attributes: [
+        // 'pt_part',
+        //  'usrd_site',
+        // [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
+        [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
+      ],
+      // group: ['usrd_site'],
+      raw: true,
+    });
+    console.log(sansbo[0].amt_sansbo, avecbo);
+    return res
+      .status(200)
+      .json({ message: 'fetched succesfully', data: { casansbo: sansbo[0].amt_sansbo, ca: avecbo[0].total_amt } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1158,4 +1186,5 @@ export default {
   findPosGrp,
   findBySite,
   createOrder,
+  set,
 };
