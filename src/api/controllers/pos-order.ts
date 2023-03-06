@@ -26,6 +26,7 @@ import * as path from 'path';
 
 import { type } from 'os';
 import posCategoriesService from '../../services/pos-categories';
+import item from './item';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -711,8 +712,18 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     //console.log(orders)
     let result = [];
     var i = 1;
+    var typ = ""
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+
+      if (items.pt_part_type == "BO" || items.pt_part_type == "AG" || items.pt_part_type == "SC" || items.pt_part_type == "D")
+      {
+console.log(ord.pt_part, items.pt_part_type)
+        typ = "Stock"
+      }
+      else{
+        typ = "PS"
+      }
       result.push({
         id: i,
         part: ord.pt_part,
@@ -720,10 +731,39 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
         bom: items.pt_bom_code,
         ord_qty: ord.total_qty,
         prod_qty: ord.total_qty,
+        type: typ,
       });
       i = i + 1;
     }
 
+    const saus = await PosOrderDetailSauseServiceInstance.findspec({
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      attributes: [
+        'pt_pt_part',
+        'usrd_site',
+        'pt_desc1',
+        [Sequelize.fn('sum', 1), 'total_qty'],
+      ],
+      group: ['pt_pt_part', 'usrd_site', 'pt_desc1'],
+      raw: true,
+    });
+    for (let sau of saus) {
+      console.log(sau.pt_pt_part)
+      const items = await itemServiceInstance.findOne({ pt_part: sau.pt_pt_part });
+      if (items.pt_part_type == "BO" || items.pt_part_type == "AG" || items.pt_part_type == "SC" || items.pt_part_type == "D")
+      {
+      result.push({
+        id: i,
+        part: sau.pt_pt_part,
+        desc1: items.pt_desc1,
+        bom: items.pt_bom_code,
+        ord_qty: sau.total_qty,
+        prod_qty: sau.total_qty,
+        type: "Stock",
+      });
+      i = i + 1;
+    }
+    }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);

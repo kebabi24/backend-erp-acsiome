@@ -31,7 +31,7 @@ export default class locationDetailService {
   }
   public async find(query: any): Promise<any> {
     try {
-      console.log(query);
+      //console.log(query);
       //const locationDetails = await this.locationDetailModel.findAll({ where: query, include: this.itemModel });
 
       const locationDetails = await this.locationDetailModel.findAll({
