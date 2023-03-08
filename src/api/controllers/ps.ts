@@ -6,6 +6,7 @@ import { Container } from 'typedi';
 
 import costSimulationService from '../../services/cost-simulation';
 import { INTEGER } from 'sequelize';
+import { readlink } from 'fs';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -187,6 +188,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         rank: item.int01,
       });
     }
+    
     //  for(let res of result){
     //      res.qtycom = res.qty - res.qtyoh
     //  }
