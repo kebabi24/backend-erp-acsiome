@@ -218,21 +218,29 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_code });
     console.log(bank);
     console.log(cart);
+
     if (bank) {
       if (cart.products.length > 0) {
+        const PosOrderServiceInstance = Container.get(PosOrder);
+        const currentOrder = await PosOrderServiceInstance.findOne({
+          order_code: cart.order_code,
+          created_date: cart.created_date,
+          usrd_site: cart.usrd_site,
+        });
+        console.log(currentOrder.total_price);
         await bankhDetailerviceInstance.create({
           bkh_code: bank.bk_code,
           bkh_date: new Date(),
-          bkh_balance: Number(bank.bk_balance) + Number(cart.total_price),
+          bkh_balance: Number(bank.bk_balance) + Number(currentOrder.total_price),
           bkh_type: 'R',
-          dec01: Number(cart.total_price),
+          dec01: Number(currentOrder.total_price),
           bkh_num_doc: cart.order_code,
           bkh_site: cart.usrd_site,
           bkh_effdate: currentService.service_period_activate_date,
         });
         await bankServiceInstance.update(
           {
-            bk_balance: Number(bank.bk_balance) + Number(cart.total_price),
+            bk_balance: Number(currentOrder.total_price) + Number(currentOrder.total_price),
 
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
