@@ -469,8 +469,8 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
 
     let update: boolean = false;
 
-    const currentService = await service.findOne({ service_site: user_site, service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', chr01: user_site });
+    const currentService = await service.findOne({ service_site: '1000', service_open: true });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OFCCL' });
 
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     await PosOrderServiceInstance.create({
@@ -516,7 +516,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
         pt_qty_ord_pos: pt_qty,
         pt_price_pos: pt_price,
         usrd_site: cart.usrd_site,
-        created_date: new Date(),
+        created_date: currentService.service_period_activate_date,
       });
 
       const supp = product.suppliments;
@@ -534,7 +534,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_ord_qty: s.pt_ord_qty,
           pt_price: s.pt_price,
           usrd_site: cart.usrd_site,
-          created_date: new Date(),
+          created_date: currentService.service_period_activate_date,
         });
       }
       // console.log(sauce);
@@ -549,7 +549,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_ord_qty: sa.pt_ord_qty,
           pt_price: sa.pt_price,
           usrd_site: cart.usrd_site,
-          created_date: new Date(),
+          created_date: currentService.service_period_activate_date,
         });
       }
 
@@ -564,12 +564,12 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
           pt_desc2: i.pt_desc2,
           pt_price: i.price,
           usrd_site: cart.usrd_site,
-          created_date: new Date(),
+          created_date: currentService.service_period_activate_date,
         });
       }
     }
 
-    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP', chr01: user_site });
+    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_type: 'OFCCL' });
 
     // ADD TO AGENDA
     const crmServiceInstance = Container.get(crmService);
@@ -712,17 +712,20 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     //console.log(orders)
     let result = [];
     var i = 1;
-    var typ = ""
+    var typ = '';
     for (let ord of orders) {
       const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
 
-      if (items.pt_part_type == "BO" || items.pt_part_type == "AG" || items.pt_part_type == "SC" || items.pt_part_type == "D")
-      {
-console.log(ord.pt_part, items.pt_part_type)
-        typ = "Stock"
-      }
-      else{
-        typ = "PS"
+      if (
+        items.pt_part_type == 'BO' ||
+        items.pt_part_type == 'AG' ||
+        items.pt_part_type == 'SC' ||
+        items.pt_part_type == 'D'
+      ) {
+        console.log(ord.pt_part, items.pt_part_type);
+        typ = 'Stock';
+      } else {
+        typ = 'PS';
       }
       result.push({
         id: i,
@@ -738,31 +741,30 @@ console.log(ord.pt_part, items.pt_part_type)
 
     const saus = await PosOrderDetailSauseServiceInstance.findspec({
       where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
-      attributes: [
-        'pt_pt_part',
-        'usrd_site',
-        'pt_desc1',
-        [Sequelize.fn('sum', 1), 'total_qty'],
-      ],
+      attributes: ['pt_pt_part', 'usrd_site', 'pt_desc1', [Sequelize.fn('sum', 1), 'total_qty']],
       group: ['pt_pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
     for (let sau of saus) {
-      console.log(sau.pt_pt_part)
+      console.log(sau.pt_pt_part);
       const items = await itemServiceInstance.findOne({ pt_part: sau.pt_pt_part });
-      if (items.pt_part_type == "BO" || items.pt_part_type == "AG" || items.pt_part_type == "SC" || items.pt_part_type == "D")
-      {
-      result.push({
-        id: i,
-        part: sau.pt_pt_part,
-        desc1: items.pt_desc1,
-        bom: items.pt_bom_code,
-        ord_qty: sau.total_qty,
-        prod_qty: sau.total_qty,
-        type: "Stock",
-      });
-      i = i + 1;
-    }
+      if (
+        items.pt_part_type == 'BO' ||
+        items.pt_part_type == 'AG' ||
+        items.pt_part_type == 'SC' ||
+        items.pt_part_type == 'D'
+      ) {
+        result.push({
+          id: i,
+          part: sau.pt_pt_part,
+          desc1: items.pt_desc1,
+          bom: items.pt_bom_code,
+          ord_qty: sau.total_qty,
+          prod_qty: sau.total_qty,
+          type: 'Stock',
+        });
+        i = i + 1;
+      }
     }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
@@ -794,7 +796,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
           [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
           [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
         ],
-        group: ['pt_part', 'usrd_site','pt_size','pt_part_type','pt_promo','pt_dsgn_grp','pt_group'],
+        group: ['pt_part', 'usrd_site', 'pt_size', 'pt_part_type', 'pt_promo', 'pt_dsgn_grp', 'pt_group'],
         raw: true,
       });
     } else {
@@ -811,7 +813,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
           [Sequelize.fn('sum', Sequelize.col('pt_qty_ord_pos')), 'total_qty'],
           [Sequelize.fn('sum', Sequelize.col('pt_price_pos')), 'total_amt'],
         ],
-        group: ['pt_part', 'usrd_site','pt_size','pt_part_type','pt_promo','pt_dsgn_grp','pt_group'],
+        group: ['pt_part', 'usrd_site', 'pt_size', 'pt_part_type', 'pt_promo', 'pt_dsgn_grp', 'pt_group'],
         raw: true,
       });
     }
@@ -838,10 +840,10 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
         prod_qty: ord.total_qty,
         amt: ord.total_amt,
         parttype: isNull(parttypes) ? null : parttypes.code_cmmt,
-        group: isNull(ord.pt_group) ? "" : ord.pt_group,
-        promo: isNull(ord.pt_promo) ? "" : ord.pt_promo,
-        size: isNull(ord.pt_size) ? "" : ord.pt_size,
-        dsgn_grp: isNull(ord.pt_dsgn_grp) ? "" : ord.pt_dsgn_grp,
+        group: isNull(ord.pt_group) ? '' : ord.pt_group,
+        promo: isNull(ord.pt_promo) ? '' : ord.pt_promo,
+        size: isNull(ord.pt_size) ? '' : ord.pt_size,
+        dsgn_grp: isNull(ord.pt_dsgn_grp) ? '' : ord.pt_dsgn_grp,
       });
       i = i + 1;
     }
@@ -1033,26 +1035,22 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
 
         const loys = await PosOrderDetailServiceInstance.find({
-          
-            created_date: ord.created_date,
-            usrd_site: ord.usrd_site,
-            loy_num: '000'
-          
+          created_date: ord.created_date,
+          usrd_site: ord.usrd_site,
+          loy_num: '000',
         });
-        var sumloy = 0
-        for(let loy of loys) {
-         
+        var sumloy = 0;
+        for (let loy of loys) {
           const detords = await PosOrderDetailProductServiceInstance.find({
-             created_date: loy.created_date,
-             order_code : loy.order_code,
-             usrd_site: loy.usrd_site,
-            
+            created_date: loy.created_date,
+            order_code: loy.order_code,
+            usrd_site: loy.usrd_site,
           });
-         
-         for (let detord of detords) {
-           const part = await itemServiceInstance.findOne({pt_part:detord.pt_part})
-           sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos) ;
-         } 
+
+          for (let detord of detords) {
+            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part });
+            sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos);
+          }
           /*kamel*/
         }
         const banks = await bkhServiceInstance.findq({
@@ -1097,7 +1095,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
-          loyamt : sumloy,
+          loyamt: sumloy,
           cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
         });
         i = i + 1;
@@ -1144,29 +1142,25 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
 
         const loys = await PosOrderDetailServiceInstance.find({
-          
           created_date: ord.created_date,
           usrd_site: ord.usrd_site,
-          loy_num: '000'
-        
-      });
-      var sumloy = 0
-      for(let loy of loys) {
-       
-        const detords = await PosOrderDetailProductServiceInstance.find({
-           created_date: loy.created_date,
-           order_code : loy.order_code,
-           usrd_site: loy.usrd_site,
-          
+          loy_num: '000',
         });
-       
-       for (let detord of detords) {
-         const part = await itemServiceInstance.findOne({pt_part:detord.pt_part})
-         sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos) ;
-       } 
-        /*kamel*/
-      }
-      
+        var sumloy = 0;
+        for (let loy of loys) {
+          const detords = await PosOrderDetailProductServiceInstance.find({
+            created_date: loy.created_date,
+            order_code: loy.order_code,
+            usrd_site: loy.usrd_site,
+          });
+
+          for (let detord of detords) {
+            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part });
+            sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos);
+          }
+          /*kamel*/
+        }
+
         const banks = await bkhServiceInstance.findq({
           where: {
             bkh_effdate: ord.created_date,
@@ -1209,7 +1203,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
           rec: recu,
           ecart: ord.total_amt - recu,
           obj: objc,
-          loyamt : sumloy,
+          loyamt: sumloy,
           cavsobj: objc != 0 ? (100 * ord.total_amt) / objc : 100,
         });
         i = i + 1;
