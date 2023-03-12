@@ -81,10 +81,7 @@ const Label = sequelize.define(
         lb_type: Sequelize.STRING, 
 
         lb_ld_status: Sequelize.STRING, 
-        lb_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        lb_domain:  Sequelize.STRING,
 
        
         

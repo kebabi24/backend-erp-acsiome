@@ -54,10 +54,7 @@ gmbtd_end_date: Sequelize.DATEONLY,
 
 gmbtd_end_hour: Sequelize.STRING,  
 
-gmbtd_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+gmbtd_domain: Sequelize.STRING,
 oid_gmbtd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
 },

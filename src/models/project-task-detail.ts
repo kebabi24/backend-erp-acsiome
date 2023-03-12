@@ -38,10 +38,7 @@ const ProjectTaskDetail = sequelize.define(
         pmt_level: Sequelize.STRING,
         pmt_duration: {type: Sequelize.DECIMAL, defaultValue : 0  }, 
         
-        pmt_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        pmt_domain: Sequelize.STRING,
         
         ...base,
     },

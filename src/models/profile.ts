@@ -23,10 +23,7 @@ const Profile = sequelize.define(
         usrg_val_st_date: Sequelize.DATEONLY,
         usrg_val_en_date: Sequelize.DATEONLY,
         usrg_menus: Sequelize.TEXT,
-        usrg_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        usrg_domain: Sequelize.STRING,
         oid_usrg_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

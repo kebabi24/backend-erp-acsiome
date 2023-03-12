@@ -77,10 +77,7 @@ const Taxe = sequelize.define(
 
 
 
-        tx2_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        tx2_domain: Sequelize.STRING,
         oid_ac_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

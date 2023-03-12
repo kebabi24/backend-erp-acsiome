@@ -36,10 +36,7 @@ const Accountdefault = sequelize.define(
 
 
 
-        acdf_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        acdf_domain: Sequelize.STRING,
         oid_acdf_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

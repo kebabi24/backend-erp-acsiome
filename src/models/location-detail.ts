@@ -55,10 +55,7 @@ const LocationDetail = sequelize.define(
         ld_rev:Sequelize.STRING,
         ld_cust_consign_qty:{type: Sequelize.DECIMAL, defaultValue : 0  },
         ld_supp_consign_qty:{type: Sequelize.DECIMAL, defaultValue : 0  },
-        ld_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ld_domain: Sequelize.STRING,
 
         ...base,
     },

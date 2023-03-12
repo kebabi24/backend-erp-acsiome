@@ -213,10 +213,7 @@ const Item = sequelize.define(
     pt_run_seq2: Sequelize.STRING,
     pt_atp_enforcement: Sequelize.STRING,
     pt_atp_family: { type: Sequelize.BOOLEAN, defaultValue: false },
-    pt_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'zima',
-    },
+    pt_domain: Sequelize.STRING,
     oid_pt_mstr: Sequelize.STRING,
     pt_loadpacking :Sequelize.INTEGER,
     pt_salepacking :Sequelize.INTEGER,

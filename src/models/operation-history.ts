@@ -141,10 +141,7 @@ const OperationHistory = sequelize.define(
         op_userl01: {type: Sequelize.BOOLEAN, defaultValue : false  },
         op_usert01: Sequelize.DATEONLY,
         
-        op_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        op_domain: Sequelize.STRING,
         oid_op_hist: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

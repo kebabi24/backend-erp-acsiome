@@ -21,10 +21,7 @@ const Reason = sequelize.define(
         },
         rsn_desc: Sequelize.STRING,
         rsn_type: Sequelize.STRING,
-        rsn_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        rsn_domain:  Sequelize.STRING,
         oid_rsn_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

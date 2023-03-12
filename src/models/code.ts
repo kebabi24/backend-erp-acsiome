@@ -28,10 +28,7 @@ const Code = sequelize.define(
         date02: Sequelize.DATEONLY,
         bool01: {type: Sequelize.BOOLEAN, defaultValue : false  },
         bool02: {type: Sequelize.BOOLEAN, defaultValue : false  },
-        code_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        code_domain: Sequelize.STRING,
         oid_code_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

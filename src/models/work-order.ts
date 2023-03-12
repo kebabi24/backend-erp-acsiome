@@ -292,7 +292,7 @@ wo_app_owner: Sequelize.STRING,
 
 
 
-wo_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+wo_domain: Sequelize.STRING,
 oid_wo_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
         },

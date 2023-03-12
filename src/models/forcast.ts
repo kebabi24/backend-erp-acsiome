@@ -37,10 +37,7 @@ const Forcast = sequelize.define(
         frc_promo: Sequelize.STRING,
         frc_qty: { type: Sequelize.DECIMAL, defaultValue: 0 },
         frc_amt: { type: Sequelize.DECIMAL, defaultValue: 0 },
-        frc_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        frc_domain: Sequelize.STRING,
         ...base,
     },
     {
