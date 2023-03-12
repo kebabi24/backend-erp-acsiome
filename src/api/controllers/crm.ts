@@ -638,6 +638,22 @@ const { Op } = require('sequelize')
     }
   }
 
+  const getSpecialEventConfig = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getActionTypes endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+     
+        const special_event_config = await crmServiceInstance.getSpecialEventConfig()
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: special_event_config  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
   // FOR CRM : RANDOM : to select nb random unique indexes between 0 and max_value
   const selectRandomIndexes = (max_value , nb)=>{
     let selectedIndexes = []
@@ -682,4 +698,5 @@ export default {
     createAgendaEventOrderZero,
     createAgendaExecutionLineDetail,
     getAllProfiles,
+    getSpecialEventConfig
 }
