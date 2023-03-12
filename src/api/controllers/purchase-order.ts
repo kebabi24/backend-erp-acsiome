@@ -39,34 +39,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       await purchaseOrderDetailServiceInstance.create(entry);
       logger.debug('Calling Create sequence endpoint');
       try {
-        const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
-        const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-        const { purchaseOrder, purchaseOrderDetail } = req.body;
-        const po = await purchaseOrderServiceInstance.create({
-          ...purchaseOrder,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
-        for (let entry of purchaseOrderDetail) {
-          entry = { ...entry, pod_nbr: po.po_nbr };
-          await purchaseOrderDetailServiceInstance.create(entry);
-        }
-
+       
         const addressServiceInstance = Container.get(AddressService);
-        const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+        // const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
 
-        const pdfData = {
-          pod: purchaseOrderDetail,
-          po: po,
-          adr: addr,
-        };
-        console.log('\n\n', pdfData);
+        // const pdfData = {
+        //   pod: purchaseOrderDetail,
+        //   po: po,
+        //   adr: addr,
+        // };
+        // console.log('\n\n', pdfData);
 
-        let pdf = await generatePdf(pdfData, 'po');
+        // let pdf = await generatePdf(pdfData, 'po');
 
-        return res.status(201).json({ message: 'created succesfully', data: po, pdf: pdf.content });
+        return res.status(201).json({ message: 'created succesfully', data: po, /*pdf: pdf.content*/ });
       } catch (e) {
         //#
         logger.error('🔥 error: %o', e);
@@ -90,12 +76,14 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const sequenceServiceInstance = Container.get(SequenceService);
     const itemServiceInstance = Container.get(ItemService);
+    const providerServiceInstance = Container.get(ProviderService);
     const { Site, purchaseOrder, purchaseOrderDetail } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
       const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
       //
 
+      const vd = await providerServiceInstance.findOne({ vd_addr: entry.vend });
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
@@ -106,18 +94,29 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
         po_stat: 'V',
         po_curr: 'DA',
         po_ex_rate: 1,
-        po_ex_rate1: 1,
+        po_ex_rate2: 1,
+        po_cr_terms: vd.vd_cr_terms,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       };
       const po = await purchaseOrderServiceInstance.create(ent);
+
       //console.log(po.po_nbr);
 
       var line = 1;
+
+ var amt = 0
+ var tax = 0
+ var trl1 = 0
+      // po_amt = controls1.tht.value
+      // po_tax_amt = controls1.tva.value
+      // po_trl1_amt = controls1.timbre.value
+
+
       for (let obj of purchaseOrderDetail) {
-        if (obj.qtycom > 0) {
+        if (obj.qtyval > 0) {
         //  console.log('hnahnahnahnahna', obj.part);
           if (obj.vend == entry.vend) {
             var duedate = new Date();
@@ -148,11 +147,25 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
             };
+            amt = amt + Number(pt.pt_pur_price) * Number(obj.qtyval)
+            tax = tax + Number(pt.pt_pur_price) * Number(obj.qtyval) * Number(pt.taxe.tx2_tax_pct) / 100
             await purchaseOrderDetailServiceInstance.create(entr);
             line = line + 1;
           }
         }
       }
+      if (vd.vd_cr_terms == "ES") {
+
+        trl1 = ( (Number(tax) + Number(amt)) * Number(0.01)) >= 10000 ? 10000 : (Number(tax) + Number(amt)) * Number(0.01)  
+
+      }
+      else {
+        trl1 = 0
+      }
+      const purchaseOrder = await purchaseOrderServiceInstance.update(
+        { po_amt: amt, po_tax_amt : tax, po_trl1_amt: trl1, last_modified_by: user_code },
+        { po_nbr : po.po_nbr},
+      );
     }
     //console.log(purchaseOrder);
     return res.status(201).json({ message: 'created succesfully', data: purchaseOrder });
