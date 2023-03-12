@@ -155,7 +155,15 @@ declare global {
     export type agendaModel = S.Model;
     export type agendaExecutionModel = S.Model;
     export type agendaExecutionDetailsModel = S.Model;
+<<<<<<< HEAD
     //etiquetage models
     export type LabelModel = S.Model;
+=======
+    
+    // NEW
+    export type mpMstrModel = S.Model;
+    export type mpDetailsModel = S.Model;
+
+>>>>>>> 3dfba4f3820783e4adfcdb150872fe421512d1cb
   }
 }

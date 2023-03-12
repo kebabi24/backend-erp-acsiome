@@ -5,6 +5,7 @@ export default class ProductPageService {
     constructor(
         @Inject("productPageModel") private productPageModel: Models.productPageModel,
         @Inject("productPageDetailsModel") private productPageDetailsModel: Models.productPageDetailsModel,
+        @Inject("profileProductPageModel") private profileProductPageModel: Models.profileProductPageModel,
         @Inject("logger") private logger
     ) {}
 
@@ -79,4 +80,29 @@ export default class ProductPageService {
     //         throw e
     //     }
     // }
+
+    public async updateProfileProductPages( profileCode : any,pagesCodesList: any): Promise<any> {
+        try {
+            const profile_code = profileCode.profileCode
+            const pagesCodes = pagesCodesList.pagesCodes
+            console.log(profile_code)
+            const deleteOldPages = await this.profileProductPageModel.destroy({where:{profile_code : profile_code}})
+            // const productPageDetails = await this.productPageDetailsModel.create({ product_page_code,product_code  })
+            // this.logger.silly("productPageDetails created ", productPageDetails)
+            const addProfilePages =[]
+            for(const  pageCode of pagesCodes){
+                const addProfilePage = await this.profileProductPageModel.create({
+                    profile_code: profile_code,
+                    product_page_code : pageCode,
+                })
+                addProfilePages.push(addProfilePage)
+            }
+
+           
+            return addProfilePages
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
 }

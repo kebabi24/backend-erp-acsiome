@@ -81,6 +81,34 @@ const findAllProductPages = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
+const updateProfileProductPages = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+
+    logger.debug("Calling Update profile product pages endpoint with body: %o", req.body)
+    try {
+
+        const productPageService = Container.get(ProductPageService)
+
+        // console.log(Object.keys(req.body.pagesCodes))
+        
+        const profileCode = req.body.profile_code.profile_code
+        const pagesCodes = req.body.pagesCodes.pagesCodes
+        
+        const updateProfileProductPages = await productPageService.updateProfileProductPages(
+            {profileCode},{pagesCodes}
+        )
+        
+
+        return res
+            .status(201)
+            .json({ message: "updated profile pages succesfully", data: { updateProfileProductPages  } })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
 
 
 
@@ -88,7 +116,7 @@ const findAllProductPages = async (req: Request, res: Response, next: NextFuncti
 // const update = async (req: Request, res: Response, next: NextFunction) => {
 //     const logger = Container.get("logger")
 //     const{user_code} = req.headers 
-const{user_domain} = req.headers
+//const{user_domain} = req.headers
 
 //     logger.debug("Calling update one  code endpoint")
 //     try {
@@ -110,4 +138,5 @@ export default {
     createProductPage,
     findOneByCode,
     findAllProductPages,
+    updateProfileProductPages
 }
