@@ -788,7 +788,7 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
     const pos = await purchaseOrderServiceInstance.find({ ...req.body });
-console.log(pos)
+
     return res.status(202).json({
       message: 'sec',
       data: pos,

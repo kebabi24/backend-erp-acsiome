@@ -15,10 +15,13 @@ import AddressService from '../../services/address';
 
 import { generatePdf } from '../../reporting/generator';
 
+import LabelService from '../../services/label';
+import ItemsService from '../../services/item';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling Create code endpoint');
   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
@@ -27,35 +30,90 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const purchaseOrderDetailServiceInstance = Container.get(purchaseOrderDetailService);
     const statusServiceInstance = Container.get(inventoryStatusService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const labelServiceInstance = Container.get(LabelService);
+    const itemsServiceInstance = Container.get(ItemsService);
 
     //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
+//let det = req.body.detail
+var array = []
+array = req.body.detail;        
+var result = [];
+array.reduce(function(res, value) {
+  //console.log('aaa',res[value.idh_part])
+  if (!res[value.prh_part,value.prh_serial, value.prh_taxable,value.prh_taxc,value.prh_tax_code,value.prh_um,  value.prh_um_conv, value.prh_loc, value._vend_lot, value.prh_pur_cost]) {
+    res[value.prh_part,value.prh_serial, value.prh_taxable,value.prh_taxc,value.prh_tax_code,value.prh_um, value.prh_um_conv, value.prh_loc, value._vend_lot, value.prh_pur_cost] = { prh_part: value.prh_part,prh_serial: value.prh_serial,  prh_taxable: value.prh_taxable, prh_tqxc:value.prh_taxc, prh_tax_code:value.prh_tax_code,prh_um : value.prh_um, prh_um_conv: value.prh_um_conv, prh_loc:value.prh_loc, prh_vend_lot:value._vend_lot, prh_pur_cost:value.prh_pur_cost , prh_rcvd: 0 };
+    result.push(res[value.prh_part,value.prh_serial, value.prh_taxable,value.prh_taxc,value.prh_tax_code,value.prh_um,  value.prh_um_conv, value.prh_loc, value._vend_lot, value.prh_pur_cost])
+    
+  }
+  res[value.prh_part,value.prh_serial, value.prh_taxable,value.prh_taxc,value.prh_tax_code, value.prh_um, value.prh_um_conv, value.prh_loc, value._vend_lot, value.prh_pur_cost].prh_rcvd += value.prh_rcvd; 
+  return res;
+}, {});
+   console.log("here")
+console.log(result)
+console.log("here")
 
-    for (const item of req.body.detail) {
-      const { tr_status, tr_expire, desc, ...remain } = item;
-      await purchaseReceiveServiceInstance.create({
-        prh_receiver: req.body.prhnbr,
-        ...remain,
-        ...req.body.pr,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
+var i = 1
+for (const arr of result) {
+
+  
+  await purchaseReceiveServiceInstance.create({
+    prh_receiver: req.body.prhnbr,
+    ...arr,
+    prh_line :i,
+    ...req.body.pr,
+    created_by: user_code,
+    created_ip_adr: req.headers.origin,
+    last_modified_by: user_code,
+    last_modified_ip_adr: req.headers.origin,
+  });
+  i = i + 1
+  const pod = await purchaseOrderDetailServiceInstance.findOne({
+    pod_nbr: req.body.pr.prh_nbr,
+    pod_part: arr.prh_part,
+  });
+
+  if (pod)
+    await purchaseOrderDetailServiceInstance.update(
+      {
+        pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(arr.prh_rcvd),
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
-      });
-      const pod = await purchaseOrderDetailServiceInstance.findOne({
-        pod_nbr: req.body.pr.prh_nbr,
-        pod_part: remain.prh_part,
-      });
+      },
+      { id: pod.id },
+    );
 
-      if (pod)
-        await purchaseOrderDetailServiceInstance.update(
-          {
-            pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(remain.prh_rcvd),
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
-          },
-          { id: pod.id },
-        );
+}
+    for (const item of req.body.detail) {
+      const { tr_status, tr_expire, desc, ...remain } = item;
+      const part = await itemsServiceInstance.findOne({ pt_part: remain.prh_part});
+      // await purchaseReceiveServiceInstance.create({
+      //   prh_receiver: req.body.prhnbr,
+      //   ...remain,
+      //   ...req.body.pr,
+      //   created_by: user_code,
+      //   created_ip_adr: req.headers.origin,
+      //   last_modified_by: user_code,
+      //   last_modified_ip_adr: req.headers.origin,
+      // });
+      // const pod = await purchaseOrderDetailServiceInstance.findOne({
+      //   pod_nbr: req.body.pr.prh_nbr,
+      //   pod_part: remain.prh_part,
+      // });
 
+      // if (pod)
+      //   await purchaseOrderDetailServiceInstance.update(
+      //     {
+      //       pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(remain.prh_rcvd),
+      //       last_modified_by: user_code,
+      //       last_modified_ip_adr: req.headers.origin,
+      //     },
+      //     { id: pod.id },
+      //   );
+      const seq = await sequenceServiceInstance.findOne({  seq_seq: "PL", seq_type: "PL"   });
+      console.log(seq)
+       var labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+      await sequenceServiceInstance.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { seq_type: "PL", seq_seq: "PL"  });
       await inventoryTransactionServiceInstance.create({
         tr_status,
         tr_expire,
@@ -79,6 +137,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         tr_ex_rate2: req.body.pr.prh_ex_rate2,
         tr_rmks: req.body.pr.prh_rmks,
         tr_type: 'RCT-PO',
+        tr_ref: labelId,
         tr_date: new Date(),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -126,11 +185,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         },
         { sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STDCG' },
       );
-      console.log(tr_status);
+      //console.log(tr_status);
       const status = await statusServiceInstance.findOne({
         is_status: tr_status,
       });
-      console.log(status, 'here');
+     // console.log(status, 'here');
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: remain.prh_part,
         ld_lot: remain.prh_serial,
@@ -164,8 +223,37 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         });
-    }
+      
+      /****create label**** */
+      await labelServiceInstance.create({
+      lb_site:req.body.pr.prh_site, 
 
+        lb_loc: remain.prh_loc, 
+
+        lb_part: remain.prh_part, 
+
+        lb_nbr: req.body.prhnbr, 
+
+        lb_lot: remain.prh_serial, 
+
+        lb_ref: labelId, 
+
+        lb_date: req.body.pr.prh_rcp_date,
+
+        lb_cab: labelId, 
+
+        lb_qty: remain.prh_rcvd,
+
+       
+
+        lb_ld_status: tr_status,
+        lb_desc: part.pt_desc1,
+        lb_domain:  user_domain,
+      /****create label**** */
+      
+      
+      })
+    }
     const addressServiceInstance = Container.get(AddressService);
     const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend });
     //console.log("\n\n req body : ", req.body)
@@ -437,6 +525,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
     const prh = await purchaseReceiveServiceInstance.find({ ...req.body });
+    console.log(prh)
     return res.status(200).json({ message: 'fetched succesfully', data: prh });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -476,6 +565,42 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+
+
+
+const findGroupRCP = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+  try {
+const prhs = await purchaseReceiveServiceInstance.findspec({
+  
+  attributes: ['prh_receiver','prh_rcp_date', 'prh_vend', ],
+  group: ['prh_receiver','prh_rcp_date', 'prh_vend'],
+  raw: true,
+});
+var i = 1
+let result=[]
+for (let prh of prhs) {
+  result.push({
+    id: i,
+    prh_receiver: prh.prh_receiver,
+    prh_rcp_date: prh.prh_rcp_date,
+    prh_vend: prh.prh_vend,
+  });
+  i = i + 1;
+
+}
+
+return res.status(200).json({ message: 'fetched succesfully', data: result });
+  }
+catch (e) {
+  logger.error('🔥 error: %o', e);
+  return next(e);
+}
+};
+
 export default {
   create,
   findOne,
@@ -487,4 +612,5 @@ export default {
   update,
   deleteOne,
   rctPo,
+  findGroupRCP
 };

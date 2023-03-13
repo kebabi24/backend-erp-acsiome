@@ -32,7 +32,7 @@ const Label = sequelize.define(
 
         lb_cab: Sequelize.STRING, 
 
-        lb_qty: {type: Sequelize.BOOLEAN, defaultValue : false  }, 
+        lb_qty: {type: Sequelize.DECIMAL, defaultValue : 0   }, 
 
         lb_actif: {type: Sequelize.BOOLEAN, defaultValue : false  },
 

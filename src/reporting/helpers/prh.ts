@@ -20,7 +20,7 @@ export const preparePrhData = (rawData : any) => {
         site : rawData.pr.prh_site
 
     };
-    console.log("\n\n\nNEW DATA", data_prh)
+   // console.log("\n\n\nNEW DATA", data_prh)
     return data_prh;
 }
 
