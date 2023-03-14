@@ -110,10 +110,13 @@ for (const arr of result) {
       //     },
       //     { id: pod.id },
       //   );
+      var labelId = null
+      if (part.pt_iss_pol) {
       const seq = await sequenceServiceInstance.findOne({  seq_seq: "PL", seq_type: "PL"   });
       console.log(seq)
-       var labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+        labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
       await sequenceServiceInstance.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { seq_type: "PL", seq_seq: "PL"  });
+    }
       await inventoryTransactionServiceInstance.create({
         tr_status,
         tr_expire,
@@ -123,6 +126,7 @@ for (const arr of result) {
         tr_um: remain.prh_um,
         tr_um_conv: remain.prh_um_conv,
         tr_price: remain.prh_pur_cost,
+        tr_gl_amt: Number(remain.prh_pur_cost) * Number(remain.prh_rcvd),
         tr_site: req.body.pr.prh_site,
         tr_loc: remain.prh_loc,
         tr_serial: remain.prh_serial,
@@ -195,6 +199,7 @@ for (const arr of result) {
         ld_lot: remain.prh_serial,
         ld_site: req.body.pr.prh_site,
         ld_loc: remain.prh_loc,
+        ld_ref: labelId,
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -218,6 +223,7 @@ for (const arr of result) {
           ld_expire: tr_expire,
           ld_status: tr_status,
           ld__log01: status.is_nettable,
+          ld_ref: labelId,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -225,6 +231,7 @@ for (const arr of result) {
         });
       
       /****create label**** */
+      if (part.pt_iss_pol) {
       await labelServiceInstance.create({
       lb_site:req.body.pr.prh_site, 
 
@@ -253,6 +260,7 @@ for (const arr of result) {
       
       
       })
+    }
     }
     const addressServiceInstance = Container.get(AddressService);
     const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend });
