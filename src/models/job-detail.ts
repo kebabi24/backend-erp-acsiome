@@ -25,10 +25,7 @@ const JobDetail = sequelize.define(
         
         jbd_desc: Sequelize.STRING,
         jbd_time_rate: {type: Sequelize.DECIMAL, defaultValue : 0  }, 
-        jbd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        jbd_domain: Sequelize.STRING,
         oid_jbd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

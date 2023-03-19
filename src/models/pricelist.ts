@@ -60,10 +60,7 @@ const Pricelist = sequelize.define(
         pi_promo3: Sequelize.STRING,
         pi_promo4: Sequelize.STRING,
         pi_pig_code: Sequelize.STRING,      
-        pi_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        pi_domain: Sequelize.STRING,
         oid_pi_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

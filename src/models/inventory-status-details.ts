@@ -27,10 +27,7 @@ const InventoryStatusDetails = sequelize.define(
         isd_type: Sequelize.STRING,
         isd_bdl_allowed: {type: Sequelize.BOOLEAN, defaultValue : false  },
         isd__qadc01: Sequelize.STRING,
-        isd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        isd_domain: Sequelize.STRING,
         oid_isd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

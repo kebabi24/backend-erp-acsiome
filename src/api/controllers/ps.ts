@@ -6,6 +6,7 @@ import { Container } from 'typedi';
 
 import costSimulationService from '../../services/cost-simulation';
 import { INTEGER } from 'sequelize';
+import { readlink } from 'fs';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -108,11 +109,10 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const result = [];
     var j = 1;
     for (let obj of details) {
-      //console.log(obj.part, obj.prod_qty, obj.bom);
+      if (obj.type != "Stock") {
       const ps = await psServiceInstance.finds({ ps_parent: obj.bom });
-
       for (let p of ps) {
-        console.log(p.ps_comp)
+       
         var bool = false;
         for (var i = 0; i < result.length; i++) {
           if (result[i].part == p.ps_comp) {
@@ -147,7 +147,16 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
           j = j + 1;
         }
       }
-    }
+        } else {
+          result.push({
+            id: j,
+            part: obj.part,
+            qty:  Number(obj.prod_qty),
+          });
+          j = j + 1
+
+        }
+          }
 
     let dat = [];
     for (let res of result) {
@@ -176,8 +185,10 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         sftystk: item.pt_sfty_stk,
         qtycom: qtyc,
         qtyval: Math.ceil(qtyc),
+        rank: item.int01,
       });
     }
+    
     //  for(let res of result){
     //      res.qtycom = res.qty - res.qtyoh
     //  }

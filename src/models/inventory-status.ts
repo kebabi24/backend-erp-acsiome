@@ -30,10 +30,7 @@ const InventoryStatus = sequelize.define(
         is_desc: Sequelize.STRING,
         is_cmtindx: Sequelize.INTEGER,
         is__qadc01: Sequelize.STRING,
-        is_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        is_domain: Sequelize.STRING,
         oid_is_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

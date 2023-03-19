@@ -125,10 +125,7 @@ const AccountShiper = sequelize.define(
     as_draft_submit_date: Sequelize.DATEONLY, 
     as_pay_method: Sequelize.STRING, 
     as_void_date: Sequelize.DATEONLY, 
-    as_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+    as_domain: Sequelize.STRING,
     oid_as_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

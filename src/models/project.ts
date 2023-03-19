@@ -33,10 +33,7 @@ const Project = sequelize.define(
         pm_ord_date: Sequelize.DATEONLY,
         pm_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
         pm_cost: {type: Sequelize.DECIMAL, defaultValue : 0  },
-        pm_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        pm_domain:  Sequelize.STRING,
         oid_pm_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

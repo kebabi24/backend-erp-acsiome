@@ -31,10 +31,7 @@ const Entity = sequelize.define(
         en_type: Sequelize.STRING,
         en_user1: Sequelize.STRING,
         en_user2: Sequelize.STRING,
-        en_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        en_domain: Sequelize.STRING,
         oid_en_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

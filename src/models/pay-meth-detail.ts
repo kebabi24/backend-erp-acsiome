@@ -26,10 +26,7 @@ const PayMethDetail = sequelize.define(
         ctd_due_day: {type: Sequelize.INTEGER, defaultValue : 0  }, 
         ctd_pct:Sequelize.DECIMAL, 
         
-        ctd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ctd_domain: Sequelize.STRING,
         
         ...base,
     },

@@ -45,9 +45,7 @@ export default class posOrderProductService {
   }
   public async findspec(query: any): Promise<any> {
     try {
-      const ordersDetail = await this.posOrderDetailProductModel.findAll(
-        query,
-      );
+      const ordersDetail = await this.posOrderDetailProductModel.findAll(query);
       this.logger.silly('find All orders detail mstr');
       return ordersDetail;
     } catch (e) {
@@ -57,7 +55,7 @@ export default class posOrderProductService {
   }
   public async update(data: any, query: any): Promise<any> {
     try {
-      const orderDetail = await this.posOrderDetailProductModel.upsert(data, { where: query });
+      const orderDetail = await this.posOrderDetailProductModel.update(data, { where: query });
       this.logger.silly('update one orders detail mstr');
       return orderDetail;
     } catch (e) {

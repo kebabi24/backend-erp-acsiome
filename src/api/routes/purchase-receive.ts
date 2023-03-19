@@ -10,6 +10,7 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.post('/:distinct/:liste', controller.findAllDistinct);
   route.post('/distinct', controller.findDistinct);
+  route.post('/grouprcp', controller.findGroupRCP);
   route.get('/:id', controller.findOne);
 
   route.post('/find', controller.findBy);

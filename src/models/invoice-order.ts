@@ -210,7 +210,7 @@ const InvoiceOrder = sequelize.define(
 		ih_fsdef_cc: Sequelize.STRING,
 		ih_manual_fr_terms: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ih_req_time: Sequelize.STRING,
-		ih_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+		ih_domain: Sequelize.STRING,
 		oid_ih_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		...base,
 			},

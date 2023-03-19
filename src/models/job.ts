@@ -20,10 +20,7 @@ const Job = sequelize.define(
             unique: true
         },
         jb_desc: Sequelize.STRING,
-        jb_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        jb_domain:  Sequelize.STRING,
         oid_jb_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

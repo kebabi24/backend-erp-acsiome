@@ -19,10 +19,7 @@ const EmployeAvailability = sequelize.define(
         
         empd_fdate: Sequelize.DATEONLY,
         empd_ldate: Sequelize.DATEONLY,
-        empd_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        empd_domain:  Sequelize.STRING,
         
         ...base,
     },

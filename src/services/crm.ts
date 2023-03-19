@@ -588,6 +588,20 @@ export default class CRMService {
     }
   }
 
+  public async getSpecialEventConfig(): Promise<any> {
+    try {
+        const specialEventCongif = await this.codeModel.findAll({
+            where:{code_fldname :["crm_info_type","crm_shop_type","crm_job" ]},
+            attributes: ["id","code_value","code_desc","code_fldname"]
+        })
+        this.logger.silly("found all specialEventCongif ")
+        return specialEventCongif
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+
 
 }
 

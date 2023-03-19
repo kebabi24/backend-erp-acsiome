@@ -119,6 +119,7 @@ export default async ({ expressApp }) => {
       { name: 'costaccountModel', model: require('../models/costaccount').default },
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
       { name: 'forcastModel', model: require('../models/forcast').default },
+      { name: 'labelModel', model: require('../models/label').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -186,6 +187,12 @@ export default async ({ expressApp }) => {
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
       { name: 'agendaExecutionDetailsModel', model: require('../models/mobile_models/agenda_execution_details').default },
+      
+      
+      // ADDED : 10/03/2023 
+      { name: 'mpMstrModel', model: require('../models/mobile_models/mp_mstr').default },
+      { name: 'mpDetailsModel', model: require('../models/mobile_models/mpd_det').default },
+
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

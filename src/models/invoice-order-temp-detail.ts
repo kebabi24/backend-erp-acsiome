@@ -236,10 +236,7 @@ itdh_manual_fr_list: {type: Sequelize.BOOLEAN, defaultValue : false  },
 itdh_req_time: Sequelize.STRING,
 
 
-itdh_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+itdh_domain: Sequelize.STRING,
 oid_itdh_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
     },

@@ -23,4 +23,5 @@ export default (app: Router) => {
   route.post('/findorder', controller.findByOrd);
   route.post('/createCallCenterOrder', controller.createCALLCenterORDER);
   route.post('/createorder', controller.createOrder);
+  route.post('/set', controller.set);
 };
