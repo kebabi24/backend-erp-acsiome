@@ -84,7 +84,7 @@ const WorkRouting = sequelize.define(
 	ro__qadl01: {type: Sequelize.BOOLEAN, defaultValue : false },
 	ro__qadl02: {type: Sequelize.BOOLEAN, defaultValue : false },
 	ro_fsc_code: Sequelize.STRING,
-	ro_domain: {type: Sequelize.STRING, defaultValue: 'zima' },
+	ro_domain: Sequelize.STRING,
 
      
         oid_ro_det: {type: Sequelize.DECIMAL, defaultValue : 0  },

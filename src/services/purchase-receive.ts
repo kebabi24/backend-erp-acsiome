@@ -41,6 +41,16 @@ export default class purchaseReceiveService {
         }
     }
 
+    public async findspec(query: any): Promise<any> {
+        try {
+            const purchaseReceives = await this.purchaseReceiveModel.findAll(query )
+            this.logger.silly("find All purchaseReceives mstr")
+            return purchaseReceives
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async distinct(query: any): Promise<any> {
         try {       /*Attributes: ['prh_reciever', 'prh_vend','prh_rcp_date'],group: ['prh_receiver'],*/
             const purchaseRecieves = await this.purchaseReceiveModel.findAll({ where: query});

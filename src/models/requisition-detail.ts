@@ -69,10 +69,7 @@ const RequisitionDetail = sequelize.define(
         rqd_lot_rcpt: {type: Sequelize.BOOLEAN, defaultValue : false  },
         rqd_open: {type: Sequelize.BOOLEAN, defaultValue : false  },
         rqd_oot_extra: Sequelize.STRING,
-        rqd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        rqd_domain: Sequelize.STRING,
         oid_rqd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

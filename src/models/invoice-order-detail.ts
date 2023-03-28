@@ -236,10 +236,7 @@ idh_manual_fr_list: {type: Sequelize.BOOLEAN, defaultValue : false  },
 idh_req_time: Sequelize.STRING,
 
 
-idh_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+idh_domain: Sequelize.STRING,
 oid_idh_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
     },

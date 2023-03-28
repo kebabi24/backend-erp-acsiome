@@ -210,7 +210,7 @@ const InvoiceOrderTemp = sequelize.define(
 		ith_fsdef_cc: Sequelize.STRING,
 		ith_manual_fr_terms: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ith_req_time: Sequelize.STRING,
-		ith_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+		ith_domain: Sequelize.STRING,
 		oid_ith_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		...base,
 			},

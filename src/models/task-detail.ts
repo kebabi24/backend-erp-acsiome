@@ -29,10 +29,7 @@ const TaskDetail = sequelize.define(
         tkd_level: Sequelize.STRING,
         tkd_duration: {type: Sequelize.DECIMAL, defaultValue : 0  }, 
         
-        tkd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        tkd_domain: Sequelize.STRING,
         oid_tkd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

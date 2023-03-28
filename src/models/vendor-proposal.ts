@@ -58,10 +58,7 @@ const VendorProposal = sequelize.define(
         vp_tp_use_pct: {type: Sequelize.BOOLEAN, defaultValue : false  },
         vp_tp_pct: {type: Sequelize.DECIMAL, defaultValue : 0  },
         vp_total_price: {type: Sequelize.DECIMAL, defaultValue : 0  },
-        vp_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        vp_domain:  Sequelize.STRING,
         ...base,
     },
     {

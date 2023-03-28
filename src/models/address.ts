@@ -81,10 +81,7 @@ const Address = sequelize.define(
         ad_tax_report: {type: Sequelize.BOOLEAN, defaultValue : false  },
         ad_name_control: Sequelize.STRING,
         ad_last_file: {type: Sequelize.BOOLEAN, defaultValue : false  },
-        ad_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ad_domain: Sequelize.STRING,
         oid_ad_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

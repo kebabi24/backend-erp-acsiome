@@ -1860,10 +1860,12 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       //console.log(tr)
       for (let t of tr) {
         const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
-        (t.tr_desc = item.pt_desc1),
-          (t.tr_um = item.pt_um),
-          (t.tr_addr = item.pt_vend),
-          (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
+        console.log(item.pt_buyer)
+        t.tr_desc = item.pt_desc1,
+        t.tr_um = item.pt_um,
+        t.tr_addr = item.pt_vend,
+        t.chr01 = item.pt_buyer,
+        t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price);
       }
 
       return res.status(200).json({ message: 'fetched succesfully', data: tr });
@@ -1881,11 +1883,13 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       });
       for (let t of tr) {
         const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
-        (t.tr_desc = item.pt_desc1),
-          (t.tr_um = item.pt_um),
-          (t.tr_addr = item.pt_vend),
-          (t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price));
+        t.tr_desc = item.pt_desc1,
+        t.tr_um = item.pt_um,
+        t.tr_addr = item.pt_vend,
+        t.chr01 = item.pt_buyer,
+        t.dec05 = Number(t.tr_qty_loc) * Number(t.tr_price);
       }
+      
       return res.status(200).json({ message: 'fetched succesfully', data: tr });
     } catch (e) {
       logger.error('🔥 error: %o', e);
@@ -2002,6 +2006,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
           pu: price,
           achat: achatt,
           inv: invt,
+          cnt: cnt,
           avarie: 0,
           conso: cons,
           vendue: trsv,
@@ -2085,6 +2090,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
           bopu: price,
           boachat: achatt,
           boinv: invt,
+          bocnt: cnt,
           boavarie: 0,
           boconso: cons,
           bovendue: trsv,
@@ -2097,6 +2103,9 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     // console.log(results)
+    results.sort((a,b)=> a.rank - b.rank )
+    boresults.sort((a,b)=> a.borank - b.borank )
+   // results.sort((a,b)=> (a.rank > b.rank) ? 1 : (a.rank < b.rank) ? -1 : 0);
     return res.status(200).json({
       message: 'fetched succesfully',
       data: { detail: results, bodetail: boresults, casansbo: sansbo[0].amt_sansbo, ca: avecbo[0].total_amt },

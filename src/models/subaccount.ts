@@ -32,10 +32,7 @@ sb_active: {type: Sequelize.BOOLEAN, defaultValue : false  },
   
 sb__qadc01: Sequelize.STRING, 
 
-        sb_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        sb_domain: Sequelize.STRING,
         ...base,
     },
     {

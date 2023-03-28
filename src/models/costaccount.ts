@@ -27,10 +27,7 @@ const Costaccount = sequelize.define(
         ccd1_user1: Sequelize.STRING,
         ccd1_user2: Sequelize.STRING,  
         ccd1__qadc01: Sequelize.STRING,
-        ccd1_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ccd1_domain: Sequelize.STRING,
         ...base,
     },
     {

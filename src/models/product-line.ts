@@ -144,10 +144,7 @@ const ProductLine = sequelize.define(
         pl_fsaccr_acct: Sequelize.STRING,
         pl_fsaccr_sub: Sequelize.STRING,
         pl_fsaccr_cc: Sequelize.STRING,
-        pl_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        pl_domain: Sequelize.STRING,
         oid_pl_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

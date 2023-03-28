@@ -41,10 +41,7 @@ const Site = sequelize.define(
         si_decl: Sequelize.STRING,
         si_xfer_ownership: {type: Sequelize.BOOLEAN, defaultValue : false  },
         si_git_location: Sequelize.STRING,
-        si_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        si_domain:  Sequelize.STRING,
         si_type: Sequelize.STRING,
         oid_si_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 

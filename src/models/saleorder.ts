@@ -203,7 +203,7 @@ const saleOrder = sequelize.define(
 		so_req_time: Sequelize.STRING,
 		so_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		so_tax_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
-		so_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+		so_domain: Sequelize.STRING,
 		oid_so_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		...base,
 			},

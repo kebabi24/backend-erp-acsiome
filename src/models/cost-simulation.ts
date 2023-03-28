@@ -44,10 +44,7 @@ const CostSimulation = sequelize.define(
         sct_nrv: {type: Sequelize.DECIMAL, defaultValue : 0  },
         sct__qadc01: Sequelize.STRING,
         sct_cost_changed: {type: Sequelize.BOOLEAN, defaultValue : false  },
-        sct_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        sct_domain: Sequelize.STRING,
         oid_sct_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

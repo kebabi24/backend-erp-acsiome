@@ -106,10 +106,7 @@ const GeneralLedger = sequelize.define(
         
        glt_src_desc : Sequelize.STRING,
 
-        glt_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        glt_domain: Sequelize.STRING,
         oid_glt_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

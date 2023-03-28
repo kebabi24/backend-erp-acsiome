@@ -21,7 +21,7 @@ const PayMeth = sequelize.define(
         },
         ct_desc: Sequelize.STRING,
 		
-		ct_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+		ct_domain: Sequelize.STRING,
 		
 		...base,
 			},

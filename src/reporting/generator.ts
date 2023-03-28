@@ -51,7 +51,7 @@ export const generatePdf = async (rawData: any, name: string) => {
         if (err) return err;
       });
     }
-    console.log('NEW GEN', data);
+   // console.log('NEW GEN', data);
     const filePath = 'D:/ERP-AXIOM/backend/src/reporting/files/' + data.titre + '.pdf';
     await fs.writeFileSync(filePath, result.content);
   }

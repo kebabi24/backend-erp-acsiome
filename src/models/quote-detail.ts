@@ -122,10 +122,7 @@ qod_sub	: Sequelize.STRING,
 qod_dsc_sub: Sequelize.STRING,
 qod_dsc_project	: Sequelize.STRING,
 qod_manual_fr_list: {type: Sequelize.BOOLEAN, defaultValue : false  },
-qod_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+qod_domain: Sequelize.STRING,
 oid_qod_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
     },

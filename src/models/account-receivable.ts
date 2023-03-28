@@ -123,10 +123,7 @@ const AccountReceivable = sequelize.define(
     ar_draft_submit_date: Sequelize.DATEONLY, 
     ar_pay_method: Sequelize.STRING, 
     ar_void_date: Sequelize.DATEONLY, 
-    ar_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+    ar_domain: Sequelize.STRING,
     oid_ar_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

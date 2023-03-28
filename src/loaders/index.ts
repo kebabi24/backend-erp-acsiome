@@ -119,6 +119,7 @@ export default async ({ expressApp }) => {
       { name: 'costaccountModel', model: require('../models/costaccount').default },
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
       { name: 'forcastModel', model: require('../models/forcast').default },
+      { name: 'labelModel', model: require('../models/label').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
