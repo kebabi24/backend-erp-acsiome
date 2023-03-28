@@ -1,4 +1,4 @@
-import AccountService from "../../services/account"
+import DomainService from "../../services/domain"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -7,14 +7,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers
 
-    logger.debug("Calling Create account endpoint")
+    logger.debug("Calling Create code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
-        const account = await AccountServiceInstance.create({...req.body, ac_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const domainServiceInstance = Container.get(DomainService)
+
+        const domain = await domainServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
-            .json({ message: "created succesfully", data:  account })
+            .json({ message: "created succesfully", data:  domain })
     } catch (e) {
+        //#
         logger.error("🔥 error: %o", e)
         return next(e)
     }
@@ -22,14 +24,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    logger.debug("Calling find one  account endpoint")
+    logger.debug("Calling find one  code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
+        const domainServiceInstance = Container.get(DomainService)
+
         const {id} = req.params
-        const account = await AccountServiceInstance.findOne({id})
+        const domain = await domainServiceInstance.findOne({id})
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: account  })
+            .json({ message: "fetched succesfully", data: domain  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -38,16 +41,14 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    logger.debug("Calling find all account endpoint")
-    const{user_code} = req.headers 
-    const{user_domain} = req.headers
-
+    logger.debug("Calling find all code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
-        const accounts = await AccountServiceInstance.find({ ac_domain: user_domain})
+        const domainServiceInstance = Container.get(DomainService)
+
+        const domain = await domainServiceInstance.find({})
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: accounts })
+            .json({ message: "fetched succesfully", data: domain })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -56,15 +57,14 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    logger.debug("Calling find by  all account endpoint")
-    const{user_code} = req.headers 
-    const{user_domain} = req.headers
+    logger.debug("Calling find by  all code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
-        const accounts = await AccountServiceInstance.findOne({...req.body,ac_domain: user_domain})
+        const domainServiceInstance = Container.get(DomainService)
+
+        const domain = await domainServiceInstance.findOne({...req.body})
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: accounts })
+            .json({ message: "fetched succesfully", data: domain })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -76,14 +76,15 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
 const{user_domain} = req.headers
 
-    logger.debug("Calling update one  account endpoint")
+    logger.debug("Calling update one  code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
+        const domainServiceInstance = Container.get(DomainService)
+
         const {id} = req.params
-        const account = await AccountServiceInstance.update({...req.body,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        const domain = await domainServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: account  })
+            .json({ message: "fetched succesfully", data: domain  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -92,11 +93,12 @@ const{user_domain} = req.headers
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    logger.debug("Calling update one  account endpoint")
+    logger.debug("Calling update one  code endpoint")
     try {
-        const AccountServiceInstance = Container.get(AccountService)
+        const domainServiceInstance = Container.get(DomainService)
+
         const {id} = req.params
-        const account = await AccountServiceInstance.delete({id})
+        const domain = await domainServiceInstance.delete({id})
         return res
             .status(200)
             .json({ message: "deleted succesfully", data: id  })
@@ -105,6 +107,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
 export default {
     create,
     findOne,
@@ -113,3 +116,4 @@ export default {
     update,
     deleteOne
 }
+

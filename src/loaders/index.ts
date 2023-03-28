@@ -120,6 +120,7 @@ export default async ({ expressApp }) => {
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
       { name: 'forcastModel', model: require('../models/forcast').default },
       { name: 'labelModel', model: require('../models/label').default },
+      { name: 'domainModel', model: require('../models/domain').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -814,16 +815,16 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
-  // await sequelizeConnection
-  //   .sync({ alter: true })
-  //   .then(() => {
-  //     console.log('database updated');
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //   });
+  await sequelizeConnection
+    .sync({ alter: true })
+    .then(() => {
+      console.log('database updated');
+    })
+    .catch(err => {
+      console.log(err);
+    });
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

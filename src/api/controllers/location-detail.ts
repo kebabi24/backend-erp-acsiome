@@ -5,6 +5,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
 import sequenceService from '../../services/sequence';
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -123,6 +124,20 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body });
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByOneRef = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body, 
+      ld_qty_oh: {[Op.gt]: 0},
+      } );
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -296,6 +311,7 @@ export default {
   findAll,
   findBy,
   findByOne,
+  findByOneRef,
   findByOneStatus,
   update,
   deleteOne,

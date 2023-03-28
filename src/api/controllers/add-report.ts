@@ -15,7 +15,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create code endpoint")
     try {
@@ -31,16 +31,16 @@ const{user_domain} = req.headers
         const saleorderServiceInstance = Container.get(SaleorderService);
         const { addReport, empDetail,cnsDetail, nbr } = req.body
         console.log(nbr)
-        const task = await projectTaskDetailServiceInstance.findOne ({pmt_code: addReport.pmr_pm_code, pmt_inst: addReport.pmr_inst, pmt_task: addReport.pmr_task})
+        const task = await projectTaskDetailServiceInstance.findOne ({pmt_code: addReport.pmr_pm_code,pmt_domain: user_domain, pmt_inst: addReport.pmr_inst, pmt_task: addReport.pmr_task})
     
         const tk = await projectTaskDetailServiceInstance.update ({pmt_status: addReport.pmr_task_status, pmt_close: addReport.pmr_close},{id:task.id})
         if (addReport.pmr_close) {
-            const pm = await projectServiceInstance.findOne ({pm_code: addReport.pmr_pm_code})
+            const pm = await projectServiceInstance.findOne ({pm_code: addReport.pmr_pm_code,pm_domain:user_domain})
 
-            const pmd = await projectDetailServiceInstance.findOne ({pmd_code: addReport.pmr_pm_code, pmd_task: addReport.pmr_inst})
+            const pmd = await projectDetailServiceInstance.findOne ({pmd_code: addReport.pmr_pm_code,pmd_domain:user_domain, pmd_task: addReport.pmr_inst})
 
-            const so = await saleorderServiceInstance.findOne ({so_po: addReport.pmr_pm_code})
-            const sod = await saleorderDetailServiceInstance.findOne ({sod_nbr: so.so_nbr, sod_part:pmd.pmd_part, sod__chr01: pmd.pmd_task})
+            const so = await saleorderServiceInstance.findOne ({so_po: addReport.pmr_pm_code,sod_domain:user_domain})
+            const sod = await saleorderDetailServiceInstance.findOne ({sod_nbr: so.so_nbr,sod_domain: user_domain, sod_part:pmd.pmd_part, sod__chr01: pmd.pmd_task})
 
                     await saleorderDetailServiceInstance.update(
                         {
@@ -56,7 +56,7 @@ const{user_domain} = req.headers
         for (let entry of empDetail) {
             
             
-            await addReportServiceInstance.create({...entry,pmr_nbr: nbr, pmr_pm_code: addReport.pmr_pm_code, pmr_inst: addReport.pmr_inst, pmr_task: addReport.pmr_task, pmr_task_status: addReport.pmr_task_status,
+            await addReportServiceInstance.create({...entry,pmr_nbr: nbr,pmr_domain:user_domain, pmr_pm_code: addReport.pmr_pm_code, pmr_inst: addReport.pmr_inst, pmr_task: addReport.pmr_task, pmr_task_status: addReport.pmr_task_status,
                  pmr_close: addReport.pmr_close, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
             
@@ -71,12 +71,14 @@ const{user_domain} = req.headers
           
               for (const item of cnsDetail) {
                 const sct = await costSimulationServiceInstance.findOne({
+                    sct_domain:user_domain,
                   sct_part: item.tr_part,
                   sct_site: item.tr_site,
                   sct_sim: 'STDCG',
                 });
-                const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+                const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain });
                 const ld = await locationDetailServiceInstance.findOne({
+                  ld_domain: user_domain,  
                   ld_part: item.tr_part,
                   ld_lot: item.tr_serial,
                   ld_site: item.tr_site,
@@ -94,7 +96,7 @@ const{user_domain} = req.headers
                   );
                 await inventoryTransactionServiceInstance.create({
                   ...item,
-                  
+                  tr_domain:user_domain,
                   tr_lot: nbr,
                   tr_effdate: new Date(),
                   tr_gl_date: new Date(),
@@ -137,6 +139,8 @@ const{user_domain} = req.headers
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const addReportServiceInstance = Container.get(AddReportService)
         const {id} = req.params
@@ -153,9 +157,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const addReportServiceInstance = Container.get(AddReportService)
-        const employe = await addReportServiceInstance.find({})
+        const employe = await addReportServiceInstance.find({pmr_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
@@ -168,9 +174,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const addReportServiceInstance = Container.get(AddReportService)
-        const employe = await addReportServiceInstance.find({...req.body})
+        const employe = await addReportServiceInstance.find({...req.body,pmr_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
@@ -184,7 +192,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  code endpoint")
     try {

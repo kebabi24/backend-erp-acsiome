@@ -161,6 +161,7 @@ declare global {
     // NEW
     export type mpMstrModel = S.Model;
     export type mpDetailsModel = S.Model;
+    export type DomainModel = S.Model;
 
   }
 }

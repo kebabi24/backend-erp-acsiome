@@ -356,7 +356,9 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling update one  code endpoint');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
+console.log(user_domain)
   console.log('\n\n transfert');
   try {
     const { detail, it, nlot } = req.body;
@@ -371,19 +373,23 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         sct_part: item.tr_part,
         sct_site: it.tr_site,
         sct_sim: 'STDCG',
+        sct_domain: user_domain,
       });
       const sctrct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_ref_site,
         sct_sim: 'STDCG',
+        sct_domain: user_domain
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
 
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
         ld_site: it.tr_site,
         ld_loc: it.tr_loc,
+        ld_ref:item.tr_ref,
+        ld_domain:user_domain,
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -399,6 +405,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         ...it,
         tr_lot: nlot,
         tr_qty_loc: -1 * Number(item.tr_qty_loc),
+        tr_loc_begin: (ld) ? ld.ld_qty_oh : 0,
         tr_type: 'ISS-TR',
         tr_date: new Date(),
         tr_mtl_std: sct.sct_mtl_tl,
@@ -411,6 +418,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
       });
 
       const ld1 = await locationDetailServiceInstance.findOne({
@@ -418,11 +426,13 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: it.tr_ref_site,
         ld_loc: it.tr_ref_loc,
+        ld_ref:item.tr_ref,
+        ld_domain: user_domain,
       });
       if (ld1)
         await locationDetailServiceInstance.update(
           {
-            ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -431,10 +441,12 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
       else {
         const status = await statusServiceInstance.findOne({
           is_status: item.tr_status,
+          is_domain: user_domain,
         });
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
           ld_lot: item.tr_serial,
+          ld_ref: item.tr_ref,
           ld_date: new Date(),
           ld_site: it.tr_ref_site,
           ld_loc: it.tr_ref_loc,
@@ -446,6 +458,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
+          ld_domain: user_domain,
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -456,6 +469,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         tr_type: 'RCT-TR',
         tr_date: new Date(),
         tr_loc: it.tr_ref_loc,
+        tr_loc_begin: (ld1) ? ld1.ld_qty_oh : 0,
         tr_site: it.tr_ref_site,
         tr_ref_site: it.tr_site,
         tr_ref_loc: it.tr_loc,
@@ -469,6 +483,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
       });
     }
 

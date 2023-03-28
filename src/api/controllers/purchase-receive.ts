@@ -250,16 +250,16 @@ for (const arr of result) {
         lb_cab: labelId, 
 
         lb_qty: remain.prh_rcvd,
-
-       
-
         lb_ld_status: tr_status,
         lb_desc: part.pt_desc1,
         lb_domain:  user_domain,
       /****create label**** */
       
-      
       })
+       /****print label**** */
+     
+       /****print label**** */
+     
     }
     }
     const addressServiceInstance = Container.get(AddressService);

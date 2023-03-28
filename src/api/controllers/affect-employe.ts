@@ -5,7 +5,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create code endpoint")
     try {
@@ -15,7 +15,7 @@ const{user_domain} = req.headers
         for (let entry of empDetail) {
             
             
-            await affectEmployeServiceInstance.create({...entry,pme_pm_code: affectEmp.pme_pm_code, pme_inst: affectEmp.pme_inst, pme_task: affectEmp.pme_task,
+            await affectEmployeServiceInstance.create({...entry,pme_pm_code: affectEmp.pme_pm_code,pme_domain:user_domain, pme_inst: affectEmp.pme_inst, pme_task: affectEmp.pme_task,
                 pme_start_date: affectEmp.pme_start_date,pme_end_date: affectEmp.pme_end_date, pme_start_time: affectEmp.pme_start_time, pme_end_time: affectEmp.pme_end_time, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
             
@@ -35,6 +35,8 @@ const{user_domain} = req.headers
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const affectEmployeServiceInstance = Container.get(AffectEmployeService)
         const {id} = req.params
@@ -51,9 +53,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const affectEmployeServiceInstance = Container.get(AffectEmployeService)
-        const employe = await affectEmployeServiceInstance.find({})
+        const employe = await affectEmployeServiceInstance.find({pme_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
@@ -66,9 +70,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const affectEmployeServiceInstance = Container.get(AffectEmployeService)
-        const employe = await affectEmployeServiceInstance.find({...req.body})
+        const employe = await affectEmployeServiceInstance.find({...req.body,pme_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
