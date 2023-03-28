@@ -8,8 +8,10 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const MPD_det = sequelize.define(
-    "mpd_det",
+//  mpd_det
+
+const SpecificationDetails = sequelize.define(
+    "specificationDetails",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -17,6 +19,7 @@ const MPD_det = sequelize.define(
             autoIncrement: true,
             unique: true
         },
+        // foreign key 
         mpd_nbr: {
             type: Sequelize.STRING,
             primaryKey: true,
@@ -44,7 +47,7 @@ const MPD_det = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_mpd_det",
+        tableName: "aa_specificationDetails",
     }
 )
-export default  MPD_det ;
+export default  SpecificationDetails ;

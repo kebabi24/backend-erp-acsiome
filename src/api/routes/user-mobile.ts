@@ -17,4 +17,5 @@ export default (app: Router) => {
   route.delete('/:user_mobile_code', controller.deleteOne);
   route.post('/signin', controller.signin);
   route.post('/getData', controller.getDataBack);
+  route.post('/getDataTest', controller.getDataBackTest);
 };

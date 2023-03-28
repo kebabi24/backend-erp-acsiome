@@ -7,7 +7,10 @@ export default (app: Router) => {
     app.use("/qualityControl", route)
 
     route.post("/createSpecification", controller.createStandardSpecification)
+    route.post("/createTestsHistory", controller.createTestsHistory)
     route.get("/findOneSpecificationByCode/:specification_code", controller.findOneSpecificationByCode)
+    route.get("/findSpecificationWithDetails/:specification_code", controller.findOneSpecificationWithDetails)
+    route.get("/findSpecifications", controller.getSpecificationsCodes)
    
     
 }

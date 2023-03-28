@@ -184,11 +184,34 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
       const user_mobile_code = role.user_mobile_code;
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
+      var users =[];
+      var profiles = [];
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });
       const checklist = await userMobileServiceInstanse.getChecklist();
       const visitList = await userMobileServiceInstanse.getVisitList();
+      const cancelationReasons = await userMobileServiceInstanse.getCancelationReasons();
+      const priceList = await userMobileServiceInstanse.getPriceList();
+      const invoice = await userMobileServiceInstanse.getInvoice();
+      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
+      var role_controller = {};
+      var profile_controller = {};
+
+      if(role['controller_role'].length != null ){
+        role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
+        profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
+        const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
+        menus.push(...controller_menus)
+    }
+
+    users.push(userMobile,role_controller)
+    profiles.push(profile,profile_controller)
+    
+    const index = parameter.map(elem => elem.parameter_code).indexOf('service')
+    console.log(index)
+      
+
       const productPages = await userMobileServiceInstanse.getProfileProductPages({
         profile_code: userMobile.profile_code,
       });
@@ -201,9 +224,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest);
       const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest);
       const locationDetail = await userMobileServiceInstanse.getLocationDetail(role.role_loc, role.role_site);
-
+      
+      console.log(parameter)
       // service created on backend
-      if (parameter.hold === true) {
+      if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
         // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
@@ -238,6 +262,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           subClusters: subClusters,
           visitList: visitList,
           salesChannels: salesChannels,
+          cancelationReasons:cancelationReasons,
+          priceList:priceList,
+          invoice :invoice,
+          invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
           products: products,
@@ -286,6 +314,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           subClusters: subClusters,
           visitList: visitList,
           salesChannels: salesChannels,
+          cancelationReasons:cancelationReasons,
+          priceList:priceList,
+          invoice :invoice,
+          invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
           products: products,
@@ -324,6 +356,61 @@ const getDataBack = async function(socket) {
   });
 };
 
+const getDataBackTest = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  // logger.debug("Calling user mobile login endpoint")
+
+  const userMobileServiceInstanse = Container.get(UserMobileService);
+  try {
+
+    // CUSTOMERS : 
+    // 0 : no change = do nothing 
+    // 1 : update 
+    // 2 : create new 
+    if(req.body.customers.length >0){
+      // console.log(req.body.customers)
+      for(const customer of req.body.customers){
+        if(customer.changed == 1 ){
+          const udpatedCustomer = await userMobileServiceInstanse.updateCustomer(customer,{customer_code:customer.customer_code});
+        }
+        if(customer.changed == 2 ){
+          delete customer.id
+          delete customer.changed
+          const createdCustomer = await userMobileServiceInstanse.createCustomer(customer);
+        }
+      };
+    }
+    
+    // SERVICE
+    // CREATED FROM BACKEDN
+    const {service} = req.body
+    if(req.body.parameter.hold == 1){
+      const udpatedService = await userMobileServiceInstanse.updateService(
+        {
+          service_open:false,
+          service_kmdep:service.service_kmdep,
+          service_kmarr:service.service_kmarr,
+        },
+        {service_code:service.service_code}
+        );
+      }else{
+        // CREATED FROM MOBILE
+        delete service.id
+        service.service_open = false
+        const udpatedService = await userMobileServiceInstanse.createService(service)
+    }
+
+    return res.status(200).json({ message: 'deleted succesfully', data: req.body });
+    
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+}
+
+   
+
+
 export default {
   create,
   findOne,
@@ -336,4 +423,5 @@ export default {
   deleteOne,
   signin,
   getDataBack,
+  getDataBackTest,
 };

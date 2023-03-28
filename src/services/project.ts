@@ -3,8 +3,11 @@ import { Service, Inject, Container } from "typedi"
 @Service()
 export default class projectService {
     constructor(
-        @Inject("projectModel")
-        private projectModel: Models.ProjectModel,
+        @Inject("projectModel") private projectModel: Models.ProjectModel,
+        @Inject("projectDetailModel") private projectDetailModel: Models.ProjectDetailModel,
+        @Inject("affectEmployeModel") private affectEmployeModel: Models.AffectEmployeModel,
+        @Inject('employeModel')private employeModel: Models.EmployeModel,
+        @Inject("codeModel") private codeModel: Models.CodeModel,
         @Inject("logger") private logger
     ) {}
 
@@ -65,6 +68,57 @@ export default class projectService {
             })
             this.logger.silly("delete one project mstr")
             return project
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getProjectTypes(): Promise<any> {
+        try {
+            const project_types = await this.codeModel.findAll({
+                where:{code_fldname :"pj_type" },
+                attributes: ["id","code_value","code_desc"]
+            })
+            this.logger.silly("find project_types ")
+            return project_types
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+      }
+
+      public async findAllProjectDetails(query: any): Promise<any> {
+        try {
+            const project_details = await this.affectEmployeModel.findAll({
+                where: query,
+            })
+            for(const emp of project_details ){
+                console.log(emp.dataValues.pme_employe)
+                const empData = await this.employeModel.findOne({
+                    where :{emp_addr : emp.dataValues.pme_employe}
+                })
+                emp.dataValues.emp_fname = empData.dataValues.emp_fname
+                emp.dataValues.emp_lname = empData.dataValues.emp_lname
+                console.log(empData)
+            };
+
+            this.logger.silly("find All project_details ")
+            return project_details
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findAllProjectDetailsByCode(query: any): Promise<any> {
+        try {
+            const project_details = await this.affectEmployeModel.findAll({
+                where: query,
+            })
+            
+            this.logger.silly("find All project_details ")
+            return project_details
         } catch (e) {
             this.logger.error(e)
             throw e

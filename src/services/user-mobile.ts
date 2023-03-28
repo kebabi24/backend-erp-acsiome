@@ -842,7 +842,7 @@ export default class UserMobileService {
     // ******************** GET INVOICE    **************************
     public async getInvoice(): Promise<any> {
         try {
-            const invoice = await this.invoiceModel.findAll()
+            const invoice = await this.invoiceModel.findAll({where :{closed : false}})
             return invoice
         } catch (e) {
             console.log('Error from service- getInvoice')
@@ -858,6 +858,58 @@ export default class UserMobileService {
             return invoice_line
         } catch (e) {
             console.log('Error from service- getInvoiceLine')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** UPDATE ONE CUSTOMER **************************
+    public async updateCustomer(data: any, query: any): Promise<any> {
+        try {
+            const customer = await this.customerMobileModel.update(data, {
+                where: query,
+            })
+            this.logger.silly("updated one mobile customer mstr")
+            return customer
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE ONE CUSTOMER **************************
+    public async createCustomer(data: any): Promise<any> {
+        try {
+            const customer = await this.customerMobileModel.create(data)
+            this.logger.silly("created one mobile customer mstr")
+            return customer
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** UPDATE ONE SERVICE **************************
+    public async updateService(data: any, query: any): Promise<any> {
+        try {
+            const service = await this.serviceModel.update(data, {
+                where: query,
+            })
+            this.logger.silly("updated one service  mstr")
+            return service
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE ONE SERVICE **************************
+    public async createService(data: any): Promise<any> {
+        try {
+            const service = await this.serviceModel.create(data)
+            this.logger.silly("created one service ")
+            return service
+        } catch (e) {
             this.logger.error(e)
             throw e
         }

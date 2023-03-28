@@ -1,43 +1,28 @@
-import ProductPageService from "../../services/product-page"
+import TokenSerieService from "../../services/token-serie"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from "lodash";
 
-const createProductPage = async (req: Request, res: Response, next: NextFunction) => {
+const createTokens = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
 
-    logger.debug("Calling Create productPage endpoint with body: %o", req.body)
+    logger.debug("Calling createTokens endpoint with body: %o", req.body)
     try {
-        console.log("heyyyy")
-        const productPageService = Container.get(ProductPageService)
+        const tokenSerieService = Container.get(TokenSerieService)
         
-        const productPageCode = req.body.productPage.productPage.product_page_code
-        const productCodes = req.body.productsCodes.productCodes
+        const tokens = req.body.tokens
+        tokens.forEach(token => {
+            delete token.id
+        });
         
-        const productPage = await productPageService.createProductPage({
-            ...req.body.productPage.productPage,
-        })
+        const createdTokens = await tokenSerieService.createTokens(tokens)
 
-        
-
-        for(const productCode of productCodes){
-            const productPageDetails = await productPageService.createProductPageProducts(
-                {
-                    productPageCode,
-                },
-                {
-                    productCode,
-                })
-        }
-
-        
-       
        
         return res
             .status(201)
-            .json({ message: "created succesfully", data: { productPage  } })
+            .json({ message: "created succesfully", data: { createdTokens  } })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -66,15 +51,15 @@ const findOneByCode = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-const findAllProductPages = async (req: Request, res: Response, next: NextFunction) => {
+const findAllTokens = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  code endpoint")
     try {
-        const productPageService = Container.get(ProductPageService)
-        const productPages = await productPageService.findAll()
+        const tokenSerieService = Container.get(TokenSerieService)
+        const tokens = await tokenSerieService.findAllTokens()
         return res
             .status(200)
-            .json({ message: "found all product page", data: productPages  })
+            .json({ message: "found all tokens", data: tokens  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -110,8 +95,6 @@ const updateProfileProductPages = async (req: Request, res: Response, next: Next
 }
 
 export default {
-    createProductPage,
-    findOneByCode,
-    findAllProductPages,
-    updateProfileProductPages
+    createTokens,
+    findAllTokens
 }
