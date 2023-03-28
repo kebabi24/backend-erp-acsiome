@@ -3,7 +3,7 @@ import { Service, Inject } from "typedi"
 @Service()
 export default class projectDetailService {
     constructor(
-        @Inject("projectDetailModel") private projectDetailModel: Models.ProjectDetailService,
+        @Inject("projectDetailModel") private projectDetailModel: Models.ProjectDetailModel,
         @Inject("taskModel") private taskModel: Models.TaskModel,
         @Inject("logger") private logger
     ) {}
@@ -61,5 +61,6 @@ export default class projectDetailService {
             throw e
         }
     }
+
 }
 

@@ -33,7 +33,7 @@ const Role = sequelize.define(
       //     key: "user_mobile_code",
       // },
     },
-    controller_role: {
+    controller_role: {  // person who verifie loads
       type: Sequelize.STRING,
       allowNull: true,
       references: {
@@ -49,10 +49,11 @@ const Role = sequelize.define(
         key: 'token_code',
       },
     },
-    upper_role_code: { type: Sequelize.STRING },
+    upper_role_code: { type: Sequelize.STRING }, // master
     role_loc: { type: Sequelize.STRING },
     role_site: { type: Sequelize.STRING },
     role_loc_from: { type: Sequelize.STRING },
+    printer_adress:{type: Sequelize.STRING }
     // role_loc_from , string   , stock details - ld_det , stock info  - loc_mstr
     // ...base,
   },

@@ -146,6 +146,8 @@ declare global {
     export type InventoryLineModel = S.Model;
     export type cancelationReasonModel = S.Model;
     export type paymentModel = S.Model;
+    export type barecodeInfosModel = S.Model;
+    export type messagesModel = S.Model;
 
     // CRM models
     export type paramHeaderModel = S.Model;
@@ -156,8 +158,13 @@ declare global {
     export type agendaExecutionDetailsModel = S.Model;
     
     // NEW
-    export type mpMstrModel = S.Model;
-    export type mpDetailsModel = S.Model;
+    export type specificationModel = S.Model;
+    export type specificationDetailsModel = S.Model;
+    export type SpecificationTestResultsModel = S.Model;
+    export type ItemSpecificationDetailsModel = S.Model;
+    export type SpecificationTestHistoryModel = S.Model;
+    export type QualityTestBillDetails = S.Model;
+    export type QualityInspectionRoutingDetails = S.Model;
 
   }
 }

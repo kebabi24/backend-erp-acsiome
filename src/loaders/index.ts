@@ -174,6 +174,8 @@ export default async ({ expressApp }) => {
       { name: 'paymentModel', model: require('../models/mobile_models/payment').default },
       { name: 'invoiceModel', model: require('../models/mobile_models/invoice').default },
       { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
+      { name: 'barecodeInfosModel', model: require('../models/mobile_models/barecode_infos').default },
+      { name: 'messagesModel', model: require('../models/mobile_models/messages').default },
 
       // WAS ALREADY COMMENTED
       // { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
@@ -189,8 +191,13 @@ export default async ({ expressApp }) => {
       
       
       // ADDED : 10/03/2023 
-      { name: 'mpMstrModel', model: require('../models/mobile_models/mp_mstr').default },
-      { name: 'mpDetailsModel', model: require('../models/mobile_models/mpd_det').default },
+      { name: 'specificationModel', model: require('../models/mobile_models/specification').default },
+      { name: 'specificationDetailsModel', model: require('../models/mobile_models/specification_details').default },
+      { name: 'SpecificationTestResultsModel', model: require('../models/mobile_models/specification_test_results').default },
+      { name: 'ItemSpecificationDetailsModel', model: require('../models/mobile_models/item_specification_details').default },
+      { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
+      { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
+      { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
 
     ],
   });
@@ -318,6 +325,15 @@ export default async ({ expressApp }) => {
   require('../models/mobile_models/invoice_line').default.belongsTo(
     require('../models/mobile_models/invoice').default,
     { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
+  );
+
+  require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
+    foreignKey: 'pricelist_code',
+    sourceKey: 'pricelist_code',
+  });
+  require('../models/mobile_models/price_list').default.belongsTo(
+    require('../models/mobile_models/customer').default,
+    { foreignKey: 'pricelist_code', targetKey: 'pricelist_code' },
   );
 
   // associations pos
@@ -813,7 +829,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();l
 
   // await sequelizeConnection
   //   .sync({ alter: true })

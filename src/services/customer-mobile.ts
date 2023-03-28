@@ -9,6 +9,7 @@ export default class customersMobileSercice {
         @Inject("categoryModel") private categoryModel: Models.CategoryModel,
         @Inject("subClusterModel") private subClusterModel: Models.SubClusterModel,
         @Inject("categoryTypeModel") private categoryTypeModel: Models.CategoryTypeModel,
+        @Inject("salesChannelModel") private salesChannelModel: Models.salesChannelModel,
 
         @Inject("logger") private logger
     ) {}
@@ -223,7 +224,16 @@ export default class customersMobileSercice {
         }
     }
 
-   
+    public async createSalesChannels(data: any): Promise<any> {
+        try {
+            const salesChannels = await this.salesChannelModel.bulkCreate(data)
+            this.logger.silly("created sales channels")
+            return salesChannels
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
 
    
 

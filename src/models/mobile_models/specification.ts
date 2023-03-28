@@ -8,8 +8,10 @@ import base from "../base"
 
 const sequelize = Container.get("sequelize")
 
-const MP = sequelize.define(
-    "mp",
+//  mp_mstr
+
+const Specification = sequelize.define(
+    "specification",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -42,7 +44,7 @@ const MP = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_mp_mstr",
+        tableName: "aa_specification",
     }
 )
-export default  MP ;
+export default  Specification ;

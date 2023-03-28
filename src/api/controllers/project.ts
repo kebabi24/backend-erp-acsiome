@@ -8,7 +8,7 @@ import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -139,7 +139,7 @@ const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find all project endpoint")
     try {
         const projectServiceInstance = Container.get(ProjectService)
-        const projects = await projectServiceInstance.find({ ...req.body,})
+        const projects = await projectServiceInstance.find({ ...req.body})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: projects })
@@ -148,6 +148,7 @@ const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all project endpoint")
@@ -194,6 +195,7 @@ const{user_domain} = req.headers
         return next(e)
     }
 }
+
 const updateM = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -216,6 +218,7 @@ const{user_domain} = req.headers
         return next(e)
     }
 }
+
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
@@ -237,6 +240,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
         return next(e)
     } 
 }
+
 const findAllbomDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
@@ -265,6 +269,7 @@ const findAllbomDetails = async (req: Request, res: Response, next: NextFunction
         return next(e)
     } 
 }
+
 const findpmdetail = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
@@ -286,6 +291,84 @@ const findpmdetail = async (req: Request, res: Response, next: NextFunction) => 
         return next(e)
     } 
 }
+
+const getProjectTypes = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all project endpoint")
+    try {
+        const projectServiceInstance = Container.get(ProjectService)
+        const project_types = await projectServiceInstance.getProjectTypes()
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: project_types })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+// const assignEmpProject = async (req: Request, res: Response, next: NextFunction) => {
+//     const logger = Container.get("logger")
+
+//     logger.debug("Calling Create sequence endpoint")
+//     try {
+//         const projectServiceInstance = Container.get(ProjectService)
+//         const { headerData, employees } = req.body
+       
+//         return res
+//             .status(201)
+//             .json({ message: "created succesfully", data: "" })
+//     } catch (e) {
+//         //#
+//         logger.error("🔥 error: %o", e)
+//         return next(e)
+//     }
+// }
+
+    const findAssignedEmpOfProject = async (req: Request, res: Response, next: NextFunction) => {
+            const logger = Container.get("logger")
+        
+            logger.debug("Calling findAssignedEmpOfProject endpoint")
+            try {
+                const projectServiceInstance = Container.get(ProjectService)
+                const { project_code } = req.params
+                const employees = await projectServiceInstance.findAllProjectDetails({
+                    pme_pm_code : project_code
+                })
+            
+                return res
+                    .status(201)
+                    .json({ message: "created succesfully", data: employees })
+            } catch (e) {
+                //#
+                logger.error("🔥 error: %o", e)
+                return next(e)
+            }
+        }
+
+     const findInstructionsOfProject = async (req: Request, res: Response, next: NextFunction) => {
+        const logger = Container.get("logger")
+    
+        logger.debug("Calling findAssignedEmpOfProject endpoint")
+        try {
+            const projectServiceInstance = Container.get(ProjectService)
+            const { project_code } = req.params
+            const instructions = await projectServiceInstance.findAllProjectDetails({
+                pme_pm_code : project_code
+            })
+           
+            return res
+                .status(201)
+                .json({ message: "instructions found succesfully", data: instructions })
+        } catch (e) {
+            //#
+            logger.error("🔥 error: %o", e)
+            return next(e)
+        }
+     }     
+
+
+
 export default {
     create,
     findBy,
@@ -297,5 +380,7 @@ export default {
     updateM,
     findAllwithDetails,
     findAllbomDetails,
-    findpmdetail
+    findpmdetail,
+    getProjectTypes,
+    findAssignedEmpOfProject,
 }

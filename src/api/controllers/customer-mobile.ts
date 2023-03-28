@@ -416,6 +416,31 @@ const deleteCategoryTypeById = async (req: Request, res: Response, next: NextFun
     }
 }
 
+const createSalesChannels = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+
+    logger.debug("Calling createTokens endpoint with body: %o", req.body)
+    try {
+        const userMobileServiceInstance = Container.get(CustomerMobileService)
+        
+        const sales_channels = req.body.sales_channels
+        sales_channels.forEach(channel => {
+            delete channel.id
+        });
+        
+        const createdChannels = await userMobileServiceInstance.createSalesChannels(sales_channels)
+
+       
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data: { createdChannels  } })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
 
 
 
@@ -440,5 +465,5 @@ export default {
     deleteCategoryById,
     deleteSubClusterById,
     deleteCategoryTypeById,
-
+    createSalesChannels,
 }

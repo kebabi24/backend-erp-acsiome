@@ -86,7 +86,9 @@ import forcast from './routes/forcast';
 import synchro from './routes/synchro';
 import crm from './routes/crm';
 import lodaRequest from "./routes/load-request"
+import productPage from "./routes/product-page"
 import qualityControl from "./routes/quality-control"
+import tokenSerie from "./routes/token-serie"
 
 // guaranteed to get dependencies
 export default () => {
@@ -180,5 +182,7 @@ export default () => {
   forcast(app);
   lodaRequest(app)
   qualityControl(app)
+  productPage(app)
+  tokenSerie(app)
   return app;
 };
