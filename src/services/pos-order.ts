@@ -201,4 +201,17 @@ export default class posOrderService {
       throw e;
     }
   }
+
+  public async findAllPosOrders(): Promise<any> {
+    try {
+      const orders = await this.posOrderModel.findAll({
+        attributes:["id","usrd_site","total_price","created_date"]
+      });
+      this.logger.silly('found all orders mstr');
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

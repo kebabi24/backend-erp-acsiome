@@ -4,11 +4,13 @@ import PosOrderDetailSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSauce from '../../services/pos-order-product-sauce';
 import PosOrderProductSupp from '../../services/pos-order-product-supp';
 import PosOrderProductIng from '../../services/pos-order-product-ing';
+import InventoryTransactionService from '../../services/inventory-transaction';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
 import CodeService from '../../services/code';
+import SiteService from "../../services/site"
 import SequenceService from '../../services/sequence';
 import { isNull } from 'lodash';
 import workOrderService from '../../services/work-order';
@@ -27,6 +29,7 @@ import * as path from 'path';
 import { type } from 'os';
 import posCategoriesService from '../../services/pos-categories';
 import item from './item';
+import _ from 'lodash';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1266,6 +1269,96 @@ const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const findAllPosOrders = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling findAllPosOrders endpoint');
+  try {
+    const PosOrderServiceInstance = Container.get(PosOrder);
+    const siteServiceInstance = Container.get(SiteService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const posOrderDetailServiceInstance = Container.get(PosOrderDetail);
+
+    const orders = await PosOrderServiceInstance.findAllPosOrders();
+    const transactions = await inventoryTransactionServiceInstance.findAllissSo();
+    const orders_details = await posOrderDetailServiceInstance.findAllDetailsFiltered()
+
+    const locations = _.mapValues(_.groupBy(orders, 'usrd_site'));
+    const tr_locations = _.mapValues(_.groupBy(transactions, 'tr_site'));
+    const meatTypes = _.mapValues(_.groupBy(orders_details, 'pt_size'));
+    const breadTypes = _.mapValues(_.groupBy(orders_details, 'pt_group'));
+    // const days = _.mapValues(_.groupBy(orders, 'created_date'));
+
+    let order_by_shop = []
+    let tr_by_shop = []
+    let meat_types = []
+    let bread_types = []
+
+
+    for(const key in tr_locations){
+      const site = await siteServiceInstance.findOne({si_site : key })
+      const site_name = site.dataValues.si_desc
+      let sum = 0 
+      tr_locations[key].forEach(order=>{
+       sum += parseFloat(order.tr_gl_amt)
+      })
+      console.log("key:\t"+key + "\tname:\t"+site_name +"\t length:"+ tr_locations[key].length +"\t sum:"+ sum)
+      tr_by_shop.push({shop: key, Cout :sum ,shop_name :site_name })
+      sum = 0
+    }
+    
+    // by location 
+    for(const key in locations){
+      const site = await siteServiceInstance.findOne({si_site : key })
+      const site_name = site.dataValues.si_desc
+      let sum = 0 
+      locations[key].forEach(order=>{
+       sum += parseFloat(order.total_price)
+      })
+      // console.log("key:\t"+key + "name:\t"+site_name +"\t length:"+ locations[key].length +"\t sum:"+ sum)
+      order_by_shop.push({shop: key , CA:sum , Cout : 0.0 ,shop_name :site_name })
+      sum = 0
+    }
+
+    for(const key in meatTypes){
+      let sum = 0 
+      meatTypes[key].forEach(order=>{
+       sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+      })
+      if(key === "VIANDE" || "MIXTE" || "POULET"){
+        meat_types.push({type: key , CA:sum  })
+      }
+      sum = 0
+    }
+
+    // for(const key in breadTypes){
+    //   let sum = 0 
+    //   breadTypes[key].forEach(order=>{
+    //    sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+    //   })
+    //   bread_types.push({type: key , CA:sum  })
+    //   sum = 0
+    // }
+
+    // by day
+    // for(const key in days){
+    //   let sum = 0 
+    //   days[key].forEach(order=>{
+    //     // console.log(parseFloat(order.total_price))
+    //    sum += parseFloat(order.total_price)
+    //   })
+    //   console.log("key:\t"+key +"\t length:"+ days[key].length +"\t sum:"+ sum)
+    //   sum = 0
+    // }
+    
+    // return res.status(200).json({ message: 'fetched succesfully', data: { meat_types} });
+     return res.status(200).json({ message: 'fetched succesfully', data: { tr_by_shop, order_by_shop , orders ,meat_types} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -1284,4 +1377,5 @@ export default {
   findBySite,
   createOrder,
   set,
+  findAllPosOrders
 };
