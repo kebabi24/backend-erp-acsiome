@@ -87,6 +87,7 @@ import synchro from './routes/synchro';
 import crm from './routes/crm';
 import lodaRequest from "./routes/load-request"
 import qualityControl from "./routes/quality-control"
+import locationFilter from './routes/location-filter';
 
 // guaranteed to get dependencies
 export default () => {
@@ -180,5 +181,6 @@ export default () => {
   forcast(app);
   lodaRequest(app)
   qualityControl(app)
+  locationFilter(app)
   return app;
 };
