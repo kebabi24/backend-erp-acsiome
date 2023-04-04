@@ -84,10 +84,10 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
         const accountReceivableServiceInstance = Container.get(AccountReceivableService)
         const { invoiceOrder, invoiceOrderDetail } = req.body
 
-        const ih = await invoiceOrderServiceInstance.create({...invoiceOrder, ih_domian:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ih = await invoiceOrderServiceInstance.create({...invoiceOrder, ih_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderDetail) {
-            entry = { ...entry,idh_domian:user_domain, idh_inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry,idh_domain:user_domain, idh_inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await invoiceOrderDetailServiceInstance.create(entry)
 
         

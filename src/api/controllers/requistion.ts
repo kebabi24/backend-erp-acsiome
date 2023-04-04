@@ -43,7 +43,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
             RequisitionDetailService
         )
         const requisition = await requisitionServiceInstance.findOne({
-            ...req.body, rqm_domian: user_domain
+            ...req.body, rqm_domain: user_domain
        })
         if (requisition) {
             const details = await requisitionDetailServiceInstance.find({

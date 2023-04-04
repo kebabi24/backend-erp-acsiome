@@ -88,7 +88,11 @@ import crm from './routes/crm';
 import lodaRequest from "./routes/load-request"
 import productPage from "./routes/product-page"
 import qualityControl from "./routes/quality-control"
+<<<<<<< HEAD
 import domain from './routes/domain';
+=======
+import locationFilter from './routes/location-filter';
+>>>>>>> 3174c98beff13cf764f7199b5820fd961a3e50a0
 import tokenSerie from "./routes/token-serie"
 
 // guaranteed to get dependencies
@@ -183,7 +187,11 @@ export default () => {
   forcast(app);
   lodaRequest(app)
   qualityControl(app)
+<<<<<<< HEAD
   domain(app);
+=======
+  locationFilter(app)
+>>>>>>> 3174c98beff13cf764f7199b5820fd961a3e50a0
   productPage(app)
   tokenSerie(app)
   return app;

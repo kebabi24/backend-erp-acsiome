@@ -2065,7 +2065,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       });
       const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
       const rctpo = await inventoryTransactionServiceInstance.findOneI({
-        tr_domian:user_domain,
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: items.pt_part,
@@ -2132,7 +2132,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     /*boisson*/
-    const boparts = await itemServiceInstance.find({ pt_domian:user_domain,pt_cyc_int: 1, pt_part_type: 'BO' });
+    const boparts = await itemServiceInstance.find({ pt_domain:user_domain,pt_cyc_int: 1, pt_part_type: 'BO' });
     let boresults = [];
     var j = 1;
     for (let boitems of boparts) {
@@ -2145,7 +2145,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         console.log(boitems.pt_part, 'part');
       }
       const trrcycmax = await inventoryTransactionServiceInstance.max({
-        tr_domian:user_domain,
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: boitems.pt_part,
@@ -2336,6 +2336,19 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const findAllissSo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling findAllissSo endpoint');
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const transactions = await inventoryTransactionServiceInstance.findAllissSo();
+    return res.status(200).json({ message: 'fetched succesfully', data: transactions });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -2366,4 +2379,5 @@ export default {
   findByInv,
   findByRct,
   findBySpec,
+  findAllissSo
 };

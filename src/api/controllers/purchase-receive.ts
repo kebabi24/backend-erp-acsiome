@@ -497,7 +497,7 @@ const findGroup = async (req: Request, res: Response, next: NextFunction) => {
  
   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
-    const devise = await purchaseReceiveServiceInstance.distinct({prh_domian:user_domain});
+    const devise = await purchaseReceiveServiceInstance.distinct({prh_domain:user_domain});
     console.log(devise);
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {

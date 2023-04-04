@@ -169,7 +169,7 @@ const{user_domain} = req.headers
             entry = { ...entry, ccd1_domain:user_domain,ccd1_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await costaccountServiceInstance.create(entry)
         }
-        await costsubServiceInstance.delete({ccd2_cc: cc.cc_ctr,ccd2_domian:user_domain})
+        await costsubServiceInstance.delete({ccd2_cc: cc.cc_ctr,ccd2_domain:user_domain})
         for (let entry of subdetails) {
             entry = { ...entry, ccd2_domain:user_domain,ccd2_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await costsubServiceInstance.create(entry)
