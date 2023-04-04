@@ -133,5 +133,19 @@ export default class inventoryTransactionService {
             throw e
         }
     }
+
+    public async findAllissSo(): Promise<any> {
+        try {
+            const inventoryTransaction = await this.inventoryTransactionModel.findAll({ 
+                where: {tr_type: "ISS-WO"}, 
+                attributes :["id","tr_gl_amt","tr_site"]
+                 })
+            this.logger.silly("find one inventoryTransaction mstr")
+            return inventoryTransaction
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
 }
 

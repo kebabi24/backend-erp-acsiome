@@ -2215,6 +2215,19 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const findAllissSo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling findAllissSo endpoint');
+  try {
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const transactions = await inventoryTransactionServiceInstance.findAllissSo();
+    return res.status(200).json({ message: 'fetched succesfully', data: transactions });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -2245,4 +2258,5 @@ export default {
   findByInv,
   findByRct,
   findBySpec,
+  findAllissSo
 };

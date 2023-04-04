@@ -22,6 +22,7 @@ const Project = sequelize.define(
             
         pm_desc: Sequelize.STRING,
         pm_status: Sequelize.STRING,
+        
         pm_cust: {
             type: Sequelize.STRING,
             references:{
@@ -35,6 +36,8 @@ const Project = sequelize.define(
         pm_cost: {type: Sequelize.DECIMAL, defaultValue : 0  },
         pm_domain:  Sequelize.STRING,
         oid_pm_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
+        pm_type: Sequelize.STRING,
+        pm_doc_list_code: Sequelize.STRING,
 
         ...base,
     },

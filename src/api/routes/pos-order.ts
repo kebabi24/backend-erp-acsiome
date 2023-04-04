@@ -8,6 +8,7 @@ export default (app: Router) => {
 
   route.get('/findw', controller.findAlll);
   route.post('/findall', controller.findAll);
+  route.get('/findAllPosOrders', controller.findAllPosOrders);
   route.post('/', controller.create);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);

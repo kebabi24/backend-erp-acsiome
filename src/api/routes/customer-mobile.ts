@@ -14,6 +14,7 @@ export default (app: Router) => {
     route.post("/createSubCluster", controller.createSubCluster)
     route.post("/createCategory", controller.createCategory)
     route.post("/createCategoryType", controller.createCategoryType)
+    route.post("/createSalesChannels", controller.createSalesChannels)
     route.delete("/deleteCluster/:clusterId", controller.deleteClusterById)
     route.delete("/deleteCategory/:categoryId", controller.deleteCategoryById)
     route.delete("/deleteSubCluster/:subClusterId", controller.deleteSubClusterById)

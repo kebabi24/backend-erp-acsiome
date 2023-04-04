@@ -73,4 +73,17 @@ export default class posOrderProductService {
       throw e;
     }
   }
+
+  public async findAllDetailsFiltered(): Promise<any> {
+    try {
+      const ordersDetail = await this.posOrderDetailProductModel.findAll({
+        attributes : ["id","pt_size","pt_qty_ord_pos","pt_price_pos","created_date"]
+      });
+      this.logger.silly('find All orders detail mstr');
+      return ordersDetail;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }
