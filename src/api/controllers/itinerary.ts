@@ -6,14 +6,14 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
     const {customers, itinerary} = req.body
     //console.log(customers)
     logger.debug("Calling Create itn endpoint")
     try {
         const ItineraryServiceInstance = Container.get(ItineraryService)
         const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService)
-        const itn = await ItineraryServiceInstance.create({...itinerary, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const itn = await ItineraryServiceInstance.create({...itinerary,domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of customers) {
             entry = { customerId: entry, itineraryId: itn.id }
             await CustomerItineraryServiceInstance.create(entry)
@@ -62,9 +62,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all itn endpoint")
+    
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
     try {
         const ItineraryServiceInstance = Container.get(ItineraryService)
-        const itn = await ItineraryServiceInstance.find({...req.body})
+        const itn = await ItineraryServiceInstance.find({...req.body,domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: itn })

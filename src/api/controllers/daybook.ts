@@ -5,12 +5,12 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create daybook endpoint")
     try {
         const DaybookServiceInstance = Container.get(DaybookService)
-        const daybook = await DaybookServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const daybook = await DaybookServiceInstance.create({...req.body, dy_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  daybook })
@@ -39,9 +39,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all daybook endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const DaybookServiceInstance = Container.get(DaybookService)
-        const daybooks = await DaybookServiceInstance.find({})
+        const daybooks = await DaybookServiceInstance.find({dy_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: daybooks })
@@ -54,9 +57,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all daybook endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const DaybookServiceInstance = Container.get(DaybookService)
-        const daybooks = await DaybookServiceInstance.find({...req.body})
+        const daybooks = await DaybookServiceInstance.find({...req.body,dy_domain:user_domain})
         
         return res
             .status(200)
@@ -69,9 +75,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all daybook endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const DaybookServiceInstance = Container.get(DaybookService)
-        const daybooks = await DaybookServiceInstance.findOne({...req.body})
+        const daybooks = await DaybookServiceInstance.findOne({...req.body,dy_domain:user_domain})
         
         return res
             .status(200)

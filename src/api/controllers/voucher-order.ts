@@ -18,7 +18,7 @@ import moment from 'moment';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
     const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -37,17 +37,18 @@ const{user_domain} = req.headers
 
 console.log(vh_inv_nbr)
 
-        const vh = await voucherOrderServiceInstance.create({...voucherOrder,vh_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code})
+        const vh = await voucherOrderServiceInstance.create({...voucherOrder,vh_domain: user_domain,vh_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code})
         
         for (let entry of voucherOrderDetail) {
-            entry = { ...entry, vdh_inv_nbr: vh_inv_nbr }
+            entry = { ...entry, vdh_domain: user_domain,vdh_inv_nbr: vh_inv_nbr }
             await voucherOrderDetailServiceInstance.create({...entry, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
-            const sh = await purchaseReceiveServiceInstance.findOne({prh_receiver: entry.vdh_ship, prh_part:entry.vdh_part, prh_nbr: entry.vdh_nbr,prh_line: entry.vdh_sad_line })
+            const sh = await purchaseReceiveServiceInstance.findOne({prh_domain: user_domain,prh_receiver: entry.vdh_ship, prh_part:entry.vdh_part, prh_nbr: entry.vdh_nbr,prh_line: entry.vdh_sad_line })
             if(sh) await purchaseReceiveServiceInstance.update({prh_invoiced : true, prh_inv_nbr:vh.vh_inv_nbr,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
         }
         
         await accountPayableServiceInstance.create({
+         ap_domain: user_domain,   
          ap_nbr : vh_inv_nbr,
          ap_po: vh.vh_po,
          ap_effdate: voucherOrder.vh_inv_date,
@@ -69,7 +70,7 @@ console.log(vh_inv_nbr)
         })
 
          /***************GL *************/
-         const gl = await generalLedgerServiceInstance.findLastId({glt_date: date})
+         const gl = await generalLedgerServiceInstance.findLastId({glt_domain: user_domain,glt_date: date})
          if(gl) {
            var seq =  gl.glt_ref.substring(10, 18)
         var d = Number(seq) + 1
@@ -89,10 +90,11 @@ console.log(vh_inv_nbr)
 
         var i = 1
         for (let entr of apDetail) {
-            entr = { ...entr, apd_nbr: vh.vh_inv_nbr }
+            entr = { ...entr, apd_domain: user_domain,apd_nbr: vh.vh_inv_nbr }
             await accountPayableDetailServiceInstance.create({...entr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
             await generalLedgerServiceInstance.create({
+                glt_domain: user_domain,
                 glt_ref: ref,
 
                 glt_line: i,
@@ -122,7 +124,7 @@ console.log(vh_inv_nbr)
 
           
 
-        const vd = await providerServiceInstance.findOne({vd_addr: voucherOrder.vh_vend})
+        const vd = await providerServiceInstance.findOne({vd_domain:user_domain,vd_addr: voucherOrder.vh_vend})
         console.log(voucherOrder.vd_vend)
         console.log(vd.vd_balance)
         console.log(Number(voucherOrder.vh_amt) + Number(voucherOrder.vh_tax_amt) + Number(voucherOrder.vh_trl1_amt))
@@ -198,16 +200,18 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all invoiceOrder endpoint")
+    const{user_domain} = req.headers
     try {
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const voucherOrderDetailServiceInstance = Container.get(
             VoucherOrderDetailService
         )
         const voucherOrder = await voucherOrderServiceInstance.findOne({
-            ...req.body,
+            ...req.body,vh_domain:user_domain
         })
         if (voucherOrder) {
             const details = await voucherOrderDetailServiceInstance.find({
+                vdh_domain: user_domain,
                 vdh_inv_nbr: voucherOrder.vh_inv_nbr,
             })
             return res.status(200).json({
@@ -229,10 +233,11 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all invoiceOrder endpoint")
+    const{user_domain} = req.headers
     try {
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const voucherOrder = await voucherOrderServiceInstance.findOne({
-            ...req.body,
+            ...req.body,vh_domain: user_domain
         })
         return res
         .status(200)
@@ -246,6 +251,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  invoiceOrder endpoint")
+    const{user_domain} = req.headers
     try {
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const { id } = req.params
@@ -254,6 +260,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             VoucherOrderDetailService
         )
         const details = await voucherOrderDetailServiceInstance.find({
+            vdh_domain: user_domain,
             vdh_inv_nbr: voucherOrder.vh_inv_nbr,
         })
 
@@ -271,10 +278,11 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all requisition endpoint")
+    const{user_domain} = req.headers
     try {
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         
-        const ihs = await voucherOrderServiceInstance.find({})
+        const ihs = await voucherOrderServiceInstance.find({vh_domain: user_domain})
             
         return res.status(202).json({
             message: "sec",
@@ -289,15 +297,17 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all invoiceOrder endpoint")
+    const{user_domain} = req.headers
     try {
         let result = []
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const voucherOrderDetailServiceInstance = Container.get(
             VoucherOrderDetailService
         )
-        const vhs = await voucherOrderServiceInstance.find({})
+        const vhs = await voucherOrderServiceInstance.find({vh_domain: user_domain})
         for(const vh of vhs){
             const details = await voucherOrderDetailServiceInstance.find({
+                vdh_domain: user_domain,
                 vdh_nbr: vh.vh_inv_nbr,
             })
             result.push({id:vh.id, vh, details})
@@ -314,7 +324,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  invoiceOrder endpoint")
     try {
@@ -337,13 +347,13 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
-
+    const{user_domain} = req.headers
     logger.debug("Calling find all invoiceOrder endpoint")
     try {
         let result = []
         //const voucherOrderServiceInstance = Container.get(VoucherOrderService)
 
-        const vhs =await sequelize.query("SELECT *  FROM   PUBLIC.vh_hist, PUBLIC.pt_mstr, PUBLIC.vdh_det  where PUBLIC.vdh_det.vdh_inv_nbr = PUBLIC.vh_hist.vh_inv_nbr and PUBLIC.vdh_det.vdh_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.vdh_det.id DESC", { type: QueryTypes.SELECT });
+        const vhs =await sequelize.query("SELECT *  FROM   PUBLIC.vh_hist, PUBLIC.pt_mstr, PUBLIC.vdh_det  where PUBLIC.vdh_det.vdh_domain = ? and PUBLIC.vdh_det.vdh_inv_nbr = PUBLIC.vh_hist.vh_inv_nbr and PUBLIC.vdh_det.vdh_part = PUBLIC.pt_mstr.pt_part PUBLIC.vh_hist.vh_domain = PUBLIC.vdh_det.vdh_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.vdh_det.vdh_domain ORDER BY PUBLIC.vdh_det.id DESC", { remplacements: [user_domain], type: QueryTypes.SELECT });
        
         return res
             .status(200)

@@ -5,12 +5,12 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create taxe endpoint")
     try {
         const TaxeServiceInstance = Container.get(TaxeService)
-        const taxe = await TaxeServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const taxe = await TaxeServiceInstance.create({...req.body,tx2_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  taxe })
@@ -23,6 +23,7 @@ const{user_domain} = req.headers
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  taxe endpoint")
+    const{user_domain} = req.headers
     try {
         const TaxeServiceInstance = Container.get(TaxeService)
         const {id} = req.params
@@ -39,9 +40,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all taxe endpoint")
+    const{user_domain} = req.headers
     try {
         const TaxeServiceInstance = Container.get(TaxeService)
-        const taxes = await TaxeServiceInstance.find({})
+        const taxes = await TaxeServiceInstance.find({tx2_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: taxes })
@@ -54,9 +56,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all taxe endpoint")
+    const{user_domain} = req.headers
     try { 
         const TaxeServiceInstance = Container.get(TaxeService)
-        const taxes = await TaxeServiceInstance.findOne({...req.body})
+        const taxes = await TaxeServiceInstance.findOne({...req.body,tx2_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: taxes })

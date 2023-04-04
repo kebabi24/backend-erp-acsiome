@@ -7,7 +7,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -16,9 +16,9 @@ const{user_domain} = req.headers
             RequisitionDetailService
         )
         const { requisition, requisitionDetail } = req.body
-        const requi = await requisitionServiceInstance.create({...requisition, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const requi = await requisitionServiceInstance.create({...requisition, rqm_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of requisitionDetail) {
-            entry = { ...entry, rqd_nbr: requi.rqm_nbr }
+            entry = { ...entry, rqd_domain: user_domain,rqd_nbr: requi.rqm_nbr }
             await requisitionDetailServiceInstance.create(entry)
         }
         return res
@@ -34,6 +34,8 @@ const{user_domain} = req.headers
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     logger.debug("Calling find by  all requisition endpoint")
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
@@ -41,10 +43,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
             RequisitionDetailService
         )
         const requisition = await requisitionServiceInstance.findOne({
-            ...req.body,
+            ...req.body, rqm_domian: user_domain
        })
         if (requisition) {
             const details = await requisitionDetailServiceInstance.find({
+                rqd_domain: user_domain,
                 rqd_nbr: requisition.rqm_nbr,
             })
             return res.status(200).json({
@@ -66,12 +69,14 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     logger.debug("Calling find by  all requisition endpoint")
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
         
         const requisitions = await requisitionServiceInstance.find({
-            ...req.body,
+            ...req.body,rqm_domain: user_domain
         })
         return res.status(202).json({
             message: "sec",
@@ -84,6 +89,8 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 }
 const findNotByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     const Sequelize = require('sequelize');
         const Op = Sequelize.Op;
     console.log(req.body)
@@ -96,7 +103,8 @@ const findNotByAll = async (req: Request, res: Response, next: NextFunction) => 
                 rqm_aprv_stat: {
                   [Op.ne]: "3"
                 },
-                rqm_open: true 
+                rqm_open: true ,
+                rqm_domain: user_domain
               }
            ,
         })
@@ -113,6 +121,8 @@ const findNotByAll = async (req: Request, res: Response, next: NextFunction) => 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  requisition endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
         const { id } = req.params
@@ -121,6 +131,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             RequisitionDetailService
         )
         const details = await requisitionDetailServiceInstance.find({
+            rqd_domain: user_domain,
             rqd_nbr: requisition.rqm_nbr,
         })
         
@@ -138,15 +149,18 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         let result=[]
         const requisitionServiceInstance = Container.get(RequisitionService)
         const requisitionDetailServiceInstance = Container.get(
             RequisitionDetailService
         )
-        const requisitions = await requisitionServiceInstance.find({})
+        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain})
         for(const req of requisitions){
             const details = await requisitionDetailServiceInstance.find({
+                rqd_domain: user_domain,
                 rqd_nbr: req.rqm_nbr,
             })
             result.push({id: req.id ,req, details})
@@ -186,7 +200,7 @@ const{user_domain} = req.headers
 const updatedet = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  inventoryStatus endpoint")
     try {
@@ -202,9 +216,9 @@ const{user_domain} = req.headers
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await requisitionDetailServiceInstance.delete({rqd_nbr: requisition.rqm_nbr})
+        await requisitionDetailServiceInstance.delete({rqd_domain: user_domain,rqd_nbr: requisition.rqm_nbr})
         for (let entry of details) {
-            entry = { ...entry, rqd_nbr: requisition.rqm_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, rqd_domain: user_domain,rqd_nbr: requisition.rqm_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await requisitionDetailServiceInstance.create(entry)
         }
         return res

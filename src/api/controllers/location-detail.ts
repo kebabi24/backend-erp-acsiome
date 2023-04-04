@@ -10,12 +10,15 @@ import { Op, Sequelize } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
 
   logger.debug('Calling Create locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const locationDetail = await locationDetailServiceInstance.create({
       ...req.body,
+      ld_domain : user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -32,6 +35,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createldpos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   const code_cart = req.body.cart.code_cart;
   const usrd_site = req.body.cart.usrd_site;
   const products = req.body.cart.products;
@@ -46,6 +51,7 @@ const createldpos = async (req: Request, res: Response, next: NextFunction) => {
       const { pt_part, pt_qty, pt_loc } = product;
 
       await locationDetailServiceInstance.create({
+        ld_domain:user_domain,
         ld_loc: pt_loc,
         ld_part: pt_part,
         ld_lot: nbr,
@@ -83,9 +89,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findall({});
+    const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain});
    // console.log(locationDetails)
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
@@ -97,9 +106,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.find({ ...req.body });
+    const locationDetails = await locationDetailServiceInstance.find({ ...req.body,ld_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -109,9 +121,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByWeek = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findByWeek({ ...req.body });
+    const locationDetails = await locationDetailServiceInstance.findByWeek({ ...req.body,ld_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -121,9 +136,12 @@ const findByWeek = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body });
+    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body,ld_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -133,9 +151,12 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const findByOneRef = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body, 
+    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body,ld_domain:user_domain, 
       ld_qty_oh: {[Op.gt]: 0},
       } );
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
@@ -147,14 +168,18 @@ const findByOneRef = async (req: Request, res: Response, next: NextFunction) => 
 const findByOneStatus = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const inventoryStatusDetailServiceInstance = Container.get(InventoryStatusDetailService);
-    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body });
+    const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body,ld_domain:user_domain });
 
     console.log(locationDetails);
     if (locationDetails) {
       const trstatus = await inventoryStatusDetailServiceInstance.findOne({
+        isd_domain:user_domain,
         isd_status: locationDetails.ld_status,
         isd_tr_type: 'ISS-SO',
       });
@@ -178,11 +203,14 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
 
     const locationDetails = await locationDetailServiceInstance.find({
-      ...req.body,
+      ...req.body,ld_domain:user_domain,
     });
     return res.status(202).json({
       message: 'sec',
@@ -197,10 +225,13 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 const findByFifo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
 
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findfifo({ ...req.body.obj, ld__log01: true });
+    const locationDetails = await locationDetailServiceInstance.findfifo({ ...req.body.obj, ld__log01: true,ld_domain:user_domain });
     const result = [];
     var rest = Number(req.body.qty);
     var qty = locationDetails.ld_qty_oh;
@@ -268,6 +299,9 @@ const findOtherStatus = async (req: Request, res: Response, next: NextFunction) 
   const Op = Sequelize.Op;
   console.log(req.body.status);
   logger.debug('Calling find by  all details endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   try {
     console.log('here', req.body);
     const { detail } = req.body.obj;
@@ -275,7 +309,7 @@ const findOtherStatus = async (req: Request, res: Response, next: NextFunction) 
     const locationDetailServiceInstance = Container.get(LocationDetailService);
 
     const locationdetails = await locationDetailServiceInstance.find({
-      ...req.body.obj,
+      ...req.body.obj,ld_domain:user_domain,
       ld_status: {
         [Op.ne]: req.body.status,
       },

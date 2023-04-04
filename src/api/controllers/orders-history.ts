@@ -4,12 +4,13 @@ import { Container } from 'typedi';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling Create ordersHistory endpoint');
   try {
     const OrdersHistoryServiceInstance = Container.get(OrdersHistory);
-    const ordersHistory = await OrdersHistoryServiceInstance.create({ ...req.body });
+    const ordersHistory = await OrdersHistoryServiceInstance.create({ ...req.body,domain:user_domain });
     return res.status(201).json({ message: 'created succesfully', data: ordersHistory });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -20,9 +21,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all ordersHistory endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const OrdersHistoryServiceInstance = Container.get(OrdersHistory);
-    const ordersHistory = await OrdersHistoryServiceInstance.find({});
+    const ordersHistory = await OrdersHistoryServiceInstance.find({domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: ordersHistory });
   } catch (e) {
     logger.error('🔥 error: %o', e);

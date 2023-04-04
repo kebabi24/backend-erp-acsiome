@@ -7,7 +7,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create forcast endpoint")
     try {
@@ -15,7 +15,7 @@ const{user_domain} = req.headers
         
         const { Details } = req.body
         for (let entry of Details) {
-            entry = { ...entry,  created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry, frc_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await forcastServiceInstance.create(entry)
         }
         return res
@@ -46,11 +46,13 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     
     logger.debug("Calling find all site endpoint")
     try {
         const forcastServiceInstance = Container.get(ForcastService)
-        const forcasts = await forcastServiceInstance.find({})
+        const forcasts = await forcastServiceInstance.find({frc_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: forcasts })
@@ -63,10 +65,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const forcastServiceInstance = Container.get(ForcastService)
         
-        const forcasts = await forcastServiceInstance.find({...req.body})
+        const forcasts = await forcastServiceInstance.find({...req.body,frc_domain:user_domain})
        
         return res
             .status(200)
@@ -80,9 +84,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const forcastServiceInstance = Container.get(ForcastService)
-        const forcasts = await forcastServiceInstance.findOne({...req.body})
+        const forcasts = await forcastServiceInstance.findOne({...req.body,frc_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: forcasts })
@@ -95,7 +101,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  site endpoint")
     try {

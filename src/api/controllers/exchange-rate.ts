@@ -11,7 +11,7 @@ const{user_domain} = req.headers
   logger.debug('Calling Create exchangeRate endpoint');
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
-    const exchangeRate = await exchangeRateServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
+    const exchangeRate = await exchangeRateServiceInstance.create({...req.body,exr_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
     return res.status(201).json({ message: 'created succesfully', data: exchangeRate });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -36,9 +36,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all exchangeRate endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
-    const exchangeRates = await exchangeRateServiceInstance.find({});
+    const exchangeRates = await exchangeRateServiceInstance.find({exr_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: exchangeRates });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -49,9 +51,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all exchangeRate endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
-    const exchangeRates = await exchangeRateServiceInstance.find({ ...req.body });
+    const exchangeRates = await exchangeRateServiceInstance.find({ ...req.body,exr_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: exchangeRates });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -61,9 +65,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all exchangeRate endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
-    const exchangeRate = await exchangeRateServiceInstance.findOne({ ...req.body });
+    const exchangeRate = await exchangeRateServiceInstance.findOne({ ...req.body , exr_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: exchangeRate });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -103,12 +109,15 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const getExRate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
     const { exr_curr1, exr_curr2, date } = req.body;
     // console.log(req.body)
     //console.log(date);
     const exchangeRates = await exchangeRateServiceInstance.findOne({
+      exr_domain:user_domain,
       exr_curr1,
       exr_curr2,
       exr_start_date: {

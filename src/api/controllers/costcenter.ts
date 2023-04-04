@@ -8,7 +8,7 @@ import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -21,13 +21,13 @@ const{user_domain} = req.headers
         )
         const { costcenter, costsub, costaccount } = req.body
         console.log(costsub)
-        const cc = await costcenterServiceInstance.create({...costcenter, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const cc = await costcenterServiceInstance.create({...costcenter, cc_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of costsub) {
-            entry = { ...entry, ccd2_cc: costcenter.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry, ccd2_domain:user_domain,ccd2_cc: costcenter.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await CostsubServiceInstance.create(entry)
         }
         for (let entry of costaccount) {
-            entry = { ...entry, ccd1_cc: costcenter.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry,ccd1_domain:user_domain, ccd1_cc: costcenter.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await CostaccountServiceInstance.create(entry)
         }
         return res
@@ -43,10 +43,12 @@ const{user_domain} = req.headers
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         console.log(req.body)
         const costcenterServiceInstance = Container.get(CostcenterService)
-        const cc = await costcenterServiceInstance.find({...req.body})
+        const cc = await costcenterServiceInstance.find({...req.body,cc_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: cc })
@@ -59,6 +61,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByDet = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         console.log(req.body)
         const costcenterServiceInstance = Container.get(CostcenterService)
@@ -69,11 +73,11 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
             CostaccountService
         )
         
-        const cc = await costcenterServiceInstance.findOne({...req.body})
-        const subdetails = await costsubServiceInstance.find({
+        const cc = await costcenterServiceInstance.findOne({...req.body,cc_domain:user_domain})
+        const subdetails = await costsubServiceInstance.find({ccd2_domain:user_domain,
             ccd2_cc: cc.cc_ctr,
         })
-        const accdetails = await costaccountServiceInstance.find({
+        const accdetails = await costaccountServiceInstance.find({ ccd1_domain:user_domain,
             ccd1_cc: cc.cc_ctr,
         })
         
@@ -90,6 +94,8 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  cc endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const costcenterServiceInstance = Container.get(CostcenterService)
         const { id } = req.params
@@ -101,10 +107,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             CostaccountService
         )
         const subdetails = await costsubServiceInstance.find({
-            ccd2_cc: cc.cc_ctr,
+            ccd2_cc: cc.cc_ctr, ccd2_domain:user_domain
         })
         const accdetails = await costaccountServiceInstance.find({
-            ccd1_cc: cc.cc_ctr,
+            ccd1_cc: cc.cc_ctr,ccd1_domain:user_domain
         })
 
         return res.status(200).json({
@@ -122,9 +128,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all task endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const costcenterServiceInstance = Container.get(CostcenterService)
-        const ccs = await costcenterServiceInstance.find({})
+        const ccs = await costcenterServiceInstance.find({cc_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ccs })
@@ -156,14 +164,14 @@ const{user_domain} = req.headers
             { ...req.body.cc , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await costaccountServiceInstance.delete({ccd1_cc: cc.cc_ctr})
+        await costaccountServiceInstance.delete({ccd1_cc: cc.cc_ctr,ccd1_domain:user_domain})
         for (let entry of accdetails) {
-            entry = { ...entry, ccd1_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, ccd1_domain:user_domain,ccd1_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await costaccountServiceInstance.create(entry)
         }
-        await costsubServiceInstance.delete({ccd2_cc: cc.cc_ctr})
+        await costsubServiceInstance.delete({ccd2_cc: cc.cc_ctr,ccd2_domian:user_domain})
         for (let entry of subdetails) {
-            entry = { ...entry, ccd2_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, ccd2_domain:user_domain,ccd2_cc: cc.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await costsubServiceInstance.create(entry)
         }
         return res
@@ -177,13 +185,15 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
 
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const ccs =await sequelize.query('SELECT  PUBLIC.cc_mstr.id as "cid"  , *  FROM   PUBLIC.cc_mstr,  PUBLIC.ccd2_det , PUBLIC.ccd1_det where PUBLIC.ccd2_det.ccd2_cc = PUBLIC.cc_mstr.cc_ctr  and  PUBLIC.ccd1_det where PUBLIC.ccd1_det.ccd1_cc = PUBLIC.cc_mstr.cc_ctr ORDER BY PUBLIC.cc_mstr.id ASC', { type: QueryTypes.SELECT });
+        const ccs =await sequelize.query('SELECT  PUBLIC.cc_mstr.id as "cid"  , *  FROM   PUBLIC.cc_mstr,  PUBLIC.ccd2_det , PUBLIC.ccd1_det where PUBLIC.ccd2_det.ccd2_cc = PUBLIC.cc_mstr.cc_ctr  and   PUBLIC.ccd1_det.ccd1_cc = PUBLIC.cc_mstr.cc_ctr and PUBLIC.ccd1_det.ccd1_domain= PUBLIC.cc_mstr.cc_domain and PUBLIC.ccd2_det.ccd2_domain = PUBLIC.cc_mstr.cc_domain and PUBLIC.cc_mstr.cc_domain = ? ORDER BY PUBLIC.cc_mstr.id ASC', { replacements: [user_domain], type: QueryTypes.SELECT },);
        console.log(ccs.sid)
         return res
             .status(200)

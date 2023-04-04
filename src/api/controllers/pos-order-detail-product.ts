@@ -6,6 +6,8 @@ import { Container } from 'typedi';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
 
   logger.debug('Calling Create order endpoint');
   try {
@@ -15,6 +17,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const total_price = req.body.cart.total_price;
     const products = req.body.cart.products;
     await PosOrderServiceInstance.create({
+      domain:user_domain,
       order_code: cart.code_cart,
       total_price: cart.total_price,
       order_emp: cart.order_emp,
@@ -28,6 +31,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       let ing = product.ingredients;
       for (const supp of supps) {
         await PosOrderDetailServiceInstance.create({
+          domain:user_domain,
           order_code: cart.code_cart,
           pt_part: pt_part,
           pt_part_det: supp.pt_part,
@@ -62,9 +66,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const order = await PosOrderServiceInstance.find({});
+    const order = await PosOrderServiceInstance.find({domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -75,9 +82,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const order = await PosOrderServiceInstance.findOne({ ...req.body });
+    const order = await PosOrderServiceInstance.findOne({ ...req.body,domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -88,9 +98,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOrd = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
-    const order = await PosOrderDetailServiceInstance.find({ ...req.body });
+    const order = await PosOrderDetailServiceInstance.find({ ...req.body,domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);

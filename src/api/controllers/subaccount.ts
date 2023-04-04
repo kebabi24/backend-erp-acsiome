@@ -17,9 +17,9 @@ const{user_domain} = req.headers
         )
         const { subaccount, Details } = req.body
         console.log(Details)
-        const sub = await subaccountServiceInstance.create({...subaccount, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const sub = await subaccountServiceInstance.create({...subaccount, sb_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of Details) {
-            entry = { ...entry, sbd_sub: sub.sb_sub, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry,sbd_domain: user_domain, sbd_sub: sub.sb_sub, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await subaccountDetailServiceInstance.create(entry)
         }
         return res
@@ -35,10 +35,11 @@ const{user_domain} = req.headers
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_domain} = req.headers
     try {
         console.log(req.body)
         const subaccountServiceInstance = Container.get(SubaccountService)
-        const sub = await subaccountServiceInstance.find({...req.body})
+        const sub = await subaccountServiceInstance.find({...req.body,sb_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: sub })
@@ -50,14 +51,16 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByDet = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_domain} = req.headers
     try {
         console.log(req.body)
         const subaccountServiceInstance = Container.get(SubaccountService)
         const subaccountDetailServiceInstance = Container.get(
             SubaccountDetailService
         )
-        const sub = await subaccountServiceInstance.findOne({...req.body})
+        const sub = await subaccountServiceInstance.findOne({...req.body,sb_domain: user_domain})
         const details = await subaccountDetailServiceInstance.find({
+            sbd_domain: user_domain,
             sbd_sub: sub.sb_sub,
         })
         return res
@@ -73,6 +76,7 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  task endpoint")
+    const{user_domain} = req.headers
     try {
         const subaccountServiceInstance = Container.get(SubaccountService)
         const { id } = req.params
@@ -81,6 +85,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             SubaccountDetailService
         )
         const details = await subaccountDetailServiceInstance.find({
+            sbd_domain: user_domain,
             sbd_sub: sub.sb_sub,
         })
 
@@ -100,9 +105,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all task endpoint")
+    const{user_domain} = req.headers
     try {
         const subaccountServiceInstance = Container.get(SubaccountService)
-        const subs = await subaccountServiceInstance.find({})
+        const subs = await subaccountServiceInstance.find({sb_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: subs })
@@ -131,9 +137,9 @@ const{user_domain} = req.headers
             { ...req.body.sub , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await subaccountDetailServiceInstance.delete({sbd_sub: sub.sb_sub})
+        await subaccountDetailServiceInstance.delete({sbd_domain: user_domain,sbd_sub: sub.sb_sub})
         for (let entry of details) {
-            entry = { ...entry, sbd_sub: sub.sb_sub, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, sbd_domain: user_domain,sbd_sub: sub.sb_sub, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await subaccountDetailServiceInstance.create(entry)
         }
         return res
@@ -147,13 +153,13 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
-
+    const{user_domain} = req.headers
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const sbs =await sequelize.query('SELECT  PUBLIC.sb_mstr.id as "sid"  , *  FROM   PUBLIC.sb_mstr,  PUBLIC.sbd_det  where PUBLIC.sbd_det.sbd_sub = PUBLIC.sb_mstr.sb_sub  ORDER BY PUBLIC.sb_mstr.id ASC', { type: QueryTypes.SELECT });
+        const sbs =await sequelize.query('SELECT  PUBLIC.sb_mstr.id as "sid"  , *  FROM   PUBLIC.sb_mstr,  PUBLIC.sbd_det  where PUBLIC.sbd_det.sbd_domain = ? and PUBLIC.sb_mstr.sb_domain = UBLIC.sbd_det.sbd_domain  and PUBLIC.sbd_det.sbd_sub = PUBLIC.sb_mstr.sb_sub  ORDER BY PUBLIC.sb_mstr.id ASC', {replacements: [user_domain], type: QueryTypes.SELECT });
        console.log(sbs.sid)
         return res
             .status(200)

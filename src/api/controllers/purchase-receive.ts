@@ -58,6 +58,7 @@ for (const arr of result) {
 
   
   await purchaseReceiveServiceInstance.create({
+    prh_domain: user_domain,
     prh_receiver: req.body.prhnbr,
     ...arr,
     prh_line :i,
@@ -69,6 +70,7 @@ for (const arr of result) {
   });
   i = i + 1
   const pod = await purchaseOrderDetailServiceInstance.findOne({
+    pod_domain: user_domain,
     pod_nbr: req.body.pr.prh_nbr,
     pod_part: arr.prh_part,
   });
@@ -86,7 +88,7 @@ for (const arr of result) {
 }
     for (const item of req.body.detail) {
       const { tr_status, tr_expire, desc, ...remain } = item;
-      const part = await itemsServiceInstance.findOne({ pt_part: remain.prh_part});
+      const part = await itemsServiceInstance.findOne({ pt_part: remain.prh_part, pt_domain: user_domain});
       // await purchaseReceiveServiceInstance.create({
       //   prh_receiver: req.body.prhnbr,
       //   ...remain,
@@ -112,12 +114,13 @@ for (const arr of result) {
       //   );
       var labelId = null
       if (part.pt_iss_pol) {
-      const seq = await sequenceServiceInstance.findOne({  seq_seq: "PL", seq_type: "PL"   });
+      const seq = await sequenceServiceInstance.findOne({  seq_domain: user_domain,seq_seq: "PL", seq_type: "PL"   });
       console.log(seq)
         labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
-      await sequenceServiceInstance.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { seq_type: "PL", seq_seq: "PL"  });
+      await sequenceServiceInstance.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { seq_type: "PL", seq_seq: "PL" , seq_domain:user_domain });
     }
       await inventoryTransactionServiceInstance.create({
+        tr_domain: user-domain,
         tr_status,
         tr_expire,
         tr_line: remain.prh_line,
@@ -148,13 +151,15 @@ for (const arr of result) {
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      const lds = await locationDetailServiceInstance.find({ ld_part: remain.prh_part, ld_site: req.body.pr.prh_site });
+      const lds = await locationDetailServiceInstance.find({ ld_domain: user_domain,ld_part: remain.prh_part, ld_site: req.body.pr.prh_site });
       const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
         sct_sim: 'STDCG',
       });
       const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
         sct_sim: 'STDCG',
@@ -187,14 +192,16 @@ for (const arr of result) {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STDCG' },
+        { sct_domain: user_domain,sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STDCG' },
       );
       //console.log(tr_status);
       const status = await statusServiceInstance.findOne({
+        is_domain: user_domain,
         is_status: tr_status,
       });
      // console.log(status, 'here');
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
         ld_part: remain.prh_part,
         ld_lot: remain.prh_serial,
         ld_site: req.body.pr.prh_site,
@@ -214,6 +221,7 @@ for (const arr of result) {
         );
       else
         await locationDetailServiceInstance.create({
+          ld_domain: user_domain,
           ld_part: remain.prh_part,
           ld_date: new Date(),
           ld_lot: remain.prh_serial,
@@ -233,7 +241,8 @@ for (const arr of result) {
       /****create label**** */
       if (part.pt_iss_pol) {
       await labelServiceInstance.create({
-      lb_site:req.body.pr.prh_site, 
+        lb_domain: user_domain,
+        lb_site:req.body.pr.prh_site, 
 
         lb_loc: remain.prh_loc, 
 
@@ -252,7 +261,7 @@ for (const arr of result) {
         lb_qty: remain.prh_rcvd,
         lb_ld_status: tr_status,
         lb_desc: part.pt_desc1,
-        lb_domain:  user_domain,
+        
       /****create label**** */
       
       })
@@ -263,7 +272,7 @@ for (const arr of result) {
     }
     }
     const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend });
+    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend ,ad_domain: user_domain});
     //console.log("\n\n req body : ", req.body)
 
     const { detail, pr, prhnbr } = req.body;
@@ -289,6 +298,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { detail } = req.body;
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling find one  code endpoint');
   try {
@@ -301,14 +311,15 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
     const sequenceServiceInstance = Container.get(SequenceService);
     const purchaseOrderDetailServiceInstance = Container.get(purchaseOrderDetailService);
     const statusServiceInstance = Container.get(inventoryStatusService);
-    const user = await userServiceInstance.findOne({ usrd_code: user_code });
-    const seq = await sequenceServiceInstance.findOne({ seq_type: 'PR', seq_profile: user.usrd_profile });
+    const user = await userServiceInstance.findOne({ usrd_code: user_code , usrd_domain: user_domain});
+    const seq = await sequenceServiceInstance.findOne({seq_domain: user_domain, seq_type: 'PR', seq_profile: user.usrd_profile });
 
     const prh_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update({ seq_curr_val: Number(seq.seq_curr_val) + 1 }, { id: seq.id });
     for (const po of detail) {
-      const poo = await purchaseOrderServiceInstance.findOne({ po_nbr: po.pod_nbr });
+      const poo = await purchaseOrderServiceInstance.findOne({ po_nbr: po.pod_nbr, pod_domain: user_domain });
       await purchaseReceiveServiceInstance.create({
+        prh_domain: user_domain,
         prh_receiver: prh_nbr,
         prh_nbr: po.pod_nbr,
         prh_vend: poo.po_vend,
@@ -329,6 +340,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
       const pod = await purchaseOrderDetailServiceInstance.findOne({
+        pod_domain: user_domain,
         pod_nbr: po.pod_nbr,
         pod_part: po.pod_part,
         pod_line: po.pod_line,
@@ -344,6 +356,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
       );
 
       await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
         tr_status: null,
         tr_expire: null,
         tr_line: po.pod_line,
@@ -371,13 +384,15 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      const lds = await locationDetailServiceInstance.find({ ld_part: po.pod_part, ld_site: po.pod_site });
+      const lds = await locationDetailServiceInstance.find({ ld_domain: user_domain,ld_part: po.pod_part, ld_site: po.pod_site });
       const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
         sct_part: po.pod_part,
         sct_site: po.pod_site,
         sct_sim: 'STDCG',
       });
       const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
         sct_part: po.pod_part,
         sct_site: po.pod_site,
         sct_sim: 'STDCG',
@@ -403,10 +418,11 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_part: po.pod_part, sct_site: po.pod_site, sct_sim: 'STDCG' },
+        { sct_domain: user_domain,sct_part: po.pod_part, sct_site: po.pod_site, sct_sim: 'STDCG' },
       );
 
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
         ld_part: po.pod_part,
         ld_lot: po.pod_serial,
         ld_site: po.pod_site,
@@ -424,6 +440,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         );
       else
         await locationDetailServiceInstance.create({
+          ld_domain: user_domain,
           ld_part: po.pod_part,
           ld_date: new Date(),
           ld_lot: po.pod_serial,
@@ -463,9 +480,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
+  const { user_domain} = req.headers;
   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
-    const devise = await purchaseReceiveServiceInstance.find({});
+    const devise = await purchaseReceiveServiceInstance.find({prh_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -475,9 +493,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findGroup = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
+  const { user_domain} = req.headers;
+ 
   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
-    const devise = await purchaseReceiveServiceInstance.distinct({});
+    const devise = await purchaseReceiveServiceInstance.distinct({prh_domian:user_domain});
     console.log(devise);
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
@@ -488,7 +508,8 @@ const findGroup = async (req: Request, res: Response, next: NextFunction) => {
 const findAllDistinct = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const sequelize = Container.get('sequelize');
-
+  const { user_domain} = req.headers;
+ 
   logger.debug('Calling find all purchaseOrder endpoint');
   try {
     let result = [];
@@ -497,8 +518,8 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     console.log(liste, 'disting');
 
     const prhs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_invoiced = 'false' and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
-      { replacements: [distinct, liste], type: QueryTypes.SELECT },
+      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
+      { replacements: [user_domain,distinct, liste], type: QueryTypes.SELECT },
     );
     return res.status(200).json({ message: 'fetched succesfully', data: prhs });
   } catch (e) {
@@ -511,14 +532,15 @@ const findDistinct = async (req: Request, res: Response, next: NextFunction) => 
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
   const sequelize = Container.get('sequelize');
-
+  const { user_domain} = req.headers;
+ 
   logger.debug('Calling find all purchaseOrder endpoint');
   try {
     let result = [];
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
     const prhs = await sequelize.query(
-      'SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist.id,  PUBLIC.prh_hist.prh_rcp_date  FROM   PUBLIC.prh_hist ',
-      { type: QueryTypes.SELECT },
+      'SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist.id,  PUBLIC.prh_hist.prh_rcp_date  FROM   PUBLIC.prh_hist  where PUBLIC.prh_hist.prh_domain = ? ',
+      { replacements: [user_domain],type: QueryTypes.SELECT },
     );
     console.log(prhs);
     return res.status(200).json({ message: 'fetched succesfully', data: prhs });
@@ -530,9 +552,10 @@ const findDistinct = async (req: Request, res: Response, next: NextFunction) => 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  try {
+  const { user_domain} = req.headers;
+   try {
     const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
-    const prh = await purchaseReceiveServiceInstance.find({ ...req.body });
+    const prh = await purchaseReceiveServiceInstance.find({ ...req.body , prh_domain: user_domain});
     console.log(prh)
     return res.status(200).json({ message: 'fetched succesfully', data: prh });
   } catch (e) {
@@ -580,6 +603,8 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 const findGroupRCP = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain} = req.headers;
+ 
   const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
   try {
 const prhs = await purchaseReceiveServiceInstance.findspec({

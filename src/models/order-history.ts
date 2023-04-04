@@ -21,6 +21,7 @@ const OrdersHistory = sequelize.define(
     usrd_site: Sequelize.STRING,
     order_emp: Sequelize.STRING,
     deleted_date: Sequelize.DATEONLY,
+    domain:Sequelize.STRING,
   },
   {
     tableName: 'orders_history',

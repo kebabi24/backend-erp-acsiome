@@ -26,6 +26,7 @@ const{user_domain} = req.headers
     if (!isNaN(lastId)) {  tagId = Number(lastId) };
     
     const items = await itemService.find({
+      pt_domain: user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -42,6 +43,7 @@ const{user_domain} = req.headers
     const result = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
         ld_part: item.pt_part,
         ld_site: { [Op.between]: [req.body.pt_site_1, req.body.pt_site_2] },
         ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
@@ -56,7 +58,7 @@ const{user_domain} = req.headers
           tag_site: detail.ld_site,
           tag_type: detail.pt_part_type,
         };
-        const tag = await tagServiceInstance.create({...data, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
+        const tag = await tagServiceInstance.create({...data, tag_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
         result.push({ tag, item });
       }
     }
@@ -89,7 +91,7 @@ const{user_domain} = req.headers
       const { Detail } = req.body
        // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of Detail) {
-            entry = { ...entry, tag_nbr: tagId + 1 }
+            entry = { ...entry, tag_domain: user_domain,tag_nbr: tagId + 1 }
             await tagServiceInstance.create(entry)
         }
       //const tag = await tagServiceInstance.create({...req.body,tag_nbr: tagId + 1, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
@@ -108,10 +110,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all tag endpoint');
+  const{user_domain} = req.headers
   try {
     const tagServiceInstance = Container.get(TagService);
     const tags = await tagServiceInstance.find({
-      ...req.body,
+      ...req.body,tag_domain: user_domain
     });
 
     return res.status(200).json({
@@ -126,6 +129,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByLastId = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
+  const{user_domain} = req.headers
   logger.debug('Calling find by  all tag endpoint');
   try {
     const tagServiceInstance = Container.get(TagService);
@@ -145,10 +149,11 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all tag endpoint');
+  const{user_domain} = req.headers
   try {
     const tagServiceInstance = Container.get(TagService);
     const tag = await tagServiceInstance.findOne({
-      ...req.body,
+      ...req.body, tag_domain: user_domain
     });
 
     return res.status(200).json({
@@ -164,6 +169,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  tag endpoint');
+  const{user_domain} = req.headers
   try {
     const tagServiceInstance = Container.get(TagService);
     const { id } = req.params;
@@ -181,10 +187,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
+  const{user_domain} = req.headers
   logger.debug('Calling find all tag endpoint');
   try {
     const tagServiceInstance = Container.get(TagService);
-    const vps = await tagServiceInstance.find({});
+    const vps = await tagServiceInstance.find({tagf_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: vps });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -233,15 +240,17 @@ const gap = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all tag endpoint');
+  const{user_domain} = req.headers
   try {
     const tagServiceInstance = Container.get(TagService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const data = [];
     const tags = await tagServiceInstance.find({
-      ...req.body,
+      ...req.body, tag_domain: user_domain
     });
     for (const tag of tags) {
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
         ld_part: tag.tag_part,
         ld_lot: tag.tag_serial,
         ld_site: tag.tag_site,
@@ -277,6 +286,7 @@ const{user_domain} = req.headers
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const lastId = await tagServiceInstance.max('tag_nbr');
     const items = await itemService.find({
+      pt_domain: user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -294,6 +304,7 @@ const{user_domain} = req.headers
     const result = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
         ld_part: item.pt_part,
         ld_site: { [Op.between]: [req.body.pt_site_1, req.body.pt_site_2] },
         ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
@@ -331,7 +342,7 @@ const{user_domain} = req.headers
     
     const data = [];
     const tags = await tagServiceInstance.find({
-      ...req.body,
+      ...req.body, tag_domain: user_domain
     });
     for (const tag of tags) {
 //console.log(tag, "boucle")
@@ -352,15 +363,16 @@ const{user_domain} = req.headers
       } = tag;
       if(tag.bool01==true){
         const loc = await locationServiceInstance.findOne({
+          loc_domain: user_domain,
           loc_site: tag.tag_site,
           loc_loc: tag.tag_loc,
         }); 
       
         await locationDetailServiceInstance.create(
-          { ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
         )
       }
-      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_part: pt_part, sct_sim: 'STDCG' });
+      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STDCG' });
      // console.log({ ...tag.dataValues,tag_posted: true })
       await tagServiceInstance.update({ ...tag.dataValues,tag_posted: true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id: tag.id });
       /*onst {
@@ -379,6 +391,7 @@ const{user_domain} = req.headers
       });*/
       //console.log(tag.tag_serial)
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain ,
         ld_part: tag.tag_part,
         ld_lot: tag.tag_serial,
         ld_site: tag.tag_site,
@@ -398,6 +411,7 @@ const{user_domain} = req.headers
       const qty2 = tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty;
       const tr_qty_loc = qty2 - qty1;
       await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
         tr_part: ld.ld_part,
         tr_type: 'CYC_RCNT',
         tr_date: new Date(),
