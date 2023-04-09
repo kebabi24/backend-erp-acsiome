@@ -12,9 +12,11 @@ import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import purchaseOrderService from '../../services/purchase-order';
 import AddressService from '../../services/address';
-
+import { print } from 'pdf-to-printer';
 import { generatePdf } from '../../reporting/generator';
 
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -476,6 +478,55 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const test = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const doc = new PDFDocument({
+      size: [306, 306],
+      layout: 'portrait',
+    });
+
+    doc.image('logo.png', {
+      fit: [200, 60], // Fit the image inside a rectangle of width 250 and height 300
+      align: 'center', // Align the image to the center of the page horizontally
+      valign: 'top', // Align the image to the top of the page vertically
+      x: doc.page.width / 2 - 200 / 2, // Center the image horizontally
+      y: doc.page.margins.top - 75, // Set the y-coordinate to the top margin
+    });
+    // Define the rectangles
+    const rectWidth = 300;
+    const rectHeight = 35;
+    const rectSpacing = 10;
+    const rectX = (doc.page.width - rectWidth) / 2;
+    let rectY = 70;
+
+    for (let i = 0; i < 5; i++) {
+      // Draw the rectangle
+      doc.rect(rectX, rectY, rectWidth, rectHeight, 10).stroke();
+
+      // Add the text inside the rectangle
+      doc.text(`REFERENCE ${i + 1} :`, 10, rectY + rectHeight / 2 - 5, {
+        // align: 'center',
+        // valign: 'center',
+      });
+
+      // Increment the y position for the next rectangle
+
+      rectY += rectHeight + rectSpacing;
+    }
+    doc.pipe(fs.createWriteStream('output.pdf'));
+    doc.end();
+    // const options = {
+    //   printer: 'Xprinter XP-TT426B',
+    // };
+    // print('output.pdf', options).then(console.log);
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -487,4 +538,5 @@ export default {
   update,
   deleteOne,
   rctPo,
+  test,
 };

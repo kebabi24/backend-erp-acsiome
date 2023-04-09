@@ -20,6 +20,7 @@ const Categories = sequelize.define(
     },
     category_name: Sequelize.STRING,
     category_img: Sequelize.STRING,
+    category_profile: Sequelize.STRING,
     rang: Sequelize.INTEGER,
     direct: Sequelize.BOOLEAN,
   },

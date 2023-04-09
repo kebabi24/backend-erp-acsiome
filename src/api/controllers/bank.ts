@@ -253,7 +253,11 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
             status: 'P',
           },
 
-          { order_code: cart.order_code, usrd_site: cart.usrd_site },
+          {
+            order_code: cart.order_code,
+            usrd_site: cart.usrd_site,
+            created_date: currentService.service_period_activate_date,
+          },
         );
       }
     }

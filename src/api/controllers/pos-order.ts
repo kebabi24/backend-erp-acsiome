@@ -385,7 +385,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           );
         }
       }
-
+      console.log('detail', detail);
       for (const item of detail) {
         const sct = await costSimulationServiceInstance.findOne({
           sct_part: item.wod_part,
