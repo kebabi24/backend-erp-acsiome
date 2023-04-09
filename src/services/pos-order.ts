@@ -1,4 +1,5 @@
 import { Service, Inject } from 'typedi';
+import { Op ,Sequelize } from "sequelize";
 
 @Service()
 export default class posOrderService {
@@ -185,6 +186,7 @@ export default class posOrderService {
     try {
       const order = await this.posOrderModel.update(data, { where: query });
       this.logger.silly('update one orders mstr');
+      
       return order;
     } catch (e) {
       this.logger.error(e);
@@ -202,10 +204,16 @@ export default class posOrderService {
     }
   }
 
-  public async findAllPosOrders(): Promise<any> {
+  public async findAllPosOrders(startDate: any, endDate:any): Promise<any> {
     try {
+      
       const orders = await this.posOrderModel.findAll({
-        attributes:["id","usrd_site","total_price","created_date"]
+        where :Sequelize.and( 
+          {del_comp  :{[Op.not]: "null"}},
+          {created_date :  {[Op.gte]:new Date(startDate)}},
+          {created_date :  {[Op.lte]:new Date(endDate)}},    
+        ),
+        attributes:["id","usrd_site","total_price","del_comp","created_date","customer"]
       });
       this.logger.silly('found all orders mstr');
       return orders;
