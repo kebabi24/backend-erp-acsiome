@@ -43,6 +43,7 @@ const OrderPosProductIng = sequelize.define(
     usrd_site: Sequelize.STRING,
     created_date: Sequelize.DATEONLY,
     bool05: Sequelize.BOOLEAN,
+    domain:Sequelize.STRING,
   },
   {
     tableName: 'bb_order_pos_detail_product_ing',

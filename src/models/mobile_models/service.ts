@@ -43,6 +43,7 @@ const Service = sequelize.define(
     service_open: { type: Sequelize.BOOLEAN },
     service_kmdep: { type: Sequelize.STRING },
     service_kmarr: { type: Sequelize.STRING },
+    service_domain: Sequelize.STRING,
     // ...base,
   },
   {

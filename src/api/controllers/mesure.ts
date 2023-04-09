@@ -5,12 +5,12 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create mesure endpoint")
     try {
         const mesureServiceInstance = Container.get(MesureService)
-        const mesure = await mesureServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const mesure = await mesureServiceInstance.create({...req.body,um_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  mesure })
@@ -39,9 +39,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all mesure endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const mesureServiceInstance = Container.get(MesureService)
-        const mesures = await mesureServiceInstance.find({})
+        const mesures = await mesureServiceInstance.find({ud_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: mesures })
@@ -54,9 +56,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all mesure endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const mesureServiceInstance = Container.get(MesureService)
-        const mesures = await mesureServiceInstance.findOne({...req.body})
+        const mesures = await mesureServiceInstance.findOne({...req.body,um_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: mesures })
@@ -69,7 +73,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
     logger.debug("Calling update one  mesure endpoint")
     try {
         const mesureServiceInstance = Container.get(MesureService)
@@ -87,6 +91,8 @@ const{user_domain} = req.headers
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling update one  mesure endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const mesureServiceInstance = Container.get(MesureService)
         const {id} = req.params

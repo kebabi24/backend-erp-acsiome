@@ -9,6 +9,9 @@ const createProductPage = async (req: Request, res: Response, next: NextFunction
     const logger = Container.get("logger")
 
     logger.debug("Calling Create productPage endpoint with body: %o", req.body)
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         console.log("heyyyy")
         const productPageService = Container.get(ProductPageService)
@@ -17,7 +20,7 @@ const createProductPage = async (req: Request, res: Response, next: NextFunction
         const productCodes = req.body.productsCodes.productCodes
         
         const productPage = await productPageService.createProductPage({
-            ...req.body.productPage.productPage,
+            ...req.body.productPage.productPage,domain:user_domain
         })
 
         
@@ -29,7 +32,8 @@ const createProductPage = async (req: Request, res: Response, next: NextFunction
                 },
                 {
                     productCode,
-                })
+                },
+               )
         }
 
         

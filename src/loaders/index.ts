@@ -44,6 +44,7 @@ export default async ({ expressApp }) => {
       { name: 'taxeModel', model: require('../models/taxe').default },
       { name: 'siteModel', model: require('../models/site').default },
       { name: 'locationModel', model: require('../models/location').default },
+      { name: 'locationFilterModel', model: require('../models/location-filter').default },
       { name: 'profileModel', model: require('../models/profile').default },
       { name: 'userModel', model: require('../models/user').default },
       { name: 'requisitionModel', model: require('../models/requisition').default },
@@ -120,6 +121,7 @@ export default async ({ expressApp }) => {
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
       { name: 'forcastModel', model: require('../models/forcast').default },
       { name: 'labelModel', model: require('../models/label').default },
+      { name: 'domainModel', model: require('../models/domain').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -827,19 +829,24 @@ export default async ({ expressApp }) => {
     foreignKey: 'empt_code',
     targetKey: 'emp_addr',
   });
+  // require('../models/location-filter').default.belongsTo(require('../models/location').default, {
+  //   foreignKey: 'loc_loc',
+  //   targetKey: 'loc_loc',
+  // });
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
+  //await sequelizeConnection.sync();
   //await sequelizeConnection.sync();l
 
-  // await sequelizeConnection
-  //   .sync({ alter: true })
-  //   .then(() => {
-  //     console.log('database updated');
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //   });
+  await sequelizeConnection
+    .sync({ alter: true })
+    .then(() => {
+      console.log('database updated');
+    })
+    .catch(err => {
+      console.log(err);
+    });
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

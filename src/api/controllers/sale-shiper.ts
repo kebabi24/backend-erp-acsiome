@@ -10,6 +10,7 @@ import { Container } from 'typedi';
 import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import { generatePdf } from '../../reporting/generator';
+import { domain } from 'process';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -30,6 +31,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     for (const item of req.body.detail) {
       const { ...remain } = item;
       await saleShiperServiceInstance.create({
+        psh_domain: user_domain,
         psh_shiper: req.body.pshnbr,
         ...remain,
         ...req.body.ps,
@@ -39,6 +41,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
       const sod = await saleOrderDetailServiceInstance.findOne({
+        sod_domain: user_domain,
         sod_nbr: req.body.ps.psh_nbr,
         sod_line: remain.psh_line,
         sod_part: remain.psh_part,
@@ -53,16 +56,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           { id: sod.id },
         );
       const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
         sct_part: remain.psh_part,
         sct_site: remain.psh_site,
         sct_sim: 'STDCG',
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: remain.psh_part });
+      const pt = await itemServiceInstance.findOne({ pt_domain: user_domain,pt_part: remain.psh_part });
       //console.log(remain.psh_part, remain.psh_site)
 
       //console.log(remain.qty_oh)
       //console.log(sctdet.sct_cst_tot)
       await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
         tr_status: remain.psh_status,
         tr_expire: remain.psh_expire,
         tr_line: remain.psh_line,
@@ -103,6 +108,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
       if (remain.psh_type != 'M') {
         const ld = await locationDetailServiceInstance.findOne({
+          ld_domain: user_domain,
           ld_part: remain.psh_part,
           ld_lot: remain.psh_serial,
           ld_site: remain.psh_site,
@@ -120,6 +126,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           );
         else
           await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
             ld_part: remain.psh_part,
             ld_date: new Date(),
             ld_lot: remain.psh_serial,
@@ -140,7 +147,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { detail, ps, pshnbr, tot } = req.body;
     console.log('\n\n ps ', ps);
     const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: ps.psh_cust });
+    const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: ps.psh_cust });
 
     const pdfData = {
       detail: detail,
@@ -178,9 +185,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const saleShiperServiceInstance = Container.get(SaleShiperService);
-    const shiper = await saleShiperServiceInstance.find({});
+    const shiper = await saleShiperServiceInstance.find({psh_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: shiper });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -191,7 +200,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAllDistinct = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const sequelize = Container.get('sequelize');
-
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   logger.debug('Calling find all purchaseOrder endpoint');
   try {
     let result = [];
@@ -199,8 +209,8 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
     console.log(distinct);
     const pshs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.psh_hist.psh_shiper, PUBLIC.psh_hist.psh_cust, PUBLIC.psh_hist.psh_ship_date  FROM   PUBLIC.psh_hist where PUBLIC.psh_hist.psh_invoiced = 'false' and  PUBLIC.psh_hist.psh_cust = ? ",
-      { replacements: [distinct], type: QueryTypes.SELECT },
+      "SELECT DISTINCT PUBLIC.psh_hist.psh_shiper, PUBLIC.psh_hist.psh_cust, PUBLIC.psh_hist.psh_ship_date  FROM   PUBLIC.psh_hist where PUBLIC.psh_hist.psh_domain = ? and PUBLIC.psh_hist.psh_invoiced = 'false' and  PUBLIC.psh_hist.psh_cust = ? ",
+      { replacements: [user_domain,distinct], type: QueryTypes.SELECT },
     );
     console.log(pshs);
     return res.status(200).json({ message: 'fetched succesfully', data: pshs });
@@ -212,10 +222,12 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     console.log(req.body);
     const saleShiperServiceInstance = Container.get(SaleShiperService);
-    const shiper = await saleShiperServiceInstance.find({ ...req.body });
+    const shiper = await saleShiperServiceInstance.find({ ...req.body, psh_domain: user_domain });
     console.log(shiper);
     return res.status(200).json({ message: 'fetched succesfully', data: shiper });
   } catch (e) {

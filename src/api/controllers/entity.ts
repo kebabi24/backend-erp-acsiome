@@ -5,12 +5,12 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create code endpoint")
     try {
         const entityServiceInstance = Container.get(EntityService)
-        const entity = await entityServiceInstance.create({...req.body, created_by: user_code, last_modified_by: user_code})
+        const entity = await entityServiceInstance.create({...req.body,en_domain:user_domain, created_by: user_code, last_modified_by: user_code})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  entity })
@@ -40,9 +40,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const entityServiceInstance = Container.get(EntityService)
-        const entity = await entityServiceInstance.find({})
+        const entity = await entityServiceInstance.find({en_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: entity })
@@ -55,9 +57,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const entityServiceInstance = Container.get(EntityService)
-        const entity = await entityServiceInstance.find({...req.body})
+        const entity = await entityServiceInstance.find({...req.body,en_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: entity })

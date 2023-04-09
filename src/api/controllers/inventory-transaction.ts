@@ -27,7 +27,8 @@ import LocationDetailService from '../../services/location-details';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   console.log('\n\n Inventory transaction');
   logger.debug('Calling Create code endpoint');
@@ -35,6 +36,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const devise = await inventoryTransactionServiceInstance.create({
       ...req.body,
+      tr_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -65,9 +67,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const devise = await inventoryTransactionServiceInstance.find({});
+    const devise = await inventoryTransactionServiceInstance.find({tr_domain:user_domain});
     console.log('devise : ' + Object.keys(devise[0].dataValues));
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
@@ -79,9 +83,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const devise = await inventoryTransactionServiceInstance.findOne({ ...req.body });
+    const devise = await inventoryTransactionServiceInstance.findOne({ ...req.body,tr_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -92,14 +98,17 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOneinv = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const ServiceInstance = Container.get(serviceMobile);
     const { role_code, type } = req.body;
-    const currentService = await ServiceInstance.findOne({ role_code: role_code, service_open: true });
+    const currentService = await ServiceInstance.findOne({ role_code: role_code, service_open: true,service_domain:user_domain });
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const inv = await inventoryTransactionServiceInstance.findOne({
       tr_type: type,
       tr_effdate: currentService.service_period_activate_date,
+      tr_domain:user_domain
     });
     return res.status(200).json({ message: 'fetched succesfully', data: inv });
   } catch (e) {
@@ -142,7 +151,8 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 };
 const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -156,15 +166,17 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
     for (const data of detail) {
       const { desc, ...item } = data;
       const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
-      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_part: item.tr_part, sct_sim: 'STDCG' });
+      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_domain:user_domain });
+      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STDCG' });
       const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
@@ -192,13 +204,14 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_part: item.tr_part, sct_site: item.tr_site, sct_sim: 'STDCG' },
+        { sct_part: item.tr_part, sct_site: item.tr_site, sct_sim: 'STDCG',sct_domain:user_domain },
       );
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_domain:user_domain
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -212,6 +225,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       else {
         console.log(item.tr_status);
         const status = await statusServiceInstance.findOne({
+          is_domain:user_domain,
           is_status: item.tr_status,
         });
 
@@ -225,6 +239,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           ld__log01: status.is_nettable,
+          ld_domain:user_domain
         });
       }
       let qtyoh = 0;
@@ -236,6 +251,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       await inventoryTransactionServiceInstance.create({
         ...item,
         ...it,
+        tr_domain:user_domain,
         tr_lot: nlot,
         tr_qty_chg: Number(item.tr_qty_loc),
         tr_loc_begin: Number(qtyoh),
@@ -256,7 +272,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr });
+    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr,ad_domain:user_domain });
 
     const pdfData = {
       detail: detail,
@@ -277,7 +293,8 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
 
 const issUnp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -289,12 +306,14 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
 
     for (const item of detail) {
       const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain });
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain:user_domain,
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
@@ -314,6 +333,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         ...item,
         ...it,
         tr_lot: nlot,
+        tr_domain:user_domain,
         tr_gl_date: it.tr_effdate,
         tr_qty_loc: -1 * Number(item.tr_qty_loc),
         tr_qty_chg: -1 * Number(item.tr_qty_loc),
@@ -335,7 +355,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr });
+    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr ,ad_domain:user_domain});
 
     const pdfData = {
       detail: detail,
@@ -356,7 +376,9 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling update one  code endpoint');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
+console.log(user_domain)
   console.log('\n\n transfert');
   try {
     const { detail, it, nlot } = req.body;
@@ -371,19 +393,23 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         sct_part: item.tr_part,
         sct_site: it.tr_site,
         sct_sim: 'STDCG',
+        sct_domain: user_domain,
       });
       const sctrct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_ref_site,
         sct_sim: 'STDCG',
+        sct_domain: user_domain
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
 
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
         ld_site: it.tr_site,
         ld_loc: it.tr_loc,
+        ld_ref:item.tr_ref,
+        ld_domain:user_domain,
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -399,6 +425,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         ...it,
         tr_lot: nlot,
         tr_qty_loc: -1 * Number(item.tr_qty_loc),
+        tr_loc_begin: (ld) ? ld.ld_qty_oh : 0,
         tr_type: 'ISS-TR',
         tr_date: new Date(),
         tr_mtl_std: sct.sct_mtl_tl,
@@ -411,6 +438,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
       });
 
       const ld1 = await locationDetailServiceInstance.findOne({
@@ -418,11 +446,13 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: it.tr_ref_site,
         ld_loc: it.tr_ref_loc,
+        ld_ref:item.tr_ref,
+        ld_domain: user_domain,
       });
       if (ld1)
         await locationDetailServiceInstance.update(
           {
-            ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -431,10 +461,12 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
       else {
         const status = await statusServiceInstance.findOne({
           is_status: item.tr_status,
+          is_domain: user_domain,
         });
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
           ld_lot: item.tr_serial,
+          ld_ref: item.tr_ref,
           ld_date: new Date(),
           ld_site: it.tr_ref_site,
           ld_loc: it.tr_ref_loc,
@@ -446,6 +478,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
+          ld_domain: user_domain,
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -456,6 +489,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         tr_type: 'RCT-TR',
         tr_date: new Date(),
         tr_loc: it.tr_ref_loc,
+        tr_loc_begin: (ld1) ? ld1.ld_qty_oh : 0,
         tr_site: it.tr_ref_site,
         tr_ref_site: it.tr_site,
         tr_ref_loc: it.tr_loc,
@@ -469,6 +503,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
       });
     }
 
@@ -490,7 +525,8 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
 };
 const issChl = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -502,14 +538,16 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
     const statusServiceInstance = Container.get(statusService);
 
     const sct = await costSimulationServiceInstance.findOne({
+      sct_domain:user_domain,
       sct_part: it.tr_part,
       sct_site: it.tr_site,
       sct_sim: 'STDCG',
     });
-    const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part });
+    const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part,pt_domain:user_domain });
 
     console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc);
     const ld = await locationDetailServiceInstance.findOne({
+      ld_domain:user_domain,
       ld_part: it.tr_part,
       ld_lot: it.tr_serial,
       ld_site: it.tr_site,
@@ -518,6 +556,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
     console.log(ld);
     await inventoryTransactionServiceInstance.create({
       ...it,
+      tr_domain:user_domain,
       tr_status: ld.ld_status,
       tr_expire: ld.ld_expire,
       tr_qty_loc: 0,
@@ -540,6 +579,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
     });
     if (ld) {
       const status = await statusServiceInstance.findOne({
+        is_domain:user_domain,
         is_status: it.tr_status,
       });
       await locationDetailServiceInstance.update(
@@ -555,6 +595,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
     }
     await inventoryTransactionServiceInstance.create({
       ...it,
+      tr_domain:user_domain,
       tr_qty_loc: 0,
       tr_type: 'RCT-CHL',
       tr_line: 1,
@@ -584,13 +625,14 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
 const inventoryToDate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling Create sequence endpoint');
   try {
     const itemService = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     console.log(req.body.date);
     const items = await itemService.find({
+      pt_domain:user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -599,6 +641,7 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.findSpecial({
         where: {
+          ld_domain:user_domain,
           ld_part: item.pt_part,
           ld_site: { [Op.between]: [req.body.pt_site_1, req.body.pt_site_2] },
           ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
@@ -612,6 +655,7 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
         const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
         const res = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_site: det.ld_site,
             tr_loc: det.ld_loc,
@@ -624,7 +668,7 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
         });
         const qty = res[0] ? (res[0].total ? res[0].total : 0) : 0;
         det.total_qty = det.total_qty - qty;
-        const item = await itemService.findOneS({ pt_part: det.ld_part });
+        const item = await itemService.findOneS({ pt_part: det.ld_part,pt_domain:user_domain });
         det.item = item;
         result.push(det);
       }
@@ -641,6 +685,7 @@ const inventoryToDate = async (req: Request, res: Response, next: NextFunction) 
 const inventoryActivity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -648,6 +693,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
     const locationDetailServiceInstance = Container.get(locationDetailService);
     console.log(req.body.date);
     const items = await itemService.find({
+      pt_domain:user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -656,6 +702,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
         where: {
+          ld_domain:user_domain,
           ld_part: item.pt_part,
         },
         attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
@@ -667,6 +714,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
         const res_2 = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_effdate: { [Op.between]: [req.body.date_2, new Date()] },
@@ -680,6 +728,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
 
         const res_rctpo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-PO' },
@@ -693,6 +742,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rctpo = det.total_qty_rctpo + qty_rctpo;
         const res_rctwo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-WO' },
@@ -706,6 +756,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rctwo = det.total_qty_rctwo + qty_rctwo;
         const res_rctcns = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-CNS' },
@@ -719,6 +770,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rctcns = det.total_qty_rctcns + qty_rctcns;
         const res_rcttr = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-TR' },
@@ -733,6 +785,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rcttr = det.total_qty_rcttr + qty_rcttr;
         const res_rctchl = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-CHL' },
@@ -747,6 +800,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rctchl = det.total_qty_rctchl + qty_rctchl;
         const res_isswo = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'ISS-WO' },
@@ -760,6 +814,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_isswo = det.total_qty_isswo + qty_isswo;
         const res_issso = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'ISS-SO' },
@@ -773,6 +828,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_issso = det.total_qty_issso + qty_issso;
         const res_issprv = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'ISS-PRV' },
@@ -786,6 +842,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_issprv = det.total_qty_issprv + qty_issprv;
         const res_rctunp = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'RCT-UNP' },
@@ -799,6 +856,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_rctunp = det.total_qty_rctunp + qty_rctunp;
         const res_issunp = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'ISS-UNP' },
@@ -812,6 +870,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_issunp = det.total_qty_issunp + qty_issunp;
         const res_isscns = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.eq]: 'ISS-CNS' },
@@ -825,6 +884,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
         det.total_qty_isscns = det.total_qty_isscns + qty_isscns;
         const res_tagcnt = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_ship_type: { [Op.ne]: 'M' },
             tr_type: { [Op.contains]: 'TAG' },
@@ -839,6 +899,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
 
         const res_1 = await inventoryTransactionServiceInstance.findSpecial({
           where: {
+            tr_domain:user_domain,
             tr_part: det.ld_part,
             tr_type: { [Op.ne]: 'M' },
             tr_effdate: { [Op.between]: [req.body.date_1, new Date()] },
@@ -867,6 +928,7 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
 const inventoryByLoc = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -874,6 +936,7 @@ const inventoryByLoc = async (req: Request, res: Response, next: NextFunction) =
     const locationDetailServiceInstance = Container.get(locationDetailService);
     console.log(req.body.date);
     const items = await itemService.find({
+      pt_domain:user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -882,6 +945,7 @@ const inventoryByLoc = async (req: Request, res: Response, next: NextFunction) =
     const results_body = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
         ld_part: item.pt_part,
         ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
       });
@@ -925,13 +989,14 @@ const inventoryByLoc = async (req: Request, res: Response, next: NextFunction) =
 const inventoryByStatus = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling Create sequence endpoint');
   try {
     const itemService = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     console.log(req.body.date);
     const items = await itemService.find({
+      pt_domain:user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -940,6 +1005,7 @@ const inventoryByStatus = async (req: Request, res: Response, next: NextFunction
     const results_body = [];
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.find({
+        ld_domain:user_domain,
         ld_part: item.pt_part,
         ld_status: { [Op.between]: [req.body.ld_status_1, req.body.ld_status_2] },
         ld_loc: { [Op.between]: [req.body.ld_loc_1, req.body.ld_loc_2] },
@@ -986,13 +1052,14 @@ const inventoryByStatus = async (req: Request, res: Response, next: NextFunction
 const inventoryOfSecurity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling Create sequence endpoint');
   try {
     const itemService = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     console.log(req.body.date);
     const items = await itemService.find({
+      pt_domain:user_domain,
       pt_part: {
         [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
       },
@@ -1001,6 +1068,7 @@ const inventoryOfSecurity = async (req: Request, res: Response, next: NextFuncti
     for (const item of items) {
       const locationDetails = await locationDetailServiceInstance.findSpecial({
         where: {
+          ld_domain:user_domain,
           ld_part: item.pt_part,
           ld_status: { [Op.between]: [req.body.pt_status_1, req.body.pt_status_2] },
           ld_loc: { [Op.between]: [req.body.pt_loc_1, req.body.pt_loc_2] },
@@ -1013,7 +1081,7 @@ const inventoryOfSecurity = async (req: Request, res: Response, next: NextFuncti
       for (const det of locationDetails) {
         const qty = res[0] ? (res[0].total_qty ? res[0].total_qty : 0) : 0;
         det.qty = qty;
-        const item = await itemService.findOneS({ pt_part: det.ld_part });
+        const item = await itemService.findOneS({ pt_part: det.ld_part,pt_domain:user_domain });
         det.item = item;
         if (det.qty < items.pt_safety_stk) {
           result.push(det);
@@ -1033,6 +1101,7 @@ const inventoryOfSecurity = async (req: Request, res: Response, next: NextFuncti
 const rctWo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -1046,9 +1115,10 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
     // console.log(it);
     for (const data of detail) {
       const { desc, ...item } = data;
-      const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part , pt_domain:user_domain});
 
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain:user_domain,
         ld_part: it.tr_part,
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
@@ -1066,10 +1136,12 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
       else {
         // console.log(item.tr_status);
         const status = await statusServiceInstance.findOne({
+          is_domain:user_domain,
           is_status: item.tr_status,
         });
 
         await locationDetailServiceInstance.create({
+          ld_domain:user_domain,
           ld_part: it.tr_part,
           ld_lot: item.tr_serial,
           ld_date: new Date(),
@@ -1088,6 +1160,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         qtyoh = 0;
       }
       const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: it.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
@@ -1095,6 +1168,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
       await inventoryTransactionServiceInstance.create({
         ...item,
         ...it,
+        tr_domain:user_domain,
         tr_qty_chg: Number(item.tr_qty_loc),
         tr_loc_begin: Number(qtyoh),
         tr_type: 'RCT-WO',
@@ -1132,7 +1206,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
 const issWo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  console.log(user_code);
+  const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
     const { detail, user } = req.body;
@@ -1144,18 +1218,20 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(itemService);
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
     const service = Container.get(MobileService);
-    const currentService = await service.findOne({ role_code: user, service_open: true });
+    const currentService = await service.findOne({ role_code: user, service_open: true,service_domain:user_domain });
     for (const item of detail) {
       console.log(detail);
       // console.log('isswo', item.tr_part, item.tr_loc, item.tr_site);
       const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
 
-      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain});
       const ld = await locationDetailServiceInstance.findOne({
+        ld_domain:user_domain,
         ld_part: item.tr_part,
         // ld_lot: item.tr_nbr,
         ld_site: item.tr_site,
@@ -1174,6 +1250,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         );
         await inventoryTransactionServiceInstance.create({
           ...item,
+          tr_domain:user_domain,
           tr_gl_date: currentService.service_period_activate_date,
           tr_qty_loc: -1 * Number(item.tr_qty_loc),
           tr_qty_chg: -1 * Number(item.tr_qty_loc),
@@ -1352,6 +1429,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
 const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   // console.log(req.body);
   const { detail } = req.body;
   // console.log(detail);
@@ -1364,20 +1442,22 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     const itemsServiceInstance = Container.get(itemService);
     const service = Container.get(MobileService);
-    const currentService = await service.findOne({ role_code: user_code, service_open: true });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true,service_domain:user_domain });
     console.log(currentService.service_period_activate_date);
     for (const item of detail) {
       const { ...remain } = item;
       console.log(remain.tag_cnt_qty, 'herehouna');
       if (remain.tag_cnt_qty !== undefined) {
         const sctdet = await costSimulationServiceInstance.findOne({
+          sct_domain:user_domain,
           sct_part: remain.ld_part,
           sct_site: remain.ld_site,
           sct_sim: 'STDCG',
         });
-        const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part });
+        const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part ,pt_domain:user_domain});
         // console.log(remain.tr_part, remain.tr_site);
         const ld = await locationDetailServiceInstance.findOne({
+          ld_domain:user_domain,
           ld_part: remain.ld_part,
           ld_lot: remain.ld_lot,
           ld_site: remain.ld_site,
@@ -1386,6 +1466,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         item.tag_cnt_qty == undefined && (item.tag_cnt_qty = 0);
         await inventoryTransactionServiceInstance.create({
           tr_line: 0,
+          tr_domain:user_domain,
           tr_part: remain.ld_part,
           tr_prod_line: pt.pt_prod_line,
           tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
@@ -1422,6 +1503,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
 
         if (remain.ld_rev != 'M') {
           const ld = await locationDetailServiceInstance.findOne({
+            ld_domain:user_domain,
             ld_part: remain.ld_part,
             ld_lot: remain.ld_lot,
             ld_site: remain.ld_site,
@@ -1443,6 +1525,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
             let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
 
             await locationDetailServiceInstance.create({
+              ld_domain:user_domain,
               ld_part: remain.tr_part,
               ld_date: new Date(),
               ld_lot: remain.ld_lot,
@@ -1457,6 +1540,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           }
         } else {
           const ld = await locationDetailServiceInstance.findOne({
+            ld_domain:user_domain,
             ld_part: remain.ld_part,
             ld_lot: remain.ld_lot,
             ld_site: remain.ld_site,
@@ -1486,6 +1570,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
 const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   // console.log(req.body);
   const { detail } = req.body;
   // console.log(detail);
@@ -1498,19 +1583,21 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     const itemsServiceInstance = Container.get(itemService);
     const service = Container.get(MobileService);
-    const currentService = await service.findOne({ role_code: user_code, service_open: true });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true ,service_domain:user_domain});
     for (const item of detail) {
       const { ...remain } = item;
       console.log(remain.tag_cnt_qty, 'here');
       if (remain.tag_cnt_qty !== undefined) {
         const sctdet = await costSimulationServiceInstance.findOne({
+          sct_domain:user_domain,
           sct_part: remain.ld_part,
           sct_site: remain.ld_site,
           sct_sim: 'STDCG',
         });
-        const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part });
+        const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part ,pt_domain:user_domain});
         // console.log(remain.tr_part, remain.tr_site);
         const ld = await locationDetailServiceInstance.findOne({
+          ld_domain:user_domain,
           ld_part: remain.ld_part,
           ld_lot: remain.ld_lot,
           ld_site: remain.ld_site,
@@ -1518,6 +1605,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
         });
         item.tag_cnt_qty = undefined && (item.tag_cnt_qty = 0);
         await inventoryTransactionServiceInstance.create({
+          tr_domain:user_domain,
           // tr_line: remain.tr_line,
           tr_part: remain.ld_part,
           tr_prod_line: pt.pt_prod_line,
@@ -1555,6 +1643,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
 
         if (remain.ld_rev != 'M') {
           const ld = await locationDetailServiceInstance.findOne({
+            ld_domain:user_domain,
             ld_part: remain.ld_part,
             ld_lot: remain.ld_lot,
             ld_site: remain.ld_site,
@@ -1577,6 +1666,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
             let qty = Number(remain.tag_cnt_qty) > 0 ? Number(remain.tag_cnt_qty) : Number(ld.ld_qty_oh);
 
             await locationDetailServiceInstance.create({
+              ld_domain:user_domain,
               ld_part: remain.tr_part,
               ld_date: new Date(),
               ld_lot: remain.ld_lot,
@@ -1602,12 +1692,14 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
 const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
     console.log(req.body);
     const parts = await inventoryTransactionServiceInstance.findSpecial({
       where: {
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
       },
@@ -1617,6 +1709,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
     });
     const tr = await inventoryTransactionServiceInstance.findSpecial({
       where: {
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
       },
@@ -1638,7 +1731,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let part of parts) {
       // console.log(part)
-      const items = await itemServiceInstance.findOnedesc({ pt_part: part.tr_part });
+      const items = await itemServiceInstance.findOnedesc({ pt_part: part.tr_part ,pt_domain:user_domain});
       const cyccnt = tr.findIndex(
         ({ tr_site, tr_part, tr_type, tr_serial }) =>
           tr_site == part.tr_site && tr_part == part.tr_part && tr_serial == part.tr_serial && tr_type == 'CYC-CNT',
@@ -1664,6 +1757,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       let qtywo = 0;
 
       const trcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
@@ -1671,6 +1765,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
         tr_type: 'CYC-CNT',
       });
       const trcycmin = await inventoryTransactionServiceInstance.min({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
@@ -1681,6 +1776,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
       const cntmax = await inventoryTransactionServiceInstance.findOneI({ id: trcycmax });
       const cntmin = await inventoryTransactionServiceInstance.findOneI({ id: trcycmin });
       const trrcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
@@ -1688,6 +1784,7 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
         tr_type: 'CYC-RCNT',
       });
       const trrcycmin = await inventoryTransactionServiceInstance.min({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.tr_effdate,
         tr_part: part.tr_part,
@@ -1731,10 +1828,12 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body.date);
   logger.debug('Calling find by  all saleOrder endpoint');
+  const { user_domain } = req.headers;
   try {
     console.log('hereherehere');
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec({
+      tr_domain:user_domain,
       tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
     });
     // console.log(tr)
@@ -1751,12 +1850,14 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
 const findTrType = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
 
     const trs = await inventoryTransactionServiceInstance.findSpecial({
       where: {
+        tr_domain:user_domain,
         tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
       },
       attributes: [
@@ -1777,7 +1878,7 @@ const findTrType = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let tr of trs) {
       // console.log(part)
-      const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part });
+      const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
       const effdate = new Date(tr.tr_effdate);
       result.push({
         id: i,
@@ -1803,12 +1904,14 @@ const findTrType = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByInv = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
+  const { user_domain } = req.headers;
   logger.debug('Calling find by  all code endpoint');
   if (req.body.site != '*') {
     try {
       const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
 
       const tr = await inventoryTransactionServiceInstance.finditem({
+        tr_domain:user_domain,
         tr_site: req.body.site,
         tr_type: req.body.type,
         tr_effdate: req.body.date,
@@ -1827,6 +1930,7 @@ const findByInv = async (req: Request, res: Response, next: NextFunction) => {
       const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
 
       const tr = await inventoryTransactionServiceInstance.finditem({
+        tr_domain:user_domain,
         tr_type: req.body.type,
         tr_effdate: req.body.date,
       });
@@ -1844,6 +1948,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
   console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
+  const { user_domain } = req.headers;
   if (req.body.site != '*') {
     try {
       const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -1852,6 +1957,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
       const tr = await inventoryTransactionServiceInstance.findbetw({
         where: {
+          tr_domain:user_domain,
           tr_site: req.body.site,
           tr_type: req.body.type,
           tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
@@ -1859,7 +1965,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       });
       //console.log(tr)
       for (let t of tr) {
-        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
+        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part, pt_domain:user_domain });
         console.log(item.pt_buyer)
         t.tr_desc = item.pt_desc1,
         t.tr_um = item.pt_um,
@@ -1879,10 +1985,10 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       const itemServiceInstance = Container.get(itemService);
 
       const tr = await inventoryTransactionServiceInstance.findbetw({
-        where: { tr_type: req.body.type, tr_effdate: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { tr_domain:user_domain,tr_type: req.body.type, tr_effdate: { [Op.between]: [req.body.date, req.body.date1] } },
       });
       for (let t of tr) {
-        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part });
+        const item = await itemServiceInstance.findOne({ pt_part: t.tr_part,pt_domain:user_domain });
         t.tr_desc = item.pt_desc1,
         t.tr_um = item.pt_um,
         t.tr_addr = item.pt_vend,
@@ -1901,6 +2007,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
 const consoReport = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
@@ -1941,15 +2048,16 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
     });
     //console.log(sansbo[0].amt_sansbo,avecbo)
 
-    const parts = await itemServiceInstance.find({ pt_cyc_int: 1, pt_part_type: { [Op.ne]: 'BO' } });
+    const parts = await itemServiceInstance.find({ pt_domain:user_domain,pt_cyc_int: 1, pt_part_type: { [Op.ne]: 'BO' } });
     let results = [];
     var i = 1;
     for (let items of parts) {
-      const codes = await codeServiceInstance.findOne({ code_fldname: 'pt_part_type', code_value: items.pt_part_type });
+      const codes = await codeServiceInstance.findOne({ code_domain:user_domain,code_fldname: 'pt_part_type', code_value: items.pt_part_type });
       if (codes == null) {
         console.log(items.pt_part, 'part');
       }
       const trrcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: items.pt_part,
@@ -1957,6 +2065,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       });
       const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
       const rctpo = await inventoryTransactionServiceInstance.findOneI({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: items.pt_part,
@@ -1964,6 +2073,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const trcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: items.pt_part,
@@ -1972,6 +2082,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
 
       const cntmax = await inventoryTransactionServiceInstance.findOneI({ id: trcycmax });
       const purprice = await inventoryTransactionServiceInstance.findOneI({
+        tr_domain:user_domain,
         tr_part: items.pt_part,
         tr_type: 'RCT-PO',
         tr_effdate: req.body.created_date,
@@ -1985,6 +2096,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
 
       const trs = await inventoryTransactionServiceInstance.findSpecial({
         where: {
+          tr_domain:user_domain,
           tr_effdate: req.body.created_date,
           tr_site: req.body.tr_site,
           tr_part: items.pt_part,
@@ -2020,11 +2132,12 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     /*boisson*/
-    const boparts = await itemServiceInstance.find({ pt_cyc_int: 1, pt_part_type: 'BO' });
+    const boparts = await itemServiceInstance.find({ pt_domain:user_domain,pt_cyc_int: 1, pt_part_type: 'BO' });
     let boresults = [];
     var j = 1;
     for (let boitems of boparts) {
       const codes = await codeServiceInstance.findOne({
+        code_domain:user_domain,
         code_fldname: 'pt_part_type',
         code_value: boitems.pt_part_type,
       });
@@ -2032,6 +2145,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         console.log(boitems.pt_part, 'part');
       }
       const trrcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: boitems.pt_part,
@@ -2041,6 +2155,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       const rcntmax = await inventoryTransactionServiceInstance.findOneI({ id: trrcycmax });
 
       const rctpo = await inventoryTransactionServiceInstance.findOneI({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: boitems.pt_part,
@@ -2048,6 +2163,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const trcycmax = await inventoryTransactionServiceInstance.max({
+        tr_domain:user_domain,
         tr_site: req.body.tr_site,
         tr_effdate: req.body.created_date,
         tr_part: boitems.pt_part,
@@ -2056,6 +2172,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
 
       const cntmax = await inventoryTransactionServiceInstance.findOneI({ id: trcycmax });
       const purprice = await inventoryTransactionServiceInstance.findOneI({
+        tr_domain:user_domain,
         tr_part: boitems.pt_part,
         tr_type: 'RCT-PO',
         tr_effdate: req.body.created_date,
@@ -2069,6 +2186,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
 
       const trs = await inventoryTransactionServiceInstance.findSpecial({
         where: {
+          tr_domain:user_domain,
           tr_effdate: req.body.created_date,
           tr_site: req.body.tr_site,
           tr_part: boitems.pt_part,
@@ -2119,12 +2237,14 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
 const consoRange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
 
     const trs = await inventoryTransactionServiceInstance.findSpecial({
       where: {
+        tr_domain:user_domain,
         tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
         tr_site: req.body.usrd_site,
         tr_type: 'ISS-WO',
@@ -2138,7 +2258,7 @@ const consoRange = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let tr of trs) {
       // console.log(part)
-      const items = await itemServiceInstance.findOne({ pt_part: tr.tr_part, pt_cyc_int: null });
+      const items = await itemServiceInstance.findOne({pt_domain:user_domain, pt_part: tr.tr_part, pt_cyc_int: null });
       if (items != null) {
         result.push({
           id: i,
@@ -2163,6 +2283,7 @@ const consoRange = async (req: Request, res: Response, next: NextFunction) => {
 const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
   try {
     const details = req.body.detail;
     const site = req.body.site;
@@ -2176,8 +2297,8 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     for (let obj of details) {
       //console.log(obj.part, obj.prod_qty, obj.bom);
 
-      const item = await itemServiceInstance.findOne({ pt_part: obj.part });
-      const lds = await ldServiceInstance.find({ ld_part: obj.part, ld_site: site });
+      const item = await itemServiceInstance.findOne({ pt_domain:user_domain,pt_part: obj.part });
+      const lds = await ldServiceInstance.find({ ld_domain:user_domain,ld_part: obj.part, ld_site: site });
       var ldqty = 0;
       for (let ld of lds) {
         ldqty = ldqty + Number(ld.ld_qty_oh);

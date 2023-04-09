@@ -34,6 +34,8 @@ const Project = sequelize.define(
         pm_ord_date: Sequelize.DATEONLY,
         pm_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
         pm_cost: {type: Sequelize.DECIMAL, defaultValue : 0  },
+        pm_type: Sequelize.STRING,
+        pm_doc_list: Sequelize.STRING,
         pm_domain:  Sequelize.STRING,
         oid_pm_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         pm_type: Sequelize.STRING,

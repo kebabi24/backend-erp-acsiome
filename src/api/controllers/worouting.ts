@@ -10,7 +10,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create code endpoint")
     try {
         const woroutingServiceInstance = Container.get(WoroutingService)
-        const ro = await woroutingServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ro = await woroutingServiceInstance.create({...req.body,wr_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  ro })
@@ -39,9 +39,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const { user_domain } = req.headers;
     try {
         const woroutingServiceInstance = Container.get(WoroutingService)
-        const ros = await woroutingServiceInstance.find({})
+        const ros = await woroutingServiceInstance.find({wr_domain: user_domain})
         console.log(ros)
         return res
             .status(200)
@@ -55,10 +56,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const { user_domain } = req.headers;
     try {
         const woroutingServiceInstance = Container.get(WoroutingService)
         console.log(req.body)
-        const ros = await woroutingServiceInstance.find({...req.body})
+        const ros = await woroutingServiceInstance.find({...req.body,wr_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ros })

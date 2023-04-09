@@ -5,11 +5,13 @@ import { Container } from 'typedi';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
 
   logger.debug('Calling Create category endpoint');
   try {
     const PosProductServiceInstance = Container.get(PosProduct);
-    const product = await PosProductServiceInstance.create({ ...req.body });
+    const product = await PosProductServiceInstance.create({ ...req.body,domain:user_domain });
     return res.status(201).json({ message: 'created succesfully', data: product });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -34,9 +36,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all product endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosProductServiceInstance = Container.get(PosProduct);
-    const product = await PosProductServiceInstance.find({});
+    const product = await PosProductServiceInstance.find({domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: product });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -47,9 +52,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all produuct endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosProductServiceInstance = Container.get(PosProduct);
-    const product = await PosProductServiceInstance.findOne({ ...req.body });
+    const product = await PosProductServiceInstance.findOne({ ...req.body,domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: product });
   } catch (e) {
     logger.error('🔥 error: %o', e);

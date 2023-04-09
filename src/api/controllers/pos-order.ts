@@ -33,6 +33,8 @@ import _ from 'lodash';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
 
   logger.debug('Calling Create order endpoint');
   try {
@@ -57,8 +59,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const editCart = req.body.modif;
     const detail = [];
     let update: boolean = false;
-    const currentService = await service.findOne({ role_code: user_code, service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', seq_profile: cart.usrd_profile });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true,service_domain:user_domain });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OF', seq_profile: cart.usrd_profile,seq_domain:user_domain });
     // const currentCart = await PosOrderServiceInstance.findOne({ order_code: cart.order_code });
     // console.log('current cart', currentCart);
     // console.log(cart);
@@ -74,6 +76,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       // console.log(update);
       const it = await inventoryTransactionServiceInstance.findSpecial({
         where: {
+          tr_domain: user_domain,
           tr_site: cart.usrd_site,
           tr_nbr: cart.order_code,
           tr_effdate: currentService.service_period_activate_date,
@@ -83,6 +86,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         // console.log(it.tr_part, it.tr_site, it.tr_loc);
         for (const i of it) {
           const ld = await locationDetailServiceInstance.findOne({
+            ld_domain:user_domain,
             ld_part: i.tr_part,
             ld_site: i.tr_site,
             ld_loc: i.tr_loc,
@@ -98,17 +102,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               { id: ld.id },
             );
             await workOrderDetailServiceInstance.delete({
+              wod_domain:user_domain,
               wod_nbr: cart.order_code,
               wod_site: i.tr_site,
               wod_iss_date: currentService.service_period_activate_date,
             });
             await inventoryTransactionServiceInstance.delete({
+              tr_domain:user_domain,
               tr_nbr: cart.order_code,
               tr_part: i.tr_part,
               tr_site: i.tr_site,
               tr_effdate: currentService.service_period_activate_date,
             });
             await OrderHistoryServiceInstance.create({
+              domain:user_domain,
               order_code: cart.order_code,
 
               ord_amt: cart.total_price,
@@ -119,31 +126,37 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           }
         }
         await workOrderServiceInstance.delete({
+          wo_domain:user_domain,
           wo_nbr: cart.order_code,
           wo_site: cart.usrd_site,
           wo_ord_date: currentService.service_period_activate_date,
         });
         await PosOrderDetailServiceInstance.delete({
+          domain:user_domain,
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
         });
         await PosOrderProductSauceServiceInstance.delete({
+          domain:user_domain,
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
         });
         await PosOrderProductIngServiceInstance.delete({
+          domain:user_domain,
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
         });
         await PosOrderProductSuppServiceInstance.delete({
+          domain:user_domain,
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
         });
         await PosOrderServiceInstance.delete({
+          domain:user_domain,
           order_code: cart.order_code,
           usrd_site: cart.usrd_site,
           created_date: currentService.service_period_activate_date,
@@ -155,6 +168,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     if (cart.products.length > 0) {
       if (cart.plateforme !== 'CALL CENTER') {
         await PosOrderServiceInstance.create({
+          domain:user_domain,
           order_code: update ? cart.order_code : nbr,
           total_price: cart.total_price,
           order_emp: cart.order_emp,
@@ -172,9 +186,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       !update &&
         (await sequence.update(
           { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
-          { seq_type: 'OF', seq_profile: cart.usrd_profile },
+          { seq_type: 'OF', seq_profile: cart.usrd_profile,seq_domain:user_domain },
         ));
-      const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
+      const currentProduct = await PosOrderServiceInstance.findOne({ domain:user_domain,order_code: update ? cart.order_code : nbr });
       for (const product of products) {
         // console.log('product', product);
         const {
@@ -197,6 +211,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         // console.log('pt_loc', pt_loc);
         if (cart.plateforme !== 'CALL CENTER') {
           await PosOrderDetailServiceInstance.create({
+            domain:user_domain,
             order_code: currentProduct.order_code,
             pt_part: pt_part,
             pt_formule: pt_formule,
@@ -220,6 +235,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           });
         }
         await workOrderServiceInstance.create({
+          wo_domain:user_domain,
           wo_nbr: currentProduct.order_code,
           wo_part: pt_part,
           wo_lot: line,
@@ -237,14 +253,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
         const wOid = await workOrderServiceInstance.findOne({
+          wo_domain:user_domain,
           wo_nbr: currentProduct.order_code,
           wo_lot: product.line,
         });
         if (wOid.wo_bom_code != null) {
           const wo_bom_code = wOid.wo_bom_code;
-          const ps = await psServiceInstance.find({ ps_parent: wo_bom_code });
+          const ps = await psServiceInstance.find({ ps_parent: wo_bom_code,ps_domain:user_domain });
           for (const pss of ps) {
             const elem_wod = {
+              wod_domain:user_domain,
               wod_nbr: currentProduct.order_code,
               wod_lot: wOid.id,
               wod_loc: product.pt_loc,
@@ -263,6 +281,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           }
         } else {
           const elem_wod = {
+            wod_domain:user_domain,
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
@@ -286,6 +305,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         for (const s of supp) {
           if (cart.plateforme !== 'CALL CENTER') {
             await PosOrderProductSuppServiceInstance.create({
+              domain:user_domain,
               order_code: currentProduct.order_code,
               pt_part: pt_part,
               pt_pt_part: s.pt_part,
@@ -302,6 +322,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           }
 
           const elem_wod = {
+            wod_domain:user_domain,
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: s.pt_loc,
@@ -325,6 +346,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             console.log(pt_part);
             console.log(sa.pt_part);
             await PosOrderProductSauceServiceInstance.create({
+              domain:user_domain,
               order_code: currentProduct.order_code,
               pt_part: pt_part,
               pt_pt_part: sa.pt_pt_part,
@@ -342,6 +364,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           }
 
           const elem_wod = {
+            wod_domain:user_domain,
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_loc: sa.pt_loc,
@@ -362,6 +385,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         for (const i of ingredients) {
           if (cart.plateforme !== 'CALL CENTER') {
             await PosOrderProductIngServiceInstance.create({
+              domain:user_domain,
               order_code: currentProduct.order_code,
               pt_part: pt_part,
               pt_pt_part: i.pt_pt_part,
@@ -377,6 +401,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             });
           }
           const wOd = await workOrderDetailServiceInstance.findOne({
+            wod_domain:user_domain,
             wod_nbr: currentProduct.order_code,
             wod_lot: wOid.id,
             wod_part: i.pt_pt_part,
@@ -384,21 +409,23 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
           await workOrderDetailServiceInstance.update(
             { wod_qty_req: Number(0) },
-            { wod_nbr: currentProduct.order_code, wod_lot: wOid.id, wod_part: i.pt_pt_part },
+            { wod_nbr: currentProduct.order_code, wod_lot: wOid.id, wod_part: i.pt_pt_part ,wod_domain:user_domain},
           );
         }
       }
 
       for (const item of detail) {
         const sct = await costSimulationServiceInstance.findOne({
+          sct_domain:user_domain,
           sct_part: item.wod_part,
           sct_site: item.wod_site,
           sct_sim: 'STDCG',
         });
 
-        const pt = await itemServiceInstance.findOne({ pt_part: item.wod_part });
+        const pt = await itemServiceInstance.findOne({ pt_part: item.wod_part ,pt_domain:user_domain});
 
         const ld = await locationDetailServiceInstance.findOne({
+          ld_domain:user_domain,
           ld_part: item.wod_part,
           ld_site: item.wod_site,
           ld_loc: item.wod_loc,
@@ -413,6 +440,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             { id: ld.id },
           );
           await inventoryTransactionServiceInstance.create({
+            tr_domain:user_domain,
             tr_nbr: item.wod_nbr,
             tr_part: item.wod_part,
             tr_lot: item.wod_lot,
@@ -453,9 +481,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
-
   logger.debug('Calling Create order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
@@ -472,11 +501,12 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
 
     let update: boolean = false;
 
-    const currentService = await service.findOne({ service_site: '1000', service_open: true });
-    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OFCCL' });
+    const currentService = await service.findOne({ service_site: '1000', service_open: true,service_domain:user_domain });
+    const sequence = await SequenceServiceInstance.findOne({ seq_type: 'OFCCL' ,seq_domain:user_domain});
 
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     await PosOrderServiceInstance.create({
+      domain:user_domain,
       order_code: update ? cart.order_code : nbr,
       total_price: cart.total_price,
       order_emp: cart.order_emp,
@@ -490,7 +520,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       site_loc: cart.site_loc,
       plateforme: cart.plateforme,
     });
-    const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr });
+    const currentProduct = await PosOrderServiceInstance.findOne({ order_code: update ? cart.order_code : nbr,domain:user_domain });
     for (const product of products) {
       // console.log('product', product);
       const {
@@ -507,6 +537,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       } = product;
       // console.log('pt_loc', pt_loc);
       await PosOrderDetailServiceInstance.create({
+        domain:user_domain,
         order_code: currentProduct.order_code,
         pt_part: pt_part,
         pt_formule: pt_formule,
@@ -528,6 +559,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
 
       for (const s of supp) {
         await PosOrderProductSuppServiceInstance.create({
+          domain:user_domain,
           order_code: currentProduct.order_code,
           pt_part: pt_part,
           pt_pt_part: s.pt_part,
@@ -543,6 +575,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       // console.log(sauce);
       for (const sa of sauce) {
         await PosOrderProductSauceServiceInstance.create({
+          domain:user_domain,
           order_code: currentProduct.order_code,
           pt_part: pt_part,
           pt_pt_part: sa.pt_part,
@@ -558,6 +591,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
 
       for (const i of ingredients) {
         await PosOrderProductIngServiceInstance.create({
+          domain:user_domain,
           order_code: currentProduct.order_code,
           pt_part: pt_part,
           pt_pt_part: i.pt_pt_part,
@@ -572,7 +606,7 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
       }
     }
 
-    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_type: 'OFCCL' });
+    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_type: 'OFCCL' ,seq_domain:user_domain});
 
     // ADD TO AGENDA
     const crmServiceInstance = Container.get(crmService);
@@ -606,11 +640,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
-    const { user } = req.body;
-    const { user_code } = req.headers;
     const service = Container.get(mobileService);
-    const currentService = await service.findOne({ role_code: user_code, service_open: true });
+    const currentService = await service.findOne({ role_code: user_code, service_open: true,service_domain:user_domain });
     const { Op } = require('sequelize');
     // console.log(currentService);
     console.log(currentService.service_period_activate_date);
@@ -618,6 +653,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const order = await PosOrderServiceInstance.find({
       status: { [Op.notLike]: 'P' },
       created_date: currentService.service_period_activate_date,
+      domain:user_domain
     });
     console.log(order);
 
@@ -631,9 +667,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAlll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const order = await PosOrderServiceInstance.findW({});
+    const order = await PosOrderServiceInstance.findW({domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -644,9 +683,12 @@ const findAlll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
-    const order = await PosOrderServiceInstance.findOne({ ...req.body });
+    const order = await PosOrderServiceInstance.findOne({ ...req.body,domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -657,13 +699,16 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
 
     const orders = await PosOrderDetailServiceInstance.findspec({
-      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date,domain:user_domain },
       attributes: [
         'pt_part',
         'usrd_site',
@@ -695,6 +740,9 @@ const findSumQty = async (req: Request, res: Response, next: NextFunction) => {
 const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
@@ -702,7 +750,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     const itemServiceInstance = Container.get(ItemService);
     //console.log( "here",req.body)
     const orders = await PosOrderDetailServiceInstance.findspec({
-      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date,domain:user_domain },
       attributes: [
         'pt_part',
         'usrd_site',
@@ -717,7 +765,7 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     var i = 1;
     var typ = '';
     for (let ord of orders) {
-      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part,pt_domain:user_domain });
 
       if (
         items.pt_part_type == 'BO' ||
@@ -743,14 +791,14 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     const saus = await PosOrderDetailSauseServiceInstance.findspec({
-      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date },
+      where: { usrd_site: req.body.usrd_site, created_date: req.body.created_date , domain : user_domain},
       attributes: ['pt_pt_part', 'usrd_site', 'pt_desc1', [Sequelize.fn('sum', 1), 'total_qty']],
       group: ['pt_pt_part', 'usrd_site', 'pt_desc1'],
       raw: true,
     });
     for (let sau of saus) {
       console.log(sau.pt_pt_part);
-      const items = await itemServiceInstance.findOne({ pt_part: sau.pt_pt_part });
+      const items = await itemServiceInstance.findOne({ pt_part: sau.pt_pt_part,pt_domain:user_domain });
       if (
         items.pt_part_type == 'BO' ||
         items.pt_part_type == 'AG' ||
@@ -779,6 +827,9 @@ const findSumQtyPs = async (req: Request, res: Response, next: NextFunction) => 
 const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
@@ -787,7 +838,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.body);
     if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { created_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { domain:user_domain, created_date: { [Op.between]: [req.body.date, req.body.date1] } },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -804,7 +855,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
       });
     } else {
       var orders = await PosOrderDetailServiceInstance.findspec({
-        where: { usrd_site: req.body.site, created_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { domain:user_domain, usrd_site: req.body.site, created_date: { [Op.between]: [req.body.date, req.body.date1] } },
         attributes: [
           'pt_part',
           'usrd_site',
@@ -824,9 +875,10 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     let result = [];
     var i = 1;
     for (let ord of orders) {
-      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part });
+      const items = await itemServiceInstance.findOne({ pt_part: ord.pt_part,pt_domain: user_domain });
 
       const parttypes = await codeServiceInstance.findOne({
+        code_domain:user_domain,
         code_fldname: 'pt_part_type',
         code_value: items.pt_part_type,
       });
@@ -871,9 +923,12 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
 const findByOrd = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderDetailServiceInstance = Container.get(PosOrder);
-    const order = await PosOrderDetailServiceInstance.findOrder({ ...req.body });
+    const order = await PosOrderDetailServiceInstance.findOrder({ ...req.body,domain:user_domain });
     console.log(order);
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
@@ -914,10 +969,13 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 const set = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling update one  product endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const itemServiceInstance = Container.get(ItemService);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
-    const items = await itemServiceInstance.find({});
+    const items = await itemServiceInstance.find({pt_domain:user_domain});
     for (const item of items) {
       await PosOrderDetailServiceInstance.update(
         {
@@ -926,7 +984,7 @@ const set = async (req: Request, res: Response, next: NextFunction) => {
           pt_promo: item.pt_promo,
           pt_dsgn_grp: item.pt_dsgn_grp,
         },
-        { pt_part: item.pt_part },
+        { pt_part: item.pt_part,pt_domain:user_domain },
       );
     }
     console.log('all right');
@@ -951,6 +1009,9 @@ const createOrder = (socket, data) => {
 const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
 
@@ -958,6 +1019,7 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
+          domain:user_domain,
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
           usrd_site: req.body.site,
         },
@@ -976,6 +1038,7 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
+          domain:user_domain,
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
         },
 
@@ -995,6 +1058,8 @@ const findPosGrp = async (req: Request, res: Response, next: NextFunction) => {
 const findBySite = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   const PosOrderDetailServiceInstance = Container.get(PosOrder);
   const bkhServiceInstance = Container.get(BkhService);
@@ -1006,6 +1071,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
+          domain:user_domain,
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
           usrd_site: req.body.site,
         },
@@ -1023,6 +1089,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       for (let ord of orders) {
         const ords = await PosOrderDetailServiceInstance.findgrp({
           where: {
+            domain:user_domain,
             created_date: ord.created_date,
             usrd_site: ord.usrd_site,
             status: 'N',
@@ -1038,6 +1105,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
 
         const loys = await PosOrderDetailServiceInstance.find({
+          domain:user_domain,
           created_date: ord.created_date,
           usrd_site: ord.usrd_site,
           loy_num: '000',
@@ -1045,19 +1113,21 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         var sumloy = 0;
         for (let loy of loys) {
           const detords = await PosOrderDetailProductServiceInstance.find({
+            domain:user_domain,
             created_date: loy.created_date,
             order_code: loy.order_code,
             usrd_site: loy.usrd_site,
           });
 
           for (let detord of detords) {
-            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part });
+            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part , pt_domain:user_domain});
             sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos);
           }
           /*kamel*/
         }
         const banks = await bkhServiceInstance.findq({
           where: {
+            bkh_domain: user_domain,
             bkh_effdate: ord.created_date,
             bkh_site: ord.usrd_site,
             bkh_type: 'R',
@@ -1073,6 +1143,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         const objcts = await forcastServiceInstance.findq({
           where: {
+            frc_domain:user_domain,
             frc_date: ord.created_date,
             frc_site: ord.usrd_site,
           },
@@ -1114,6 +1185,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
+          domain:user_domain,
           created_date: { [Op.between]: [req.body.date, req.body.date1] },
         },
         attributes: [
@@ -1130,6 +1202,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
       for (let ord of orders) {
         const ords = await PosOrderDetailServiceInstance.findgrp({
           where: {
+            domain:user_domain,
             created_date: ord.created_date,
             usrd_site: ord.usrd_site,
             status: 'N',
@@ -1145,6 +1218,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
 
         const loys = await PosOrderDetailServiceInstance.find({
+          domain:user_domain,
           created_date: ord.created_date,
           usrd_site: ord.usrd_site,
           loy_num: '000',
@@ -1152,13 +1226,14 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         var sumloy = 0;
         for (let loy of loys) {
           const detords = await PosOrderDetailProductServiceInstance.find({
+            domain:user_domain,
             created_date: loy.created_date,
             order_code: loy.order_code,
             usrd_site: loy.usrd_site,
           });
 
           for (let detord of detords) {
-            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part });
+            const part = await itemServiceInstance.findOne({ pt_part: detord.pt_part, pt_domain:user_domain });
             sumloy = sumloy + Number(part.pt_price) * Number(detord.pt_qty_ord_pos);
           }
           /*kamel*/
@@ -1166,6 +1241,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
 
         const banks = await bkhServiceInstance.findq({
           where: {
+            bkh_domain:user_domain,
             bkh_effdate: ord.created_date,
             bkh_type: 'R',
             bkh_site: ord.usrd_site,
@@ -1181,6 +1257,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
         });
         const objcts = await forcastServiceInstance.findq({
           where: {
+            frc_domain:user_domain,
             frc_date: ord.created_date,
             frc_site: ord.usrd_site,
           },
@@ -1222,6 +1299,9 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
 const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all order endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosOrderServiceInstance = Container.get(PosOrder);
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
@@ -1231,6 +1311,7 @@ const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
 
     var sansbo = await PosOrderDetailServiceInstance.findspec({
       where: {
+        domain:user_domain,
         created_date: req.body.created_date,
         usrd_site: req.body.tr_site,
         pt_part_type: { [Op.ne]: 'BO' },
@@ -1247,6 +1328,7 @@ const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
 
     var avecbo = await PosOrderDetailServiceInstance.findspec({
       where: {
+        domain:user_domain,
         created_date: req.body.created_date,
         usrd_site: req.body.tr_site,
         //pt_part_type: 'BO'

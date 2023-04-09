@@ -7,7 +7,7 @@ import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -16,9 +16,9 @@ const{user_domain} = req.headers
             ToolDetailService
         )
         const { Tool, ToolDetails } = req.body
-        const to = await toolServiceInstance.create({...Tool, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const to = await toolServiceInstance.create({...Tool, to_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of ToolDetails) {
-            entry = { ...entry, tod_code: Tool.to_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry, tod_domain: user_domain,tod_code: Tool.to_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await toolDetailServiceInstance.create(entry)
         }
         return res
@@ -35,17 +35,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all tool endpoint")
+    const{user_domain} = req.headers
     try {
         const toolServiceInstance = Container.get(ToolService)
        const toolDetailServiceInstance = Container.get(
             ToolDetailService
         )
         const tool = await toolServiceInstance.findOne({
-            ...req.body,
+            ...req.body,tod_domain:user_domain
         })
         console.log("hhhhhhhhhhhhhhhh")
         if (tool) {
            const details = await toolDetailServiceInstance.find({
+               tod_domain:user_domain,
                 tod_code: tool.to_code,
            })
             return res.status(200).json({
@@ -67,6 +69,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  tool endpoint")
+    const{user_domain} = req.headers
     try {
         const toolServiceInstance = Container.get(ToolService)
         const { id } = req.params
@@ -75,6 +78,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             ToolDetailService
         )
         const details = await toolDetailServiceInstance.find({
+            tod_domain: user_domain,
             tod_code: tool.to_code,
         })
 
@@ -93,9 +97,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all tool endpoint")
+    const{user_domain} = req.headers
     try {
         const toolServiceInstance = Container.get(ToolService)
-        const tools = await toolServiceInstance.find({})
+        const tools = await toolServiceInstance.find({tod_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: tools })
@@ -110,7 +115,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  tool endpoint")
     try {
@@ -124,9 +129,9 @@ const{user_domain} = req.headers
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await toolDetailServiceInstance.delete({tod_code: Tool.to_code})
+        await toolDetailServiceInstance.delete({tod_domain: user_domain,tod_code: Tool.to_code})
         for (let entry of details) {
-            entry = { ...entry, tod_code: Tool.to_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, tod_domain: user_domain,tod_code: Tool.to_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await toolDetailServiceInstance.create(entry)
         }
         return res
@@ -140,13 +145,14 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
+    const{user_domain} = req.headers
 
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const pos =await sequelize.query("SELECT *  FROM   PUBLIC.to_mstr,  PUBLIC.tod_det  where PUBLIC.tod_det.tod_code = PUBLIC.to_mstr.to_code  ORDER BY PUBLIC.tod_det.id ASC", { type: QueryTypes.SELECT });
+        const pos =await sequelize.query("SELECT *  FROM   PUBLIC.to_mstr,  PUBLIC.tod_det  where PUBLIC.tod_det.tod_domain = ? and PUBLIC.tod_det.tod_code = PUBLIC.to_mstr.to_code and PUBLIC.to_mstr.to_domain = PUBLIC.tod_det.tod_domain  ORDER BY PUBLIC.tod_det.id ASC", { replacements: [user_domain], type: QueryTypes.SELECT });
        console.log(pos)
         return res
             .status(200)

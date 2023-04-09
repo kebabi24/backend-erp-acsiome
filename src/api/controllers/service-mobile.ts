@@ -10,7 +10,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create service endpoint")
     try {
         const MobileServiceInstance = Container.get(MobileService)
-        const service = await MobileServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const service = await MobileServiceInstance.create({...req.body,service_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  service })
@@ -23,6 +23,7 @@ const{user_domain} = req.headers
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  service endpoint")
+    const{user_domain} = req.headers
     try {
         const MobileServiceInstance = Container.get(MobileService)
         const {id} = req.params
@@ -39,9 +40,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all service endpoint")
+    const{user_domain} = req.headers
     try {
         const MobileServiceInstance = Container.get(MobileService)
-        const services = await MobileServiceInstance.find({})
+        const services = await MobileServiceInstance.find({service_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: services })
@@ -54,9 +56,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all service endpoint")
+    const{user_domain} = req.headers
     try {
         const MobileServiceInstance = Container.get(MobileService)
-        const service = await MobileServiceInstance.findOne({...req.body})
+        const service = await MobileServiceInstance.findOne({...req.body,seq_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: service })
