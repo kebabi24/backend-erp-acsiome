@@ -1361,35 +1361,54 @@ const findAllPosOrders = async (req: Request, res: Response, next: NextFunction)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const posOrderDetailServiceInstance = Container.get(PosOrderDetail);
 
-    const orders = await PosOrderServiceInstance.findAllPosOrders();
-    const transactions = await inventoryTransactionServiceInstance.findAllissSo();
-    const orders_details = await posOrderDetailServiceInstance.findAllDetailsFiltered()
+    const {startDate , endDate} = req.body
+    // console.log(startDate+"\t"+endDate)
+    // console.log(req.body)
+
+    // const str1 = "2023-3-1"
+    // const str2 = "2023-3-8"
+
+    const orders = await PosOrderServiceInstance.findAllPosOrders(startDate,endDate);
+    const transactions = await inventoryTransactionServiceInstance.findAllissSo(startDate,endDate);
+    const orders_details = await posOrderDetailServiceInstance.findAllDetailsFiltered(startDate,endDate)
 
     const locations = _.mapValues(_.groupBy(orders, 'usrd_site'));
     const tr_locations = _.mapValues(_.groupBy(transactions, 'tr_site'));
-    const meatTypes = _.mapValues(_.groupBy(orders_details, 'pt_size'));
-    const breadTypes = _.mapValues(_.groupBy(orders_details, 'pt_group'));
-    // const days = _.mapValues(_.groupBy(orders, 'created_date'));
+    const meatTypes = _.mapValues(_.groupBy(orders_details, 'pt_group'));
+    const breadTypes = _.mapValues(_.groupBy(orders_details, 'pt_part_type'));
+    const sizesTypes = _.mapValues(_.groupBy(orders_details, 'pt_promo'));
+    const formTypes = _.mapValues(_.groupBy(orders_details, 'pt_dsgn_grp'));
+    const platformTypes = _.mapValues(_.groupBy(orders, 'del_comp'));
+    const customerTypes = _.mapValues(_.groupBy(orders, 'customer'));
 
     let order_by_shop = []
     let tr_by_shop = []
     let meat_types = []
     let bread_types = []
+    let sizes_types = []
+    let form_types = []
+    let platform_types = []
+    let customer_types = []
 
 
+    let quantities = []
+    let prices = []
+
+    // TR HIST
     for(const key in tr_locations){
       const site = await siteServiceInstance.findOne({si_site : key })
       const site_name = site.dataValues.si_desc
       let sum = 0 
       tr_locations[key].forEach(order=>{
-       sum += parseFloat(order.tr_gl_amt)
+       sum += +order.tr_gl_amt
       })
       console.log("key:\t"+key + "\tname:\t"+site_name +"\t length:"+ tr_locations[key].length +"\t sum:"+ sum)
       tr_by_shop.push({shop: key, Cout :sum ,shop_name :site_name })
+      
       sum = 0
     }
     
-    // by location 
+    // SHOP SITE
     for(const key in locations){
       const site = await siteServiceInstance.findOne({si_site : key })
       const site_name = site.dataValues.si_desc
@@ -1397,44 +1416,91 @@ const findAllPosOrders = async (req: Request, res: Response, next: NextFunction)
       locations[key].forEach(order=>{
        sum += parseFloat(order.total_price)
       })
-      // console.log("key:\t"+key + "name:\t"+site_name +"\t length:"+ locations[key].length +"\t sum:"+ sum)
-      order_by_shop.push({shop: key , CA:sum , Cout : 0.0 ,shop_name :site_name })
-      sum = 0
-    }
-
-    for(const key in meatTypes){
-      let sum = 0 
-      meatTypes[key].forEach(order=>{
-       sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+      const index = tr_by_shop.findIndex((elem)=>{
+        return elem.shop === key
       })
-      if(key === "VIANDE" || "MIXTE" || "POULET"){
-        meat_types.push({type: key , CA:sum  })
-      }
+      // console.log("key:\t"+key + "name:\t"+site_name +"\t length:"+ locations[key].length +"\t sum:"+ sum)
+      order_by_shop.push({shop: key , CA:sum , Cout : tr_by_shop[index].Cout ,shop_name :site_name })
       sum = 0
     }
 
-    // for(const key in breadTypes){
-    //   let sum = 0 
-    //   breadTypes[key].forEach(order=>{
-    //    sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
-    //   })
-    //   bread_types.push({type: key , CA:sum  })
-    //   sum = 0
-    // }
+    // MEAT TYPE
+    for(const key in meatTypes){
+        
+        let sum = 0 
+        for(const order of meatTypes[key] ){
+          
+         sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+        }
+        meat_types.push({type: key , CA:sum  }) 
+        sum = 0
 
-    // by day
-    // for(const key in days){
-    //   let sum = 0 
-    //   days[key].forEach(order=>{
-    //     // console.log(parseFloat(order.total_price))
-    //    sum += parseFloat(order.total_price)
-    //   })
-    //   console.log("key:\t"+key +"\t length:"+ days[key].length +"\t sum:"+ sum)
-    //   sum = 0
-    // }
+      
+    }
+
+    // BREAD TYPE
+    for(const key in breadTypes){
+      let sum = 0 
+      for(const order of breadTypes[key] ){  
+        sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+      }
+      bread_types.push({type: key , CA : sum  })
+     
+      sum = 0
+    }
+
+    // SIZE TYPE
+    for(const key in sizesTypes){
+      let sum = 0 
+      for(const order of sizesTypes[key] ){  
+        sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+      }
+      sizes_types.push({type: key , CA : sum  })
+     
+      sum = 0
+    }
+
+    // FORM TYPE
+    for(const key in formTypes){
+      let sum = 0 
+      for(const order of formTypes[key] ){  
+        sum += parseFloat(order.pt_price_pos) * order.pt_qty_ord_pos
+      }
+      form_types.push({type: key , CA : sum  })
+     
+      sum = 0
+    }
+
+    // PLATFORMS TYPE
+    for(const key in platformTypes){
+      let sum = 0 
+      for(const order of platformTypes[key] ){  
+        sum += parseFloat(order.total_price) 
+      }
+      platform_types.push({type: key , CA : sum  })
+     
+      sum = 0
+    }
+
+    // CUSTOMERS TYPE
+    for(const key in customerTypes){
+      let sum = 0 
+      for(const order of customerTypes[key] ){  
+        sum += parseFloat(order.total_price) 
+      }
+      customer_types.push({type: key , CA : sum  })
+     
+      sum = 0
+    }
+
     
-    // return res.status(200).json({ message: 'fetched succesfully', data: { meat_types} });
-     return res.status(200).json({ message: 'fetched succesfully', data: { tr_by_shop, order_by_shop , orders ,meat_types} });
+    
+     return res.status(200).json({ message: 'fetched succesfully', data: { 
+      // transactions,
+      // orders,
+       tr_by_shop, order_by_shop  ,meat_types , bread_types,sizes_types,form_types,platform_types,customer_types
+     }});
+    //  return res.status(200).json({ message: 'fetched succesfully', data: { orders, customer_types} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
