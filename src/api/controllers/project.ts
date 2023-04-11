@@ -73,16 +73,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
                pmd_domain:user_domain,
                 pmd_code: project.pm_code,
            })
+           console.log(project)
             return res.status(200).json({
                 message: "fetched succesfully",
                 data: { project , details },
             })
+           
        } else {
            return res.status(200).json({
                 message: "not FOund",
                 data: { project, details: null },
           })
        }
+
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

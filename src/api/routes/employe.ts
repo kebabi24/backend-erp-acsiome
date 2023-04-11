@@ -12,6 +12,7 @@ export default (app: Router) => {
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
     route.post("/findtime", controller.findByTime)
+    route.post("/findtimeproject", controller.findByTimeproject)
     route.post("/finddet", controller.findByDet)
     route.put("/:id", controller.update)
  

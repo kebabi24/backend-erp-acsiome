@@ -46,6 +46,7 @@ const Employe = sequelize.define(
         emp_mrate: Sequelize.DECIMAL,
         emp_arate: Sequelize.DECIMAL,
         emp_domain:  Sequelize.STRING,
+       
         
         ...base,
     },
