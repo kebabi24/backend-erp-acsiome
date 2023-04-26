@@ -87,13 +87,9 @@ const CustomerMobile = sequelize.define(
                 key: "sales_channel_code",
             },
         },
-        pricelist_code:{
-            type:Sequelize.STRING,
-            references: {
-                model: "aa_priceList",
-                key: "pricelist_code",
-            },
-        }
+        pricelist_code:Sequelize.STRING,
+         
+       
 
 
 

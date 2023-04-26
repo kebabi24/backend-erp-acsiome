@@ -1,11 +1,13 @@
 import EmployeService from "../../services/employe"
 import EmployeAvailabilityService from "../../services/employe-availability"
+import AffectEmployeService from "../../services/affect-employe"
 import EmployeScoreService from "../../services/employe-score"
+import EmployeJobService from "../../services/employe-job"
 import EmployeTimeService from "../../services/employe-time"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-import { start } from "repl"
 
+import {Op } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -15,13 +17,19 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const employeServiceInstance = Container.get(EmployeService)
         const employeScoreServiceInstance = Container.get(EmployeScoreService)
-        const { Employe, employeScoreDetail } = req.body
+        const employeJobServiceInstance = Container.get(EmployeJobService)
+        const { Employe, employeScoreDetail,employeJobDetail } = req.body
         console.log(employeScoreDetail)
         const employe = await employeServiceInstance.create({...Employe,emp_domain:user_domain, created_by: user_code, last_modified_by: user_code})
         for(let entry of employeScoreDetail){
 
             entry = { emps_type:entry.code_value,emps_amt:entry.emps_amt, emps_domain:user_domain,emps_addr: Employe.emp_addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await employeScoreServiceInstance.create(entry)
+        }
+        for(let entry of employeJobDetail){
+
+            entry = { ...entry, empj_domain:user_domain,empj_addr: Employe.emp_addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            await employeJobServiceInstance.create(entry)
         }
         return res
             .status(201)
@@ -63,13 +71,36 @@ const createC = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  code endpoint")
+    const{user_domain} = req.headers
     try {
         const employeServiceInstance = Container.get(EmployeService)
+        const employeScoreServiceInstance = Container.get(EmployeScoreService)
+        const employeJobServiceInstance = Container.get(EmployeJobService)
         const {id} = req.params
         const employe = await employeServiceInstance.findOne({id})
-        return res
+        const employeScoreDetail = await employeScoreServiceInstance.find({
+            emps_domain: user_domain,
+            emps_addr: employe.emp_addr,
+        })
+        const employeJob = await employeJobServiceInstance.find({
+            empj_domain: user_domain,
+            empj_addr: employe.emp_addr,
+        })
+       let  employeJobDetail= []
+       var i = 1
+        for (let empjb of employeJob) {
+            let obj = {
+                id: i,
+                empj_job : empjb.empj_job,
+                desc: empjb.job.jb_desc,
+                empj_level: empjb.empj_level
+            }
+            i = i + 1,
+            employeJobDetail.push(obj)
+        }
+       return res
             .status(200)
-            .json({ message: "fetched succesfully", data: employe  })
+            .json({ message: "fetched succesfully", data: {employe,employeScoreDetail,employeJobDetail}  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -146,10 +177,23 @@ const findByTimeproject = async (req: Request, res: Response, next: NextFunction
     try {
         const employeServiceInstance = Container.get(EmployeService)
         const empTimeServiceInstance = Container.get(EmployeTimeService)
+        const affectEmployeServiceInstance = Container.get(AffectEmployeService)
         const employe = await employeServiceInstance.find({emp_shift:req.body.emp_shift,emp_domain:user_domain})
         let result=[]
         let i = 1
+        if(req.body.site !=null) { 
         for(let emp of employe) {
+           
+            const affectemp = await affectEmployeServiceInstance.findOne({pme_domain:user_domain,pme_employe:emp.emp_addr, pme_site: req.body.site,
+                pme_start_date: {
+                    [Op.lte]: req.body.date,
+                  },
+                  pme_end_date: {
+                    [Op.gte]: req.body.date,
+                  },
+
+            })
+            if (affectemp) {
             const empTime = await empTimeServiceInstance.findOne({empt_domain:user_domain,empt_code:emp.emp_addr, empt_date: req.body.date})
             // const stat  = (empTime != null) ? empTime.empt_stat : null
             // const start =  (empTime != null) ? empTime.empt_start : null
@@ -161,7 +205,37 @@ const findByTimeproject = async (req: Request, res: Response, next: NextFunction
             result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site,  shift, type, amt})
                 i = i + 1
 
+            }
         }
+    }
+    else {
+
+        for(let emp of employe) {
+           
+            const affectemp = await affectEmployeServiceInstance.findOne({pme_domain:user_domain,pme_employe:emp.emp_addr,
+                pme_start_date: {
+                    [Op.lte]: req.body.date,
+                  },
+                  pme_end_date: {
+                    [Op.gte]: req.body.date,
+                  },
+
+            })
+            if (!affectemp) {
+            const empTime = await empTimeServiceInstance.findOne({empt_domain:user_domain,empt_code:emp.emp_addr, empt_date: req.body.date})
+            // const stat  = (empTime != null) ? empTime.empt_stat : null
+            // const start =  (empTime != null) ? empTime.empt_start : null
+            // const end   = (empTime != null) ? empTime.empt_end : null
+            const shift =  (empTime != null) ? empTime.empt_shift : employe.emp_shift
+           // console.log(employe)
+            const type =  (empTime != null) ? empTime.empt_type : null
+            const amt =  (empTime != null) ? empTime.empt_amt : 0
+            result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site,  shift, type, amt})
+                i = i + 1
+
+            }
+        }
+    }
         console.log(result)
         return res
             .status(200)
@@ -191,13 +265,28 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  code endpoint")
     try {
         const employeServiceInstance = Container.get(EmployeService)
+        const employeScoreServiceInstance = Container.get(EmployeScoreService)
+        const employeJobServiceInstance = Container.get(EmployeJobService)
         const {id} = req.params
-        const employe = await employeServiceInstance.update({...req.body, last_modified_by: user_code},{id})
+        const { Employe, employeScoreDetail,employeJobDetail } = req.body
+        const employe = await employeServiceInstance.update({...Employe, last_modified_by: user_code},{id})
+
+        await employeJobServiceInstance.delete({empj_addr: Employe.emp_addr,empj_domain:user_domain})
+        for (let entry of employeJobDetail) {
+            entry = { ...entry, empj_domain:user_domain,empj_addr: Employe.emp_addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await employeJobServiceInstance.create(entry)
+        }
+
+        await employeScoreServiceInstance.delete({emps_addr: Employe.emp_addr,emps_domain:user_domain})
+        for (let entry of employeScoreDetail) {
+            entry = { emps_type:entry.code_value,emps_amt:entry.emps_amt, emps_domain:user_domain,emps_addr: Employe.emp_addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await employeScoreServiceInstance.create(entry)
+        }
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe  })

@@ -154,7 +154,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const pos =await sequelize.query('SELECT  PUBLIC.tk_mstr.id as "tid"  , *  FROM   PUBLIC.tk_mstr,  PUBLIC.tkd_det  where PUBLIC.tkd_det.tkd_domain = ? and PUBLIC.tK_mstr.tk_domain = PUBLIC.tkd_det.tKd_domain   PUBLIC.tkd_det.tKd_code = PUBLIC.tK_mstr.tk_code  ORDER BY PUBLIC.tk_mstr.id ASC', { replacements: [user_domain], type: QueryTypes.SELECT });
+        const pos =await sequelize.query('SELECT  PUBLIC.tk_mstr.id as "tid"  , *  FROM   PUBLIC.tk_mstr,  PUBLIC.tkd_det  where PUBLIC.tkd_det.tkd_domain = ? and PUBLIC.tK_mstr.tk_domain = PUBLIC.tkd_det.tKd_domain  and  PUBLIC.tkd_det.tKd_code = PUBLIC.tK_mstr.tk_code  ORDER BY PUBLIC.tk_mstr.id ASC', { replacements: [user_domain], type: QueryTypes.SELECT });
        console.log(pos.tid)
         return res
             .status(200)

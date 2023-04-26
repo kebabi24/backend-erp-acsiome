@@ -1,5 +1,6 @@
 import InventoryStatusService from "../../services/inventory-status"
 import InventoryStatusDetailService from "../../services/inventory-status-details"
+import InventoryStatusMouvementService from "../../services/inventory-status-mouvement"
 
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
@@ -29,6 +30,57 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         logger.error("🔥 error: %o", e)
         return next(e)
     }
+}
+
+const createIsm = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
+    logger.debug("Calling Create sequence endpoint")
+    try {
+        const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
+        const inventoryStatusMouvementServiceInstance = Container.get(
+            InventoryStatusMouvementService
+        )
+        const { Status,inventoryStatusMouvement } = req.body
+        console.log(Status)
+        console.log(inventoryStatusMouvement)
+        await inventoryStatusMouvementServiceInstance.delete({ism_loc_start:Status.ism_loc_start, ism_loc_end:Status.ism_loc_end,ism_domain:user_domain})
+        for (let entry of inventoryStatusMouvement) {
+            entry = { ...entry, ism_loc_start:Status.ism_loc_start,ism_loc_end:Status.ism_loc_end, ism_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            await inventoryStatusMouvementServiceInstance.create(entry)
+        }
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data: inventoryStatusMouvement })
+    } catch (e) {
+        //#
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const findByIsm = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    console.log(req.body)
+    logger.debug("Calling find by  all inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+       const inventoryStatusMouvementServiceInstance = Container.get(
+            InventoryStatusMouvementService
+        )
+        const inventoryStatusMouvement = await inventoryStatusMouvementServiceInstance.find({
+            ...req.body,ism_domain:user_domain
+        })
+        return res
+        .status(200)
+        .json({ message: "fetched succesfully", data: inventoryStatusMouvement })
+} catch (e) {
+    logger.error("🔥 error: %o", e)
+    return next(e)
+}
 }
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
@@ -160,7 +212,9 @@ const{user_domain} = req.headers
 
 export default {
     create,
+    createIsm,
     findBy,
+    findByIsm,
     findOne,
     findAll,
     findAllDetails,
