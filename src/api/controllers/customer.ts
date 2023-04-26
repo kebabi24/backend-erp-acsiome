@@ -86,7 +86,7 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerServiceInstance = Container.get(CustomerService);
     //const adresseServiceInstance = Container.get(addresseService);
-    const customer = await customerServiceInstance.findOne({ cm_addr: customer_number });
+    const customer = await customerServiceInstance.findOne({ cm_domain:user_domain,cm_addr: customer_number });
     const customer_name = customer.dataValues.cm_sort;
     let testAccount = await nodemailer.createTestAccount();
     let transporter = nodemailer.createTransport({
@@ -136,7 +136,7 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
         cm_db: cart_number,
         cm_type: type,
       },
-      { cm_addr: customer_number },
+      { cm_domain: user_domain,cm_addr: customer_number },
     );
 
     // ADD TO AGENDA

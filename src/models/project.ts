@@ -38,7 +38,12 @@ const Project = sequelize.define(
         pm_doc_list: Sequelize.STRING,
         pm_domain:  Sequelize.STRING,
         oid_pm_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
+        
         pm_doc_list_code: Sequelize.STRING,
+        pm_reason : Sequelize.STRING,
+        pm_win_addr : Sequelize.STRING,
+        pm_win_amt : Sequelize.INTEGER,
+        pm_win_cmmt : Sequelize.STRING,
 
         ...base,
     },
