@@ -1,6 +1,7 @@
 import SiteService from "../../services/site"
 import ItemService from "../../services/item"
 import CostSimulationService from "../../services/cost-simulation"
+import ConfigService from "../../services/config"
 
 
 
@@ -21,20 +22,23 @@ const{user_domain} = req.headers
         const sequenceServiceInstance = Container.get(SequenceService);
         const itemServiceInstance = Container.get(ItemService)
         const costSimulationServiceInstance = Container.get(CostSimulationService)
+        const configServiceInstance = Container.get(ConfigService)
         
         const site = await siteServiceInstance.create({...req.body, si_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         // ADD TO AGENDA 
-        const param = await crmServiceInstance.getParamFilterd("new_shop")
-        const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code,domain: user_domain})
-        const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
-        for(const element of elements ){
-            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-            const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
-            console.log(addLine)
+        const config = await configServiceInstance.findOne({cfg_crm : true})
+        if (config) {
+            const param = await crmServiceInstance.getParamFilterd("new_shop")
+            const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code,domain: user_domain})
+            const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
+                for(const element of elements ){
+                    const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                    const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
+                    console.log(addLine)
+                }
+            
         }
-        
-        
         const items = await itemServiceInstance.find({pt_domain: user_domain});
 
         for(let item of items) {

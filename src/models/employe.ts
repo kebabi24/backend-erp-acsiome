@@ -45,6 +45,17 @@ const Employe = sequelize.define(
         emp_rate: Sequelize.DECIMAL,
         emp_mrate: Sequelize.DECIMAL,
         emp_arate: Sequelize.DECIMAL,
+        emp_dlicence: Sequelize.STRING,
+        emp_habiliation:  {type: Sequelize.BOOLEAN, defaultValue : false  },
+        emp_hab_date: Sequelize.DATEONLY,
+        emp_anem: Sequelize.STRING,
+        emp_child_nbr: {type: Sequelize.INTEGER, defaultValue : 0  },
+        emp_blood: Sequelize.STRING,
+        emp_contact_fname: Sequelize.STRING,
+        emp_contact_lname: Sequelize.STRING,
+        emp_contact_adress: Sequelize.STRING,
+        emp_contact_tel: Sequelize.STRING,
+        emp_parent_liaison: Sequelize.STRING,
         emp_domain:  Sequelize.STRING,
        
         

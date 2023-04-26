@@ -19,9 +19,11 @@ const Site = sequelize.define(
             primaryKey: true,
             unique: true
         },
+
         si_desc: Sequelize.STRING,
         si_entity: Sequelize.STRING,
         si_status: Sequelize.STRING,
+        si_cust: Sequelize.STRING,
         si_auto_loc: {type: Sequelize.BOOLEAN, defaultValue : false  },
         si_default: {type: Sequelize.BOOLEAN, defaultValue : false  },
         si_user1: Sequelize.STRING,

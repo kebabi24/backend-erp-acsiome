@@ -139,6 +139,7 @@ declare global {
     export type SatisfactionModel = S.Model;
     export type invoiceModel = S.Model;
     export type forcastModel = S.Model;
+    export type InventoryStatusMouvementModel = S.Model;
     // new models
     export type ListPriceModel = S.Model;
     export type fidelityCardModel = S.Model;
@@ -173,6 +174,7 @@ declare global {
     export type QualityTestBillDetails = S.Model;
     export type QualityInspectionRoutingDetails = S.Model;
     export type EmployeScoreModel = S.Model;
+    export type EmployeJobModel = S.Model;
 
     export type PjdDetailsModel = S.Model;
     export type projectAssetDownDetailsModel = S.Model;
