@@ -941,7 +941,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
       'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.pod_det.id DESC',
       { type: QueryTypes.SELECT },
     );
-
+console.log(pos)
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
     logger.error('ðŸ”¥ error: %o', e);

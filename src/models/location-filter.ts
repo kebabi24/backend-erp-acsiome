@@ -4,8 +4,8 @@ import base from "./base"
 
 const sequelize = Container.get("sequelize")
 
-const Location = sequelize.define(
-    "loc_det",
+const LocationFilter = sequelize.define(
+    "locationFilter",
     {
         id: {
             type: Sequelize.INTEGER,
@@ -29,25 +29,29 @@ const Location = sequelize.define(
             //     key: "loc_site",
             // },
         },
-        chr01:Sequelize.STRING,
-        chr02:Sequelize.STRING,
-        chr03:Sequelize.STRING,
-        chr04:Sequelize.STRING,
-        chr05:Sequelize.STRING,
-        chr06:Sequelize.STRING,
-        chr07:Sequelize.STRING,
-        chr08:Sequelize.STRING,
-
+        loc_part: {
+            type: Sequelize.STRING,
+            // references:{
+            //     model: "pt_mstr",
+            //     key: "pt_part",
+            // },
+        },
+        color:Sequelize.STRING,
+        model:Sequelize.STRING,
+        quality:Sequelize.STRING,
+        logo:Sequelize.STRING,
+        grammage:Sequelize.STRING,
+      
         // loc_loc: Sequelize.STRING,
         // loc_site: Sequelize.STRING,
         // loc__qad01: {type: Sequelize.BOOLEAN, defaultValue : false  },
         // loc_date: Sequelize.DATEONLY,
         // loc_cap: {type: Sequelize.DECIMAL, defaultValue : 0  },
      
-        // ...base,
+        ...base,
     },
     {
-        tableName: "loc_det",
+        tableName: "locd_det",
     }
 )
-export default Location
+export default LocationFilter
