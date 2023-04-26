@@ -201,6 +201,9 @@ export default async ({ expressApp }) => {
       { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
       { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
       { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
+      { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
+
+      { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
 
     ],
   });
@@ -837,16 +840,16 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
-  //await sequelizeConnection.sync();l
+  //await sequelizeConnection.sync();
 
-  await sequelizeConnection
-    .sync({ alter: true })
-    .then(() => {
-      console.log('database updated');
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

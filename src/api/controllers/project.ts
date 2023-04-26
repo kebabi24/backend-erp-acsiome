@@ -22,8 +22,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const taskDetailServiceInstance = Container.get(
             TaskDetailService
         )
-        const { Project, ProjectDetails } = req.body
+        const { Project, ProjectDetails , docs_codes} = req.body
         const pj = await projectServiceInstance.create({...Project,pm_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const project_code = Project.pm_code
+        let data = []
+        docs_codes.forEach(doc_code => {
+            data.push({
+                pjd_nbr : project_code ,
+                mp_nbr : doc_code,
+                pjd_domain:user_domain,
+            })
+           
+        });
+        const pjDetails = await projectServiceInstance.createDocsDetails(data)
+        
         for (let entry of ProjectDetails) {
             entry = { ...entry,pmd_domain:user_domain, pmd_code: Project.pm_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await projectDetailServiceInstance.create(entry)
@@ -388,6 +400,28 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
         }
      }     
 
+     
+     const createAssetDown = async (req: Request, res: Response, next: NextFunction) => {
+        const logger = Container.get("logger")
+        logger.debug("Calling createAssetDown endpoint")
+        const{user_domain} = req.headers
+        const {  data} = req.body
+        try {
+            data.forEach(line => {
+                delete line.id
+                line.pad_domain = user_domain
+            });
+            const projectServiceInstance = Container.get(ProjectService)
+            const assetsDown = await projectServiceInstance.createAssetDown(data)
+            return res
+                .status(200)
+                .json({ message: "created succesfully", data: assetsDown })
+        } catch (e) {
+            logger.error("🔥 error: %o", e)
+            return next(e)
+        }
+    }
+
 
 
 export default {
@@ -405,4 +439,5 @@ export default {
     getProjectTypes,
     findAssignedEmpOfProject,
     findInstructionsOfProject,
+    createAssetDown
 }
