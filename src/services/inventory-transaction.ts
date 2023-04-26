@@ -135,16 +135,32 @@ export default class inventoryTransactionService {
         }
     }
 
-    public async findAllissSo(startDate: any, endDate:any): Promise<any> {
+    public async findAllissSo(startDate: any, endDate:any, shop :any): Promise<any> {
         try {
-            const inventoryTransaction = await this.inventoryTransactionModel.findAll({ 
-                where: Sequelize.and(
-                 {tr_type: "ISS-WO"}, 
-                 {tr_date :  {[Op.gte]:new Date(startDate)}},
-                 {tr_date :  {[Op.lte]:new Date(endDate)}},    
-                ),
-                  attributes :["id","tr_gl_amt","tr_site","tr_date"]
-                 })
+            let inventoryTransaction;
+            if(shop.length == 0){
+                inventoryTransaction = await this.inventoryTransactionModel.findAll({ 
+                    where: Sequelize.and(
+                     
+                     {tr_type: "ISS-WO"}, 
+                     {tr_date :  {[Op.gte]:new Date(startDate)}},
+                     {tr_date :  {[Op.lte]:new Date(endDate)}},    
+                    ),
+                      attributes :["id","tr_gl_amt","tr_site","tr_date"]
+                    })
+            }else{  
+                inventoryTransaction = await this.inventoryTransactionModel.findAll({ 
+                    where: Sequelize.and(
+                     {tr_site : shop},
+                     {tr_type: "ISS-WO"}, 
+                     {tr_date :  {[Op.gte]:new Date(startDate)}},
+                     {tr_date :  {[Op.lte]:new Date(endDate)}},    
+                    ),
+                      attributes :["id","tr_gl_amt","tr_site","tr_date"]
+                    })
+            }
+
+            
             this.logger.silly("find one inventoryTransaction mstr")
             return inventoryTransaction
         } catch (e) {

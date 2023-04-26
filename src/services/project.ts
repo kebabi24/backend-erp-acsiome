@@ -4,10 +4,12 @@ import { Service, Inject, Container } from "typedi"
 export default class projectService {
     constructor(
         @Inject("projectModel") private projectModel: Models.ProjectModel,
+        @Inject("pjdDetailsModel") private pjdDetailsModel: Models.PjdDetailsModel,
         @Inject("projectDetailModel") private projectDetailModel: Models.ProjectDetailModel,
         @Inject("affectEmployeModel") private affectEmployeModel: Models.AffectEmployeModel,
         @Inject('employeModel')private employeModel: Models.EmployeModel,
         @Inject("codeModel") private codeModel: Models.CodeModel,
+        @Inject("projectAssetDownDetailsModel") private projectAssetDownDetailsModel: Models.projectAssetDownDetailsModel,
         @Inject("logger") private logger
     ) {}
 
@@ -21,6 +23,19 @@ export default class projectService {
             throw e
         }
     }
+
+    public async createDocsDetails(data: any): Promise<any> {
+        try {
+            const details = await this.pjdDetailsModel.bulkCreate(data)
+            this.logger.silly("create details")
+            return details
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
 
     public async findOne(query: any): Promise<any> {
         try {
@@ -119,6 +134,17 @@ export default class projectService {
             
             this.logger.silly("find All project_details ")
             return project_details
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async createAssetDown(data: any): Promise<any> {
+        try {
+            const assetsDown = await this.projectAssetDownDetailsModel.bulkCreate(data)
+            this.logger.silly("create assets down")
+            return assetsDown
         } catch (e) {
             this.logger.error(e)
             throw e

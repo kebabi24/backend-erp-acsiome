@@ -1361,15 +1361,10 @@ const findAllPosOrders = async (req: Request, res: Response, next: NextFunction)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const posOrderDetailServiceInstance = Container.get(PosOrderDetail);
 
-    const {startDate , endDate} = req.body
-    // console.log(startDate+"\t"+endDate)
-    // console.log(req.body)
-
-    // const str1 = "2023-3-1"
-    // const str2 = "2023-3-8"
-
-    const orders = await PosOrderServiceInstance.findAllPosOrders(startDate,endDate);
-    const transactions = await inventoryTransactionServiceInstance.findAllissSo(startDate,endDate);
+    const {startDate , endDate , shop} = req.body
+    
+    const orders = await PosOrderServiceInstance.findAllPosOrders(startDate,endDate,shop);
+    const transactions = await inventoryTransactionServiceInstance.findAllissSo(startDate,endDate,shop);
     const orders_details = await posOrderDetailServiceInstance.findAllDetailsFiltered(startDate,endDate)
 
     const locations = _.mapValues(_.groupBy(orders, 'usrd_site'));

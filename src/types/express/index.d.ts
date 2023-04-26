@@ -176,6 +176,8 @@ declare global {
     export type EmployeScoreModel = S.Model;
     export type EmployeJobModel = S.Model;
 
+    export type PjdDetailsModel = S.Model;
+    export type projectAssetDownDetailsModel = S.Model;
 
   }
 }

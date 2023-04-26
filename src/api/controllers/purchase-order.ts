@@ -21,7 +21,6 @@ import { generatePdf } from '../../reporting/generator';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -31,13 +30,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const po = await purchaseOrderServiceInstance.create({
       ...purchaseOrder,
       created_by: user_code,
-      po_domain: user_domain,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
     for (let entry of purchaseOrderDetail) {
-      entry = { ...entry, pod_domain:user_domain, pod_nbr: po.po_nbr };
+      entry = { ...entry, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
       logger.debug('Calling Create sequence endpoint');
       try {
@@ -71,7 +69,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createPos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
+
   logger.debug('Calling Create sequence endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
@@ -82,14 +80,13 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     const { Site, purchaseOrder, purchaseOrderDetail } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain: user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
       //
 
-      const vd = await providerServiceInstance.findOne({ vd_addr: entry.vend, vd_domain: user_domain });
+      const vd = await providerServiceInstance.findOne({ vd_addr: entry.vend });
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
-        po_domain: user_domain,
         po_category: 'PO',
         po_site: Site,
         po_ord_date: new Date(),
@@ -131,7 +128,6 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
           var loc = null
           if (Site == "0901") { loc = "MGM0010" } else loc = Site
             let entr = {
-              pod_domain: user_domain,
               pod_nbr: po.po_nbr,
               pod_line: line,
               pod_part: obj.part,
@@ -168,7 +164,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
       }
       const purchaseOrder = await purchaseOrderServiceInstance.update(
         { po_amt: amt, po_tax_amt : tax, po_trl1_amt: trl1, last_modified_by: user_code },
-        { po_nbr : po.po_nbr,po_domain:user_domain},
+        { po_nbr : po.po_nbr},
       );
     }
     //console.log(purchaseOrder);
@@ -183,7 +179,6 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
 const createPosUnp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -195,13 +190,12 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
     const { Site, purchaseOrder } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain:user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
       console.log(sequence);
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
-        po_domain:user_domain,
         po_category: 'PO',
         po_site: Site,
         po_ord_date: new Date(),
@@ -228,12 +222,11 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
 
           // add a day
           duedate.setDate(duedate.getDate() + 1);
-          const pt = await itemServiceInstance.findOne({ pt_part: obj.pt_part , pt_domain:user_domain});
-          const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc , tx2_domain:user_domain});
+          const pt = await itemServiceInstance.findOne({ pt_part: obj.pt_part });
+          const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc });
           console.log(pt.taxe);
 
           let entr = {
-            pod_domain: user_domain,
             pod_nbr: po.po_nbr,
             pod_line: line,
             pod_part: pt.pt_part,
@@ -269,7 +262,7 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
 const createPosUnpp = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
+
   logger.debug('Calling Create sequence endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
@@ -280,13 +273,12 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
     const { Site, purchaseOrder, po_blanket } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain:user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO' });
       console.log(sequence);
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
-        po_domain:user_domain,
         po_category: 'PO',
         po_site: Site,
         po_ord_date: new Date(),
@@ -310,12 +302,11 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
 
       // add a day
       duedate.setDate(duedate.getDate() + 1);
-      const pt = await itemServiceInstance.findOne({ pt_part: entry.pt_part, pt_domain:user_domain });
-      const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc, tx2_domain: user_domain });
+      const pt = await itemServiceInstance.findOne({ pt_part: entry.pt_part });
+      const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc });
       console.log(pt.taxe);
 
       let entr = {
-        pod_domain: user_domain,
         pod_nbr: po.po_nbr,
         pod_line: line,
         pod_part: pt.pt_part,
@@ -348,7 +339,6 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
 const payPo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -363,26 +353,25 @@ const payPo = async (req: Request, res: Response, next: NextFunction) => {
     const { Site, details } = req.body;
     for (const item of details) {
       if (item.po_amt == item.po_pai) {
-        await purchaseOrderServiceInstance.update({ po_stat: 'C' ,}, { po_nbr: item.po_nbr, po_site: item.po_site , po_domain: user_domain});
+        await purchaseOrderServiceInstance.update({ po_stat: 'C' }, { po_nbr: item.po_nbr, po_site: item.po_site });
       } else {
         console.log(typeof item.po_pai);
         console.log(typeof item.po_amt);
         if (item.po_pai) {
           await purchaseOrderServiceInstance.update(
             { po_amt: Number(item.po_amt) - Number(item.po_pai) },
-            { po_nbr: item.po_nbr, po_site: item.po_site , po_domain:user_domain},
+            { po_nbr: item.po_nbr, po_site: item.po_site },
           );
         }
       }
-      const bk = await bankServiceInstance.findOne({ bk_userid: user_code, bk_type: item.po_blanket, bk_domain: user_domain });
+      const bk = await bankServiceInstance.findOne({ bk_userid: user_code, bk_type: item.po_blanket });
       if (bk) {
         if (item.po_pai) {
           await bankServiceInstance.update(
             { bk_balance: Number(bk.bk_balance) - Number(item.po_pai) },
-            { bk_userid: user_code, bk_type: item.po_blanket, bk_domain:user_domain },
+            { bk_userid: user_code, bk_type: item.po_blanket },
           );
           await bkhServiceInstance.create({
-            bkh_domain: user_domain,
             bkh_code: bk.bk_code,
             bkh_num_doc: item.po_nbr,
             bkh_date: new Date(),
@@ -405,20 +394,17 @@ const payPo = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   logger.debug('Calling find by  all purchaseOrder endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const purchaseOrder = await purchaseOrderServiceInstance.findOne({
-      ...req.body,po_domain:user_domain
+      ...req.body,
     });
    // console.log(purchaseOrder);
     if (purchaseOrder) {
       const details = await purchaseOrderDetailServiceInstance.find({
-        pod_nbr: purchaseOrder.po_nbr, pod_domain: user_domain
+        pod_nbr: purchaseOrder.po_nbr,
       });
       return res.status(200).json({
         message: 'fetched succesfully',
@@ -438,15 +424,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   logger.debug('Calling find by  all purchaseOrder endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const purchaseOrder = await purchaseOrderServiceInstance.find({
-      ...req.body, po_domain:user_domain
+      ...req.body,
     });
 
     return res.status(200).json({
@@ -461,9 +444,6 @@ const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
 const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   logger.debug('Calling find by  all purchaseOrder endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
@@ -476,7 +456,6 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
       po_ord_date: {
         [Op.between]: [req.body.date_1, req.body.date_2],
       },
-      po_domain:user_domain
     });
     console.log('here', purchaseOrder);
     const results_head = [];
@@ -485,7 +464,6 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
     for (const po of purchaseOrder) {
       const details = await purchaseOrderDetailServiceInstance.find({
         pod_nbr: po.po_nbr,
-        pod_domain: user_domain,
         pod_part: {
           [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
         },
@@ -533,9 +511,6 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
 const getProviderActivity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   logger.debug('Calling find by  all purchaseOrder endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
@@ -549,7 +524,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
       vd_addr: {
         [Op.between]: [req.body.vd_addr_1, req.body.vd_addr_2],
       },
-      vd_domain:user_domain
     });
     console.log('here', provider);
     const results_head = [];
@@ -558,7 +532,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
     for (const vd of provider) {
       const accountpayable = await accountPayableServiceInstance.find({
         ap_vend: vd.vd_addr,
-        ap_domain: user_domain,
         ap_type: { [Op.eq]: 'p' },
         ap_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -569,7 +542,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
       }
       const voucher = await voucherOrderServiceInstance.find({
         vh_vend: vd.vd_addr,
-        vh_domain: user_domain,
 
         vh_inv_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -579,7 +551,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
         inv_amt = inv_amt + Number(vh.vh_amt);
       }
       const purchasereceive = await purchaseReceiveServiceInstance.find({
-        prh_domain: user_domain,
         prh_vend: vd.vd_addr,
         prh_rcp_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -589,7 +560,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
         ship_amt = ship_amt + Number(prh.prh_rcvd * prh.prh_um_conv * prh.prh_pur_cost);
       }
       const purchase = await purchaseOrderServiceInstance.find({
-        po_domain: user_domain,
         po_vend: vd.vd_addr,
         po_ord_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -624,9 +594,6 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
 const getProviderBalance = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   logger.debug('Calling find by  all purchaseOrder endpoint');
   try {
     const voucherOrderServiceInstance = Container.get(VoucherOrderService);
@@ -634,7 +601,6 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
     const providerServiceInstance = Container.get(ProviderService);
 
     const provider = await providerServiceInstance.find({
-      vd_domain: user_domain,
       vd_addr: {
         [Op.between]: [req.body.vd_addr_1, req.body.vd_addr_2],
       },
@@ -645,7 +611,6 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
 
     for (const vd of provider) {
       const accountpayable2 = await accountPayableServiceInstance.find({
-        ap_domain: user_domain,
         ap_vend: vd.vd_addr,
         ap_type: { [Op.eq]: 'P' },
         ap_effdate: { [Op.between]: [req.body.date_2, new Date()] },
@@ -656,7 +621,6 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
         paid_amt2 = paid_amt2 + Number(ap.ap_amt);
       }
       const accountpayable1 = await accountPayableServiceInstance.find({
-        ap_domain: user_domain,
         ap_vend: vd.vd_addr,
         ap_type: { [Op.eq]: 'P' },
         ap_effdate: { [Op.between]: [req.body.date_1, new Date()] },
@@ -667,7 +631,6 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
         paid_amt1 = paid_amt1 + Number(ap.ap_amt);
       }
       const voucher2 = await accountPayableServiceInstance.find({
-        ap_domain: user_domain,
         ap_vend: vd.vd_addr,
         ap_type: { [Op.eq]: 'I' },
         ap_effdate: { [Op.between]: [req.body.date_1, new Date()] },
@@ -678,7 +641,6 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
         inv_amt2 = inv_amt2 + Number(vh.ap_amt);
       }
       const voucher1 = await accountPayableServiceInstance.find({
-        ap_domain: user_domain,
         ap_vend: vd.vd_addr,
         ap_type: { [Op.eq]: 'I' },
         ap_effdate: { [Op.between]: [req.body.date_1, new Date()] },
@@ -732,15 +694,11 @@ const getProviderBalance = async (req: Request, res: Response, next: NextFunctio
 const getProviderCA = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     const voucherOrderServiceInstance = Container.get(VoucherOrderService);
     const providerServiceInstance = Container.get(ProviderService);
 
     const provider = await providerServiceInstance.find({
-      vd_domain: user_domain,
       vd_addr: { [Op.between]: [req.body.vd_addr_1, req.body.vd_addr_2] },
     });
 
@@ -748,7 +706,6 @@ const getProviderCA = async (req: Request, res: Response, next: NextFunction) =>
 
     for (const vd of provider) {
       const invoice = await voucherOrderServiceInstance.find({
-        vh_domain: user_domain,
         vh_vend: vd.vd_addr,
         vh_inv_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -785,9 +742,6 @@ const getProviderCA = async (req: Request, res: Response, next: NextFunction) =>
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  purchaseOrder endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const { id } = req.params;
@@ -795,7 +749,6 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const details = await purchaseOrderDetailServiceInstance.find({
       pod_nbr: purchaseOrder.po_nbr,
-      pod_domain: user_domain
     });
 
     return res.status(200).json({
@@ -812,13 +765,10 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all requisition endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({});
 
     return res.status(202).json({
       message: 'sec',
@@ -834,13 +784,10 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all requisition endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
-    const pos = await purchaseOrderServiceInstance.find({ ...req.body,po_domain: user_domain });
+    const pos = await purchaseOrderServiceInstance.find({ ...req.body });
 
     return res.status(202).json({
       message: 'sec',
@@ -854,9 +801,6 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
 
 const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   const pod_site = req.body.pod_site;
   console.log(pod_site);
   const details = [];
@@ -867,7 +811,6 @@ const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
 
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const detail = await purchaseOrderDetailServiceInstance.find({
-      pod_domain:user_domain,
       pod_stat: 'V',
       pod_site: pod_site,
     });
@@ -885,17 +828,13 @@ const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all purchaseOrder endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     let result = [];
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({});
     for (const po of pos) {
       const details = await purchaseOrderDetailServiceInstance.find({
-        pod_domain: user_domain,
         pod_nbr: po.po_nbr,
       });
       result.push({ id: po.id, po, details });
@@ -909,18 +848,14 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all purchaseOrder endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
   try {
     let result = [];
     console.log(req.body);
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({});
     for (const po of pos) {
       const details = await purchaseOrderDetailServiceInstance.find({
-        pod_domain: user_domain,
         pod_nbr: po.po_nbr,
         pod_site: req.body.site,
       });
@@ -937,7 +872,6 @@ const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
   logger.debug('Calling update one  purchaseOrder endpoint');
   try {
@@ -951,7 +885,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
     console.log(purchase.po_nbr);
-    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain,pod_nbr: purchase.po_nbr });
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_nbr: purchase.po_nbr });
     for (const po of pos) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
         { pod_stat: req.body.po_stat, last_modified_by: user_code },
@@ -967,8 +901,6 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const updated = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
 
   logger.debug('Calling update one  purchaseOrder endpoint');
   try {
@@ -982,7 +914,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     // );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
     console.log(purchase.po_nbr);
-    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain,pod_nbr: purchase.po_nbr });
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_nbr: purchase.po_nbr });
     for (const pod of req.body.detail) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
         { pod_qty_ord:pod.pod_qty_ord,pod_price:pod.pod_price, last_modified_by: user_code },
@@ -999,8 +931,6 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const sequelize = Container.get('sequelize');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
   logger.debug('Calling find all purchaseOrder with all site endpoint');
   try {
@@ -1008,20 +938,19 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const pos = await sequelize.query(
-      'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where  PUBLIC.pod_det.pod_domain = ? and  PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and  PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.pod_det.id DESC',
-      { replacements: [user_domain], type: QueryTypes.SELECT },
+      'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.pod_det.id DESC',
+      { type: QueryTypes.SELECT },
     );
-
+console.log(pos)
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
-    logger.error('ðŸ”¥ error: %o', e);
+    logger.error('error: %o', e);
     return next(e);
   }
 };
 const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const sequelize = Container.get('sequelize');
-  const { user_domain } = req.headers;
 
   logger.debug('Calling find all purchaseOrder with site endpoint');
   try {
@@ -1031,8 +960,8 @@ const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunc
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const pos = await sequelize.query(
-      'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where   PUBLIC.pod_det.pod_domain = ? and PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part  and PUBLIC.pod_det.pod_site = ? ORDER BY PUBLIC.pod_det.id DESC',
-      { replacements: [user_domain,site], type: QueryTypes.SELECT },
+      'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part  and PUBLIC.pod_det.pod_site = ? ORDER BY PUBLIC.pod_det.id DESC',
+      { replacements: [site], type: QueryTypes.SELECT },
     );
 
     return res.status(200).json({ message: 'fetched succesfully', data: pos });

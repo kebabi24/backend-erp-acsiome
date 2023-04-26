@@ -204,17 +204,31 @@ export default class posOrderService {
     }
   }
 
-  public async findAllPosOrders(startDate: any, endDate:any): Promise<any> {
+  public async findAllPosOrders(startDate: any, endDate:any , shop : any): Promise<any> {
     try {
+      console.log(shop)
+      let orders; 
+      if(shop.length == 0 ){
+         orders = await this.posOrderModel.findAll({
+          where :Sequelize.and( 
+            {del_comp  :{[Op.not]: "null"}},
+            {created_date :  {[Op.gte]:new Date(startDate)}},
+            {created_date :  {[Op.lte]:new Date(endDate)}},    
+          ),
+          attributes:["id","usrd_site","total_price","del_comp","created_date","customer"]
+        });
+      }else{
+        orders = await this.posOrderModel.findAll({
+          where :Sequelize.and( 
+            {usrd_site : shop},
+            {del_comp  :{[Op.not]: "null"}},
+            {created_date :  {[Op.gte]:new Date(startDate)}},
+            {created_date :  {[Op.lte]:new Date(endDate)}},    
+          ),
+          attributes:["id","usrd_site","total_price","del_comp","created_date","customer"]
+        });
+      }
       
-      const orders = await this.posOrderModel.findAll({
-        where :Sequelize.and( 
-          {del_comp  :{[Op.not]: "null"}},
-          {created_date :  {[Op.gte]:new Date(startDate)}},
-          {created_date :  {[Op.lte]:new Date(endDate)}},    
-        ),
-        attributes:["id","usrd_site","total_price","del_comp","created_date","customer"]
-      });
       this.logger.silly('found all orders mstr');
       return orders;
     } catch (e) {

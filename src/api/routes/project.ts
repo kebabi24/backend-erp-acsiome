@@ -8,6 +8,7 @@ export default (app: Router) => {
 
     
     route.post("/", controller.create)
+    route.post("/createAsset", controller.createAssetDown)
     route.get("/projectTypes", controller.getProjectTypes)
     route.get("/allwithdetail", controller.findAllwithDetails)
     route.get("/allbomdetail", controller.findAllbomDetails)

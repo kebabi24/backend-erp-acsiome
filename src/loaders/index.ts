@@ -203,6 +203,9 @@ export default async ({ expressApp }) => {
       { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
       { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
       { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
+      { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
+
+      { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
 
     ],
   });
