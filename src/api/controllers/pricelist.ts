@@ -21,7 +21,7 @@ import { DATE, Op } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  code endpoint")
     try {
@@ -32,7 +32,7 @@ const{user_domain} = req.headers
 
         for (const item of detail) {
             
-            const price = await pricelistServiceInstance.create({...item,...pricelist, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin })
+            const price = await pricelistServiceInstance.create({...item,...pricelist,pi_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin })
 
 
         }
@@ -49,11 +49,14 @@ const{user_domain} = req.headers
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  pricelist endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const pricelistServiceInstance = Container.get(PricelistService)
         const {id} = req.params
         const pricelist = await pricelistServiceInstance.findOne({id})
-        const details = await pricelistServiceInstance.find({pi_list: pricelist.pi_list})
+        const details = await pricelistServiceInstance.find({pi_list: pricelist.pi_list,pi_domain:user_domain})
         console.log(pricelist.pi_list)
         return res
             .status(200)
@@ -67,9 +70,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all pricelist endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const pricelistServiceInstance = Container.get(PricelistService)
-        const pricelists = await pricelistServiceInstance.find({})
+        const pricelists = await pricelistServiceInstance.find({pi_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: pricelists })
@@ -82,9 +88,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all pricelist endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const pricelistServiceInstance = Container.get(PricelistService)
-        const pricelists = await pricelistServiceInstance.find({...req.body})
+        const pricelists = await pricelistServiceInstance.find({...req.body,pi_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: pricelists })
@@ -97,9 +106,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all pricelist endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const pricelistServiceInstance = Container.get(PricelistService)
-        const pricelists = await pricelistServiceInstance.findOne({...req.body})
+        const pricelists = await pricelistServiceInstance.findOne({...req.body,pi_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: pricelists })
@@ -120,10 +132,10 @@ const{user_domain} = req.headers
         console.log(pricelist)
         const pricelistServiceInstance = Container.get(PricelistService)
         
-        const price = await pricelistServiceInstance.delete({pi_list: pricelist.pi_list })
+        const price = await pricelistServiceInstance.delete({pi_list: pricelist.pi_list,pi_domain:user_domain })
         for (const item of detail) {
             
-            const price = await pricelistServiceInstance.create({...item,...pricelist, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code })
+            const price = await pricelistServiceInstance.create({...item,...pricelist,pi_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code })
 
 
         }
@@ -154,6 +166,9 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 }
 const getPrice = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
       
       const pricelistServiceInstance = Container.get(PricelistService);
@@ -179,6 +194,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
         pi_um: um,
         pi_curr: curr,
         pi_amt_type: type,
+        pi_domain:user_domain,
 
       });
       console.log(pricelist)
@@ -190,6 +206,9 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
   };
   const getDiscPct = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
       
       const pricelistServiceInstance = Container.get(PricelistService);
@@ -215,6 +234,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
         pi_um: um,
         pi_curr: curr,
         pi_amt_type: typer,
+        pi_domain:user_domain,
 
       });
       console.log(pricelist)

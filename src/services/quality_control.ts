@@ -60,7 +60,7 @@ export default class QualityControl {
     public async getSpecifications(): Promise<any> {
         try {
             const specifications = await this.specificationModel.findAll({
-                attributes: ["mp_nbr"]
+                attributes: ["id","mp_nbr","mp_desc","mp_expire"]
             })
             this.logger.silly("find categories ")
             return specifications

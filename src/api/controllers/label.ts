@@ -6,12 +6,14 @@ import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
     const { user_code } = req.headers;
+    const { user_domain } = req.headers;
   
     logger.debug('Calling Create label endpoint');
     try {
       const labelServiceInstance = Container.get(LabelService);
       const label = await labelServiceInstance.create({
         ...req.body,
+        lb_domain: user_domain,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -30,10 +32,13 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all job endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const labelServiceInstance = Container.get(LabelService)
         const label = await labelServiceInstance.findOne({
-            ...req.body,
+            ...req.body,lb_domain:user_domain
         })
             return res.status(200).json({
                 message: "fetched succesfully",
@@ -69,9 +74,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all job endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const labelServiceInstance = Container.get(LabelService)
-        const labels = await labelServiceInstance.find({})
+        const labels = await labelServiceInstance.find({lb_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: labels })

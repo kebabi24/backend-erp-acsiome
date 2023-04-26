@@ -121,6 +121,8 @@ export default async ({ expressApp }) => {
       { name: 'employeTimeModel', model: require('../models/employe-time').default },
       { name: 'forcastModel', model: require('../models/forcast').default },
       { name: 'labelModel', model: require('../models/label').default },
+      { name: 'domainModel', model: require('../models/domain').default },
+      { name: 'employeScoreModel', model: require('../models/employe-score').default },
 
       // mobile models
       // MOBILE DATABASE MODELS
@@ -200,6 +202,9 @@ export default async ({ expressApp }) => {
       { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
       { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
       { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
+      { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
+
+      { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
 
     ],
   });
@@ -832,10 +837,18 @@ export default async ({ expressApp }) => {
   //   foreignKey: 'loc_loc',
   //   targetKey: 'loc_loc',
   // });
-
+  require('../models/employe').default.hasOne(require('../models/employe-score').default, {
+    foreignKey: 'emps_addr',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-score').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'emps_addr',
+    targetKey: 'emp_addr',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();l
+   //await sequelizeConnection.sync();
+   //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

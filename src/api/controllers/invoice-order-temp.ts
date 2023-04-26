@@ -20,7 +20,7 @@ import { generatePdf } from "../../reporting/generator";
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     console.log("INVOICE\n")
     logger.debug("Calling Create sequence endpoint")
@@ -35,16 +35,16 @@ const{user_domain} = req.headers
         )
         const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body
 
-        const ih = await invoiceOrderServiceInstance.create({...invoiceOrderTemp, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ih = await invoiceOrderServiceInstance.create({...invoiceOrderTemp,ith_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderTempDetail) {
              
-            entry = { ...entry, itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, itdh_domain:user_domain,itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await invoiceOrderDetailServiceInstance.create(entry)
 
         }
 
-        const so = await saleOrderServiceInstance.findOne({so_nbr: ih.ith_nbr })
+        const so = await saleOrderServiceInstance.findOne({so_domain:user_domain,so_nbr: ih.ith_nbr })
             if(so) await saleOrderServiceInstance.update({so_invoiced : true,so_to_inv:false, so_inv_nbr: ih.ith_inv_nbr, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: so.id})
         
         return res
@@ -60,7 +60,7 @@ const{user_domain} = req.headers
 const createIV = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -75,20 +75,20 @@ const{user_domain} = req.headers
         const saleShiperServiceInstance = Container.get(SaleShiperService)
         const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body
 
-        const ih = await invoiceOrderTempServiceInstance.create({...invoiceOrderTemp, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code})
+        const ih = await invoiceOrderTempServiceInstance.create({...invoiceOrderTemp, ith_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code})
         
         for (let entry of invoiceOrderTempDetail) {
-            entry = { ...entry, itdh_inv_nbr: ih.ith_inv_nbr }
+            entry = { ...entry,itdh_domain:user_domain, itdh_inv_nbr: ih.ith_inv_nbr }
             await invoiceOrderTempDetailServiceInstance.create({...entry, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
-            const sh = await saleShiperServiceInstance.findOne({psh_shiper: entry.itdh_ship, psh_part:entry.itdh_part, psh_nbr: entry.itdh_nbr,psh_line: entry.itdh_sad_line })
+            const sh = await saleShiperServiceInstance.findOne({psh_domain:user_domain,psh_shiper: entry.itdh_ship, psh_part:entry.itdh_part, psh_nbr: entry.itdh_nbr,psh_line: entry.itdh_sad_line })
             if(sh) await saleShiperServiceInstance.update({psh_invoiced : true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
           }
 
         
         
         const addressServiceInstance = Container.get(AddressService)
-        const addr = await addressServiceInstance.findOne({ ad_addr: invoiceOrderTemp.ith_bill});
+        const addr = await addressServiceInstance.findOne({ ad_domain:user_domain,ad_addr: invoiceOrderTemp.ith_bill});
 
         const pdfData = {
             ih : invoiceOrderTemp,
@@ -112,7 +112,7 @@ const{user_domain} = req.headers
 const imput = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
     const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -130,22 +130,24 @@ const{user_domain} = req.headers
         const accountReceivableServiceInstance = Container.get(AccountReceivableService)
         const { invoiceOrder, invoiceOrderDetail, gldetail } = req.body
 
-        const ih = await invoiceOrderServiceInstance.create({...invoiceOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ih = await invoiceOrderServiceInstance.create({...invoiceOrder,ih_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderDetail) {
-            entry = { ...entry, _inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, idh_domain:user_domain,idh_inv_nbr: ih.ih_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await invoiceOrderDetailServiceInstance.create(entry)
 
         
         }
 
         const PayMeth = await payMethServiceInstance.findOne({
+            ct_domain:user_domain,
             ct_code: invoiceOrder.ih_cr_terms
         })
 
         if (PayMeth) {
 
             const details = await payMethDetailServiceInstance.find({
+                ctd_domain:user_domain,
                 ctd_code: PayMeth.ct_code,
            })
 
@@ -155,6 +157,7 @@ const{user_domain} = req.headers
             effdate.setDate(effdate.getDate() + Number(det.ctd_due_day) )
          
                 await accountReceivableServiceInstance.create({
+                    ar_domain:user_domain,
                     ar_nbr : ih.ih_inv_nbr,
                     ar_effdate: invoiceOrder.ih_inv_date  ,
                     ar_due_date: effdate,
@@ -179,31 +182,32 @@ const{user_domain} = req.headers
         }
         else {
             await accountReceivableServiceInstance.create({
-            ar_nbr : ih.ih_inv_nbr,
-            ar_effdate: invoiceOrder.ih_inv_date,
-            ar_due_date: invoiceOrder.ih_due_date  ,
-            ar_date: new Date(),
-            ar_type: "I",
-            ar_cust: invoiceOrder.ih_cust,
-            ar_bill: invoiceOrder.ih_bill,
-            ar_rmks: invoiceOrder.ih_rmks,
-            ar_cr_terms: invoiceOrder.ih_cr_terms,
-            ar_open: true,
-            ar_applied: 0,
-            ar_base_applied:0,
-            ar_curr: invoiceOrder.ih_curr,
-            ar_ex_rate: invoiceOrder.ih_ex_rate,
-            ar_ex_rate2: invoiceOrder.ih_ex_rate2,
-            ar_amt: Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt),
-            ar_base_amt: (Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) * Number(invoiceOrder.ar_ex_rate2) /  Number(invoiceOrder.ar_ex_rate)   ,
-            created_by: user_code,
-            last_modified_by: user_code
+                ar_domain:user_domain,
+                ar_nbr : ih.ih_inv_nbr,
+                ar_effdate: invoiceOrder.ih_inv_date,
+                ar_due_date: invoiceOrder.ih_due_date  ,
+                ar_date: new Date(),
+                ar_type: "I",
+                ar_cust: invoiceOrder.ih_cust,
+                ar_bill: invoiceOrder.ih_bill,
+                ar_rmks: invoiceOrder.ih_rmks,
+                ar_cr_terms: invoiceOrder.ih_cr_terms,
+                ar_open: true,
+                ar_applied: 0,
+                ar_base_applied:0,
+                ar_curr: invoiceOrder.ih_curr,
+                ar_ex_rate: invoiceOrder.ih_ex_rate,
+                ar_ex_rate2: invoiceOrder.ih_ex_rate2,
+                ar_amt: Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt),
+                ar_base_amt: (Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) * Number(invoiceOrder.ar_ex_rate2) /  Number(invoiceOrder.ar_ex_rate)   ,
+                created_by: user_code,
+                last_modified_by: user_code
             })
         }
 
 
         /***************GL *************/
-        const gl = await generalLedgerServiceInstance.findLastId({glt_date: date})
+        const gl = await generalLedgerServiceInstance.findLastId({glt_date: date,glt_domain:user_domain})
         if(gl) {
         var seq =  gl.glt_ref.substring(10, 18)
         var d = Number(seq) + 1
@@ -223,6 +227,7 @@ const{user_domain} = req.headers
         for (let entry of gldetail) {
         console.log(entry)
         await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
+            glt_domain:user_domain,
             glt_addr: invoiceOrder.ih_bill,
             glt_curr: invoiceOrder.ih_curr,
             glt_tr_type: "SO",
@@ -238,7 +243,7 @@ const{user_domain} = req.headers
 
         }
         /***************GL *************/
-        const ith = await invoiceOrderTempServiceInstance.findOne({ith_inv_nbr: ih.ih_inv_nbr })
+        const ith = await invoiceOrderTempServiceInstance.findOne({ith_inv_nbr: ih.ih_inv_nbr,ith_domain:user_domain })
         if(ith) await invoiceOrderTempServiceInstance.update({ith_invoiced : true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: ith.id})
  
 
@@ -257,17 +262,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all invoiceOrderTemp endpoint")
+    const { user_domain } = req.headers;
     try {
         const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService)
         const invoiceOrderTempDetailServiceInstance = Container.get(
             InvoiceOrderTempDetailService
         )
         const invoiceOrderTemp = await invoiceOrderTempServiceInstance.findOne({
-            ...req.body,
+            ...req.body,ith_domain:user_domain
         })
         console.log("hamel",invoiceOrderTemp.ith_invoiced)
         if (invoiceOrderTemp) {
             const details = await invoiceOrderTempDetailServiceInstance.find({
+                itdh_domain:user_domain,
                 itdh_inv_nbr: invoiceOrderTemp.ith_inv_nbr,
             })
             return res.status(200).json({
@@ -289,6 +296,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  invoiceOrderTemp endpoint")
+    const { user_domain } = req.headers;
     try {
         const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService)
         const { id } = req.params
@@ -297,6 +305,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             InvoiceOrderTempDetailService
         )
         const details = await invoiceOrderTempDetailServiceInstance.find({
+            itdh_domain:user_domain,
             itdh_inv_nbr: invoiceOrderTemp.ith_inv_nbr,
         })
 
@@ -312,12 +321,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    const { user_domain } = req.headers;
     logger.debug("Calling find by  all requisition endpoint")
     try {
         const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService)
         
-        const ihs = await invoiceOrderTempServiceInstance.find({...req.body})
+        const ihs = await invoiceOrderTempServiceInstance.find({...req.body,ith_domain:user_domain})
             
         return res.status(202).json({
             message: "sec",
@@ -332,15 +341,17 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all invoiceOrderTemp endpoint")
+    const { user_domain } = req.headers;
     try {
         let result = []
         const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService)
         const invoiceOrderTempDetailServiceInstance = Container.get(
             InvoiceOrderTempDetailService
         )
-        const ihs = await invoiceOrderTempServiceInstance.find({})
+        const ihs = await invoiceOrderTempServiceInstance.find({ith_domain:user_domain})
         for(const ih of ihs){
             const details = await invoiceOrderTempDetailServiceInstance.find({
+                itdh_domain: user_domain,
                 itdh_inv_nbr: ih.ith_inv_nbr,
             })
             result.push({id:ih.id, ih, details})
@@ -357,7 +368,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  invoiceOrderTemp endpoint")
     try {
@@ -380,13 +391,14 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
+    const{user_domain} = req.headers
 
     logger.debug("Calling find all invoiceOrderTemp endpoint")
     try {
         let result = []
         //const invoiceOrderTempServiceInstance = Container.get(invoiceOrderTempService)
 
-        const ihs =await sequelize.query("SELECT *  FROM   PUBLIC.ith_hist, PUBLIC.pt_mstr, PUBLIC.itdh_det  where PUBLIC.itdh_det.itdh_inv_nbr = PUBLIC.ith_hist.ith_inv_nbr and PUBLIC.itdh_det.itdh_part = PUBLIC.pt_mstr.pt_part OrderTemp BY PUBLIC.itdh_det.id DESC", { type: QueryTypes.SELECT });
+        const ihs =await sequelize.query("SELECT *  FROM   PUBLIC.ith_hist, PUBLIC.pt_mstr, PUBLIC.itdh_det  where PUBLIC.itdh_det.itdh_inv_nbr = PUBLIC.ith_hist.ith_inv_nbr and PUBLIC.itdh_det.itdh_part = PUBLIC.pt_mstr.pt_part and PUBLIC.ith_hist.ith_domain =  PUBLIC.itdh_det.itdh_domain and PUBLIC.ith_hist.ith_domain = PUBLIC.pt_mstr.pt_domain and PUBLIC.ith_hist.ith_domain = ?  Order BY PUBLIC.itdh_det.id DESC",  { replacements: [user_domain], type: QueryTypes.SELECT });
        
         return res
             .status(200)

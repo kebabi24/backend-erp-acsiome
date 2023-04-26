@@ -5,12 +5,12 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create provider endpoint with body: %o", req.body)
     try {
         const providerServiceInstance = Container.get(ProviderService)
-        const provider = await providerServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const provider = await providerServiceInstance.create({...req.body,vd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data: { provider } })
@@ -39,9 +39,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const providerServiceInstance = Container.get(ProviderService)
-        const providers = await providerServiceInstance.find({})
+        const providers = await providerServiceInstance.find({vd_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: providers })
@@ -54,9 +56,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all provider endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const providerServiceInstance = Container.get(ProviderService)
-        const provider = await providerServiceInstance.findOne({...req.body})
+        const provider = await providerServiceInstance.findOne({...req.body,vd_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: provider })

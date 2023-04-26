@@ -163,6 +163,7 @@ declare global {
     // NEW
     export type mpMstrModel = S.Model;
     export type mpDetailsModel = S.Model;
+    export type DomainModel = S.Model;
     export type locationFilterModel = S.Model;
     export type specificationModel = S.Model;
     export type specificationDetailsModel = S.Model;
@@ -171,6 +172,10 @@ declare global {
     export type SpecificationTestHistoryModel = S.Model;
     export type QualityTestBillDetails = S.Model;
     export type QualityInspectionRoutingDetails = S.Model;
+    export type EmployeScoreModel = S.Model;
+
+    export type PjdDetailsModel = S.Model;
+    export type projectAssetDownDetailsModel = S.Model;
 
   }
 }

@@ -4,13 +4,14 @@ import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-        const{user_code} = req.headers 
-const{user_domain} = req.headers
+  
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create account endpoint")
     try {
         const AccountServiceInstance = Container.get(AccountService)
-        const account = await AccountServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const account = await AccountServiceInstance.create({...req.body, ac_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  account })
@@ -39,9 +40,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const AccountServiceInstance = Container.get(AccountService)
-        const accounts = await AccountServiceInstance.find({})
+        const accounts = await AccountServiceInstance.find({ ac_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: accounts })
@@ -54,9 +58,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const AccountServiceInstance = Container.get(AccountService)
-        const accounts = await AccountServiceInstance.findOne({...req.body})
+        const accounts = await AccountServiceInstance.findOne({...req.body,ac_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: accounts })

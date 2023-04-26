@@ -27,6 +27,7 @@ const Category_Product = sequelize.define(
         key: 'product_code',
       },
     },
+    domain:Sequelize.STRING,
     // ...base,
   },
   {

@@ -11,6 +11,7 @@ import { workerData } from 'worker_threads';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create workOrderDetail endpoint');
   try {
@@ -18,7 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
 
-    const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot });
+    const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot , wod_domain: user_domain});
 
     if (wo)
       await workOrderServiceInstance.update(
@@ -31,7 +32,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         },
         { id: wo.id },
       );
-    const wrs = await woroutingServiceInstance.find({ wr_lot: req.body._wod.wod_lot });
+    const wrs = await woroutingServiceInstance.find({ wr_domain: user_domain,wr_lot: req.body._wod.wod_lot });
     for (const wr of wrs) {
       console.log(wr);
       await woroutingServiceInstance.update(
@@ -51,6 +52,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       await workOrderDetailServiceInstance.create({
         ...item,
         ...req.body._wod,
+        wod_domain: user_domain,
         wod__chr01: req.body.lpnbr,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -70,7 +72,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createWodPos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  console.log(req.body.cart.products);
+  const { user_domain } = req.headers;
   const products = req.body.cart.products;
   const cart = req.body.cart;
   const { usrd_site } = req.body.cart.usrd_site;
@@ -83,13 +85,14 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const psServiceInstance = Container.get(psService);
     for (const product of products) {
-      const id = await workOrderServiceInstance.findOne({ wo_nbr: cart.order_code, wo_lot: product.line });
+      const id = await workOrderServiceInstance.findOne({ wo_domain: user_domain,wo_nbr: cart.order_code, wo_lot: product.line });
       let ps_parent = product.pt_bom_code;
       console.log(product);
-      const ps = await psServiceInstance.find({ ps_parent });
+      const ps = await psServiceInstance.find({ ps_parent,ps_domain: user_domain });
       for (const pss of ps) {
         console.log(cart);
         const workOrderDetail = await workOrderDetailServiceInstance.create({
+          wod_domain: user_domain,
           wod_nbr: req.body.cart.order_code,
           wod_lot: id.id,
           wod_loc: product.pt_loc,
@@ -134,9 +137,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all workOrderDetail endpoint');
+  const { user_domain } = req.headers;
   try {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
-    const workOrderDetails = await workOrderDetailServiceInstance.find({});
+    const workOrderDetails = await workOrderDetailServiceInstance.find({wod_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: workOrderDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -147,9 +151,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all workOrderDetail endpoint');
+  const { user_domain } = req.headers;
   try {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
-    const workOrderDetails = await workOrderDetailServiceInstance.find({ ...req.body });
+    const workOrderDetails = await workOrderDetailServiceInstance.find({ ...req.body,wod_domain: user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: workOrderDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -159,9 +164,10 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all workOrderDetail endpoint');
+  const { user_domain } = req.headers;
   try {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
-    const workOrderDetails = await workOrderDetailServiceInstance.findOne({ ...req.body });
+    const workOrderDetails = await workOrderDetailServiceInstance.findOne({ ...req.body,wod_domain: user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: workOrderDetails });
   } catch (e) {
     logger.error('🔥 error: %o', e);

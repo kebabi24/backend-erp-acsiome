@@ -6,18 +6,18 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create code endpoint")
     try {
         const bomPartServiceInstance = Container.get(BomPartService)
         const { BomPart, Details } = req.body
 
-        await bomPartServiceInstance.delete({ptb_part: BomPart.ptb_part})
+        await bomPartServiceInstance.delete({ptb_part: BomPart.ptb_part, ptb_domain: user_domain})
         for (let entry of Details) {
             
             
-            await bomPartServiceInstance.create({...entry, ...BomPart,
+            await bomPartServiceInstance.create({...entry, ...BomPart,ptb_domain: user_domain,
                  created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
             
@@ -52,9 +52,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const bomPartServiceInstance = Container.get(BomPartService)
-        const bom = await bomPartServiceInstance.find({})
+        const bom = await bomPartServiceInstance.find({ptb_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: bom })
@@ -67,9 +69,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const bomPartServiceInstance = Container.get(BomPartService)
-        const bom = await bomPartServiceInstance.find({...req.body})
+        const bom = await bomPartServiceInstance.find({...req.body,ptb_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: bom })

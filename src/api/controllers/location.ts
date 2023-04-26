@@ -50,6 +50,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  location endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const locationServiceInstance = Container.get(LocationService)
         const {id} = req.params
@@ -66,9 +69,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all location endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const locationServiceInstance = Container.get(LocationService)
-        const locations = await locationServiceInstance.find({})
+        const locations = await locationServiceInstance.find({loc_domain : user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: locations })
@@ -81,9 +87,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all location endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const locationServiceInstance = Container.get(LocationService)
-        const locations = await locationServiceInstance.find({...req.body})
+        const locations = await locationServiceInstance.find({...req.body,loc_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: locations })
@@ -95,9 +104,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all location endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const locationServiceInstance = Container.get(LocationService)
-        const locations = await locationServiceInstance.findOne({...req.body})
+        const locations = await locationServiceInstance.findOne({...req.body,loc_domain : user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: locations })
@@ -113,15 +124,18 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all location endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
     try {
         const locationServiceInstance = Container.get(LocationService)
         
         const locations = await locationServiceInstance.find({
-            ...req.body,
+            ...req.body,loc_domain:user_domain
         })
         return res.status(202).json({
             message: "sec",
-            data:  requisitions ,
+            data:  locations ,
         })
     } catch (e) {
         logger.error("🔥 error: %o", e)

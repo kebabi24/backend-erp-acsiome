@@ -88,6 +88,7 @@ import crm from './routes/crm';
 import lodaRequest from "./routes/load-request"
 import productPage from "./routes/product-page"
 import qualityControl from "./routes/quality-control"
+import domain from './routes/domain';
 import locationFilter from './routes/location-filter';
 import tokenSerie from "./routes/token-serie"
 
@@ -183,6 +184,7 @@ export default () => {
   forcast(app);
   lodaRequest(app)
   qualityControl(app)
+  domain(app);
   locationFilter(app)
   productPage(app)
   tokenSerie(app)

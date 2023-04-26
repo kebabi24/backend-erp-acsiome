@@ -32,6 +32,7 @@ const Itinerary = sequelize.define(
         // day : 0 sunday -> 6 saturday 
         
         // ...base,
+        domain: Sequelize.STRING,
     },
     {
         tableName: "aa_itinerary",

@@ -944,7 +944,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
 console.log(pos)
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
-    logger.error('ðŸ”¥ error: %o', e);
+    logger.error('error: %o', e);
     return next(e);
   }
 };

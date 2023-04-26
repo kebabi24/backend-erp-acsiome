@@ -22,6 +22,7 @@ const Product = sequelize.define(
     product_img: Sequelize.STRING,
     product_qty: Sequelize.INTEGER,
     product_price: Sequelize.INTEGER,
+    domain:Sequelize.STRING,
   },
   {
     tableName: 'bb_pos_product',

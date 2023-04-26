@@ -7,7 +7,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -18,7 +18,7 @@ const{user_domain} = req.headers
         const {  empDetails } = req.body
         
         for (let entry of empDetails) {
-            entry = { ...entry, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry, empd_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await empAvailabilityServiceInstance.create(entry)
         }
         return res
@@ -34,9 +34,11 @@ const{user_domain} = req.headers
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const empdDetailsServiceInstance = Container.get(EmployeAvailabilityService)
-        const employe = await empdDetailsServiceInstance.find({...req.body})
+        const employe = await empdDetailsServiceInstance.find({...req.body,empd_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
@@ -65,9 +67,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const empdDetailsServiceInstance = Container.get(EmployeAvailabilityService)
-        const employe = await empdDetailsServiceInstance.find({})
+        const employe = await empdDetailsServiceInstance.find({empd_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: employe })
@@ -94,7 +98,7 @@ const{user_domain} = req.headers
         
         await empDetailserviceInstance.delete({empd_addr: addr})
         for (let entry of details) {
-            entry = { ...entry, empd_addt: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, empd_domain:user_domain,empd_addt: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await empDetailserviceInstance.create(entry)
         }
         return res

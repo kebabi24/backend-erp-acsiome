@@ -6,7 +6,8 @@ import { Container } from "typedi"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
-    const { user_code } = req.headers;
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
   
     logger.debug('Calling update one  code endpoint');
     try {
@@ -26,13 +27,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const [hoursd, minutesd] = hmsd.split(':');
         const totalSecondsd = (+hoursd) * 60 * 60 + (+minutesd) * 60 ;
        
-        const wo = await workOrderServiceInstance.findOne({id : item.op_wo_lot})
+        const wo = await workOrderServiceInstance.findOne({id : item.op_wo_lot,wo_domain:user_domain})
 
-        const ro = await workroutingServiceInstance.findOne({ro_routing : wo.wo_routing})
+        const ro = await workroutingServiceInstance.findOne({ro_routing : wo.wo_routing,ro_domain:user_domain})
 
         await operationHistoryServiceInstance.create({
           ...item,
           ...op,
+          op_domain:user_domain,
           op_type: "labor", 
           op_act_run :totalSeconds - totalSecondsd,
          // op_std_run : item.op_qty_comp * Number(ro.ro_run),
@@ -53,6 +55,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await operationHistoryServiceInstance.create({
           ...down,
           ...op,
+          op_domain:user_domain,
           op_type: "down", 
           op_act_run : totalSeconds - totalSecondsd,
           created_by: user_code,
@@ -67,6 +70,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await operationHistoryServiceInstance.create({
           ...rjct,
           ...op,
+          op_domain:user_domain,
           op_type: "reject", 
           created_by: user_code,
           created_ip_adr: req.headers.origin,
@@ -101,11 +105,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.headers.origin)
-
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     logger.debug("Calling find all site endpoint")
     try {
         const operationHistoryServiceInstance = Container.get(OperationHistoryService)
-        const ops = await operationHistoryServiceInstance.find({})
+        const ops = await operationHistoryServiceInstance.find({op_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ops })
@@ -118,9 +123,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const operationHistoryServiceInstance = Container.get(OperationHistoryService)
-        const ops = await operationHistoryServiceInstance.find({...req.body})
+        const ops = await operationHistoryServiceInstance.find({...req.body,op_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ops })
@@ -133,9 +140,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const operationHistoryServiceInstance = Container.get(OperationHistoryService)
-        const ops = await operationHistoryServiceInstance.findOne({...req.body})
+        const ops = await operationHistoryServiceInstance.findOne({...req.body,op_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ops })

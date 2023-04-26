@@ -12,12 +12,14 @@ const nodemailer = require('nodemailer');
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create customer endpoint with body: %o', req.body);
   try {
     const customerServiceInstance = Container.get(CustomerService);
     const customer = await customerServiceInstance.create({
       ...req.body,
+      cm_domain:user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -33,6 +35,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   const { customer } = req.body;
   logger.debug('Calling Create customer endpoint with body: %o', req.body);
   try {
@@ -40,6 +43,7 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
     const adresseServiceInstance = Container.get(addresseService);
     const addr = await adresseServiceInstance.create({
       ad_addr: customer.cm_addr,
+      ad_domain: user_domain,
       ad_name: customer.cm_sort,
       ad_line1: customer.cm_ar_sub,
       ad_type: 'customer',
@@ -49,6 +53,7 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     const customerr = await customerServiceInstance.create({
+      cm_domain:user_domain,
       cm_addr: customer.cm_addr,
       cm_sort: customer.cm_sort,
       cm_high_cr: customer.cm_high_cr,
@@ -71,6 +76,8 @@ const createCmPos = async (req: Request, res: Response, next: NextFunction) => {
 const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
   const { customer_number, type } = req.body;
   const cart_number = Math.random()
     .toString(36)
@@ -79,7 +86,7 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerServiceInstance = Container.get(CustomerService);
     //const adresseServiceInstance = Container.get(addresseService);
-    const customer = await customerServiceInstance.findOne({ cm_addr: customer_number });
+    const customer = await customerServiceInstance.findOne({ cm_domain:user_domain,cm_addr: customer_number });
     const customer_name = customer.dataValues.cm_sort;
     let testAccount = await nodemailer.createTestAccount();
     let transporter = nodemailer.createTransport({
@@ -129,7 +136,7 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
         cm_db: cart_number,
         cm_type: type,
       },
-      { cm_addr: customer_number },
+      { cm_domain: user_domain,cm_addr: customer_number },
     );
 
     // ADD TO AGENDA
@@ -166,9 +173,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const customerServiceInstance = Container.get(CustomerService);
-    const customers = await customerServiceInstance.find({});
+    const customers = await customerServiceInstance.find({cm_domain:user_domain});
 
     return res.status(200).json({ message: 'fetched succesfully', data: customers });
   } catch (e) {
@@ -180,9 +189,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const customerServiceInstance = Container.get(CustomerService);
-    const customer = await customerServiceInstance.findOne({ ...req.body });
+    const customer = await customerServiceInstance.findOne({ ...req.body , cm_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: customer });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -193,18 +204,21 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const getSolde = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const customerServiceInstance = Container.get(CustomerService);
     const accountreceivableServiceInstance = Container.get(AccountReceivableService);
     const accountshiperServiceInstance = Container.get(accountShiperService);
     const customer = await customerServiceInstance.find({
-      cm_addr: { [Op.between]: [req.body.cm_addr_1, req.body.cm_addr_2] },
+      cm_addr: { [Op.between]: [req.body.cm_addr_1, req.body.cm_addr_2] }, cm_domain:user_domain
     });
 
     const results_head = [];
 
     for (const cm of customer) {
       const accountreceivable = await accountreceivableServiceInstance.find({
+        ar_domain:user_domain,
         ar_cust: cm.cm_addr,
         ar_effdate: { [Op.between]: [req.body.date, new Date()] },
       });
@@ -214,6 +228,7 @@ const getSolde = async (req: Request, res: Response, next: NextFunction) => {
         solde = solde - Number(ar.ar_amt);
       }
       const accountshiper = await accountshiperServiceInstance.find({
+        as_domain:user_domain,
         as_cust: cm.cm_addr,
         as_effdate: { [Op.between]: [req.body.date, new Date()] },
       });
@@ -243,9 +258,11 @@ const getSolde = async (req: Request, res: Response, next: NextFunction) => {
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const customerServiceInstance = Container.get(CustomerService);
-    const customer = await customerServiceInstance.find({ ...req.body });
+    const customer = await customerServiceInstance.find({ ...req.body , cm_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: customer });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -256,6 +273,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  
   logger.debug('Calling update one  customer endpoint');
   try {
     const customerServiceInstance = Container.get(CustomerService);

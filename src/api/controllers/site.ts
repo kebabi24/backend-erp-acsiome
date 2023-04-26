@@ -22,11 +22,11 @@ const{user_domain} = req.headers
         const itemServiceInstance = Container.get(ItemService)
         const costSimulationServiceInstance = Container.get(CostSimulationService)
         
-        const site = await siteServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const site = await siteServiceInstance.create({...req.body, si_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         // ADD TO AGENDA 
         const param = await crmServiceInstance.getParamFilterd("new_shop")
-        const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+        const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code,domain: user_domain})
         const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
         for(const element of elements ){
             const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
@@ -35,11 +35,11 @@ const{user_domain} = req.headers
         }
         
         
-        const items = await itemServiceInstance.find({});
+        const items = await itemServiceInstance.find({pt_domain: user_domain});
 
         for(let item of items) {
-            const sct = await costSimulationServiceInstance.create({sct_site: req.body.si_site,sct_sim:"STDCG", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
-            const sct2 = await costSimulationServiceInstance.create({sct_site: req.body.si_site,sct_sim:"STDCR", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            const sct = await costSimulationServiceInstance.create({sct_domain: user_domain,sct_site: req.body.si_site,sct_sim:"STDCG", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            const sct2 = await costSimulationServiceInstance.create({sct_domain: user_domain,sct_site: req.body.si_site,sct_sim:"STDCR", sct_part:item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
        
 
         }
@@ -72,11 +72,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.headers.origin)
-
+    const{user_domain} = req.headers
     logger.debug("Calling find all site endpoint")
     try {
         const siteServiceInstance = Container.get(SiteService)
-        const sites = await siteServiceInstance.find({})
+        const sites = await siteServiceInstance.find({si_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: sites })
@@ -89,9 +89,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_domain} = req.headers
     try {
         const siteServiceInstance = Container.get(SiteService)
-        const sites = await siteServiceInstance.find({...req.body})
+        const sites = await siteServiceInstance.find({...req.body,si_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: sites })
@@ -104,9 +105,10 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_domain} = req.headers
     try {
         const siteServiceInstance = Container.get(SiteService)
-        const sites = await siteServiceInstance.findOne({...req.body})
+        const sites = await siteServiceInstance.findOne({...req.body,si_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: sites })

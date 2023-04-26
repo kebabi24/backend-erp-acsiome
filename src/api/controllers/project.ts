@@ -22,14 +22,27 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const taskDetailServiceInstance = Container.get(
             TaskDetailService
         )
-        const { Project, ProjectDetails } = req.body
-        const pj = await projectServiceInstance.create({...Project, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const { Project, ProjectDetails , docs_codes} = req.body
+        const pj = await projectServiceInstance.create({...Project,pm_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const project_code = Project.pm_code
+        let data = []
+        docs_codes.forEach(doc_code => {
+            data.push({
+                pjd_nbr : project_code ,
+                mp_nbr : doc_code,
+                pjd_domain:user_domain,
+            })
+           
+        });
+        const pjDetails = await projectServiceInstance.createDocsDetails(data)
+        
         for (let entry of ProjectDetails) {
-            entry = { ...entry, pmd_code: Project.pm_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry,pmd_domain:user_domain, pmd_code: Project.pm_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await projectDetailServiceInstance.create(entry)
-            const tasks = await taskDetailServiceInstance.find({tkd_code : entry.pmd_task})
+            const tasks = await taskDetailServiceInstance.find({tkd_code : entry.pmd_task,tkd_domain:user_domain})
             for(let tks of tasks) {
                 const tk = {
+                    pmt_domain:user_domain,
                     pmt_task : tks.tkd_nbr,
                     pmt_desc: tks.tkd_desc,
                     pmt_job: tks.tkd_job,
@@ -56,29 +69,35 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const projectServiceInstance = Container.get(ProjectService)
        const projectDetailServiceInstance = Container.get(
             ProjectDetailService
         )
         const project = await projectServiceInstance.findOne({
-            ...req.body,
+            ...req.body,pm_domain:user_domain
         })
         console.log("hhhhhhhhhhhhhhhh")
         if (project) {
            const details = await projectDetailServiceInstance.find({
+               pmd_domain:user_domain,
                 pmd_code: project.pm_code,
            })
+           console.log(project)
             return res.status(200).json({
                 message: "fetched succesfully",
                 data: { project , details },
             })
+           
        } else {
            return res.status(200).json({
                 message: "not FOund",
                 data: { project, details: null },
           })
        }
+
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -88,13 +107,16 @@ const findByTask = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
       
        const projectTaskDetailServiceInstance = Container.get(
             ProjectTaskDetailService
         )
            const details = await projectTaskDetailServiceInstance.find({
-            ...req.body,
+            
+            ...req.body,pmt_domain:user_domain
            })
            console.log(details)
             return res.status(200).json({
@@ -111,6 +133,8 @@ const findByTask = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const projectServiceInstance = Container.get(ProjectService)
         const { id } = req.params
@@ -119,7 +143,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             ProjectDetailService
         )
         const details = await projectDetailServiceInstance.find({
-            pmd_code: project.pm_code,
+            pmd_code: project.pm_code,pmd_domain:user_domain
         })
 
         return res.status(200).json({
@@ -137,9 +161,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const projectServiceInstance = Container.get(ProjectService)
-        const projects = await projectServiceInstance.find({ ...req.body})
+        const projects = await projectServiceInstance.find({ ...req.body,pm_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: projects })
@@ -152,9 +178,11 @@ const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const projectServiceInstance = Container.get(ProjectService)
-        const projects = await projectServiceInstance.find({})
+        const projects = await projectServiceInstance.find({pm_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: projects })
@@ -182,9 +210,9 @@ const{user_domain} = req.headers
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await projectDetailServiceInstance.delete({pmd_code: project.pm_code})
+        await projectDetailServiceInstance.delete({pmd_code: project.pm_code,pmd_domain:user_domain})
         for (let entry of details) {
-            entry = { ...entry, pmd_code: project.pm_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, pmd_domain:user_domain,pmd_code: project.pm_code, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await projectDetailServiceInstance.create(entry)
         }
         return res
@@ -222,13 +250,14 @@ const{user_domain} = req.headers
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
-
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const pos =await sequelize.query("SELECT * , PUBLIC.pmd_det.pmd_price / PUBLIC.pmd_det.pmd_qty as UP  FROM  PUBLIC.tk_mstr, PUBLIC.pm_mstr,  PUBLIC.pmd_det  where PUBLIC.pmd_det.pmd_code = PUBLIC.pm_mstr.pm_code and PUBLIC.tk_mstr.tk_code = PUBLIC.pmd_det.pmd_task  ORDER BY PUBLIC.pmd_det.id ASC", { type: QueryTypes.SELECT });
+        const pos =await sequelize.query("SELECT * , PUBLIC.pmd_det.pmd_price / PUBLIC.pmd_det.pmd_qty as UP  FROM  PUBLIC.tk_mstr, PUBLIC.pm_mstr,  PUBLIC.pmd_det  where PUBLIC.pmd_det.pmd_domain = ? and PUBLIC.pmd_det.pmd_code = PUBLIC.pm_mstr.pm_code and PUBLIC.tk_mstr.tk_code = PUBLIC.pmd_det.pmd_task and PUBLIC.pm_mstr.pm_domain = PUBLIC.pmd_det.pmd_domain and  PUBLIC.tk_mstr.tk_domain = PUBLIC.pmd_det.pmd_domain ORDER BY PUBLIC.pmd_det.id ASC", {replacements: [user_domain], type: QueryTypes.SELECT });
        console.log(pos)
         return res
             .status(200)
@@ -273,13 +302,14 @@ const findAllbomDetails = async (req: Request, res: Response, next: NextFunction
 const findpmdetail = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
-
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const pos =await sequelize.query("SELECT *, PUBLIC.pm_mstr.id as id, PUBLIC.pm_mstr.pm_cost / PUBLIC.pm_mstr.pm_amt as gm  FROM   PUBLIC.pm_mstr,  PUBLIC.ad_mstr  where PUBLIC.ad_mstr.ad_addr = PUBLIC.pm_mstr.pm_cust  ORDER BY PUBLIC.pm_mstr.id ASC", { type: QueryTypes.SELECT });
+        const pos =await sequelize.query("SELECT *, PUBLIC.pm_mstr.id as id, PUBLIC.pm_mstr.pm_cost / PUBLIC.pm_mstr.pm_amt as gm  FROM   PUBLIC.pm_mstr,  PUBLIC.ad_mstr  where PUBLIC.pm_mstr.pm_domain = ? and  PUBLIC.ad_mstr.ad_addr = PUBLIC.pm_mstr.pm_cust and PUBLIC.ad_mstr.ad_domain = PUBLIC.pm_mstr.pm_domain ORDER BY PUBLIC.pm_mstr.id ASC", { replacements: [user_domain],type: QueryTypes.SELECT });
        console.log(pos)
         return res
             .status(200)
@@ -295,6 +325,8 @@ const findpmdetail = async (req: Request, res: Response, next: NextFunction) => 
 const getProjectTypes = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all project endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const projectServiceInstance = Container.get(ProjectService)
         const project_types = await projectServiceInstance.getProjectTypes()
@@ -329,11 +361,13 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
             const logger = Container.get("logger")
         
             logger.debug("Calling findAssignedEmpOfProject endpoint")
+            const{user_code} = req.headers 
+            const{user_domain} = req.headers
             try {
                 const projectServiceInstance = Container.get(ProjectService)
                 const { project_code } = req.params
                 const employees = await projectServiceInstance.findAllProjectDetails({
-                    pme_pm_code : project_code
+                    pme_pm_code : project_code,pme_domain:user_domain,
                 })
             
                 return res
@@ -350,11 +384,13 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
         const logger = Container.get("logger")
     
         logger.debug("Calling findAssignedEmpOfProject endpoint")
+        const{user_code} = req.headers 
+        const{user_domain} = req.headers
         try {
             const projectServiceInstance = Container.get(ProjectService)
             const { project_code } = req.params
             const instructions = await projectServiceInstance.findAllProjectDetails({
-                pme_pm_code : project_code
+                pme_pm_code : project_code,pme_domain:user_domain
             })
            
             return res
@@ -366,6 +402,28 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
             return next(e)
         }
      }     
+
+     
+     const createAssetDown = async (req: Request, res: Response, next: NextFunction) => {
+        const logger = Container.get("logger")
+        logger.debug("Calling createAssetDown endpoint")
+        const{user_domain} = req.headers
+        const {  data} = req.body
+        try {
+            data.forEach(line => {
+                delete line.id
+                line.pad_domain = user_domain
+            });
+            const projectServiceInstance = Container.get(ProjectService)
+            const assetsDown = await projectServiceInstance.createAssetDown(data)
+            return res
+                .status(200)
+                .json({ message: "created succesfully", data: assetsDown })
+        } catch (e) {
+            logger.error("🔥 error: %o", e)
+            return next(e)
+        }
+    }
 
 
 
@@ -383,4 +441,6 @@ export default {
     findpmdetail,
     getProjectTypes,
     findAssignedEmpOfProject,
+    findInstructionsOfProject,
+    createAssetDown
 }
