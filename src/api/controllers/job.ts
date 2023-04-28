@@ -132,7 +132,7 @@ const{user_domain} = req.headers
         const { id } = req.params
         const {job, details} = req.body
         const jb = await jobServiceInstance.update(
-            { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
+            { ...job , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
         await jobDetailServiceInstance.delete({jbd_code: job.jb_code,jbd_domain:user_domain})
@@ -158,7 +158,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const pos =await sequelize.query("SELECT *  FROM   PUBLIC.jb_mstr,  PUBLIC.jbd_det  where PUBLIC.jb_mstr.jb_domain= ? and PUBLIC.jbd_det.jbd_code = PUBLIC.jb_mstr.jb_code and PUBLIC.jbd_det.jbd_domain = PUBLIC.jb_mstr.jb_domain  ORDER BY PUBLIC.jbd_det.id ASC", {  replacements: [user_domain],type: QueryTypes.SELECT });
+        const pos =await sequelize.query('SELECT  PUBLIC.jb_mstr.id as "jbid",*  FROM   PUBLIC.jb_mstr,  PUBLIC.jbd_det  where PUBLIC.jb_mstr.jb_domain= ? and PUBLIC.jbd_det.jbd_code = PUBLIC.jb_mstr.jb_code and PUBLIC.jbd_det.jbd_domain = PUBLIC.jb_mstr.jb_domain  ORDER BY PUBLIC.jbd_det.id ASC', {  replacements: [user_domain],type: QueryTypes.SELECT });
        console.log(pos)
         return res
             .status(200)

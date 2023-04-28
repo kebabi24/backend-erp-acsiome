@@ -261,7 +261,22 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
+const findByJob = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all empdet endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const empJobServiceInstance = Container.get(EmployeJobService)
+        const employeJob = await empJobServiceInstance.find({...req.body,empj_domain:user_domain})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: employeJob })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -349,6 +364,7 @@ export default {
     findByTime,
     findByTimeproject,
     findByDet,
+    findByJob,
     update,
     deleteOne,
     findAvailable
