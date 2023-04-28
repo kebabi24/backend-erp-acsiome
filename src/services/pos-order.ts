@@ -211,7 +211,7 @@ export default class posOrderService {
       if(shop.length == 0 ){
          orders = await this.posOrderModel.findAll({
           where :Sequelize.and( 
-            {del_comp  :{[Op.not]: "null"}},
+            // {del_comp  :{[Op.not]: "null"}},
             {created_date :  {[Op.gte]:new Date(startDate)}},
             {created_date :  {[Op.lte]:new Date(endDate)}},    
           ),
@@ -221,7 +221,7 @@ export default class posOrderService {
         orders = await this.posOrderModel.findAll({
           where :Sequelize.and( 
             {usrd_site : shop},
-            {del_comp  :{[Op.not]: "null"}},
+            // {del_comp  :{[Op.not]: "null"}},
             {created_date :  {[Op.gte]:new Date(startDate)}},
             {created_date :  {[Op.lte]:new Date(endDate)}},    
           ),
