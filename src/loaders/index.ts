@@ -125,6 +125,7 @@ export default async ({ expressApp }) => {
       { name: 'domainModel', model: require('../models/domain').default },
       { name: 'employeScoreModel', model: require('../models/employe-score').default },
       { name: 'employeJobModel', model: require('../models/employe-job').default },
+      { name: 'dealModel', model: require('../models/deal').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },

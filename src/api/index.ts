@@ -90,6 +90,7 @@ import productPage from "./routes/product-page"
 import qualityControl from "./routes/quality-control"
 import domain from './routes/domain';
 import tokenSerie from "./routes/token-serie"
+import deal from './routes/deal';
 
 // guaranteed to get dependencies
 export default () => {
@@ -186,5 +187,6 @@ export default () => {
   domain(app);
   productPage(app)
   tokenSerie(app)
+  deal(app)
   return app;
 };
