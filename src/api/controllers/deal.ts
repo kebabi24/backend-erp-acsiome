@@ -80,9 +80,11 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all deal endpoint")
     const{user_domain} = req.headers
+    console.log(req.body)
     try {
         const dealServiceInstance = Container.get(DealService)
         const deals = await dealServiceInstance.findOne({...req.body,deal_domain: user_domain})
+        console.log(deals)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: deals })
@@ -95,7 +97,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  deal endpoint")
     try {

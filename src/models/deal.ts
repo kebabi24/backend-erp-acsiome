@@ -34,6 +34,7 @@ const Deal = sequelize.define(
         deal_attach: Sequelize.STRING,
         deal_sign_cust: Sequelize.STRING,
         deal_sign_prov: Sequelize.STRING,
+        deal_cust: Sequelize.STRING,
     
 
         deal_open: {type: Sequelize.BOOLEAN, defaultValue : false  },

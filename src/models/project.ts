@@ -44,8 +44,12 @@ const Project = sequelize.define(
         pm_win_addr : Sequelize.STRING,
         pm_win_amt : Sequelize.INTEGER,
         pm_win_cmmt : Sequelize.STRING,
+        pm_deal: Sequelize.STRING,
 
         ...base,
+
+        
+           
     },
     {
         tableName: "pm_mstr",
