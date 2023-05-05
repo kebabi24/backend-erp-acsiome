@@ -22,10 +22,7 @@ const Task = sequelize.define(
         tk_desc: Sequelize.STRING,
         tk_um: Sequelize.STRING,
         tk_price: {type: Sequelize.DECIMAL, defaultValue : 0  },
-        tk_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        tk_domain:  Sequelize.STRING,
         oid_tk_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

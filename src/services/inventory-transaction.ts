@@ -1,4 +1,5 @@
 import { Service, Inject } from "typedi"
+import { Op ,Sequelize } from "sequelize";
 
 @Service()
 export default class inventoryTransactionService {
@@ -127,6 +128,24 @@ export default class inventoryTransactionService {
         try {
             const inventoryTransaction = await this.inventoryTransactionModel.destroy({ where: query })
             this.logger.silly("delete one inventoryTransaction mstr")
+            return inventoryTransaction
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async findAllissSo(startDate: any, endDate:any): Promise<any> {
+        try {
+            const inventoryTransaction = await this.inventoryTransactionModel.findAll({ 
+                where: Sequelize.and(
+                 {tr_type: "ISS-WO"}, 
+                 {tr_date :  {[Op.gte]:new Date(startDate)}},
+                 {tr_date :  {[Op.lte]:new Date(endDate)}},    
+                ),
+                  attributes :["id","tr_gl_amt","tr_site","tr_date"]
+                 })
+            this.logger.silly("find one inventoryTransaction mstr")
             return inventoryTransaction
         } catch (e) {
             this.logger.error(e)

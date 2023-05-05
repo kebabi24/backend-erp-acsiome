@@ -134,10 +134,7 @@ const Quote = sequelize.define(
 	qo_ar_sub: Sequelize.STRING,
 	qo_app_owner: Sequelize.STRING,
 	qo_manual_fr_terms: {type: Sequelize.BOOLEAN, defaultValue : false  },
-	qo_domain: {
-		type: Sequelize.STRING,
-		defaultValue: 'zima'
-	},
+	qo_domain: Sequelize.STRING,
 	oid_qo_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

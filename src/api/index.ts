@@ -85,6 +85,12 @@ import delivery from './routes/delivery';
 import forcast from './routes/forcast';
 import synchro from './routes/synchro';
 import crm from './routes/crm';
+import lodaRequest from "./routes/load-request"
+import productPage from "./routes/product-page"
+import qualityControl from "./routes/quality-control"
+import domain from './routes/domain';
+import locationFilter from './routes/location-filter';
+import tokenSerie from "./routes/token-serie"
 
 // guaranteed to get dependencies
 export default () => {
@@ -176,5 +182,11 @@ export default () => {
   synchro(app);
   crm(app);
   forcast(app);
+  lodaRequest(app)
+  qualityControl(app)
+  domain(app);
+  locationFilter(app)
+  productPage(app)
+  tokenSerie(app)
   return app;
 };

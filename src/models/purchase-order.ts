@@ -156,10 +156,7 @@ const PurchaseOrder = sequelize.define(
         po_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		po_tax_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		po_trl1_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
-        po_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        po_domain: Sequelize.STRING,
     
         ...base,
     },

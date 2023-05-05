@@ -23,6 +23,7 @@ const ProductPage = sequelize.define(
     description: {
       type: Sequelize.STRING,
     },
+    domain:Sequelize.STRING,
 
     // profile_code:{
     //     type: Sequelize.STRING,

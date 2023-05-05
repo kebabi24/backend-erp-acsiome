@@ -36,10 +36,7 @@ const ExchangeRate = sequelize.define(
         exr_mod_userid: Sequelize.STRING,
 
         
-        exr_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        exr_domain:  Sequelize.STRING,
         ...base,
     },
     {

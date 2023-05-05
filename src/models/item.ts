@@ -111,7 +111,13 @@ const Item = sequelize.define(
     pt_size: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_size_um: Sequelize.STRING,
     pt_taxable: { type: Sequelize.BOOLEAN, defaultValue: false },
-    pt_taxc: Sequelize.STRING,
+    pt_taxc: {
+      type: Sequelize.STRING,
+      references: {
+        model: 'tx2_mstr',
+        key: 'tx2_tax_code',
+      },
+    },
     pt_rollup: { type: Sequelize.BOOLEAN, defaultValue: false },
     pt_xovh_ll: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_xovh_tl: { type: Sequelize.DECIMAL, defaultValue: 0 },
@@ -213,11 +219,10 @@ const Item = sequelize.define(
     pt_run_seq2: Sequelize.STRING,
     pt_atp_enforcement: Sequelize.STRING,
     pt_atp_family: { type: Sequelize.BOOLEAN, defaultValue: false },
-    pt_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'zima',
-    },
+    pt_domain: Sequelize.STRING,
     oid_pt_mstr: Sequelize.STRING,
+    pt_loadpacking: Sequelize.INTEGER,
+    pt_salepacking: Sequelize.INTEGER,
     ...base,
   },
   {

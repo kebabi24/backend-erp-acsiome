@@ -111,10 +111,7 @@ const SaleShiper = sequelize.define(
         psh_rmks: Sequelize.STRING,
 
         psh_exru_seq: Sequelize.INTEGER,
-        psh_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        psh_domain: Sequelize.STRING,
         oid_psh_hist: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

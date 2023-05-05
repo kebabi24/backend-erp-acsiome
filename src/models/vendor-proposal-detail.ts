@@ -36,10 +36,7 @@ const VendorProposalDetail = sequelize.define(
         vpd_q_qty: {type: Sequelize.DECIMAL, defaultValue : 0  },
         vpd_mfgr: Sequelize.STRING,
         vpd_mfgr_part: Sequelize.STRING,
-        vpd_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        vpd_domain:  Sequelize.STRING,
         ...base,
     },
     {

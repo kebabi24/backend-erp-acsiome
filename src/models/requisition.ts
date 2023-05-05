@@ -89,10 +89,7 @@ const Requisition = sequelize.define(
     rqm_ex_rate2: Sequelize.DATEONLY,
     rqm_ex_ratetype: Sequelize.STRING,
     rqm_exru_seq: Sequelize.INTEGER,
-    rqm_domain:  {
-      type: Sequelize.STRING,
-      defaultValue: 'zima'
-    },
+    rqm_domain: Sequelize.STRING,
     oid_rqm_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
   },

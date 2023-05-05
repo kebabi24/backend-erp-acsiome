@@ -1,0 +1,57 @@
+import { Container } from "typedi"
+
+
+import Sequelize from "sequelize"
+
+import base from "../base"
+
+
+const sequelize = Container.get("sequelize")
+//  mph_hist
+const SpecificationTestHistory = sequelize.define(
+    "specificationTestHistory",
+    {   
+        id:{
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+            unique: true
+        },
+
+        mph_part: {type: Sequelize.STRING},
+        mph_routing: {type: Sequelize.STRING},
+        mph_op:{ type:Sequelize.INTEGER}, 
+        mph_procedure:{ type:Sequelize.STRING},
+        mph_test:{ type:Sequelize.STRING},
+        mph_date:{ type:Sequelize.DATEONLY},
+        
+        mph_cmtindx:{ type:Sequelize.INTEGER},
+        mph_rsult:{ type:Sequelize.STRING},
+        mph_op_trnbr:{ type:Sequelize.INTEGER},
+        mph_lot:{ type:Sequelize.STRING},
+        mph_mch:{ type:Sequelize.STRING},
+        mph_wr_nbr:{ type:Sequelize.STRING},
+        mph_pass:{ type:Sequelize.BOOLEAN},
+        mph_testmthd:{ type:Sequelize.STRING},
+        mph_attribute:{ type:Sequelize.STRING},
+        
+        mph_user1:{ type:Sequelize.STRING},
+        mph_user2:{ type:Sequelize.STRING},
+        mph_chr01:{ type:Sequelize.STRING},
+        mph_chr02:{ type:Sequelize.STRING},
+        mph_chr03:{ type:Sequelize.STRING},
+        mph_chr04:{ type:Sequelize.STRING},
+        mph_chr05:{ type:Sequelize.STRING},
+        mph_dec01:{ type:Sequelize.DECIMAL},
+        mph_dec02:{ type:Sequelize.DECIMAL},
+        mph_domain:{ type:Sequelize.STRING},
+        oid_mph_mstr:{ type:Sequelize.DECIMAL}
+       
+        
+        // ...base,
+    },
+    {
+        tableName: "aa_specificationTestHistory",
+    }
+)
+export default  SpecificationTestHistory ;

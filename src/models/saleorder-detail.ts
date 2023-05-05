@@ -234,10 +234,7 @@ sod_manual_fr_list: {type: Sequelize.BOOLEAN, defaultValue : false  },
 sod_req_time: Sequelize.STRING,
 
 
-sod_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+sod_domain: Sequelize.STRING,
 oid_sod_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
     },

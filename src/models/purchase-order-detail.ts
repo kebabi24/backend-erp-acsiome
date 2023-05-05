@@ -189,10 +189,7 @@ const PurchaseOrderDetail = sequelize.define(
     pod_consignment: { type: Sequelize.BOOLEAN, defaultValue: false },
     pod_max_aging_days: Sequelize.INTEGER,
     pod_multi_due_dates: { type: Sequelize.BOOLEAN, defaultValue: false },
-    pod_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'zima',
-    },
+    pod_domain: Sequelize.STRING,
     oid_pod_det: { type: Sequelize.DECIMAL, defaultValue: 0 },
     ...base,
   },

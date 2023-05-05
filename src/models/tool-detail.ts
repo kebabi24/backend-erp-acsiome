@@ -24,10 +24,7 @@ const ToolDetail = sequelize.define(
         tod_nbr: Sequelize.STRING,
         tod_desc: Sequelize.STRING,
         tod_qty: {type: Sequelize.DECIMAL, defaultValue : 0  }, 
-        tod_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        tod_domain: Sequelize.STRING,
         oid_tod_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

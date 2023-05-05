@@ -9,7 +9,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create site endpoint")
     try {
         const reasonServiceInstance = Container.get(ReasonService)
-        const reason = await reasonServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const reason = await reasonServiceInstance.create({...req.body, rsn_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  reason })
@@ -39,11 +39,13 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.headers.origin)
-
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    
     logger.debug("Calling find all site endpoint")
     try {
         const reasonServiceInstance = Container.get(ReasonService)
-        const reasons = await reasonServiceInstance.find({})
+        const reasons = await reasonServiceInstance.find({rsn_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: reasons })
@@ -56,10 +58,13 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    
     try {
         console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
         const reasonServiceInstance = Container.get(ReasonService)
-        const reasons = await reasonServiceInstance.find({...req.body})
+        const reasons = await reasonServiceInstance.find({...req.body,rsn_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: reasons })
@@ -72,9 +77,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    
     try {
         const reasonServiceInstance = Container.get(ReasonService)
-        const reasons = await reasonServiceInstance.findOne({...req.body})
+        const reasons = await reasonServiceInstance.findOne({...req.body,rsn_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: reasons })

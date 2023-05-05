@@ -20,10 +20,7 @@ const Tool = sequelize.define(
             unique: true
         },
         to_desc: Sequelize.STRING,
-        to_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        to_domain:  Sequelize.STRING,
         oid_to_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 
         ...base,

@@ -49,10 +49,7 @@ const Tag = sequelize.define(
         tag_user1: Sequelize.STRING,
         tag_user2: Sequelize.STRING,
         tag_ref: Sequelize.STRING,
-        tag_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        tag_domain:  Sequelize.STRING,
         oid_tag_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

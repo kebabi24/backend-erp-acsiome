@@ -13,6 +13,7 @@ export default (app: Router) => {
   route.post('/find', controller.findBy);
   route.post('/findonestatus', controller.findByOneStatus);
   route.post('/findone', controller.findByOne);
+  route.post('/findoneref', controller.findByOneRef);
   route.post('/findfifo', controller.findByFifo);
   route.post('/findother', controller.findOtherStatus);
   route.put('/:id', controller.update);

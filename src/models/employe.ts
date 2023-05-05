@@ -45,10 +45,8 @@ const Employe = sequelize.define(
         emp_rate: Sequelize.DECIMAL,
         emp_mrate: Sequelize.DECIMAL,
         emp_arate: Sequelize.DECIMAL,
-        emp_domain:  {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        emp_domain:  Sequelize.STRING,
+       
         
         ...base,
     },

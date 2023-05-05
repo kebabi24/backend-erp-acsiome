@@ -60,6 +60,7 @@ const OrderPosProductDetail = sequelize.define(
     pt_dsgn_grp: {
       type: Sequelize.STRING,
     },
+    domain:Sequelize.STRING,
   },
   {
     tableName: 'bb_order_pos_detail_product',

@@ -7,7 +7,7 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -16,9 +16,9 @@ const{user_domain} = req.headers
             InventoryStatusDetailService
         )
         const { inventoryStatus, inventoryStatusDetails } = req.body
-        const status = await inventoryStatusServiceInstance.create({...inventoryStatus, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const status = await inventoryStatusServiceInstance.create({...inventoryStatus,is_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of inventoryStatusDetails) {
-            entry = { ...entry, isd_status: status.is_status, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = { ...entry, isd_domain:user_domain,isd_status: status.is_status, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
             await inventoryStatusDetailServiceInstance.create(entry)
         }
         return res
@@ -35,17 +35,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
     logger.debug("Calling find by  all inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
        const inventoryStatusDetailServiceInstance = Container.get(
             InventoryStatusDetailService
         )
         const inventoryStatus = await inventoryStatusServiceInstance.findOne({
-            ...req.body,
+            ...req.body,is_domain:user_domain
         })
         if (inventoryStatus) {
            const details = await inventoryStatusDetailServiceInstance.find({
-                isd_status: inventoryStatus.is_status,
+                isd_status: inventoryStatus.is_status, isd_domain:user_domain
            })
             return res.status(200).json({
                 message: "fetched succesfully",
@@ -66,6 +68,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
         const { id } = req.params
@@ -74,7 +78,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
             InventoryStatusDetailService
         )
         const details = await inventoryStatusDetailServiceInstance.find({
-            isd_status: inventoryStatus.is_status,
+            isd_status: inventoryStatus.is_status, isd_domain:user_domain
         })
 
         return res.status(200).json({
@@ -92,9 +96,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
-        const requisitions = await inventoryStatusServiceInstance.find({})
+        const requisitions = await inventoryStatusServiceInstance.find({is_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: requisitions })
@@ -107,9 +113,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findAllDetails = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const inventoryStatusDetailServiceInstance = Container.get(InventoryStatusDetailService)
-        const details = await inventoryStatusDetailServiceInstance.findOne({ ...req.body,})
+        const details = await inventoryStatusDetailServiceInstance.findOne({ ...req.body,isd_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: details })
@@ -136,9 +144,9 @@ const{user_domain} = req.headers
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
-        await inventoryStatusDetailServiceInstance.delete({isd_status: status.is_status})
+        await inventoryStatusDetailServiceInstance.delete({isd_status: status.is_status,isd_domain:user_domain})
         for (let entry of details) {
-            entry = { ...entry, isd_status: status.is_status, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, isd_domain:user_domain,isd_status: status.is_status, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await inventoryStatusDetailServiceInstance.create(entry)
         }
         return res
