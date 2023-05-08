@@ -195,18 +195,25 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const priceList = await userMobileServiceInstanse.getPriceList();
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
+      const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
       var role_controller = {};
       var profile_controller = {};
 
-      if(role['controller_role'].length != null ){
-        role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
-        profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
-        const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
-        menus.push(...controller_menus)
-    }
+      
+      if(role['controller_role']!=null && role['controller_role'].length != 0){
+          role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
+          profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
+          const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
+          menus.push(...controller_menus)
+      }
 
-    users.push(userMobile,role_controller)
-    profiles.push(profile,profile_controller)
+      if(role['controller_role']!=null && role['controller_role'].length != 0){
+          users.push(userMobile,role_controller)
+          profiles.push(profile,profile_controller)
+      }else{
+          users.push(userMobile)
+          profiles.push(profile)
+      }
     
     const index = parameter.map(elem => elem.parameter_code).indexOf('service')
     console.log(index)
@@ -231,6 +238,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
         // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
+        // if(itinerary2==null){itinerary2=[]}
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
         // const categories = await userMobileServiceInstanse.getCategories( customers )
@@ -245,11 +253,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         return res.status(202).json({
           message: 'Data correct !',
-          service_creation: 'Service creation handled by the admin',
-          user_mobile: userMobile,
+          service_creation: parameter[index].hold,
+          // user_mobile: userMobile,
+          users:users,
           parameter: parameter,
           role: role,
           profile: profile,
+          profiles: profiles,
           menus: menus,
           service: service,
           itinerary: itinerary2,
@@ -273,6 +283,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
+          paymentMethods:paymentMethods,
         });
       }
       // service created by mobile user
@@ -297,11 +308,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         return res.status(202).json({
           message: 'Data correct !',
-          service_creation: 'Service creation handled by the user',
-          user_mobile: userMobile,
+          service_creation: parameter[index].hold,
+          // user_mobile: userMobile,
+          users:users,
           parameter: parameter,
           role: role,
           profile: profile,
+          profiles: profiles,
           menus: menus,
           checklist: checklist,
           itinerary: iitineraries,
@@ -325,6 +338,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
+          paymentMethods:paymentMethods,
         });
       }
     }
@@ -346,7 +360,7 @@ const getDataBack = async function(socket) {
   socket.emit('readyToRecieve');
 
   socket.on('sendData', data => {
-    console.log(data.data.customers);
+    console.log(data);
 
     // updated database
 

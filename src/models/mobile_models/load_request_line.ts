@@ -17,11 +17,6 @@ const LoadRequestLine = sequelize.define(
             autoIncrement: true,
             unique: true
         },
-        load_request_line_code: {
-            type: Sequelize.STRING, 
-            primaryKey: true,
-            unique: true
-        },
         date_creation:{type:Sequelize.DATE},
         date_charge:{type:Sequelize.DATE},
         line:{type: Sequelize.INTEGER},

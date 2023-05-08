@@ -7,7 +7,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-    
 
     // logger.debug("Calling Create location endpoint")
     try {
@@ -16,7 +15,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const locationFilterInstance = Container.get(LocationFilterProducts)
         const { _location, details } = req.body
         // console.log(' req body '+req.body._location+' det '+req.body.details)
-        const location = await locationServiceInstance.create({..._location, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const location = await locationServiceInstance.create({..._location,loc_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (const product of details) {
             // const { pt_part, loc_loc,loc_site,color,model,qlty,logo,grammage } = product;
       
