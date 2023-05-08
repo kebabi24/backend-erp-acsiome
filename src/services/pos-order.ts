@@ -77,7 +77,7 @@ export default class posOrderService {
       const service = await this.serviceModel.findOne({
         where: { service_site: usrd_site, service_open: true },
       });
-// console.log(service)
+      // console.log(service)
       const service_date = service.dataValues.service_period_activate_date;
       console.log(service_date);
       const orders = await this.posOrderModel.findOne({
@@ -205,16 +205,31 @@ export default class posOrderService {
     }
   }
 
-  public async findAllPosOrders(startDate: any, endDate: any): Promise<any> {
+  public async findAllPosOrders(startDate: any, endDate: any, shop: any): Promise<any> {
     try {
-      const orders = await this.posOrderModel.findAll({
-        where: Sequelize.and(
-          { del_comp: { [Op.not]: 'null' } },
-          { created_date: { [Op.gte]: new Date(startDate) } },
-          { created_date: { [Op.lte]: new Date(endDate) } },
-        ),
-        attributes: ['id', 'usrd_site', 'total_price', 'del_comp', 'created_date', 'customer'],
-      });
+      console.log(shop);
+      let orders;
+      if (shop.length == 0) {
+        orders = await this.posOrderModel.findAll({
+          where: Sequelize.and(
+            // {del_comp  :{[Op.not]: "null"}},
+            { created_date: { [Op.gte]: new Date(startDate) } },
+            { created_date: { [Op.lte]: new Date(endDate) } },
+          ),
+          attributes: ['id', 'usrd_site', 'total_price', 'del_comp', 'created_date', 'customer'],
+        });
+      } else {
+        orders = await this.posOrderModel.findAll({
+          where: Sequelize.and(
+            { usrd_site: shop },
+            // {del_comp  :{[Op.not]: "null"}},
+            { created_date: { [Op.gte]: new Date(startDate) } },
+            { created_date: { [Op.lte]: new Date(endDate) } },
+          ),
+          attributes: ['id', 'usrd_site', 'total_price', 'del_comp', 'created_date', 'customer'],
+        });
+      }
+
       this.logger.silly('found all orders mstr');
       return orders;
     } catch (e) {

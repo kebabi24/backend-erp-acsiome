@@ -93,4 +93,15 @@ export default class QualityControl {
       throw e;
     }
   }
+
+  public async create(data: any): Promise<any> {
+    try {
+      const testsHistory = await this.specificationTestHistoryModel.create(data);
+      this.logger.silly('testsHistory created ', testsHistory);
+      return testsHistory;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

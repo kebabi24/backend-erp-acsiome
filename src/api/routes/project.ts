@@ -7,6 +7,7 @@ export default (app: Router) => {
   app.use('/projects', route);
 
   route.post('/', controller.create);
+  route.post('/createAsset', controller.createAssetDown);
   route.get('/projectTypes', controller.getProjectTypes);
   route.get('/allwithdetail', controller.findAllwithDetails);
   route.get('/allbomdetail', controller.findAllbomDetails);
@@ -19,6 +20,4 @@ export default (app: Router) => {
   route.post('/findtask', controller.findByTask);
   route.put('/M:id', controller.updateM);
   route.put('/:id', controller.update);
-
-  route.post('/allpme', controller.findAllpme);
 };

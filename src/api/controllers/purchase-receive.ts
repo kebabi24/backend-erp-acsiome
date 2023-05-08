@@ -20,9 +20,6 @@ const fs = require('fs');
 import LabelService from '../../services/label';
 import ItemsService from '../../services/item';
 
-import LabelService from '../../services/label';
-import ItemsService from '../../services/item';
-
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;

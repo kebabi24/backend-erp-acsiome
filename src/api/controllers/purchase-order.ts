@@ -37,11 +37,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     for (let entry of purchaseOrderDetail) {
-      entry = { ...entry, pod_domain:user_domain, pod_nbr: po.po_nbr };
+      entry = { ...entry, pod_domain: user_domain, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
       logger.debug('Calling Create sequence endpoint');
       try {
-       
         const addressServiceInstance = Container.get(AddressService);
         // const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
 
@@ -54,7 +53,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
         // let pdf = await generatePdf(pdfData, 'po');
 
-        return res.status(201).json({ message: 'created succesfully', data: po, /*pdf: pdf.content*/ });
+        return res.status(201).json({ message: 'created succesfully', data: po /*pdf: pdf.content*/ });
       } catch (e) {
         //#
         logger.error('🔥 error: %o', e);
@@ -82,7 +81,7 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
     const { Site, purchaseOrder, purchaseOrderDetail } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain: user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO', seq_domain: user_domain });
       //
 
       const vd = await providerServiceInstance.findOne({ vd_addr: entry.vend, vd_domain: user_domain });
@@ -110,26 +109,27 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
 
       var line = 1;
 
- var amt = 0
- var tax = 0
- var trl1 = 0
+      var amt = 0;
+      var tax = 0;
+      var trl1 = 0;
       // po_amt = controls1.tht.value
       // po_tax_amt = controls1.tva.value
       // po_trl1_amt = controls1.timbre.value
 
-
       for (let obj of purchaseOrderDetail) {
         if (obj.qtyval > 0) {
-        //  console.log('hnahnahnahnahna', obj.part);
+          //  console.log('hnahnahnahnahna', obj.part);
           if (obj.vend == entry.vend) {
             var duedate = new Date();
 
             // add a day
             duedate.setDate(duedate.getDate() + 1);
             const pt = await itemServiceInstance.findOne({ pt_part: obj.part });
-          //  console.log(pt.taxe);
-          var loc = null
-          if (Site == "0901") { loc = "MGM0010" } else loc = Site
+            //  console.log(pt.taxe);
+            var loc = null;
+            if (Site == '0901') {
+              loc = 'MGM0010';
+            } else loc = Site;
             let entr = {
               pod_domain: user_domain,
               pod_nbr: po.po_nbr,
@@ -151,24 +151,21 @@ const createPos = async (req: Request, res: Response, next: NextFunction) => {
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
             };
-            amt = amt + Number(pt.pt_pur_price) * Number(obj.qtyval)
-            tax = tax + Number(pt.pt_pur_price) * Number(obj.qtyval) * Number(pt.taxe.tx2_tax_pct) / 100
+            amt = amt + Number(pt.pt_pur_price) * Number(obj.qtyval);
+            tax = tax + (Number(pt.pt_pur_price) * Number(obj.qtyval) * Number(pt.taxe.tx2_tax_pct)) / 100;
             await purchaseOrderDetailServiceInstance.create(entr);
             line = line + 1;
           }
         }
       }
-      if (vd.vd_cr_terms == "ES") {
-
-        trl1 = ( (Number(tax) + Number(amt)) * Number(0.01)) >= 10000 ? 10000 : (Number(tax) + Number(amt)) * Number(0.01)  
-
-      }
-      else {
-        trl1 = 0
+      if (vd.vd_cr_terms == 'ES') {
+        trl1 = (Number(tax) + Number(amt)) * Number(0.01) >= 10000 ? 10000 : (Number(tax) + Number(amt)) * Number(0.01);
+      } else {
+        trl1 = 0;
       }
       const purchaseOrder = await purchaseOrderServiceInstance.update(
-        { po_amt: amt, po_tax_amt : tax, po_trl1_amt: trl1, last_modified_by: user_code },
-        { po_nbr : po.po_nbr,po_domain:user_domain},
+        { po_amt: amt, po_tax_amt: tax, po_trl1_amt: trl1, last_modified_by: user_code },
+        { po_nbr: po.po_nbr, po_domain: user_domain },
       );
     }
     //console.log(purchaseOrder);
@@ -195,13 +192,13 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
     const { Site, purchaseOrder } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain:user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO', seq_domain: user_domain });
       console.log(sequence);
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
-        po_domain:user_domain,
+        po_domain: user_domain,
         po_category: 'PO',
         po_site: Site,
         po_ord_date: new Date(),
@@ -228,8 +225,8 @@ const createPosUnp = async (req: Request, res: Response, next: NextFunction) => 
 
           // add a day
           duedate.setDate(duedate.getDate() + 1);
-          const pt = await itemServiceInstance.findOne({ pt_part: obj.pt_part , pt_domain:user_domain});
-          const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc , tx2_domain:user_domain});
+          const pt = await itemServiceInstance.findOne({ pt_part: obj.pt_part, pt_domain: user_domain });
+          const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc, tx2_domain: user_domain });
           console.log(pt.taxe);
 
           let entr = {
@@ -280,13 +277,13 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
     const { Site, purchaseOrder, po_blanket } = req.body;
     // const po = await purchaseOrderServiceInstance.create({...purchaseOrder, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     for (let entry of purchaseOrder) {
-      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO',seq_domain:user_domain });
+      const sequence = await sequenceServiceInstance.findOne({ seq_seq: 'PO', seq_domain: user_domain });
       console.log(sequence);
 
       //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val)+1}`;
       //await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val )+1 }, { where: { seq_seq: "PO" } });
       let ent = {
-        po_domain:user_domain,
+        po_domain: user_domain,
         po_category: 'PO',
         po_site: Site,
         po_ord_date: new Date(),
@@ -310,7 +307,7 @@ const createPosUnpp = async (req: Request, res: Response, next: NextFunction) =>
 
       // add a day
       duedate.setDate(duedate.getDate() + 1);
-      const pt = await itemServiceInstance.findOne({ pt_part: entry.pt_part, pt_domain:user_domain });
+      const pt = await itemServiceInstance.findOne({ pt_part: entry.pt_part, pt_domain: user_domain });
       const taxe = await taxeServiceInstance.findOne({ tx2_tax_code: pt.pt_taxc, tx2_domain: user_domain });
       console.log(pt.taxe);
 
@@ -363,23 +360,30 @@ const payPo = async (req: Request, res: Response, next: NextFunction) => {
     const { Site, details } = req.body;
     for (const item of details) {
       if (item.po_amt == item.po_pai) {
-        await purchaseOrderServiceInstance.update({ po_stat: 'C' ,}, { po_nbr: item.po_nbr, po_site: item.po_site , po_domain: user_domain});
+        await purchaseOrderServiceInstance.update(
+          { po_stat: 'C' },
+          { po_nbr: item.po_nbr, po_site: item.po_site, po_domain: user_domain },
+        );
       } else {
         console.log(typeof item.po_pai);
         console.log(typeof item.po_amt);
         if (item.po_pai) {
           await purchaseOrderServiceInstance.update(
             { po_amt: Number(item.po_amt) - Number(item.po_pai) },
-            { po_nbr: item.po_nbr, po_site: item.po_site , po_domain:user_domain},
+            { po_nbr: item.po_nbr, po_site: item.po_site, po_domain: user_domain },
           );
         }
       }
-      const bk = await bankServiceInstance.findOne({ bk_userid: user_code, bk_type: item.po_blanket, bk_domain: user_domain });
+      const bk = await bankServiceInstance.findOne({
+        bk_userid: user_code,
+        bk_type: item.po_blanket,
+        bk_domain: user_domain,
+      });
       if (bk) {
         if (item.po_pai) {
           await bankServiceInstance.update(
             { bk_balance: Number(bk.bk_balance) - Number(item.po_pai) },
-            { bk_userid: user_code, bk_type: item.po_blanket, bk_domain:user_domain },
+            { bk_userid: user_code, bk_type: item.po_blanket, bk_domain: user_domain },
           );
           await bkhServiceInstance.create({
             bkh_domain: user_domain,
@@ -413,12 +417,14 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const purchaseOrder = await purchaseOrderServiceInstance.findOne({
-      ...req.body,po_domain:user_domain
+      ...req.body,
+      po_domain: user_domain,
     });
-   // console.log(purchaseOrder);
+    // console.log(purchaseOrder);
     if (purchaseOrder) {
       const details = await purchaseOrderDetailServiceInstance.find({
-        pod_nbr: purchaseOrder.po_nbr, pod_domain: user_domain
+        pod_nbr: purchaseOrder.po_nbr,
+        pod_domain: user_domain,
       });
       return res.status(200).json({
         message: 'fetched succesfully',
@@ -446,7 +452,8 @@ const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const purchaseOrder = await purchaseOrderServiceInstance.find({
-      ...req.body, po_domain:user_domain
+      ...req.body,
+      po_domain: user_domain,
     });
 
     return res.status(200).json({
@@ -476,7 +483,7 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
       po_ord_date: {
         [Op.between]: [req.body.date_1, req.body.date_2],
       },
-      po_domain:user_domain
+      po_domain: user_domain,
     });
     console.log('here', purchaseOrder);
     const results_head = [];
@@ -549,7 +556,7 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
       vd_addr: {
         [Op.between]: [req.body.vd_addr_1, req.body.vd_addr_2],
       },
-      vd_domain:user_domain
+      vd_domain: user_domain,
     });
     console.log('here', provider);
     const results_head = [];
@@ -795,7 +802,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const details = await purchaseOrderDetailServiceInstance.find({
       pod_nbr: purchaseOrder.po_nbr,
-      pod_domain: user_domain
+      pod_domain: user_domain,
     });
 
     return res.status(200).json({
@@ -818,7 +825,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({ po_domain: user_domain });
 
     return res.status(202).json({
       message: 'sec',
@@ -840,7 +847,7 @@ const findByStat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
 
-    const pos = await purchaseOrderServiceInstance.find({ ...req.body,po_domain: user_domain });
+    const pos = await purchaseOrderServiceInstance.find({ ...req.body, po_domain: user_domain });
 
     return res.status(202).json({
       message: 'sec',
@@ -867,7 +874,7 @@ const getPodRec = async (req: Request, res: Response, next: NextFunction) => {
 
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const detail = await purchaseOrderDetailServiceInstance.find({
-      pod_domain:user_domain,
+      pod_domain: user_domain,
       pod_stat: 'V',
       pod_site: pod_site,
     });
@@ -892,7 +899,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     let result = [];
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({ po_domain: user_domain });
     for (const po of pos) {
       const details = await purchaseOrderDetailServiceInstance.find({
         pod_domain: user_domain,
@@ -917,7 +924,7 @@ const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.body);
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
-    const pos = await purchaseOrderServiceInstance.find({po_domain: user_domain});
+    const pos = await purchaseOrderServiceInstance.find({ po_domain: user_domain });
     for (const po of pos) {
       const details = await purchaseOrderDetailServiceInstance.find({
         pod_domain: user_domain,
@@ -951,7 +958,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
     console.log(purchase.po_nbr);
-    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain,pod_nbr: purchase.po_nbr });
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
     for (const po of pos) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
         { pod_stat: req.body.po_stat, last_modified_by: user_code },
@@ -969,7 +976,6 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
-
   logger.debug('Calling update one  purchaseOrder endpoint');
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
@@ -982,10 +988,10 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     // );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
     console.log(purchase.po_nbr);
-    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain,pod_nbr: purchase.po_nbr });
+    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
     for (const pod of req.body.detail) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
-        { pod_qty_ord:pod.pod_qty_ord,pod_price:pod.pod_price, last_modified_by: user_code },
+        { pod_qty_ord: pod.pod_qty_ord, pod_price: pod.pod_price, last_modified_by: user_code },
         { id: pod.id },
       );
     }
@@ -1011,10 +1017,10 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
       'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where  PUBLIC.pod_det.pod_domain = ? and  PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and  PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.pod_det.id DESC',
       { replacements: [user_domain], type: QueryTypes.SELECT },
     );
-
+    console.log(pos);
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
-    logger.error('ðŸ”¥ error: %o', e);
+    logger.error('error: %o', e);
     return next(e);
   }
 };
@@ -1032,7 +1038,7 @@ const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunc
 
     const pos = await sequelize.query(
       'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where   PUBLIC.pod_det.pod_domain = ? and PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part  and PUBLIC.pod_det.pod_site = ? ORDER BY PUBLIC.pod_det.id DESC',
-      { replacements: [user_domain,site], type: QueryTypes.SELECT },
+      { replacements: [user_domain, site], type: QueryTypes.SELECT },
     );
 
     return res.status(200).json({ message: 'fetched succesfully', data: pos });

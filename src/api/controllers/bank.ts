@@ -402,7 +402,6 @@ const findAP = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all bank endpoint');

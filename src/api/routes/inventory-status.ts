@@ -8,8 +8,10 @@ export default (app: Router) => {
 
     route.get("/", controller.findAll)
     route.post("/", controller.create)
+    route.post("/ism", controller.createIsm)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
+    route.post("/findism", controller.findByIsm)
     route.put("/:id", controller.update)
     route.post("/findDetails", controller.findAllDetails)
     

@@ -54,7 +54,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all category endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log(user_domain);
+
   try {
     const PosCategoryServiceInstance = Container.get(PosCategory);
     const category = await PosCategoryServiceInstance.find({ domain: user_domain });

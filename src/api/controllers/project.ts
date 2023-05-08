@@ -17,7 +17,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const projectDetailServiceInstance = Container.get(ProjectDetailService);
     const projectTaskDetailServiceInstance = Container.get(ProjectTaskDetailService);
     const taskDetailServiceInstance = Container.get(TaskDetailService);
-    const { Project, ProjectDetails } = req.body;
+    const { Project, ProjectDetails, docs_codes } = req.body;
     const pj = await projectServiceInstance.create({
       ...Project,
       pm_domain: user_domain,
@@ -26,6 +26,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    const project_code = Project.pm_code;
+    let data = [];
+    docs_codes.forEach(doc_code => {
+      data.push({
+        pjd_nbr: project_code,
+        mp_nbr: doc_code,
+        pjd_domain: user_domain,
+      });
+    });
+    const pjDetails = await projectServiceInstance.createDocsDetails(data);
+
     for (let entry of ProjectDetails) {
       entry = {
         ...entry,
@@ -354,28 +365,6 @@ const findAssignedEmpOfProject = async (req: Request, res: Response, next: NextF
   }
 };
 
-const findAllpme = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get('logger');
-
-  logger.debug('Calling findAssignedEmpOfProject endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-  try {
-    const projectServiceInstance = Container.get(ProjectService);
-    const { project_code } = req.params;
-    const employees = await projectServiceInstance.findAllProjectDetails({
-      pme_pm_code: project_code,
-      pme_domain: user_domain,
-    });
-
-    return res.status(201).json({ message: 'created succesfully', data: employees });
-  } catch (e) {
-    //#
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
-};
-
 const findInstructionsOfProject = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
 
@@ -398,6 +387,25 @@ const findInstructionsOfProject = async (req: Request, res: Response, next: Next
   }
 };
 
+const createAssetDown = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling createAssetDown endpoint');
+  const { user_domain } = req.headers;
+  const { data } = req.body;
+  try {
+    data.forEach(line => {
+      delete line.id;
+      line.pad_domain = user_domain;
+    });
+    const projectServiceInstance = Container.get(ProjectService);
+    const assetsDown = await projectServiceInstance.createAssetDown(data);
+    return res.status(200).json({ message: 'created succesfully', data: assetsDown });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findBy,
@@ -413,5 +421,5 @@ export default {
   getProjectTypes,
   findAssignedEmpOfProject,
   findInstructionsOfProject,
-  findAllpme,
+  createAssetDown,
 };

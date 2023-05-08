@@ -60,8 +60,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const MobileServiceInstance = Container.get(MobileService);
-    // const service = await MobileServiceInstance.findOne({...req.body,seq_domain: user_domain})
-    return res.status(200).json({ message: 'fetched succesfully', data: null });
+    const service = await MobileServiceInstance.findOne({ ...req.body, seq_domain: user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: service });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

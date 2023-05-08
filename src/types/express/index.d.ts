@@ -4,6 +4,7 @@ declare global {
   namespace Express {
     export interface Request {
       // currentUser: IUser & Document;
+      file?: any;
     }
   }
 
@@ -139,6 +140,7 @@ declare global {
     export type SatisfactionModel = S.Model;
     export type invoiceModel = S.Model;
     export type forcastModel = S.Model;
+    export type InventoryStatusMouvementModel = S.Model;
     // new models
     export type ListPriceModel = S.Model;
     export type fidelityCardModel = S.Model;
@@ -149,7 +151,6 @@ declare global {
     export type barecodeInfosModel = S.Model;
     export type messagesModel = S.Model;
 
-
     // CRM models
     export type paramHeaderModel = S.Model;
     export type paramDetailsModel = S.Model;
@@ -159,7 +160,7 @@ declare global {
     export type agendaExecutionDetailsModel = S.Model;
     //etiquetage models
     export type LabelModel = S.Model;
-    
+
     // NEW
     export type mpMstrModel = S.Model;
     export type mpDetailsModel = S.Model;
@@ -173,7 +174,10 @@ declare global {
     export type QualityTestBillDetails = S.Model;
     export type QualityInspectionRoutingDetails = S.Model;
     export type EmployeScoreModel = S.Model;
+    export type EmployeJobModel = S.Model;
 
-
+    export type PjdDetailsModel = S.Model;
+    export type projectAssetDownDetailsModel = S.Model;
+    export type DealModel = S.Model;
   }
 }

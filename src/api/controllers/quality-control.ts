@@ -127,11 +127,23 @@ const createTestsHistory = async (req: Request, res: Response, next: NextFunctio
 
 const addSensibilisationData = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
+  const specificationService = Container.get(QualityControlService);
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
-    console.log(req.body);
-
+    const data = req.body;
+    const mpd = data.mpd;
+    for (let mp of mpd) {
+      await specificationService.create({
+        mph_part: data.code_project,
+        mph_routing: mp.mpd_type,
+        mph_op: mp.id,
+        mph_date: data.date,
+        mph_mch: data.code_employee,
+        mph_lot: data.location,
+        mph_attribute: data.code_educator,
+        mph_dec01: data.duration,
+      });
+    }
     return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
     logger.error('🔥 error: %o', e);
