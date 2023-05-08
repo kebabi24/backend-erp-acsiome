@@ -14,6 +14,7 @@ export default (app: Router) => {
     route.post("/findtime", controller.findByTime)
     route.post("/findtimeproject", controller.findByTimeproject)
     route.post("/finddet", controller.findByDet)
+    route.post("/findjob",controller.findByJob)
     route.put("/:id", controller.update)
  
 }
