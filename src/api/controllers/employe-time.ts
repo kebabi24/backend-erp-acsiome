@@ -66,20 +66,23 @@ const createPoint = async (req: Request, res: Response, next: NextFunction) => {
         for (let entry of empDetails) {
             console.log("entry",entry)
             const employe = await empTimeServiceInstance.findOne({empt_date: req.body.date,empt_domain:user_domain, empt_code:entry.emp_addr})
-            const emp = await employeServiceInstance.findOne({emp_addr:entry.emp_addr})
+            const emp = await employeServiceInstance.findOne({emp_addr:entry.emp_addr,emp_domain:user_domain})
      
             //   console.log("emp",employe)
         
             if(employe) {
-                const empscore = await empScoreServiceInstance.findOne({emps_addr:entry.emp_addr,emps_type:entry.type})
+                const empscore = await empScoreServiceInstance.findOne({emps_addr:entry.emp_addr,emps_type:entry.type, emps_domain:user_domain})
      
-                entry = { empt_code: entry.emp_addr,empt_amt:(empscore) ? empscore.emps_amt : 0,empt_date: req.body.date, empt_type:entry.type,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
+                entry = { empt_code: entry.emp_addr,empt_amt:(empscore) ? (Number(empscore.emps_amt) * Number(emp.emp_mrate) + Number(emp.emp_arate)) : 0,empt_mrate_activ: entry.empt_mrate_activ,empt_arate_activ: entry.empt_arate_activ,
+                            empt_mrate:emp.emp_mrate,empt_arate:emp.emp_arate,empt_date: req.body.date, empt_type:entry.type,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
            //console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
                 await empTimeServiceInstance.update({...entry},{id: employe.id})
             }
             else {
                 const empscore = await empScoreServiceInstance.findOne({emps_addr:entry.emp_addr,emps_type:entry.type})
-            entry = {empt_domain:user_domain, empt_code: entry.emp_addr,empt_amt:(empscore) ? empscore.emps_amt : 0,empt_site:entry.emp_site,empt_shift:emp.emp_shift,empt_type:entry.type,empt_date: new Date(), created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+            entry = {empt_domain:user_domain, empt_code: entry.emp_addr,empt_amt:(empscore) ? (Number(empscore.emps_amt) * Number(emp.emp_mrate) + Number(emp.emp_arate)) : 0,empt_site:entry.emp_site,empt_shift:emp.emp_shift,empt_type:entry.type,empt_date: new Date(), 
+                empt_mrate_activ: entry.empt_mrate_activ,empt_arate_activ: entry.empt_arate_activ,
+                            empt_mrate:emp.emp_mrate,empt_arate:emp.emp_arate,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
            
             await empTimeServiceInstance.create(entry)
             }

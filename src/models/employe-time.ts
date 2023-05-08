@@ -35,6 +35,11 @@ const EmployeTime = sequelize.define(
         empt_start: Sequelize.TIME,
         empt_end:   Sequelize.TIME,
         
+        empt_mrate_activ: {type: Sequelize.BOOLEAN, defaultValue : false  },
+        empt_arate_activ: {type: Sequelize.BOOLEAN, defaultValue : false  },
+        empt_mrate: {type: Sequelize.DECIMAL, defaultValue : 0  },
+        empt_arate: {type: Sequelize.DECIMAL, defaultValue : 0  },
+
         empt_domain: Sequelize.STRING,
             
 

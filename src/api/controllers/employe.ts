@@ -193,102 +193,86 @@ const findByTime = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const findByTimeproject = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get('logger');
-  logger.debug('Calling find by  all code endpoint');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-  try {
-    const employeServiceInstance = Container.get(EmployeService);
-    const empTimeServiceInstance = Container.get(EmployeTimeService);
-    const affectEmployeServiceInstance = Container.get(AffectEmployeService);
-    const employe = await employeServiceInstance.find({ emp_shift: req.body.emp_shift, emp_domain: user_domain });
-    let result = [];
-    let i = 1;
-    if (req.body.site != null) {
-      for (let emp of employe) {
-        const affectemp = await affectEmployeServiceInstance.findOne({
-          pme_domain: user_domain,
-          pme_employe: emp.emp_addr,
-          pme_site: req.body.site,
-          pme_start_date: {
-            [Op.lte]: req.body.date,
-          },
-          pme_end_date: {
-            [Op.gte]: req.body.date,
-          },
-        });
-        if (affectemp) {
-          const empTime = await empTimeServiceInstance.findOne({
-            empt_domain: user_domain,
-            empt_code: emp.emp_addr,
-            empt_date: req.body.date,
-          });
-          // const stat  = (empTime != null) ? empTime.empt_stat : null
-          // const start =  (empTime != null) ? empTime.empt_start : null
-          // const end   = (empTime != null) ? empTime.empt_end : null
-          const shift = empTime != null ? empTime.empt_shift : employe.emp_shift;
-          // console.log(employe)
-          const type = empTime != null ? empTime.empt_type : null;
-          const amt = empTime != null ? empTime.empt_amt : 0;
-          result.push({
-            id: i,
-            emp_addr: emp.emp_addr,
-            emp_fname: emp.emp_fname,
-            emp_lname: emp.emp_lname,
-            emp_site: emp.emp_site,
-            shift,
-            type,
-            amt,
-          });
-          i = i + 1;
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const employeServiceInstance = Container.get(EmployeService)
+        const empTimeServiceInstance = Container.get(EmployeTimeService)
+        const affectEmployeServiceInstance = Container.get(AffectEmployeService)
+        const employe = await employeServiceInstance.find({emp_shift:req.body.emp_shift,emp_domain:user_domain})
+        let result=[]
+        let i = 1
+        if(req.body.site !=null && req.body.site != "") { 
+            for(let emp of employe) {
+            
+                const affectemp = await affectEmployeServiceInstance.findOne({pme_domain:user_domain,pme_employe:emp.emp_addr, pme_site: req.body.site,
+                    pme_start_date: {
+                        [Op.lte]: req.body.date,
+                    },
+                    pme_end_date: {
+                        [Op.gte]: req.body.date,
+                    },
+
+                })
+                if (affectemp) {
+                const empTime = await empTimeServiceInstance.findOne({empt_domain:user_domain,empt_code:emp.emp_addr, empt_date: req.body.date})
+                // const stat  = (empTime != null) ? empTime.empt_stat : null
+                // const start =  (empTime != null) ? empTime.empt_start : null
+                // const end   = (empTime != null) ? empTime.empt_end : null
+                const shift =  (empTime != null) ? empTime.empt_shift : employe.emp_shift
+            // console.log(employe)
+                const type =  (empTime != null) ? empTime.empt_type : null
+                const amt =  (empTime != null) ? empTime.empt_amt : 0
+                const empt_mrate_activ = (empTime != null) ? empTime.empt_mrate_activ: false
+                const empt_arate_activ = (empTime != null) ? empTime.empt_arate_activ: false
+                result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site,  shift, type,empt_mrate_activ,empt_arate_activ,amt})
+                    i = i + 1
+
+                }
+            }
         }
-      }
-    } else {
-      for (let emp of employe) {
-        const affectemp = await affectEmployeServiceInstance.findOne({
-          pme_domain: user_domain,
-          pme_employe: emp.emp_addr,
-          pme_start_date: {
-            [Op.lte]: req.body.date,
-          },
-          pme_end_date: {
-            [Op.gte]: req.body.date,
-          },
-        });
-        if (!affectemp) {
-          const empTime = await empTimeServiceInstance.findOne({
-            empt_domain: user_domain,
-            empt_code: emp.emp_addr,
-            empt_date: req.body.date,
-          });
-          // const stat  = (empTime != null) ? empTime.empt_stat : null
-          // const start =  (empTime != null) ? empTime.empt_start : null
-          // const end   = (empTime != null) ? empTime.empt_end : null
-          const shift = empTime != null ? empTime.empt_shift : employe.emp_shift;
-          // console.log(employe)
-          const type = empTime != null ? empTime.empt_type : null;
-          const amt = empTime != null ? empTime.empt_amt : 0;
-          result.push({
-            id: i,
-            emp_addr: emp.emp_addr,
-            emp_fname: emp.emp_fname,
-            emp_lname: emp.emp_lname,
-            emp_site: emp.emp_site,
-            shift,
-            type,
-            amt,
-          });
-          i = i + 1;
+        else {
+
+            for(let emp of employe) {
+            
+                const affectemp = await affectEmployeServiceInstance.findOne({pme_domain:user_domain,pme_employe:emp.emp_addr,
+                    pme_start_date: {
+                        [Op.lte]: req.body.date,
+                    },
+                    pme_end_date: {
+                        [Op.gte]: req.body.date,
+                    },
+
+                })
+                if (!affectemp) {
+                const empTime = await empTimeServiceInstance.findOne({empt_domain:user_domain,empt_code:emp.emp_addr, empt_date: req.body.date})
+                // const stat  = (empTime != null) ? empTime.empt_stat : null
+                // const start =  (empTime != null) ? empTime.empt_start : null
+                // const end   = (empTime != null) ? empTime.empt_end : null
+                const shift =  (empTime != null) ? empTime.empt_shift : employe.emp_shift
+            // console.log(employe)
+                const type =  (empTime != null) ? empTime.empt_type : null
+                const amt =  (empTime != null) ? empTime.empt_amt : 0
+                const empt_mrate_activ = (empTime != null) ? empTime.empt_mrate_activ: false
+                const empt_arate_activ = (empTime != null) ? empTime.empt_arate_activ: false
+                result.push({id:i, emp_addr: emp.emp_addr, emp_fname:emp.emp_fname, emp_lname:emp.emp_lname,emp_site:emp.emp_site,  shift, type, empt_mrate_activ, empt_arate_activ, amt})
+                    i = i + 1
+
+                }
+            }
         }
-      }
+        console.log(result)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
     }
-    console.log(result);
-    return res.status(200).json({ message: 'fetched succesfully', data: result });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
-};
+}
+
 const findByDet = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all empdet endpoint');
