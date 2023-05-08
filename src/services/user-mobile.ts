@@ -152,7 +152,7 @@ export default class UserMobileService {
     public async getUser(query: any): Promise<any> {
         try {
             const user = await this.userMobileModel.findOne({ where: query})
-
+            // console.log(' get user '+user.dataValues)
             return user.dataValues;
         } catch (e) {
             console.log('Error from service-getUser')
@@ -181,6 +181,7 @@ export default class UserMobileService {
             const menusData = await this.profile_menuModel.findAll({
                 where: query ,  
             })
+            const profile_code  = query['profile_code']
             var menusCodes = []
             menusData.forEach(menu => {
                 menusCodes.push(menu.dataValues.menu_code);
@@ -192,7 +193,7 @@ export default class UserMobileService {
 
             const menusFinal =[]
             menus.forEach(menusData => {
-                menusFinal.push(menusData.dataValues);
+                menusFinal.push({...menusData.dataValues,profile_code});
             });
 
 
@@ -701,8 +702,8 @@ export default class UserMobileService {
         // this.logger.silly("find one user mstr")
     }
 
-    // ******************** GET PRODUCT PAGES DETAILS  **************************
-    public async getProducts(productPagesDetails: any): Promise<any> {
+      // ******************** GET PRODUCT PAGES DETAILS  **************************
+      public async getProducts(productPagesDetails: any): Promise<any> {
         try {
             const productsCodes = []
             productPagesDetails.forEach(productPage => {

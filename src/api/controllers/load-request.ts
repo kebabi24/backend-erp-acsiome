@@ -236,7 +236,7 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
     logger.debug("Calling find one  code endpoint")
     try {
         const loadRequestService = Container.get(LoadRequestService)
-
+        console.log(req.body)
         let loadRequests = []
         const loadRequests50 = []
 
@@ -284,14 +284,14 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
             const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequests10,-10)
         }
 
-        //  STATUS 50  : to 40
+        //  STATUS 50  : to 50
         if(LoadRequestStatus50){
             const loadRequests50 = []
             LoadRequestStatus50.forEach(loadRequest => {
                 loadRequests50.push(loadRequest.load_request_code)
             });
-            // update status to 50 to 40
-            const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequests50,40)
+            // update status to 50 to 50
+            const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequests50,50)
         }
     
         // LOAD REQUESTS : 40 

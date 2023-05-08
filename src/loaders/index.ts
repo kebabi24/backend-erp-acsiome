@@ -125,6 +125,7 @@ export default async ({ expressApp }) => {
       { name: 'domainModel', model: require('../models/domain').default },
       { name: 'employeScoreModel', model: require('../models/employe-score').default },
       { name: 'employeJobModel', model: require('../models/employe-job').default },
+      { name: 'dealModel', model: require('../models/deal').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -192,21 +193,37 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
-      { name: 'agendaExecutionDetailsModel', model: require('../models/mobile_models/agenda_execution_details').default },
-      
-      
-      // ADDED : 10/03/2023 
+      {
+        name: 'agendaExecutionDetailsModel',
+        model: require('../models/mobile_models/agenda_execution_details').default,
+      },
+
+      // ADDED : 10/03/2023
       { name: 'specificationModel', model: require('../models/mobile_models/specification').default },
       { name: 'specificationDetailsModel', model: require('../models/mobile_models/specification_details').default },
-      { name: 'SpecificationTestResultsModel', model: require('../models/mobile_models/specification_test_results').default },
-      { name: 'ItemSpecificationDetailsModel', model: require('../models/mobile_models/item_specification_details').default },
-      { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
-      { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
-      { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
+      {
+        name: 'SpecificationTestResultsModel',
+        model: require('../models/mobile_models/specification_test_results').default,
+      },
+      {
+        name: 'ItemSpecificationDetailsModel',
+        model: require('../models/mobile_models/item_specification_details').default,
+      },
+      {
+        name: 'specificationTestHistoryModel',
+        model: require('../models/mobile_models/specification_test_history').default,
+      },
+      {
+        name: 'qualityTestBillDetailsModel',
+        model: require('../models/mobile_models/quality_test_bill_details').default,
+      },
+      {
+        name: 'qualityInspectionRoutingDetailsModel',
+        model: require('../models/mobile_models/quality_inspection_routing_details').default,
+      },
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
 
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
-
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -880,7 +897,9 @@ export default async ({ expressApp }) => {
   //   .catch(err => {
   //     console.log(err);
   //   });
+
+  // });
   Logger.info('✌️ SYNC ALL MODELS');
-  await expressLoader({app: expressApp});
+  await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');
 };

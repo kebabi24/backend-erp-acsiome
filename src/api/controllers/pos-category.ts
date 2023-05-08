@@ -10,7 +10,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create category endpoint');
   try {
     const PosCategoryServiceInstance = Container.get(PosCategory);
-    const category = await PosCategoryServiceInstance.create({ ...req.body,domain:user_domain });
+    const category = await PosCategoryServiceInstance.create({ ...req.body, domain: user_domain });
     return res.status(201).json({ message: 'created succesfully', data: category });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -41,7 +41,7 @@ const findOneByCode = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const PosCategoryServiceInstance = Container.get(PosCategory);
     const { code } = req.params;
-    const category = await PosCategoryServiceInstance.findOneByCode( code );
+    const category = await PosCategoryServiceInstance.findOneByCode(code);
     return res.status(200).json({ message: 'fetched succesfully', data: category });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -57,7 +57,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const PosCategoryServiceInstance = Container.get(PosCategory);
-    const category = await PosCategoryServiceInstance.find({domain:user_domain});
+    const category = await PosCategoryServiceInstance.find({ domain: user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: category });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -73,7 +73,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const PosCategoryServiceInstance = Container.get(PosCategory);
-    const category = await PosCategoryServiceInstance.findOne({ ...req.body,domain:user_domain });
+    const category = await PosCategoryServiceInstance.findOne({ ...req.body, domain: user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: category });
   } catch (e) {
     logger.error('🔥 error: %o', e);
