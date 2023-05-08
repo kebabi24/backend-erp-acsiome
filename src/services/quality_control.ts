@@ -47,7 +47,8 @@ export default class QualityControl {
     public async findSpecificationDetailsByCode(data: any): Promise<any> {
         try {
             const specification = await this.specificationDetailsModel.findAll({
-                 where: {mpd_nbr :data }
+                 where: {mpd_nbr :data },
+                 attributes:["id","mpd_nbr","mpd_label","mpd_chr01"]
                 })
             this.logger.silly("find specification details")
             return specification

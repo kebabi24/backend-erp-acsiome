@@ -198,7 +198,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       var role_controller = {};
       var profile_controller = {};
 
-      if(role['controller_role'].length != null ){
+      console.log(role['controller_role'])
+      if(role['controller_role'] != null  ){ 
         role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
         profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
         const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
@@ -247,6 +248,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           message: 'Data correct !',
           service_creation: 'Service creation handled by the admin',
           user_mobile: userMobile,
+          users:users,
+          profiles : profiles , 
           parameter: parameter,
           role: role,
           profile: profile,
@@ -299,6 +302,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           message: 'Data correct !',
           service_creation: 'Service creation handled by the user',
           user_mobile: userMobile,
+          users:users,
+          profiles : profiles , 
           parameter: parameter,
           role: role,
           profile: profile,
@@ -383,22 +388,70 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
     
     // SERVICE
     // CREATED FROM BACKEDN
-    const {service} = req.body
-    if(req.body.parameter.hold == 1){
-      const udpatedService = await userMobileServiceInstanse.updateService(
-        {
-          service_open:false,
-          service_kmdep:service.service_kmdep,
-          service_kmarr:service.service_kmarr,
-        },
-        {service_code:service.service_code}
-        );
-      }else{
-        // CREATED FROM MOBILE
-        delete service.id
-        service.service_open = false
-        const udpatedService = await userMobileServiceInstanse.createService(service)
+    // const {service} = req.body
+    // if(req.body.parameter.hold == 1){
+    //   const udpatedService = await userMobileServiceInstanse.updateService(
+    //     {
+    //       service_open:false,
+    //       service_kmdep:service.service_kmdep,
+    //       service_kmarr:service.service_kmarr,
+    //     },
+    //     {service_code:service.service_code}
+    //     );
+    //   }else{
+    //     // CREATED FROM MOBILE
+    //     delete service.id
+    //     service.service_open = false
+    //     const udpatedService = await userMobileServiceInstanse.createService(service)
+    // }
+
+    // TOKEN SERIE
+    if(req.body.tokenSerie){
+      const token = req.body.tokenSerie
+      const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
     }
+
+    // VISITS
+    // if(req.body.visits){
+    //   const data = req.body.visits
+    //   const visits = await userMobileServiceInstanse.createVisits(data);
+    // }
+
+    // INVOICE
+    // if(req.body.invoices){
+    //   const data = req.body.invoices
+    //   const invoices = await userMobileServiceInstanse.createInvoices(data);
+    // }
+
+    // INVOICE LINE
+    // if(req.body.invoicesLines){
+    //   const data = req.body.invoicesLines
+    //   const invoicesLines = await userMobileServiceInstanse.createInvoicesLines(data);
+    // }
+
+    // INVENTORY
+    // if(req.body.inventaires){
+    //   const data = req.body.inventaires
+    //   const inventories = await userMobileServiceInstanse.createInventories(data);
+    // }
+
+    // INVENTORY LINES
+    // if(req.body.inventairesLines){
+    //   const data = req.body.inventairesLines
+    //   const inventoriesLines = await userMobileServiceInstanse.createInventoriesLines(data);
+    // }
+
+    // PAYMENTS
+    // if(req.body.payments){
+    //   const data = req.body.payments
+    //   const payments = await userMobileServiceInstanse.createPayments(data);
+    // }
+
+     // LOCATION DETAILS
+      if(req.body.loacationsDetails){
+        const data = req.body.loacationsDetails
+        const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(data);
+      }
 
     return res.status(200).json({ message: 'deleted succesfully', data: req.body });
     

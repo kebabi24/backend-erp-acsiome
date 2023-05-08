@@ -17,11 +17,7 @@ const LoadRequestDetails = sequelize.define(
             autoIncrement: true,
             unique: true
         },
-        load_request_detail_code: {
-            type: Sequelize.STRING, 
-            primaryKey: true,
-            unique: true
-        },
+        
         date_experation:{type:Sequelize.DATE},
         line:{type: Sequelize.INTEGER},
 

@@ -130,6 +130,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     try {
+        console.log(req.body)
         const employeServiceInstance = Container.get(EmployeService)
         const employe = await employeServiceInstance.find({...req.body,emp_domain:user_domain})
         return res

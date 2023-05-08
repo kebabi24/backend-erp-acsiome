@@ -149,6 +149,8 @@ declare global {
     export type paymentModel = S.Model;
     export type barecodeInfosModel = S.Model;
     export type messagesModel = S.Model;
+    export type visitsModel = S.Model;
+
 
 
     // CRM models

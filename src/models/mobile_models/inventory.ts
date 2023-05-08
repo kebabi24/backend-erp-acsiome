@@ -10,7 +10,7 @@ import { truncateSync } from "fs"
 const sequelize = Container.get("sequelize")
 
 const Inventory = sequelize.define(
-    "Inventory",
+    "inventory",
     {   
         id:{
             type: Sequelize.INTEGER,

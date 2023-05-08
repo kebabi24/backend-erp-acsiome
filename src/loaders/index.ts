@@ -181,10 +181,10 @@ export default async ({ expressApp }) => {
       { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
       { name: 'barecodeInfosModel', model: require('../models/mobile_models/barecode_infos').default },
       { name: 'messagesModel', model: require('../models/mobile_models/messages').default },
+      { name: 'visitsModel', model: require('../models/mobile_models/visits').default },
 
-      // WAS ALREADY COMMENTED
-      // { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
-      // { name: 'InventoryLineModel', model: require('../mobile_models/inventory_line').default },
+      { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
+      { name: 'inventoryLineModel', model: require('../models/mobile_models/inventory_line').default },
 
       // CRM
       { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
@@ -334,6 +334,18 @@ export default async ({ expressApp }) => {
     require('../models/mobile_models/invoice').default,
     { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
   );
+
+  // INVENTORY
+  require('../models/mobile_models/inventory_line').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'inventory_code',
+    sourceKey: 'inventory_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(
+    require('../models/mobile_models/inventory_line').default,
+    { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
+  );
+
+  
 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
@@ -858,7 +870,7 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
    //await sequelizeConnection.sync();
-    await sequelizeConnection.sync();
+   //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

@@ -5,6 +5,7 @@ import TaskDetailService from "../../services/task-detail"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -103,6 +104,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+
 const findByTask = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     console.log(req.body)
@@ -425,6 +427,23 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
         }
     }
 
+    const getAssetDownTypes = async (req: Request, res: Response, next: NextFunction) => {
+        const logger = Container.get("logger")
+        logger.debug("Calling createAssetDown endpoint")
+        const{user_domain} = req.headers
+        try {
+            
+            const projectServiceInstance = Container.get(ProjectService)
+            const types = await projectServiceInstance.getAssetDownTypes()
+            return res
+                .status(200)
+                .json({ message: "fetched succesfully", data: types })
+        } catch (e) {
+            logger.error("🔥 error: %o", e)
+            return next(e)
+        }
+    }
+
 
 
 export default {
@@ -442,5 +461,6 @@ export default {
     getProjectTypes,
     findAssignedEmpOfProject,
     findInstructionsOfProject,
-    createAssetDown
+    createAssetDown,
+    getAssetDownTypes
 }

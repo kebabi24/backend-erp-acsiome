@@ -150,4 +150,18 @@ export default class projectService {
             throw e
         }
     }
+
+    public async getAssetDownTypes(): Promise<any> {
+        try {
+            const types = await this.codeModel.findAll({
+                where:{code_fldname :"asset_down_type" },
+                attributes: ["id","code_value","code_desc"]
+            })
+            this.logger.silly("find types ")
+            return types
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+      }
 }

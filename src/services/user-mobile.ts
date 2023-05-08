@@ -36,6 +36,10 @@ export default class UserMobileService {
         @Inject("priceListModel") private priceListModel: Models.PricelistModel,
         @Inject("invoiceModel") private invoiceModel: Models.invoiceModel,
         @Inject("invoiceLineModel") private invoiceLineModel: Models.InventoryLineModel,
+        @Inject("taxeModel") private taxeModel: Models.TaxeModel,
+        @Inject("visitsModel") private visitsModel: Models.visitsModel,
+        @Inject("inventoryModel") private inventoryModel: Models.InventoryModel,
+        @Inject("inventoryLineModel") private inventoryLineModel: Models.InventoryLineModel,
         @Inject("logger") private logger
     ) {}
 
@@ -709,10 +713,18 @@ export default class UserMobileService {
                 { where: {pt_part : productsCodes},
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
-                    'pt_net_wt','pt_net_wt_um','pt_article']
+                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking']
                     },
-                )  
-                // missing fields : 'pt_loadpacking' , ,'pt_salepacking'
+                ) 
+                
+                for(const product of products){
+                    console.log(product.pt_taxc)
+                    const tax_value = await this.taxeModel.findOne({where :{tx2_tax_code:product.pt_taxc},attributes:['tx2_tax_pct']})
+                     product.dataValues.tax_pct = +tax_value.dataValues.tx2_tax_pct
+                    console.log(tax_value)
+                   
+                
+                }
             return products;
         } catch (e) {
             console.log('Error from getProducts - service ')
@@ -866,6 +878,9 @@ export default class UserMobileService {
     // ******************** UPDATE ONE CUSTOMER **************************
     public async updateCustomer(data: any, query: any): Promise<any> {
         try {
+            if(data.id){
+                delete data.id 
+            }
             const customer = await this.customerMobileModel.update(data, {
                 where: query,
             })
@@ -915,6 +930,150 @@ export default class UserMobileService {
         }
     }
 
+     // ******************** UPDATE ONE TOKEN **************************
+     public async updateTokenSerie(data: any, query: any): Promise<any> {
+        try {
+            if(data.id){
+                delete data.id 
+            }
+            const token = await this.tokenSerieModel.update(data, {
+                where: query,
+            })
+            this.logger.silly("updated one token mstr")
+            return token
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    
+     // ******************** CREATE VISITS **************************
+     public async createVisits(data: any): Promise<any> {
+        try {
+            data.forEach(element => {
+                delete element.id
+            });
+            const visits = await this.visitsModel.bulkCreate(data)
+            this.logger.silly("created visits")
+            return visits
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE INVOICES    **************************
+    public async createInvoices(data : any): Promise<any> {
+        try {
+            data.forEach(element => {
+               if(element.id) delete element.id
+            });
+            const invoices = await this.invoiceModel.bulkCreate(data)
+            return invoices
+        } catch (e) {
+            console.log('Error from service- createInvoices')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE INVOICES LINES    **************************
+    public async createInvoicesLines(data : any): Promise<any> {
+        try {
+            data.forEach(element => {
+               if(element.id) delete element.id
+            });
+            const invoices = await this.invoiceLineModel.bulkCreate(data)
+            return invoices
+        } catch (e) {
+            console.log('Error from service- createInvoicesLines')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE INVENTORIES   **************************
+    public async createInventories(data : any): Promise<any> {
+        try {
+            data.forEach(element => {
+               if(element.id) delete element.id
+            });
+            const inventories = await this.inventoryModel.bulkCreate(data)
+            return inventories
+        } catch (e) {
+            console.log('Error from service- createInvoicesLines')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** CREATE INVENTORIES LINES  **************************
+    public async createInventoriesLines(data : any): Promise<any> {
+        try {
+            data.forEach(element => {
+               if(element.id) delete element.id
+            });
+            const inventoriesLines = await this.inventoryLineModel.bulkCreate(data)
+            return inventoriesLines
+        } catch (e) {
+            console.log('Error from service- createInventoriesLines')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** CREATE PAYMENTS  **************************
+     public async createPayments(data : any): Promise<any> {
+        try {
+            data.forEach(element => {
+               if(element.id) delete element.id
+            });
+            const payments = await this.paymentModel.bulkCreate(data)
+            return payments
+        } catch (e) {
+            console.log('Error from service- createPayments')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** UPDATE CREATE LOCATION DETAILS  **************************
+     public async updateCreateLocationDetails(data : any): Promise<any> {
+        try {
+            var locationCreated =[];
+            for(const element of data){
+               if(element.id) delete element.id
+               const location = element.ld_site
+
+               const exist = await this.locationDetailModel.findOne({
+                where:{ld_site : location}
+               })
+
+               if(exist){
+                // UPDATE
+                console.log("updating")
+                
+                const location = await this.locationDetailModel.update(element, {
+                    where: {ld_site : element.ld_site},
+                })
+
+               }else{
+                // CREATE
+                console.log("creating")
+                const location = await this.locationDetailModel.create(element)
+                console.log("location detail created")
+                locationCreated.push(location)
+               } 
+
+            };
+            return locationCreated;
+        } catch (e) {
+            console.log('Error from service- updateCreateLocationDetails')
+            this.logger.error(e)
+            throw e
+        }
+    }
 
 
    
