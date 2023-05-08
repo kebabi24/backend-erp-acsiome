@@ -221,8 +221,8 @@ const Item = sequelize.define(
     pt_atp_family: { type: Sequelize.BOOLEAN, defaultValue: false },
     pt_domain: Sequelize.STRING,
     oid_pt_mstr: Sequelize.STRING,
-    pt_loadpacking :Sequelize.INTEGER,
-    pt_salepacking :Sequelize.INTEGER,
+    pt_loadpacking: Sequelize.INTEGER,
+    pt_salepacking: Sequelize.INTEGER,
     ...base,
   },
   {

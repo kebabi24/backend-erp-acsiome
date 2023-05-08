@@ -42,6 +42,11 @@ const TokenSerie = sequelize.define(
         inventory_prefix :{type: Sequelize.STRING ,unique:true},
         inventory_next_number :{type : Sequelize.INTEGER},
 
+        invoice_prefix :{type: Sequelize.STRING ,unique:true},
+        invoice_next_number :{type : Sequelize.INTEGER},
+
+        payment_prefix :{type: Sequelize.STRING ,unique:true},
+        payment_next_number :{type : Sequelize.INTEGER},
         // squote_prefix: { type: Sequelize.STRING ,unique:true},
         // squote_next_number :{type : Sequelize.INTEGER},
 

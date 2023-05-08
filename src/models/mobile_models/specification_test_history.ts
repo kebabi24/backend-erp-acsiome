@@ -1,24 +1,22 @@
-import { Container } from "typedi"
+import { Container } from 'typedi';
 
+import Sequelize from 'sequelize';
 
-import Sequelize from "sequelize"
+import base from '../base';
 
-import base from "../base"
-
-
-const sequelize = Container.get("sequelize")
+const sequelize = Container.get('sequelize');
 //  mph_hist
 const SpecificationTestHistory = sequelize.define(
-    "specificationTestHistory",
-    {   
-        id:{
-            type: Sequelize.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-            unique: true
-        },
+  'specificationTestHistory',
+  {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      unique: true,
+    },
 
-        mph_part: {type: Sequelize.STRING}, // in case of project = project_code 
+        mph_part: {type: Sequelize.STRING}, // in case of project = project_code // case accident :site_code 
         mph_routing: {type: Sequelize.STRING}, // code_specification
         mph_op:{ type:Sequelize.INTEGER}, // result number 
         mph_procedure:{ type:Sequelize.STRING}, 
@@ -37,8 +35,8 @@ const SpecificationTestHistory = sequelize.define(
         
         mph_user1:{ type:Sequelize.STRING},
         mph_user2:{ type:Sequelize.STRING},
-        mph_chr01:{ type:Sequelize.STRING},
-        mph_chr02:{ type:Sequelize.STRING},
+        mph_chr01:{ type:Sequelize.STRING}, // case accident : description 
+        mph_chr02:{ type:Sequelize.STRING},  // case accident : observation
         mph_chr03:{ type:Sequelize.STRING},
         mph_chr04:{ type:Sequelize.STRING},
         mph_chr05:{ type:Sequelize.STRING},

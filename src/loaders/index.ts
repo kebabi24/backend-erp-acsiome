@@ -182,10 +182,10 @@ export default async ({ expressApp }) => {
       { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
       { name: 'barecodeInfosModel', model: require('../models/mobile_models/barecode_infos').default },
       { name: 'messagesModel', model: require('../models/mobile_models/messages').default },
+      { name: 'visitsModel', model: require('../models/mobile_models/visits').default },
 
-      // WAS ALREADY COMMENTED
-      // { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
-      // { name: 'InventoryLineModel', model: require('../mobile_models/inventory_line').default },
+      { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
+      { name: 'inventoryLineModel', model: require('../models/mobile_models/inventory_line').default },
 
       // CRM
       { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
@@ -193,21 +193,37 @@ export default async ({ expressApp }) => {
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
-      { name: 'agendaExecutionDetailsModel', model: require('../models/mobile_models/agenda_execution_details').default },
-      
-      
-      // ADDED : 10/03/2023 
+      {
+        name: 'agendaExecutionDetailsModel',
+        model: require('../models/mobile_models/agenda_execution_details').default,
+      },
+
+      // ADDED : 10/03/2023
       { name: 'specificationModel', model: require('../models/mobile_models/specification').default },
       { name: 'specificationDetailsModel', model: require('../models/mobile_models/specification_details').default },
-      { name: 'SpecificationTestResultsModel', model: require('../models/mobile_models/specification_test_results').default },
-      { name: 'ItemSpecificationDetailsModel', model: require('../models/mobile_models/item_specification_details').default },
-      { name: 'specificationTestHistoryModel', model: require('../models/mobile_models/specification_test_history').default },
-      { name: 'qualityTestBillDetailsModel', model: require('../models/mobile_models/quality_test_bill_details').default },
-      { name: 'qualityInspectionRoutingDetailsModel', model: require('../models/mobile_models/quality_inspection_routing_details').default },
+      {
+        name: 'SpecificationTestResultsModel',
+        model: require('../models/mobile_models/specification_test_results').default,
+      },
+      {
+        name: 'ItemSpecificationDetailsModel',
+        model: require('../models/mobile_models/item_specification_details').default,
+      },
+      {
+        name: 'specificationTestHistoryModel',
+        model: require('../models/mobile_models/specification_test_history').default,
+      },
+      {
+        name: 'qualityTestBillDetailsModel',
+        model: require('../models/mobile_models/quality_test_bill_details').default,
+      },
+      {
+        name: 'qualityInspectionRoutingDetailsModel',
+        model: require('../models/mobile_models/quality_inspection_routing_details').default,
+      },
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
 
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
-
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -335,6 +351,18 @@ export default async ({ expressApp }) => {
     require('../models/mobile_models/invoice').default,
     { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
   );
+
+  // INVENTORY
+  require('../models/mobile_models/inventory_line').default.hasOne(require('../models/mobile_models/inventory').default, {
+    foreignKey: 'inventory_code',
+    sourceKey: 'inventory_code',
+  });
+  require('../models/mobile_models/inventory').default.belongsTo(
+    require('../models/mobile_models/inventory_line').default,
+    { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
+  );
+
+  
 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
@@ -859,7 +887,7 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
    //await sequelizeConnection.sync();
-    await sequelizeConnection.sync();
+   //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })
@@ -869,7 +897,9 @@ export default async ({ expressApp }) => {
   //   .catch(err => {
   //     console.log(err);
   //   });
+
+  // });
   Logger.info('✌️ SYNC ALL MODELS');
-  await expressLoader({app: expressApp});
+  await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');
 };

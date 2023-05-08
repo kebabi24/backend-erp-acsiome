@@ -10,7 +10,7 @@ import { truncateSync } from "fs"
 const sequelize = Container.get("sequelize")
 
 const InventoryLine = sequelize.define(
-    "InventoryLine",
+    "inventoryLine",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -21,8 +21,8 @@ const InventoryLine = sequelize.define(
         inventory_code:{
             type: Sequelize.STRING,
             references: {
-                model: "aa_service",
-                key: "service_code",
+                model: "aa_inventory",
+                key: "inventory_code",
             },
         },
 
