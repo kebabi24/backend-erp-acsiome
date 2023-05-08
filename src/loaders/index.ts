@@ -353,12 +353,12 @@ export default async ({ expressApp }) => {
   );
 
   // INVENTORY
-  require('../models/mobile_models/inventory_line').default.hasOne(require('../models/mobile_models/inventory').default, {
+  require('../models/mobile_models/inventory').default.hasOne(require('../models/mobile_models/inventory_line').default, {
     foreignKey: 'inventory_code',
     sourceKey: 'inventory_code',
   });
-  require('../models/mobile_models/inventory').default.belongsTo(
-    require('../models/mobile_models/inventory_line').default,
+  require('../models/mobile_models/inventory_line').default.belongsTo(
+    require('../models/mobile_models/inventory').default,
     { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
   );
 
