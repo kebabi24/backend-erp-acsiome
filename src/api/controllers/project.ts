@@ -27,12 +27,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    
     const project_code = Project.pm_code;
     let data = [];
-    docs_codes.forEach(doc_code => {
+    docs_codes.forEach(doc => {
+      console.log("*************************")
+      console.log(doc)
       data.push({
         pjd_nbr: project_code,
-        mp_nbr: doc_code,
+        mp_nbr: doc.code_doc,
+        pjd_trigger: doc.trigger,
         pjd_domain: user_domain,
       });
     });
