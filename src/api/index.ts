@@ -92,6 +92,7 @@ import domain from './routes/domain';
 import tokenSerie from './routes/token-serie';
 
 import deal from './routes/deal';
+import Label from './routes/label';
 
 // guaranteed to get dependencies
 export default () => {
@@ -188,7 +189,7 @@ export default () => {
   domain(app);
   productPage(app);
   tokenSerie(app);
-
+  Label(app)
   deal(app);
   return app;
 };

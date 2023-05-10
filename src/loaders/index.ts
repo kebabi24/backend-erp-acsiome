@@ -163,7 +163,7 @@ export default async ({ expressApp }) => {
       { name: 'posOrderModel', model: require('../models/pos-order').default },
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
-      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
+      
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
       
       { name: 'bkhModel', model: require('../models/bkh').default },
@@ -225,6 +225,7 @@ export default async ({ expressApp }) => {
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
 
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

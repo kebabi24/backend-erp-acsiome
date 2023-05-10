@@ -1,5 +1,5 @@
 import LabelService from "../../services/label"
-
+import SequenceService from '../../services/sequence';
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
@@ -9,10 +9,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { user_domain } = req.headers;
   
     logger.debug('Calling Create label endpoint');
+    console.log("heeeeeeeeeeeeeeeeeeeee",req.body)
     try {
       const labelServiceInstance = Container.get(LabelService);
+      const sequenceServiceInstance = Container.get(SequenceService);
+      var labelId = null;
+        const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
+        console.log(seq);
+        labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+        await sequenceServiceInstance.update(
+          { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+          { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+        );
       const label = await labelServiceInstance.create({
         ...req.body,
+        lb_ref: labelId,
+        lb_cab: labelId,
         lb_domain: user_domain,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
