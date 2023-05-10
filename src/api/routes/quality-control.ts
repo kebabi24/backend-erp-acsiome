@@ -8,9 +8,12 @@ export default (app: Router) => {
 
   route.post('/createSpecification', controller.createStandardSpecification);
   route.post('/createTestsHistory', controller.createTestsHistory);
+  route.post('/createTestsHistoryUpdateStatus', controller.createTestsHistoryUpdatePStatus);
   route.get('/findOneSpecificationByCode/:specification_code', controller.findOneSpecificationByCode);
   route.get('/findSpecificationWithDetails/:specification_code', controller.findOneSpecificationWithDetails);
+  route.get('/findLaunchSpeicifications/:project_code', controller.getLaunchDocumentsByProject);
   route.get('/findSpecifications', controller.getSpecificationsCodes);
+  route.get('/docTriggers', controller.getDocumentTriggers);
   route.post('/getspecmpd', controller.getSpecificationsDetails);
   route.post('/addSensibilisationData', controller.addSensibilisationData);
   route.post('/addIdentificationData', controller.addIdentificationData);

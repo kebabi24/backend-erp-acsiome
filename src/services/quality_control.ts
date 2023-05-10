@@ -1,12 +1,16 @@
 import { Service, Inject } from 'typedi';
+import { Op ,Sequelize } from "sequelize";
+
 
 @Service()
 export default class QualityControl {
   constructor(
     @Inject('specificationModel') private specificationModel: Models.specificationModel,
     @Inject('specificationDetailsModel') private specificationDetailsModel: Models.specificationDetailsModel,
-    @Inject('specificationTestHistoryModel')
-    private specificationTestHistoryModel: Models.SpecificationTestHistoryModel,
+    @Inject('specificationTestHistoryModel')  private specificationTestHistoryModel: Models.SpecificationTestHistoryModel,
+    @Inject('pjdDetailsModel') private pjdDetailsModel: Models.PjdDetailsModel,
+    @Inject('codeModel') private codeModel: Models.CodeModel,
+   
 
     @Inject('logger') private logger,
   ) {}
@@ -48,7 +52,7 @@ export default class QualityControl {
         try {
             const specification = await this.specificationDetailsModel.findAll({
                  where: {mpd_nbr :data },
-                 attributes:["id","mpd_nbr","mpd_label","mpd_chr01"]
+                 attributes:["id","mpd_nbr","mpd_label","mpd_chr01","mpd_type"]
                 })
             this.logger.silly("find specification details")
             return specification
@@ -61,7 +65,7 @@ export default class QualityControl {
   public async getSpecifications(): Promise<any> {
     try {
       const specifications = await this.specificationModel.findAll({
-        attributes: ['mp_nbr'],
+        attributes: ['id','mp_nbr','mp_desc','mp_expire'],
       });
       this.logger.silly('find categories ');
       return specifications;
@@ -105,4 +109,37 @@ export default class QualityControl {
       throw e;
     }
   }
+
+  public async getDocumentTriggers(): Promise<any> {
+    try {
+      const triggers = await this.codeModel.findAll({
+        where: {code_fldname : "pj_trigger"},
+        attributes: ["id", "code_value","code_desc"]
+      });
+      this.logger.silly('find triggers ');
+      return triggers;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async getDocumentTriggersByProject(code_project : any): Promise<any> {
+    try {
+      const docs = await this.pjdDetailsModel.findAll({
+        where:Sequelize.and(
+          {pjd_nbr : code_project},
+          {pjd_trigger : "launch"}
+        ),
+        attributes: ["mp_nbr"]
+      });
+      this.logger.silly('find docs ');
+      return docs;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
 }

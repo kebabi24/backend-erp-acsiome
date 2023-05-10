@@ -1,9 +1,10 @@
 import QualityControlService from '../../services/quality_control';
+import ProjectService from '../../services/project';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
+import { Op ,Sequelize } from "sequelize";
 
 const createStandardSpecification = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -88,6 +89,7 @@ const getSpecificationsDetails = async (req: Request, res: Response, next: NextF
   }
 };
 
+
 const findOneSpecificationWithDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  code endpoint');
@@ -117,6 +119,32 @@ const createTestsHistory = async (req: Request, res: Response, next: NextFunctio
     // console.log(date2)
 
     const createdTestsHistory = await specificationService.createTestsHistory(testsHistory);
+
+    return res.status(201).json({ message: 'created succesfully', data: { createdTestsHistory } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  logger.debug('Calling Create productPage endpoint with body: %o', req.body);
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const projectService = Container.get(ProjectService);
+
+    const testsHistory = req.body.testsHistory;
+    const update_project_status =  req.body.update_project_status
+    const  project_code=  req.body.project_code
+
+    const createdTestsHistory = await specificationService.createTestsHistory(testsHistory);
+
+    if(update_project_status){
+      const updateProject = await projectService.update({pm_status : "R"},{pm_code : project_code});
+      
+    }
 
     return res.status(201).json({ message: 'created succesfully', data: { createdTestsHistory } });
   } catch (e) {
@@ -165,13 +193,56 @@ const addIdentificationData = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+
+const getDocumentTriggers = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const code = req.body.mpd_nbr;
+  logger.debug('Calling getDocumentTriggers endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const triggers = await specificationService.getDocumentTriggers();
+    return res.status(200).json({ message: 'found triggers', data: triggers });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const getLaunchDocumentsByProject = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const { project_code } = req.params;
+
+    const docs_codes = await specificationService.getDocumentTriggersByProject(project_code);
+
+    let specs = []
+    if(docs_codes != null){
+      for (const doc_code of docs_codes){
+        const spec = await specificationService.findSpecificationByCode(doc_code.dataValues.mp_nbr)
+        const spec_details = await specificationService.findSpecificationDetailsByCode(doc_code.dataValues.mp_nbr)
+        specs.push({spec ,spec_details })
+      } 
+    }
+
+    return res.status(200).json({ message: 'found trigger specifications', data: specs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
   getSpecificationsCodes,
   findOneSpecificationWithDetails,
   createTestsHistory,
+  createTestsHistoryUpdatePStatus,
   getSpecificationsDetails,
   addSensibilisationData,
   addIdentificationData,
+  getDocumentTriggers,
+  getLaunchDocumentsByProject
 };
