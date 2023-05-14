@@ -107,10 +107,9 @@ const Customer = sequelize.define(
         cm_ex_ratetype: Sequelize.STRING,
         cm_db: Sequelize.STRING,
         cm_pay_method: Sequelize.STRING,
-        cm_domain: {
-            type: Sequelize.STRING,
-            defaultValue: "acsiome",
-        },
+        cm_seq: Sequelize.STRING,
+        cm_domain:  Sequelize.STRING,
+          
         oid_cm_mstr: Sequelize.STRING,
         ...base,
     },

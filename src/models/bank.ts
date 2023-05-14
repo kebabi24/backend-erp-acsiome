@@ -115,10 +115,7 @@ const Bank = sequelize.define(
     bk_p010: Sequelize.DECIMAL,
     bk_p005: Sequelize.DECIMAL,
 
-    bk_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'acsiome',
-    },
+    bk_domain: Sequelize.STRING,
     oid_bk_mstr: Sequelize.STRING,
     ...base,
   },
