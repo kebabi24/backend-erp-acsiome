@@ -16,10 +16,8 @@ const AffectEmploye = sequelize.define(
 
         },       
 
-
-
-
         pme_pm_code: Sequelize.STRING,
+        pme_site: Sequelize.STRING,
         pme_inst: Sequelize.STRING,
         pme_task: Sequelize.STRING,
         pme_task_status: Sequelize.STRING,

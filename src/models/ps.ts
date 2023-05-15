@@ -142,10 +142,7 @@ const Ps = sequelize.define(
        ps__qadl02: {type: Sequelize.BOOLEAN, defaultValue : false  }, 
 
 
-        ps_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ps_domain: Sequelize.STRING,
         oid_ps_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
         },

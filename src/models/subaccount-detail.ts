@@ -27,10 +27,7 @@ const SubaccountDetail = sequelize.define(
         sbd_user1: Sequelize.STRING,
         sbd_user2: Sequelize.STRING,  
         sbd__qadc01: Sequelize.STRING,
-          sbd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+          sbd_domain: Sequelize.STRING,
         ...base,
     },
     {

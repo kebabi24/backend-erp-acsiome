@@ -7,20 +7,20 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling Create sct endpoint")
     try {
         const costSimulationServiceInstance = Container.get(costSimulationService)
         const siteServiceInstance = Container.get(SiteService)
         
-        const sct = await costSimulationServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const sct = await costSimulationServiceInstance.create({...req.body,sct_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
-        const sites = await siteServiceInstance.find({});
+        const sites = await siteServiceInstance.find({si_domain:user_domain});
 
         for(let site of sites) {
             if(site.si_site != req.body.sct_site){
-            const sct1 = await costSimulationServiceInstance.create({sct_site: site.si_site,sct_sim:req.body.sct_sim, sct_part:req.body.sct_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+            const sct1 = await costSimulationServiceInstance.create({sct_domain:user_domain,sct_site: site.si_site,sct_sim:req.body.sct_sim, sct_part:req.body.sct_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
             }
 
         }
@@ -53,9 +53,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all sct endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    
     try {
         const costSimulationServiceInstance = Container.get(costSimulationService)
-        const scts = await costSimulationServiceInstance.find({})
+        const scts = await costSimulationServiceInstance.find({sct_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: scts })
@@ -68,9 +71,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all sct endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const costSimulationServiceInstance = Container.get(costSimulationService)
-        const scts = await costSimulationServiceInstance.find({...req.body})
+        const scts = await costSimulationServiceInstance.find({...req.body,sct_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: scts })
@@ -83,9 +88,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all sct endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
     try {
         const costSimulationServiceInstance = Container.get(costSimulationService)
-        const scts = await costSimulationServiceInstance.findOne({...req.body})
+        const scts = await costSimulationServiceInstance.findOne({...req.body,sct_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: scts })
@@ -98,7 +105,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
 
     logger.debug("Calling update one  sct endpoint")
     try {

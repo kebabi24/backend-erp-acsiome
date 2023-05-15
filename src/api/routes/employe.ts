@@ -7,12 +7,14 @@ export default (app: Router) => {
     app.use("/employes", route)
 
     route.get("/", controller.findAll)
+    route.post("/find", controller.findBy)
     route.post("/", controller.create)
     route.post("/C", controller.createC)
     route.get("/:id", controller.findOne)
-    route.post("/find", controller.findBy)
     route.post("/findtime", controller.findByTime)
+    route.post("/findtimeproject", controller.findByTimeproject)
     route.post("/finddet", controller.findByDet)
+    route.post("/findjob",controller.findByJob)
     route.put("/:id", controller.update)
  
 }

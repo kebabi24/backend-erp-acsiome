@@ -27,10 +27,7 @@ const Currency = sequelize.define(
         cu_user1: Sequelize.STRING,
         cu_user2: Sequelize.STRING,
         cu_iso_curr: Sequelize.STRING,
-        cu_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        cu_domain: Sequelize.STRING,
         oid_cu_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

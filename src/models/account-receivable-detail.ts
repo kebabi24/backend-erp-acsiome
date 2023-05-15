@@ -72,10 +72,7 @@ const AccountReceivableDetail = sequelize.define(
 
 
 
-        ard_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ard_domain: Sequelize.STRING,
     oid_ard_der: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

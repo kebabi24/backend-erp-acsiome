@@ -5,11 +5,12 @@ import { Container } from 'typedi';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create category product endpoint');
   try {
     const PosCategoryProductServiceInstance = Container.get(PosCategoryProduct);
-    const category_product = await PosCategoryProductServiceInstance.create({ ...req.body });
+    const category_product = await PosCategoryProductServiceInstance.create({ ...req.body,domain:user_domain });
     return res.status(201).json({ message: 'created succesfully', data: category_product });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -34,9 +35,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all category product endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   try {
     const PosCategoryProductServiceInstance = Container.get(PosCategoryProduct);
-    const category_product = await PosCategoryProductServiceInstance.find({});
+    const category_product = await PosCategoryProductServiceInstance.find({domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: category_product });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -47,9 +50,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all category  p endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
   try {
     const PosCategoryProductServiceInstance = Container.get(PosCategoryProduct);
-    const category_product = await PosCategoryProductServiceInstance.find({ ...req.body });
+    const category_product = await PosCategoryProductServiceInstance.find({ ...req.body,domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: category_product });
   } catch (e) {
     logger.error('🔥 error: %o', e);

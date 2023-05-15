@@ -11,7 +11,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create item endpoint with body: %o", req.body)
     try {
         const productLineServiceInstance = Container.get(ProductLineService)
-        const productLine = await productLineServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const productLine = await productLineServiceInstance.create({...req.body,pl_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data: { productLine } })
@@ -56,9 +56,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all productLine endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const productLineServiceInstance = Container.get(ProductLineService)
-        const productLines = await productLineServiceInstance.find({...req.body})
+        const productLines = await productLineServiceInstance.find({...req.body,pl_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: productLines })
@@ -70,9 +73,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all productLine endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
     try {
         const productLineServiceInstance = Container.get(ProductLineService)
-        const productLines = await productLineServiceInstance.findOne({...req.body})
+        const productLines = await productLineServiceInstance.findOne({...req.body,pl_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: productLines })

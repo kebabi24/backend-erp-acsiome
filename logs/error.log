@@ -276,3 +276,47 @@
     at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
     at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:327:30)
     at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-03-28T15:31:28.567Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:327:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-03-28T15:31:28.571Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:327:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-03-28T15:32:45.009Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:327:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-03-28T15:32:45.013Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:327:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)

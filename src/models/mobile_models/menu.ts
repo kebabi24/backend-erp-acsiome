@@ -32,6 +32,8 @@ const Menu = sequelize.define(
         menu_goto:{type:Sequelize.STRING},
         menu_type:{type:Sequelize.STRING},
         menu_image:{type:Sequelize.STRING},
+        rank:{type:Sequelize.INTEGER},
+
         
         // ...base,
     },

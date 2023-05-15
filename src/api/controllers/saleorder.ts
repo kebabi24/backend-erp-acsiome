@@ -19,37 +19,18 @@ import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling Create sequence endpoint');
-  try {
-    const saleOrderServiceInstance = Container.get(SaleOrderService);
-    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    const { saleOrder, saleOrderDetail } = req.body;
-    const so = await saleOrderServiceInstance.create({
-      ...saleOrder,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
-    for (let entry of saleOrderDetail) {
-      entry = {
-        ...entry,
-        sod_nbr: so.so_nbr,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      };
-      await saleOrderDetailServiceInstance.create(entry);
-      logger.debug('Calling Create sequence endpoint');
+ 
       try {
         const saleOrderServiceInstance = Container.get(SaleOrderService);
         const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
         const { saleOrder, saleOrderDetail } = req.body;
         const so = await saleOrderServiceInstance.create({
           ...saleOrder,
+          so_domain: user_domain,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -58,6 +39,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         for (let entry of saleOrderDetail) {
           entry = {
             ...entry,
+            sod_domain: user_domain,
             sod_nbr: so.so_nbr,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
@@ -67,7 +49,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           await saleOrderDetailServiceInstance.create(entry);
         }
         const addressServiceInstance = Container.get(AddressService);
-        const addr = await addressServiceInstance.findOne({ ad_addr: saleOrder.so_cust });
+        const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: saleOrder.so_cust });
 
         const pdfData = {
           so: so,
@@ -85,17 +67,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         logger.error('🔥 error: %o', e);
         return next(e);
       }
-    }
-    return res.status(201).json({ message: 'created succesfully', data: so });
-  } catch (e) {
-    //#
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
+    
 };
 const createdirect = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
   try {
@@ -108,6 +85,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
     const { saleOrder, saleOrderDetail } = req.body;
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
+      so_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -116,6 +94,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
     for (let entry of saleOrderDetail) {
       entry = {
         ...entry,
+        sod_domain: user_domain,
         sod_nbr: so.so_nbr,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -131,16 +110,18 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
       const { ...remain } = item;
       console.log(remain);
       const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
         sct_part: remain.sod_part,
         sct_site: remain.sod_site,
         sct_sim: 'STDCG',
       });
-      const pt = await itemServiceInstance.findOne({ pt_part: remain.sod_part });
+      const pt = await itemServiceInstance.findOne({pt_domain: user_domain, pt_part: remain.sod_part });
       console.log(remain.sod_part, remain.sod_site);
 
       console.log(remain.qty_oh);
       console.log(sctdet.sct_cst_tot);
       await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
         tr_status: remain.sod_status,
         tr_expire: remain.sod_expire,
         tr_line: remain.sod_line,
@@ -181,6 +162,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
 
       if (remain.sod_type != 'M') {
         const ld = await locationDetailServiceInstance.findOne({
+          ld_domain: user_domain,
           ld_part: remain.sod_part,
           ld_lot: remain.sod_serial,
           ld_site: remain.sod_site,
@@ -198,6 +180,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
           );
         else
           await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
             ld_part: remain.sod_part,
             ld_date: new Date(),
             ld_lot: remain.sod_serial,
@@ -228,14 +211,17 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all purchaseOrder endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const saleOrder = await saleOrderServiceInstance.findOne({
-      ...req.body,
+      ...req.body, so_domain: user_domain
     });
     if (saleOrder) {
       const details = await saleOrderDetailServiceInstance.find({
+        sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
       });
       return res.status(200).json({
@@ -257,13 +243,14 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  saleOrder endpoint');
+  const { user_domain} = req.headers;
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const { id } = req.params;
     const saleOrder = await saleOrderServiceInstance.findOne({ id });
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const details = await saleOrderDetailServiceInstance.find({
-      sod_nbr: saleOrder.so_nbr,
+      sod_domain: user_domain, sod_nbr: saleOrder.so_nbr,
     });
 
     return res.status(200).json({
@@ -279,11 +266,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
+  const { user_domain } = req.headers;
   logger.debug('Calling find by  all requisition endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
-    const sos = await saleOrderServiceInstance.find({ ...req.body });
+    const sos = await saleOrderServiceInstance.find({ ...req.body,so_domain: user_domain });
     console.log(sos);
     return res.status(202).json({
       message: 'sec',
@@ -297,11 +285,13 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 const findByAllSo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
+  const { user_domain } = req.headers;
+  
   logger.debug('Calling find by  all requisition endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
-    const sos = await saleOrderServiceInstance.find({ ...req.body });
+    const sos = await saleOrderServiceInstance.find({ ...req.body , so_domain: user_domain});
     let result = [];
     var i = 1;
     for (let so of sos) {
@@ -323,13 +313,16 @@ const findByAllSo = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all purchaseOrder endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     let result = [];
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    const sos = await saleOrderServiceInstance.find({});
+    const sos = await saleOrderServiceInstance.find({so_domain: user_domain});
     for (const so of sos) {
       const details = await saleOrderDetailServiceInstance.find({
+        sod_domain: user_domain,
         sod_nbr: so.so_nbr,
       });
       result.push({ id: so.id, so, details });
@@ -344,10 +337,13 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all saleOrder endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const saleorder = await saleOrderServiceInstance.find({
+      so_domain: user_domain,
       so_cust: {
         [Op.between]: [req.body.cm_addr_1, req.body.cm_addr_2],
       },
@@ -361,6 +357,7 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
 
     for (const so of saleorder) {
       const details = await saleOrderDetailServiceInstance.find({
+        sod_domain: user_domain,
         sod_nbr: so.so_nbr,
         sod_part: {
           [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
@@ -409,6 +406,8 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
 const getActivity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleShiperServiceInstance = Container.get(SaleShiperService);
@@ -417,6 +416,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
     const accountreceivableServiceInstance = Container.get(AccountReceivableService);
     const accountshiperServiceInstance = Container.get(accountShiperService);
     const customer = await customerServiceInstance.find({
+      cm_domain: user_domain,
       cm_addr: { [Op.between]: [req.body.cm_addr_1, req.body.cm_addr_2] },
     });
 
@@ -424,6 +424,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
 
     for (const cm of customer) {
       const accountreceivable = await accountreceivableServiceInstance.find({
+        ar_domain: user_domain,
         ar_cust: cm.cm_addr,
         ar_type: { [Op.eq]: 'p' },
         ar_effdate: { [Op.between]: [req.body.date, new Date()] },
@@ -434,6 +435,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
         paid_amt = paid_amt + Number(ar.ar_amt);
       }
       const accountshiper = await accountshiperServiceInstance.find({
+        as_domain: user_domain,
         as_cust: cm.cm_addr,
         as_type: { [Op.eq]: 'p' },
         as_effdate: { [Op.between]: [req.body.date, new Date()] },
@@ -443,6 +445,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
         ship_paid_amt = ship_paid_amt + Number(as.as_amt);
       }
       const saleorder = await saleOrderServiceInstance.find({
+        so_domain: user_domain,
         so_cust: cm.cm_addr,
         so_ord_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -451,6 +454,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
         ord_amt = ord_amt + Number(so.so_amt);
       }
       const saleshiper = await saleShiperServiceInstance.find({
+        psh_domain: user_domain,
         psh_cust: cm.cm_addr,
         psh_ship_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -459,6 +463,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
         ship_amt = ship_amt + Number(psh.psh_qty_ship * psh.psh_um_conv * psh.psh_price);
       }
       const invoice = await invoiceOrderServiceInstance.find({
+        ih_domain: user_domain,
         ih_cust: cm.cm_addr,
         ih_inv_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -490,11 +495,14 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
 const getCA = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+  
   try {
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
     const customerServiceInstance = Container.get(CustomerService);
 
     const customer = await customerServiceInstance.find({
+      cm_domain: user_domain,
       cm_addr: { [Op.between]: [req.body.cm_addr_1, req.body.cm_addr_2] },
     });
 
@@ -502,6 +510,7 @@ const getCA = async (req: Request, res: Response, next: NextFunction) => {
 
     for (const cm of customer) {
       const invoice = await invoiceOrderServiceInstance.find({
+        ih_domain: user_domain,
         ih_cust: cm.cm_addr,
         ih_inv_date: { [Op.between]: [req.body.date_1, req.body.date_2] },
       });
@@ -539,7 +548,8 @@ const getCA = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
+  
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -552,10 +562,11 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       { id },
     );
     console.log(saleOrder.so_nbr);
-    await saleOrderDetailServiceInstance.delete({ sod_nbr: saleOrder.so_nbr });
+    await saleOrderDetailServiceInstance.delete({sod_domain:user_domain, sod_nbr: saleOrder.so_nbr });
     for (let entry of saleOrderDetail) {
       entry = {
         ...entry,
+        sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -593,6 +604,8 @@ const updateSo = async (req: Request, res: Response, next: NextFunction) => {
 const updateSod = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
 
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
@@ -629,16 +642,18 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
 
         /*kamel*/
         const sctdet = await costSimulationServiceInstance.findOne({
+          sct_domain: user_domain,
           sct_part: details.sod_part,
           sct_site: details.sod_site,
           sct_sim: 'STDCG',
         });
-        const pt = await itemServiceInstance.findOne({ pt_part: details.sod_part });
+        const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: details.sod_part });
         console.log(details.sod_part, details.sod_site);
 
         //console.log(remain.qty_oh);
         console.log(sctdet.sct_cst_tot);
         await inventoryTransactionServiceInstance.create({
+          tr_domain: user_domain,
           tr_status: details.sod_status,
           tr_expire: details.sod_expire,
           tr_line: details.sod_line,
@@ -679,6 +694,7 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
 
         if (details.sod_type != 'M') {
           const ld = await locationDetailServiceInstance.findOne({
+            ld_domain: user_domain,
             ld_part: details.sod_part,
             ld_lot: details.sod_serial,
             ld_site: details.sod_site,
@@ -697,6 +713,7 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
           else
             await locationDetailServiceInstance.create({
               ld_part: details.sod_part,
+              ld_domain: user_domain,
               ld_date: new Date(),
               ld_lot: details.sod_serial,
               ld_site: details.sod_site,
@@ -723,15 +740,15 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
 const findAllwithDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const sequelize = Container.get('sequelize');
-
+  const { user_domain } = req.headers;
   logger.debug('Calling find all purchaseOrder endpoint');
   try {
     let result = [];
     //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const sos = await sequelize.query(
-      'SELECT *  FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.sod_det.id DESC',
-      { type: QueryTypes.SELECT },
+      'SELECT *  FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
+      { replacements: [user_domain],type: QueryTypes.SELECT },
     );
 
     return res.status(200).json({ message: 'fetched succesfully', data: sos });

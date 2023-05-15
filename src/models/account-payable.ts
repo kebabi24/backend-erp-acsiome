@@ -118,10 +118,7 @@ const AccountPayable = sequelize.define(
     ap_draft_submit_date: Sequelize.DATEONLY, 
     ap_pay_method: Sequelize.STRING, 
     ap_void_date: Sequelize.DATEONLY, 
-    ap_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+    ap_domain: Sequelize.STRING,
     oid_ap_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

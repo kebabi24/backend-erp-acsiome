@@ -23,6 +23,7 @@ const Categories = sequelize.define(
     category_profile: Sequelize.STRING,
     rang: Sequelize.INTEGER,
     direct: Sequelize.BOOLEAN,
+    domain: Sequelize.STRING,
   },
   {
     tableName: 'bb_pos_category',

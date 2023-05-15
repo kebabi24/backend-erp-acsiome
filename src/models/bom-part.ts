@@ -29,10 +29,7 @@ const BomPart = sequelize.define(
       },
     },
 
-    ptb_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'zima',
-    },
+    ptb_domain: Sequelize.STRING,
 
     ...base,
   },

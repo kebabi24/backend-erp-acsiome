@@ -38,10 +38,7 @@ const Daybook = sequelize.define(
         
         dy__qadc01: Sequelize.STRING, 
 
-        dy_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        dy_domain: Sequelize.STRING,
         oid_dy_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

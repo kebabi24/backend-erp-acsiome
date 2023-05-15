@@ -21,10 +21,7 @@ const Mesure = sequelize.define(
         um_user1: Sequelize.STRING,
         um_user2: Sequelize.STRING,
         
-        um_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        um_domain: Sequelize.STRING,
         oid_um_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

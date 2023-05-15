@@ -17,6 +17,7 @@ const AddReport = sequelize.define(
         },       
         pmr_nbr : Sequelize.STRING,
         pmr_pm_code: Sequelize.STRING,
+        pmr_site: Sequelize.STRING,
         pmr_inst: Sequelize.STRING,
         pmr_task: Sequelize.STRING,
         pmr_task_status: Sequelize.STRING,

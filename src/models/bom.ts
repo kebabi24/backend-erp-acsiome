@@ -98,10 +98,7 @@ const Bom = sequelize.define(
 
 
 
-    bom_domain: {
-        type: Sequelize.STRING,
-        defaultValue: 'zima'
-    },
+    bom_domain: Sequelize.STRING,
     oid_bom_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

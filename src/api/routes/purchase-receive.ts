@@ -10,11 +10,11 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.post('/:distinct/:liste', controller.findAllDistinct);
   route.post('/distinct', controller.findDistinct);
+  route.post('/grouprcp', controller.findGroupRCP);
   route.get('/:id', controller.findOne);
 
   route.post('/find', controller.findBy);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/rct-po', controller.rctPo);
-  route.post('/test', controller.test);
 };

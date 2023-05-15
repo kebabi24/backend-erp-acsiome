@@ -139,10 +139,7 @@ const InventoryTransaction = sequelize.define(
     tr_exru_seq: Sequelize.INTEGER,
     tr_promise_date: Sequelize.DATEONLY,
     tr_fldchg_cmtindx: Sequelize.INTEGER,
-    tr_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'zima',
-    },
+    tr_domain: Sequelize.STRING,
     ...base,
   },
   {

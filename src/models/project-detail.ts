@@ -47,10 +47,8 @@ const ProjectDetail = sequelize.define(
         },
         pmd_um: Sequelize.STRING,
         pmd_vend: Sequelize.STRING,
-        pmd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        pmd_domain: Sequelize.STRING,
+        
         oid_pmd_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

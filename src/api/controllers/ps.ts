@@ -6,9 +6,11 @@ import { Container } from 'typedi';
 
 import costSimulationService from '../../services/cost-simulation';
 import { INTEGER } from 'sequelize';
+import { readlink } from 'fs';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -19,6 +21,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       await psServiceInstance.create({
         ...item,
         ...it,
+        ps_domain:user_domain,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -49,9 +52,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code pppppssssssss');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const psServiceInstance = Container.get(PsService);
-    const ps = await psServiceInstance.findAll({});
+    const ps = await psServiceInstance.findAll({ps_domain:user_domain});
     //   console.log(ps)
     return res.status(200).json({ message: 'fetched succesfully', data: ps });
   } catch (e) {
@@ -63,9 +68,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const psServiceInstance = Container.get(PsService);
-    const ps = await psServiceInstance.findby({ ...req.body });
+    const ps = await psServiceInstance.findby({ ...req.body,ps_domain:user_domain });
     //console.log(ps)
 
     var i = 1;
@@ -85,9 +92,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findQtyOnStock = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const psServiceInstance = Container.get(PsService);
-    const ps = await psServiceInstance.findQtyOnStock({ ...req.body });
+    const ps = await psServiceInstance.findQtyOnStock({ ...req.body,ps_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: ps });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -98,6 +107,8 @@ const findQtyOnStock = async (req: Request, res: Response, next: NextFunction) =
 const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const details = req.body.detail;
     const site = req.body.site;
@@ -109,7 +120,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     var j = 1;
     for (let obj of details) {
       if (obj.type != "Stock") {
-      const ps = await psServiceInstance.finds({ ps_parent: obj.bom });
+      const ps = await psServiceInstance.finds({ ps_parent: obj.bom , ps_domain:user_domain});
       for (let p of ps) {
        
         var bool = false;
@@ -159,8 +170,8 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
 
     let dat = [];
     for (let res of result) {
-      const item = await itemServiceInstance.findOne({ pt_part: res.part });
-      const lds = await ldServiceInstance.find({ ld_part: res.part, ld_site: site });
+      const item = await itemServiceInstance.findOne({ pt_part: res.part , pt_domain:user_domain});
+      const lds = await ldServiceInstance.find({ ld_part: res.part, ld_site: site,ld_domain:user_domain });
       var ldqty = 0;
       for (let ld of lds) {
         ldqty = ldqty + Number(ld.ld_qty_oh);
@@ -187,6 +198,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         rank: item.int01,
       });
     }
+    
     //  for(let res of result){
     //      res.qtycom = res.qty - res.qtyoh
     //  }
@@ -201,9 +213,10 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
 };
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const { user_code } = req.headers;
-
+  
   logger.debug('Calling update one  code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const psServiceInstance = Container.get(PsService);
     const { id } = req.params;
@@ -215,6 +228,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       entry = {
         ...entry,
         ps_parent: id,
+        ps_domain:user_domain,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -247,18 +261,21 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   logger.debug('Calling find by  all task endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   let price = 0;
   try {
     const psServiceInstance = Container.get(PsService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
 
     const ps = await psServiceInstance.find({
-      ...req.body,
+      ...req.body,ps_domain:user_domain
     });
     console.log('hhhhhhhhhhhhhbbbbbbbb');
 
     for (let entry of ps) {
       const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
         sct_part: entry.ps_comp,
 
         sct_sim: 'STDCG',

@@ -184,11 +184,41 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
       const user_mobile_code = role.user_mobile_code;
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
+      var users =[];
+      var profiles = [];
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });
       const checklist = await userMobileServiceInstanse.getChecklist();
       const visitList = await userMobileServiceInstanse.getVisitList();
+      const cancelationReasons = await userMobileServiceInstanse.getCancelationReasons();
+      const priceList = await userMobileServiceInstanse.getPriceList();
+      const invoice = await userMobileServiceInstanse.getInvoice();
+      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
+      const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
+      var role_controller = {};
+      var profile_controller = {};
+
+      
+      if(role['controller_role']!=null && role['controller_role'].length != 0){
+          role_controller = await userMobileServiceInstanse.getUser({user_mobile_code:role['controller_role']})
+          profile_controller = await userMobileServiceInstanse.getProfile({profile_code :role_controller['profile_code'] })
+          const controller_menus = await userMobileServiceInstanse.getMenus({profile_code:role_controller['profile_code']})
+          menus.push(...controller_menus)
+      }
+
+      if(role['controller_role']!=null && role['controller_role'].length != 0){
+          users.push(userMobile,role_controller)
+          profiles.push(profile,profile_controller)
+      }else{
+          users.push(userMobile)
+          profiles.push(profile)
+      }
+    
+    const index = parameter.map(elem => elem.parameter_code).indexOf('service')
+    console.log(index)
+      
+
       const productPages = await userMobileServiceInstanse.getProfileProductPages({
         profile_code: userMobile.profile_code,
       });
@@ -201,12 +231,14 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest);
       const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest);
       const locationDetail = await userMobileServiceInstanse.getLocationDetail(role.role_loc, role.role_site);
-
+      
+      console.log(parameter)
       // service created on backend
-      if (parameter.hold === true) {
+      if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
         // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
+        // if(itinerary2==null){itinerary2=[]}
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
         // const categories = await userMobileServiceInstanse.getCategories( customers )
@@ -221,11 +253,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         return res.status(202).json({
           message: 'Data correct !',
-          service_creation: 'Service creation handled by the admin',
-          user_mobile: userMobile,
+          service_creation: parameter[index].hold,
+          // user_mobile: userMobile,
+          users:users,
           parameter: parameter,
           role: role,
           profile: profile,
+          profiles: profiles,
           menus: menus,
           service: service,
           itinerary: itinerary2,
@@ -238,6 +272,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           subClusters: subClusters,
           visitList: visitList,
           salesChannels: salesChannels,
+          cancelationReasons:cancelationReasons,
+          priceList:priceList,
+          invoice :invoice,
+          invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
           products: products,
@@ -245,6 +283,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
+          paymentMethods:paymentMethods,
         });
       }
       // service created by mobile user
@@ -269,11 +308,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         return res.status(202).json({
           message: 'Data correct !',
-          service_creation: 'Service creation handled by the user',
-          user_mobile: userMobile,
+          service_creation: parameter[index].hold,
+          // user_mobile: userMobile,
+          users:users,
           parameter: parameter,
           role: role,
           profile: profile,
+          profiles: profiles,
           menus: menus,
           checklist: checklist,
           itinerary: iitineraries,
@@ -286,6 +327,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           subClusters: subClusters,
           visitList: visitList,
           salesChannels: salesChannels,
+          cancelationReasons:cancelationReasons,
+          priceList:priceList,
+          invoice :invoice,
+          invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
           products: products,
@@ -293,6 +338,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
+          paymentMethods:paymentMethods,
         });
       }
     }
@@ -314,7 +360,7 @@ const getDataBack = async function(socket) {
   socket.emit('readyToRecieve');
 
   socket.on('sendData', data => {
-    console.log(data.data.customers);
+    console.log(data);
 
     // updated database
 
@@ -323,6 +369,109 @@ const getDataBack = async function(socket) {
     }, 4000);
   });
 };
+
+const getDataBackTest = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  // logger.debug("Calling user mobile login endpoint")
+
+  const userMobileServiceInstanse = Container.get(UserMobileService);
+  try {
+
+    // CUSTOMERS : 
+    // 0 : no change = do nothing 
+    // 1 : update 
+    // 2 : create new 
+    if(req.body.customers.length >0){
+      // console.log(req.body.customers)
+      for(const customer of req.body.customers){
+        if(customer.changed == 1 ){
+          const udpatedCustomer = await userMobileServiceInstanse.updateCustomer(customer,{customer_code:customer.customer_code});
+        }
+        if(customer.changed == 2 ){
+          delete customer.id
+          delete customer.changed
+          const createdCustomer = await userMobileServiceInstanse.createCustomer(customer);
+        }
+      };
+    }
+    
+    // SERVICE
+    // CREATED FROM BACKEDN
+    // const {service} = req.body
+    // if(req.body.parameter.hold == 1){
+    //   const udpatedService = await userMobileServiceInstanse.updateService(
+    //     {
+    //       service_open:false,
+    //       service_kmdep:service.service_kmdep,
+    //       service_kmarr:service.service_kmarr,
+    //     },
+    //     {service_code:service.service_code}
+    //     );
+    //   }else{
+    //     // CREATED FROM MOBILE
+    //     delete service.id
+    //     service.service_open = false
+    //     const udpatedService = await userMobileServiceInstanse.createService(service)
+    // }
+
+    // TOKEN SERIE
+    if(req.body.tokenSerie){
+      const token = req.body.tokenSerie
+      const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
+    }
+
+    // VISITS
+    // if(req.body.visits){
+    //   const data = req.body.visits
+    //   const visits = await userMobileServiceInstanse.createVisits(data);
+    // }
+
+    // INVOICE
+    // if(req.body.invoices){
+    //   const data = req.body.invoices
+    //   const invoices = await userMobileServiceInstanse.createInvoices(data);
+    // }
+
+    // INVOICE LINE
+    // if(req.body.invoicesLines){
+    //   const data = req.body.invoicesLines
+    //   const invoicesLines = await userMobileServiceInstanse.createInvoicesLines(data);
+    // }
+
+    // INVENTORY
+    // if(req.body.inventaires){
+    //   const data = req.body.inventaires
+    //   const inventories = await userMobileServiceInstanse.createInventories(data);
+    // }
+
+    // INVENTORY LINES
+    // if(req.body.inventairesLines){
+    //   const data = req.body.inventairesLines
+    //   const inventoriesLines = await userMobileServiceInstanse.createInventoriesLines(data);
+    // }
+
+    // PAYMENTS
+    // if(req.body.payments){
+    //   const data = req.body.payments
+    //   const payments = await userMobileServiceInstanse.createPayments(data);
+    // }
+
+     // LOCATION DETAILS
+      if(req.body.loacationsDetails){
+        const data = req.body.loacationsDetails
+        const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(data);
+      }
+
+    return res.status(200).json({ message: 'deleted succesfully', data: req.body });
+    
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+}
+
+   
+
 
 export default {
   create,
@@ -336,4 +485,5 @@ export default {
   deleteOne,
   signin,
   getDataBack,
+  getDataBackTest,
 };

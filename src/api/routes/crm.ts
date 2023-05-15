@@ -24,6 +24,7 @@ export default (app: Router) => {
     route.get("/getCRMDashboardData", controller.getCRMDashboardData)
     route.post("/createEventOrderZero", controller.createAgendaEventOrderZero)
     route.get("/allProfiles", controller.getAllProfiles)
+    route.get("/specialEventConfig", controller.getSpecialEventConfig)
 
   
 }

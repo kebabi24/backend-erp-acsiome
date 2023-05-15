@@ -23,10 +23,7 @@ const Frais = sequelize.define(
         frp_user1: Sequelize.STRING,
         frp_user2: Sequelize.STRING,
         
-        frp_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        frp_domain: Sequelize.STRING,
         oid_frp_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

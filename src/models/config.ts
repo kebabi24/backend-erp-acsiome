@@ -17,7 +17,7 @@ const Config = sequelize.define(
        
         cfg_pm_module: {type: Sequelize.BOOLEAN, defaultValue : false  },
         cfg_pay_multiple: {type: Sequelize.BOOLEAN, defaultValue : false  },
-            
+        cfg_crm: {type: Sequelize.BOOLEAN, defaultValue : false  },     
        
         ...base,
     },

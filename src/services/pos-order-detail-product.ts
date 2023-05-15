@@ -1,3 +1,6 @@
+
+
+import { Op ,Sequelize } from "sequelize";
 import { Service, Inject } from 'typedi';
 
 @Service()
@@ -68,6 +71,29 @@ export default class posOrderProductService {
       const orderDetail = await this.posOrderDetailProductModel.destroy({ where: query });
       this.logger.silly('delete one order detail mstr');
       return orderDetail;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findAllDetailsFiltered(startDate: any, endDate:any): Promise<any> {
+    try {
+      
+      const ordersDetail = await this.posOrderDetailProductModel.findAll({
+        where : Sequelize.and(
+          {pt_group : ["POULET","VIANDE","MIXTE"]},
+          {pt_part_type :["P","G","L"]},
+          {pt_promo :["MIXTE","AUTHENTIQUE","CLASSIQUE"]},
+          {pt_dsgn_grp  :["SANDWICH","PLAT","FORMULE"]},
+          {created_date :  {[Op.gte]:new Date(startDate)}}, 
+          {created_date :  {[Op.lte]:new Date(endDate)}},    
+          ),
+          
+        attributes : ["id","pt_size","pt_group","pt_part_type","pt_qty_ord_pos","pt_price_pos","created_date","pt_promo","pt_dsgn_grp"]
+      });
+      this.logger.silly('find All orders detail mstr');
+      return ordersDetail;
     } catch (e) {
       this.logger.error(e);
       throw e;

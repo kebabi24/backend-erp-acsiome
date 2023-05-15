@@ -109,10 +109,7 @@ const PurchaseReceive = sequelize.define(
         prh_rmks: Sequelize.STRING,
 
         prh_exru_seq: Sequelize.INTEGER,
-        prh_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        prh_domain: Sequelize.STRING,
         oid_prh_hist: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

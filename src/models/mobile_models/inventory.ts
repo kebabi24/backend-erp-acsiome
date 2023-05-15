@@ -10,7 +10,7 @@ import { truncateSync } from "fs"
 const sequelize = Container.get("sequelize")
 
 const Inventory = sequelize.define(
-    "Inventory",
+    "inventory",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -18,9 +18,9 @@ const Inventory = sequelize.define(
             autoIncrement: true,
             unique: true
         },
+        inventory_code:{type:Sequelize.STRING , unique: true},
         site : {type: Sequelize.STRING},
         location:{ type:Sequelize.STRING},
-        inventory_code:{type:Sequelize.STRING},
         user_code:{type:Sequelize.STRING},
         thedate:{type:Sequelize.STRING},
         service_code:{

@@ -36,6 +36,7 @@ const Bkh = sequelize.define(
     bk_p005: Sequelize.DECIMAL,
     bkh_site: Sequelize.STRING,
     bkh_effdate: Sequelize.DATEONLY,
+    bkh_domain: Sequelize.STRING,
     ...base,
   },
   {

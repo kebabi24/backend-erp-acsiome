@@ -35,10 +35,7 @@ const Account = sequelize.define(
         ac_modl_only: {type: Sequelize.BOOLEAN, defaultValue : false  },
         ac_match_seq: Sequelize.STRING,
 
-        ac_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        ac_domain: Sequelize.STRING,
         oid_ac_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
     },

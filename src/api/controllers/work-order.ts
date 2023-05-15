@@ -15,7 +15,7 @@ import sequenceService from '../../services/sequence';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
     const { detail, it, nof } = req.body;
@@ -31,6 +31,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         .create({
           ...item,
           ...it,
+          wo_domain: user_domain,
           wo_nbr: nof,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
@@ -40,9 +41,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         .then(result => {
           wolot = result.id;
         });
-      const ros = await workroutingServiceInstance.find({ ro_routing: it.wo_routing });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing });
       for (const ro of ros) {
         await woroutingServiceInstance.create({
+          wr_domain: user_domain,
           wr_nbr: nof,
           wr_lot: wolot,
           wr_start: item.wo_rel_date,
@@ -69,7 +71,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createPosWorkOrder = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
+  const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
@@ -77,7 +79,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const psServiceInstance = Container.get(psService);
     const itemServiceInstance = Container.get(ItemService);
     const SequenceServiceInstance = Container.get(sequenceService);
-    const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
+    const sequence = await SequenceServiceInstance.findOne({ seq_domain:user_domain,seq_seq: 'OP' });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
@@ -87,6 +89,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
       await workOrderServiceInstance.create({
+        wo_domain: user_domain,
         wo_nbr: nbr,
         wo_part: pt_part,
         wo_lot: line,
@@ -102,11 +105,11 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      const wOid = await workOrderServiceInstance.findOne({ wo_nbr: nbr, wo_lot: product.line });
+      const wOid = await workOrderServiceInstance.findOne({ wo_domain:user_domain,wo_nbr: nbr, wo_lot: product.line });
       if (wOid) {
         let ps_parent = product.pt_bom_code;
 
-        const ps = await psServiceInstance.find({ ps_parent });
+        const ps = await psServiceInstance.find({ ps_parent ,ps_domain: user_domain});
         console.log(ps);
         if (ps.length > 0) {
           console.log('ps l dakhel f if', ps);
@@ -114,6 +117,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           for (const pss of ps) {
             // console.log(pss.ps_scrp_pct);
             await workOrderDetailServiceInstance.create({
+              wod_domain: user_domain,
               wod_nbr: nbr,
               wod_lot: wOid.id,
               wod_loc: product.pt_loc,
@@ -130,6 +134,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         } else {
           console.log('ps f else', ps);
           await workOrderDetailServiceInstance.create({
+            wod_domain: user_domain,
             wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: product.pt_loc,
@@ -149,6 +154,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           const s_part = s.pt_part;
           // console.log(s_part);
           await workOrderDetailServiceInstance.create({
+            wod_domain: user_domain,
             wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: s.pt_loc,
@@ -166,6 +172,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         for (const sa of sauce) {
           const sa_part = sa.pt_part;
           await workOrderDetailServiceInstance.create({
+            wod_domain: user_domain,
             wod_nbr: nbr,
             wod_lot: wOid.id,
             wod_loc: sa.pt_loc,
@@ -182,6 +189,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         if (ing.length > 0) {
           for (const g of ing) {
             const wOd = await workOrderDetailServiceInstance.findOne({
+              wod_dpomain: user_domain,
               wod_nbr: nbr,
               wod_lot: wOid.id,
               wod_part: g.spec_code,
@@ -189,7 +197,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
 
             await workOrderDetailServiceInstance.update(
               { wod_qty_req: Number(0) },
-              { wod_nbr: nbr, wod_lot: wOid.id, wod_part: g.spec_code },
+              { wod_domain: user_domain,wod_nbr: nbr, wod_lot: wOid.id, wod_part: g.spec_code },
             );
 
             // const ing_part = g.pt_part;
@@ -210,7 +218,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         }
       }
     }
-    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_seq: 'OP' });
+    await sequence.update({ seq_curr_val: Number(sequence.seq_curr_val) + 1 }, { seq_domain: user_domain,seq_seq: 'OP' });
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -235,11 +243,11 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.headers.origin);
-
+  const { user_domain } = req.headers;
   logger.debug('Calling find all wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.find({});
+    const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -250,9 +258,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.find({ ...req.body });
+    const wos = await workOrderServiceInstance.find({ ...req.body , wo_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -263,9 +272,10 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.findOne({ ...req.body });
+    const wos = await workOrderServiceInstance.findOne({ ...req.body,wo_domain: user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);

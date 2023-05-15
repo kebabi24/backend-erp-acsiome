@@ -198,10 +198,7 @@ wod_ret_ref: Sequelize.STRING,
 wod_yield_pct: {type: Sequelize.DECIMAL, defaultValue : 0  }, 
 
 
-wod_domain: {
-    type: Sequelize.STRING,
-    defaultValue: 'zima'
-},
+wod_domain: Sequelize.STRING,
 oid_wod_det: {type: Sequelize.DECIMAL, defaultValue : 0  },
 ...base,
     },

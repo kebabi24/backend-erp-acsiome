@@ -10,7 +10,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create code endpoint")
     try {
         const workroutingServiceInstance = Container.get(WorkRoutingService)
-        const ro = await workroutingServiceInstance.create({...req.body, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ro = await workroutingServiceInstance.create({...req.body,ro_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  ro })
@@ -39,9 +39,10 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all code endpoint")
+    const { user_domain } = req.headers;
     try {
         const workroutingServiceInstance = Container.get(WorkRoutingService)
-        const ros = await workroutingServiceInstance.find({})
+        const ros = await workroutingServiceInstance.find({ro_domain: user_domain})
         console.log(ros)
         return res
             .status(200)
@@ -55,9 +56,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
+    const { user_domain } = req.headers;
     try {
         const workroutingServiceInstance = Container.get(WorkRoutingService)
-        const ros = await workroutingServiceInstance.find({...req.body})
+        const ros = await workroutingServiceInstance.find({...req.body,ro_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ros })
@@ -70,13 +72,13 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findAlldistinct = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
-
+    const { user_domain } = req.headers;
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const ros =await sequelize.query("SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc  FROM   PUBLIC.ro_det", { type: QueryTypes.SELECT });
+        const ros =await sequelize.query("SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc  FROM   PUBLIC.ro_det where PUBLIC.ro_domain = ?", { remplacements: [user_domain],type: QueryTypes.SELECT });
         console.log(ros)
         let id = 1;
         for(const ro of ros){

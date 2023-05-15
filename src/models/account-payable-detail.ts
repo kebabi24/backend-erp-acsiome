@@ -78,10 +78,7 @@ const AccountPayableDetail = sequelize.define(
 
 
 
-        apd_domain: {
-            type: Sequelize.STRING,
-            defaultValue: 'zima'
-        },
+        apd_domain: Sequelize.STRING,
     oid_apd_der: {type: Sequelize.DECIMAL, defaultValue : 0  },
     ...base,
     },

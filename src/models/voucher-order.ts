@@ -202,7 +202,7 @@ const VoucherOrder = sequelize.define(
 		vh_fsdef_cc: Sequelize.STRING,
 		vh_manual_fr_terms: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		vh_req_time: Sequelize.STRING,
-		vh_domain: {type: Sequelize.STRING,	defaultValue: 'zima'	},
+		vh_domain: Sequelize.STRING,
 		oid_vh_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		...base,
 			},

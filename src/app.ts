@@ -37,13 +37,14 @@ async function startServer() {
   });
 
   const io = require('socket.io')(server);
-  io.on('connection', socket => {
-    console.log('new connection');
+  io.on('connection',userMobileController.getDataBack)
+  // io.on('connection', socket => {
+  //   console.log('new connection');
 
-    socket.on('createOrder', data => posOrderController.createOrder(socket, data));
+    // socket.on('createOrder', data => posOrderController.createOrder(socket, data));
 
-    socket.on('disconnect', () => console.log('disconnected'));
-  });
+    // socket.on('disconnect', () => console.log('disconnected'));
+  // });
 }
 
 startServer();
