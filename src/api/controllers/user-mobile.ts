@@ -196,6 +196,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
+      const messages = await userMobileServiceInstanse.getMessages(role_code)
       var role_controller = {};
       var profile_controller = {};
 
@@ -284,6 +285,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
+          messages:messages,
         });
       }
       // service created by mobile user
@@ -339,6 +341,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           loadRequestsDetails: loadRequestsDetails,
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
+          messages:messages,
         });
       }
     }
@@ -415,10 +418,10 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
     // }
 
     // TOKEN SERIE
-    if(req.body.tokenSerie){
-      const token = req.body.tokenSerie
-      const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
-    }
+    // if(req.body.tokenSerie){
+    //   const token = req.body.tokenSerie
+    //   const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
+    // }
 
     // VISITS
     // if(req.body.visits){

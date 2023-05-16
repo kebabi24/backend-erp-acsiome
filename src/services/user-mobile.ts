@@ -40,6 +40,8 @@ export default class UserMobileService {
         @Inject("visitsModel") private visitsModel: Models.visitsModel,
         @Inject("inventoryModel") private inventoryModel: Models.InventoryModel,
         @Inject("inventoryLineModel") private inventoryLineModel: Models.InventoryLineModel,
+        @Inject("messagesModel") private messagesModel: Models.messagesModel,
+        @Inject("domainModel") private domainModel: Models.DomainModel,
         @Inject("logger") private logger
     ) {}
 
@@ -1071,6 +1073,38 @@ export default class UserMobileService {
             return locationCreated;
         } catch (e) {
             console.log('Error from service- updateCreateLocationDetails')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** GET PAYMENT METHOD  **************************
+     public async getMessages(role_code : any): Promise<any> {
+        try {
+            const messages = await this.messagesModel.findAll({
+                where:{
+                    role_code : role_code
+                }
+            })
+            return messages
+        } catch (e) {
+            console.log('Error from etMessages')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET DOMAIN  **************************
+    public async getDomain(user_domain : any): Promise<any> {
+        try {
+            const domain = await this.domainModel.findAll({
+                where:{
+                    dom_domain : user_domain
+                }
+            })
+            return domain
+        } catch (e) {
+            console.log('Error from getDomain')
             this.logger.error(e)
             throw e
         }

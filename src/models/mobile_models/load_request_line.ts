@@ -18,8 +18,8 @@ const LoadRequestLine = sequelize.define(
             unique: true
         },
         
-        date_creation:{type:Sequelize.DATE},
-        date_charge:{type:Sequelize.DATE},
+        date_creation:{type:Sequelize.DATEONLY},
+        date_charge:{type:Sequelize.DATEONLY},
         line:{type: Sequelize.INTEGER},
 
         

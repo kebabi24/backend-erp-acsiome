@@ -21,7 +21,7 @@ const Messages = sequelize.define(
         title:{type:Sequelize.STRING},
         description:{type:Sequelize.STRING},
         rank:{type: Sequelize.INTEGER},
-
+        role_code : {type: Sequelize.STRING}
         
         
         // ...base,
