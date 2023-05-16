@@ -33,7 +33,6 @@ export default async ({ expressApp }) => {
     models: [
       testModel,
       { name: 'addressModel', model: require('../models/address').default },
-      //{name:'currencyModel',model: require('../models/currency').default},
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
       { name: 'productLineModel', model: require('../models/product-line').default },
@@ -163,8 +162,9 @@ export default async ({ expressApp }) => {
       { name: 'posOrderModel', model: require('../models/pos-order').default },
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
+      
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
-      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
+      
       { name: 'bkhModel', model: require('../models/bkh').default },
       { name: 'ordersHistoryModel', model: require('../models/order-history').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
@@ -224,6 +224,7 @@ export default async ({ expressApp }) => {
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
 
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
+      { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -886,8 +887,13 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
+<<<<<<< HEAD
   //await sequelizeConnection.sync();
    //await sequelizeConnection.sync();
+=======
+   //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
+>>>>>>> f1c2df0b2641d3af9d246b350acc232152359c76
 
   // await sequelizeConnection
   //   .sync({ alter: true })
@@ -898,7 +904,7 @@ export default async ({ expressApp }) => {
   //     console.log(err);
   //   });
 
-  // });
+ 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

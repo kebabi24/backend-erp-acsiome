@@ -83,10 +83,9 @@ const Provider = sequelize.define(
     vd_tot_terms_code: Sequelize.STRING,
     vd_carrier_id: Sequelize.STRING,
     vd_kanban_supplier: Sequelize.STRING,
-    vd_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'acsiome',
-    },
+    vd_seq : Sequelize.STRING,
+    vd_domain: Sequelize.STRING,
+      
     oid_vd_mstr: Sequelize.STRING,
     ...base,
   },
