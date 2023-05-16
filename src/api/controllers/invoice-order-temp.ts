@@ -30,6 +30,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const invoiceOrderServiceInstance = Container.get(InvoiceOrderTempService)
         const saleOrderServiceInstance = Container.get(SaleOrderService)
 
+        const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService)
+
         const invoiceOrderDetailServiceInstance = Container.get(
             InvoiceOrderTempDetailService
         )
@@ -39,9 +41,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         
         for (let entry of invoiceOrderTempDetail) {
              
-            entry = { ...entry, itdh_domain:user_domain,itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry,  itdh_domain:user_domain,itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+        
             await invoiceOrderDetailServiceInstance.create(entry)
 
+            const sod = await saleOrderDetailServiceInstance.findOne({sod_domain:user_domain,sod_nbr: ih.ith_nbr, sod_part:entry.itdh_part })
+            if(sod) await saleOrderDetailServiceInstance.update({sod_qty_ret: Number(sod.sod_qty_ret) + Number(entry.itdh_qty_cons) , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sod.id})
+        
         }
 
         const so = await saleOrderServiceInstance.findOne({so_domain:user_domain,so_nbr: ih.ith_nbr })

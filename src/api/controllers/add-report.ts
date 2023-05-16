@@ -45,6 +45,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                     await saleorderDetailServiceInstance.update(
                         {
                         sod_qty_ship: Number(sod.sod_qty_ship) + 1,
+                        sod_qty_cons: Number(sod.sod_qty_cons) + 1,
                         last_modified_by: user_code,
                         last_modified_ip_adr: req.headers.origin,
                         },
