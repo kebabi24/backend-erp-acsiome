@@ -362,14 +362,29 @@ const getDataBack = async function(socket) {
 
   socket.emit('readyToRecieve');
 
-  socket.on('sendData', data => {
-    console.log(data);
+  socket.on('sendData', async data => {
 
     // updated database
+    console.log("CUSTOMERS LIST LENGTH : "+ data.customers.length)
+    if(data.customers.length >0){
+      // console.log(data.customers)
+      for(const customer of data.customers){
+        if(customer.changed == 1 ){
+          const udpatedCustomer = await userMobileServiceInstanse.updateCustomer(customer,{customer_code:customer.customer_code});
+        }
+        if(customer.changed == 2 ){
+          console.log("creatin customers")
+          console.log(customer)
+          delete customer.id
+          delete customer.changed
+          const createdCustomer = await userMobileServiceInstanse.createCustomer(customer);
+        }
+      };
+    }
 
-    setTimeout(() => {
-      socket.emit('dataUpdated');
-    }, 4000);
+    // setTimeout(() => {
+    //   socket.emit('dataUpdated');
+    // }, 4000);
   });
 };
 
