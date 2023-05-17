@@ -366,6 +366,7 @@ const getDataBack = async function(socket) {
 
     // updated database
     console.log("CUSTOMERS LIST LENGTH : "+ data.customers.length)
+
     if(data.customers.length >0){
       // console.log(data.customers)
       for(const customer of data.customers){
@@ -381,6 +382,75 @@ const getDataBack = async function(socket) {
         }
       };
     }
+
+    // SERVICE
+    // CREATED FROM BACKEDN
+    const {service , service_creation} = data
+    if(service_creation == true){ // created from backend 
+      const udpatedService = await userMobileServiceInstanse.updateService(
+        {
+          service_open:false,
+          service_kmdep:service.service_kmdep,
+          service_kmarr:service.service_kmarr,
+        },
+        {service_code:service.service_code}
+        );
+      }else{
+        // CREATED FROM MOBILE  // false 
+        delete service.id
+        service.service_open = false
+        const udpatedService = await userMobileServiceInstanse.createService(service)
+      }
+
+      // TOKEN SERIE
+      if(data.tokenSerie){
+        const token = data.tokenSerie
+        const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
+      }
+
+       // VISITS
+    if(data.visits){
+      const dataa = data.visits
+      const visits = await userMobileServiceInstanse.createVisits(dataa);
+    }
+
+    // INVOICE
+    if(data.invoices){
+      const dataa = data.invoices
+      const invoices = await userMobileServiceInstanse.createInvoices(dataa);
+    }
+
+    // INVOICE LINE
+    if(data.invoicesLines){
+      const dataa = data.invoicesLines
+      const invoicesLines = await userMobileServiceInstanse.createInvoicesLines(dataa);
+    }
+
+    // INVENTORY
+    if(data.inventaires){
+      const dataa = data.inventaires
+      const inventories = await userMobileServiceInstanse.createInventories(dataa);
+    }
+
+    // INVENTORY LINES
+    if(data.inventairesLines){
+      const dataa = data.inventairesLines
+      const inventoriesLines = await userMobileServiceInstanse.createInventoriesLines(dataa);
+    }
+
+    // PAYMENTS
+    if(data.payments){
+      const dataa = data.payments
+      const payments = await userMobileServiceInstanse.createPayments(dataa);
+    }
+
+     // LOCATION DETAILS
+      if(data.loacationsDetails){
+        const dataa = data.loacationsDetails
+        const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
+      }
+
+
     socket.emit('dataUpdated')
     // setTimeout(() => {
     //   socket.emit('dataUpdated');
