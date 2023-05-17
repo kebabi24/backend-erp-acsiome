@@ -887,13 +887,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-<<<<<<< HEAD
   //await sequelizeConnection.sync();
    //await sequelizeConnection.sync();
-=======
-   //await sequelizeConnection.sync();
-  // await sequelizeConnection.sync();
->>>>>>> f1c2df0b2641d3af9d246b350acc232152359c76
 
   // await sequelizeConnection
   //   .sync({ alter: true })

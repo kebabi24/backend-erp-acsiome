@@ -381,7 +381,7 @@ const getDataBack = async function(socket) {
         }
       };
     }
-
+    socket.emit('dataUpdated')
     // setTimeout(() => {
     //   socket.emit('dataUpdated');
     // }, 4000);
