@@ -40,7 +40,7 @@ export default class codeService {
 
   public async findsome(query: any): Promise<any> {
     try {
-      const codes = await this.codeModel.findAll({ attributes: ['code_value', 'code_cmmt'], where: query });
+      const codes = await this.codeModel.findAll({ attributes: ['code_value', 'code_cmmt','code_desc'], where: query });
       this.logger.silly('find All Codes mstr');
       return codes;
     } catch (e) {

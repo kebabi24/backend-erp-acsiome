@@ -11,6 +11,7 @@ export default (app: Router) => {
     route.get("/emptime", controller.findEmpTime)
     route.get("/empshift", controller.findEmpShift)
     route.get("/emptype", controller.findEmpType)
+    route.get("/triggerType", controller.findTriggerType)
     route.get("/conge", controller.findConge)
     route.get("/module", controller.findModule)
     route.get("/trans", controller.findTrans)

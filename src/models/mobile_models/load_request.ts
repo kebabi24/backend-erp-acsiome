@@ -22,7 +22,7 @@ const LoadRequest = sequelize.define(
             primaryKey: true,
             unique: true
         },
-        date_creation:{type:Sequelize.DATE},
+        date_creation:{type:Sequelize.DATEONLY},
         date_charge:{type:Sequelize.DATE},
         status:{type: Sequelize.INTEGER},
 
