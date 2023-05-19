@@ -74,7 +74,6 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 // ***************************************************
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(typeof req.body.username);
   logger.debug('Calling find one by  user endpoint');
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
@@ -217,7 +216,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       }
     
     const index = parameter.map(elem => elem.parameter_code).indexOf('service')
-    console.log(index)
       
 
       const productPages = await userMobileServiceInstanse.getProfileProductPages({
@@ -233,7 +231,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const loadRequestsDetails = await userMobileServiceInstanse.getLoadRequestDetails(loadRequest);
       const locationDetail = await userMobileServiceInstanse.getLocationDetail(role.role_loc, role.role_site);
       
-      console.log(parameter)
       // service created on backend
       if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
@@ -365,20 +362,30 @@ const getDataBack = async function(socket) {
   socket.on('sendData', async data => {
 
     // updated database
-    console.log("CUSTOMERS LIST LENGTH : "+ data.customers.length)
-
+    
     if(data.customers.length >0){
-      // console.log(data.customers)
+      console.log("CUSTOMERS LIST LENGTH : "+ data.customers.length)
       for(const customer of data.customers){
         if(customer.changed == 1 ){
           const udpatedCustomer = await userMobileServiceInstanse.updateCustomer(customer,{customer_code:customer.customer_code});
         }
         if(customer.changed == 2 ){
           console.log("creatin customers")
-          console.log(customer)
           delete customer.id
           delete customer.changed
+          const date = new Date()
+          const m = Number(date.getMonth())+ 1
+          const date2 = date.getFullYear() + '-' + m + '-' + date.getDate() +' '+ date.getHours() + ':' +date.getMinutes() + ':' + date.getSeconds() +'.63682+01' 
+          // customer.
           const createdCustomer = await userMobileServiceInstanse.createCustomer(customer);
+          if(createdCustomer){
+
+            let createData = {
+              itinerary_code : data.service.itinerary_code,
+              customer_code : customer.customer_code
+            }
+            const createdCustomerItinerary = await userMobileServiceInstanse.createCustomerItinerary(createData);
+          }
         }
       };
     }
@@ -387,6 +394,7 @@ const getDataBack = async function(socket) {
     // CREATED FROM BACKEDN
     const {service , service_creation} = data
     if(service_creation == true){ // created from backend 
+      console.log("service_creation is true")
       const udpatedService = await userMobileServiceInstanse.updateService(
         {
           service_open:false,
@@ -397,58 +405,66 @@ const getDataBack = async function(socket) {
         );
       }else{
         // CREATED FROM MOBILE  // false 
+        console.log("CREATING SERVICE")
         delete service.id
+        service.service_creation_date = formatDateAddTimeZone(service.service_creation_date)
+        service.service_closing_date = formatDateAddTimeZone(service.service_closing_date)
+        service.date_quitter_depot = changeOrderDate(service.date_quitter_depot )
+        service.date_retour_depot = changeOrderDate(service.date_retour_depot)
+        service.service_period_activate_date = dateonlyToDate( service.service_period_activate_date)
         service.service_open = false
-        const udpatedService = await userMobileServiceInstanse.createService(service)
+        const createdService = await userMobileServiceInstanse.createService(service)
       }
 
-      // TOKEN SERIE
+      //TOKEN SERIE
       if(data.tokenSerie){
+        console.log("UPDATING TOKEN SERIE")
         const token = data.tokenSerie
+        console.log(token)
         const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token,{token_code:token.token_code});
       }
 
-       // VISITS
-    if(data.visits){
-      const dataa = data.visits
-      const visits = await userMobileServiceInstanse.createVisits(dataa);
-    }
+    //    // VISITS
+    // if(data.visits){
+    //   const dataa = data.visits
+    //   const visits = await userMobileServiceInstanse.createVisits(dataa);
+    // }
 
-    // INVOICE
-    if(data.invoices){
-      const dataa = data.invoices
-      const invoices = await userMobileServiceInstanse.createInvoices(dataa);
-    }
+    // // INVOICE
+    // if(data.invoices){
+    //   const dataa = data.invoices
+    //   const invoices = await userMobileServiceInstanse.createInvoices(dataa);
+    // }
 
-    // INVOICE LINE
-    if(data.invoicesLines){
-      const dataa = data.invoicesLines
-      const invoicesLines = await userMobileServiceInstanse.createInvoicesLines(dataa);
-    }
+    // // INVOICE LINE
+    // if(data.invoicesLines){
+    //   const dataa = data.invoicesLines
+    //   const invoicesLines = await userMobileServiceInstanse.createInvoicesLines(dataa);
+    // }
 
-    // INVENTORY
-    if(data.inventaires){
-      const dataa = data.inventaires
-      const inventories = await userMobileServiceInstanse.createInventories(dataa);
-    }
+    // // INVENTORY
+    // if(data.inventaires){
+    //   const dataa = data.inventaires
+    //   const inventories = await userMobileServiceInstanse.createInventories(dataa);
+    // }
 
-    // INVENTORY LINES
-    if(data.inventairesLines){
-      const dataa = data.inventairesLines
-      const inventoriesLines = await userMobileServiceInstanse.createInventoriesLines(dataa);
-    }
+    // // INVENTORY LINES
+    // if(data.inventairesLines){
+    //   const dataa = data.inventairesLines
+    //   const inventoriesLines = await userMobileServiceInstanse.createInventoriesLines(dataa);
+    // }
 
-    // PAYMENTS
-    if(data.payments){
-      const dataa = data.payments
-      const payments = await userMobileServiceInstanse.createPayments(dataa);
-    }
+    // // PAYMENTS
+    // if(data.payments){
+    //   const dataa = data.payments
+    //   const payments = await userMobileServiceInstanse.createPayments(dataa);
+    // }
 
-     // LOCATION DETAILS
-      if(data.loacationsDetails){
-        const dataa = data.loacationsDetails
-        const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
-      }
+    //  // LOCATION DETAILS
+    //   if(data.loacationsDetails){
+    //     const dataa = data.loacationsDetails
+    //     const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
+    //   }
 
 
     socket.emit('dataUpdated')
@@ -545,10 +561,10 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
     // }
 
      // LOCATION DETAILS
-      if(req.body.loacationsDetails){
-        const data = req.body.loacationsDetails
-        const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(data);
-      }
+      // if(req.body.loacationsDetails){
+      //   const data = req.body.loacationsDetails
+      //   const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(data);
+      // }
 
     return res.status(200).json({ message: 'deleted succesfully', data: req.body });
     
@@ -558,8 +574,30 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
   }
 }
 
-   
 
+
+function formatDateAddTimeZone(timeString) {
+  const date = new Date(timeString)
+  const m = Number(date.getMonth())+ 1
+  const date2 = date.getFullYear() + '-' + m + '-' + date.getDate() +' '+ date.getHours() + ':' +date.getMinutes() + ':' + date.getSeconds() +'.63682+01' 
+  console.log("Formated date : "+ date2)
+  return date2
+}
+
+function changeOrderDate(timeString) {
+  let elements = timeString.split(" ") 
+  let dateComponents = elements[0].split("-")
+  const str = dateComponents[2]+'-'+dateComponents[1]+'-'+dateComponents[0] +' '+elements[1]+'.63682+01' 
+  return str
+}
+
+function dateonlyToDate(timeString) {
+  let elements = timeString.split("-") 
+  const date = new Date()
+  const str = elements[2] + '-' + elements[1] + '-' + elements[0] +' '+ date.getHours() + ':' +date.getMinutes() + ':' + date.getSeconds() +'.63682+01' 
+  console.log(str)
+   return str
+}
 
 export default {
   create,

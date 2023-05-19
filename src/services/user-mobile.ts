@@ -140,7 +140,7 @@ export default class UserMobileService {
     public async getParameter(query: any): Promise<any> {
         try {
             const parameter = await this.parameterModel.findAll({ where: query})
-            console.log(parameter)
+            
             return parameter;
         } catch (e) {
             console.log('Error from service-getParameter')
@@ -721,10 +721,9 @@ export default class UserMobileService {
                 ) 
                 
                 for(const product of products){
-                    console.log(product.pt_taxc)
                     const tax_value = await this.taxeModel.findOne({where :{tx2_tax_code:product.pt_taxc},attributes:['tx2_tax_pct']})
                      product.dataValues.tax_pct = +tax_value.dataValues.tx2_tax_pct
-                    console.log(tax_value)
+                   
                    
                 
                 }
@@ -902,6 +901,7 @@ export default class UserMobileService {
             this.logger.silly("created one mobile customer mstr")
             return customer
         } catch (e) {
+            console.log("error service : createCustomer")
             this.logger.error(e)
             throw e
         }
@@ -939,6 +939,7 @@ export default class UserMobileService {
             if(data.id){
                 delete data.id 
             }
+            console.log("hellloooooo")
             const token = await this.tokenSerieModel.update(data, {
                 where: query,
             })
@@ -1109,6 +1110,19 @@ export default class UserMobileService {
             throw e
         }
     }
+
+     // ******************** CREATE ONE CUSTOMER **************************
+     public async createCustomerItinerary(data: any): Promise<any> {
+        try {
+            const custItin = await this.itineraryCustomerModel.create(data)
+            this.logger.silly("created one customerItinerary")
+            return custItin
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
 
 
    
