@@ -939,7 +939,6 @@ export default class UserMobileService {
             if(data.id){
                 delete data.id 
             }
-            console.log("hellloooooo")
             const token = await this.tokenSerieModel.update(data, {
                 where: query,
             })
@@ -971,7 +970,17 @@ export default class UserMobileService {
     public async createInvoices(data : any): Promise<any> {
         try {
             data.forEach(element => {
-               if(element.id) delete element.id
+                // console.log(element)
+                if(element.id) delete element.id
+                element.due_amount = element.dueamout 
+                //    element.period_active_day = element.periode_active_date 
+               element.progress_level = element.progresslevel 
+                //    element.the_date = element.thedate 
+               delete element.dueamount
+               delete element.periode_active_date
+               delete element.progress_level
+               delete element.thedate
+               delete element.MAJ
             });
             const invoices = await this.invoiceModel.bulkCreate(data)
             return invoices
@@ -992,6 +1001,20 @@ export default class UserMobileService {
             return invoices
         } catch (e) {
             console.log('Error from service- createInvoicesLines')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** UPDATE ONE INVOICE **************************
+    public async updateInvoice(data: any, query: any): Promise<any> {
+        try {
+            const invoice = await this.invoiceModel.update(data, {
+                where: query,
+            })
+            this.logger.silly("updated one invoice  mstr")
+            return invoice
+        } catch (e) {
             this.logger.error(e)
             throw e
         }
@@ -1048,10 +1071,15 @@ export default class UserMobileService {
             var locationCreated =[];
             for(const element of data){
                if(element.id) delete element.id
-               const location = element.ld_site
+               const ld_site = element.ld_site
+               const ld_loc = element.ld_loc
+               const ld_part = element.ld_part 
+               const ld_lot = element.ld_lot
+
+               console.log(ld_site,ld_loc,ld_part,ld_lot)
 
                const exist = await this.locationDetailModel.findOne({
-                where:{ld_site : location}
+                where:{ld_site : ld_site , ld_loc : ld_loc , ld_lot : ld_lot ,ld_part : ld_part} 
                })
 
                if(exist){
@@ -1059,7 +1087,7 @@ export default class UserMobileService {
                 console.log("updating")
                 
                 const location = await this.locationDetailModel.update(element, {
-                    where: {ld_site : element.ld_site},
+                    where: {ld_site : element.ld_site , ld_loc : ld_loc , ld_lot : ld_lot ,ld_part : ld_part},
                 })
 
                }else{

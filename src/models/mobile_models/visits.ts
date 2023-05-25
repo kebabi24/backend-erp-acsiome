@@ -23,7 +23,7 @@ const Visits = sequelize.define(
        
         itinerary_code : {type: Sequelize.STRING },
         customer_code  : {type : Sequelize.STRING},
-        periode_active_day   : {type : Sequelize.STRING},
+        periode_active_date : {type : Sequelize.STRING},
         start_time   : {type : Sequelize.STRING},
         end_time   : {type : Sequelize.STRING},
         role_code    : {type : Sequelize.STRING},

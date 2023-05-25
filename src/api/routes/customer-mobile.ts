@@ -19,6 +19,7 @@ export default (app: Router) => {
     route.delete("/deleteCategory/:categoryId", controller.deleteCategoryById)
     route.delete("/deleteSubCluster/:subClusterId", controller.deleteSubClusterById)
     route.delete("/deleteCategoryType/:categoryTypeId", controller.deleteCategoryTypeById)
+    route.get("/getDataCreateCustomer", controller.getDataForCustomerCreate)
     route.get("/findCluster/:cluster_code", controller.findClusterByCode)
     route.get("/findCategory/:category_code", controller.findCategoryByCode)
     route.get("/findAllClusters", controller.findAllClusters)
