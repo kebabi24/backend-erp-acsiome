@@ -27,7 +27,7 @@ const Invoice = sequelize.define(
         itinerary_code:{type: Sequelize.STRING}, // from itinerary 
         customer_code:{type: Sequelize.STRING}, // from customer 
         the_date:{type: Sequelize.DATE},
-        period_active_day:{type: Sequelize.DATEONLY},
+        period_active_date:{type: Sequelize.DATEONLY},
         role_code:{type: Sequelize.STRING}, // from role 
         user_code:{type: Sequelize.STRING}, // from user
         loc_code:{type: Sequelize.STRING}, 

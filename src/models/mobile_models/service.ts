@@ -20,7 +20,7 @@ const Service = sequelize.define(
       primaryKey: true,
       unique: true,
     },
-    service_period_activate_date: { type: Sequelize.DATE },
+    service_period_activate_date: { type: Sequelize.DATEONLY },
     service_creation_date: { type: Sequelize.DATE },
     service_closing_date: { type: Sequelize.DATE },
     role_code: {

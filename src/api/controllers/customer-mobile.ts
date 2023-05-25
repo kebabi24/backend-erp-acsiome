@@ -179,13 +179,10 @@ const findCategoryByCode = async (req: Request, res: Response, next: NextFunctio
 
 const findAllClusters = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
     logger.debug("Calling Create cluster endpoint with body: %o", req.body)
     try {
         const customerMobileServiceInstance = Container.get(CustomerMobileService)
         const clusters = await customerMobileServiceInstance.findAllClusters({})
-        console.log(clusters)
-       
        
         return res
             .status(201)
@@ -274,7 +271,6 @@ const findSubClusterByCode = async (req: Request, res: Response, next: NextFunct
         const subCluster = await customerMobileServiceInstance.findSubClusterByCode({
             sub_cluster_code:sub_cluster_code,
         })
-        console.log(subCluster)
        
        
         return res
@@ -318,7 +314,6 @@ const findAllSubClusters = async (req: Request, res: Response, next: NextFunctio
     try {
         const customerMobileServiceInstance = Container.get(CustomerMobileService)
         const subClusters = await customerMobileServiceInstance.findAllSubClusters({})
-        console.log(subClusters)
        
        
         return res
@@ -441,6 +436,56 @@ const createSalesChannels = async (req: Request, res: Response, next: NextFuncti
 
 }
 
+const getDataForCustomerCreate = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    console.log(req.body)
+    logger.debug("Calling find all categories types endpoint with body: %o", req.body)
+    try {
+        const customerMobileServiceInstance = Container.get(CustomerMobileService)
+
+        const clusters = await customerMobileServiceInstance.findAllClusters({})
+        const categories = await customerMobileServiceInstance.findAllCategories({})
+        const sales_channels = await customerMobileServiceInstance.findAllSalesChannels()
+
+        for(const cluster of clusters){
+            delete cluster.dataValues.createdAt
+            delete cluster.dataValues.updatedAt
+
+            const subClusters = await customerMobileServiceInstance.findAllSubClusterByCode({cluster_code : cluster.cluster_code})
+            subClusters.forEach(subCluster => {
+                delete subCluster.dataValues.createdAt
+                delete subCluster.dataValues.updatedAt
+            });
+            cluster.dataValues.subClusters = subClusters
+        }     
+
+        for(const category of categories){
+            delete category.dataValues.createdAt
+            delete category.dataValues.updatedAt
+
+            const categoryTypes = await customerMobileServiceInstance.findAllCategoriesTypesByCode({category_code : category.category_code})
+            categoryTypes.forEach(categoryType => {
+                delete categoryType.dataValues.createdAt
+                delete categoryType.dataValues.updatedAt
+            });
+
+            category.dataValues.categoryTypes = categoryTypes 
+        }
+
+        
+
+       
+       
+        return res
+            .status(201)
+            .json({ message: "create data found ", data: { categories,clusters,sales_channels} })
+    } catch (e) {
+        logger.error("🔥 error from getDataForCustomerCreate ")
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 
 
 
@@ -466,4 +511,5 @@ export default {
     deleteSubClusterById,
     deleteCategoryTypeById,
     createSalesChannels,
+    getDataForCustomerCreate,
 }

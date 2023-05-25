@@ -22,7 +22,7 @@ const Inventory = sequelize.define(
         site : {type: Sequelize.STRING},
         location:{ type:Sequelize.STRING},
         user_code:{type:Sequelize.STRING},
-        thedate:{type:Sequelize.STRING},
+        the_date:{type:Sequelize.DATE}, //  the_date
         service_code:{
             type: Sequelize.STRING,
             references: {
