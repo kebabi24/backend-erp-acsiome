@@ -73,12 +73,13 @@ const findAlldistinct = async (req: Request, res: Response, next: NextFunction) 
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
     const { user_domain } = req.headers;
+    console.log("hdkbevfhgevfe", user_domain)
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const ros =await sequelize.query("SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc  FROM   PUBLIC.ro_det where PUBLIC.ro_domain = ?", { remplacements: [user_domain],type: QueryTypes.SELECT });
+        const ros =await sequelize.query('SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc  FROM   PUBLIC.ro_det where PUBLIC.ro_det.ro_domain = ?',   {replacements: [user_domain], type: QueryTypes.SELECT });
         console.log(ros)
         let id = 1;
         for(const ro of ros){

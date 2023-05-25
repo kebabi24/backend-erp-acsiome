@@ -68,6 +68,62 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const createDirect = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  code endpoint');
+  console.log("hnahnahnahnahnahnahnahna")
+  try {
+    const { it, nof } = req.body;
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const woroutingServiceInstance = Container.get(WoroutingService);
+    const workroutingServiceInstance = Container.get(WorkroutingService);
+    const itemServiceInstance = Container.get(ItemService);
+
+  
+      let wolot = 0;
+
+      await workOrderServiceInstance
+        .create({
+          ...it,
+          wo_domain: user_domain,
+          wo_nbr: nof,
+          wo_status: "R",
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        })
+        .then(result => {
+          wolot = result.id;
+        });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing });
+      for (const ro of ros) {
+        await woroutingServiceInstance.create({
+          wr_domain: user_domain,
+          wr_nbr: nof,
+          wr_lot: wolot,
+          wr_start: new Date(),
+          wr_routing: ro.ro_routing,
+          wr_wkctr: ro.ro_wkctr,
+          wr_mch: ro.ro_mch,
+          wr_status: 'R',
+          wr_part: req.body.wo_part,
+          wr_site: req.body.wo_site,
+          wr_op: ro.ro_op,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+    }
+    return res.status(200).json({ message: 'deleted succesfully', data: wolot });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const createPosWorkOrder = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -318,6 +374,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 };
 export default {
   create,
+  createDirect,
   createPosWorkOrder,
   findOne,
   findAll,

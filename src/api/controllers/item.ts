@@ -140,6 +140,7 @@ const findProd = async (req: Request, res: Response, next: NextFunction) => {
       ...{
         pt_domain: user_domain,
         pt_pm_code: 'M',
+        ...req.body
       },
     });
 
