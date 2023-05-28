@@ -94,6 +94,7 @@ import tokenSerie from './routes/token-serie';
 
 import deal from './routes/deal';
 import Label from './routes/label';
+import repertory from './routes/repertory';
 
 // guaranteed to get dependencies
 export default () => {
@@ -193,5 +194,6 @@ export default () => {
   Label(app);
   deal(app);
   printers(app);
+  repertory(app);
   return app;
 };

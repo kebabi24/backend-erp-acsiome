@@ -7,8 +7,11 @@ export default (app: Router) => {
   app.use('/labels', route);
 
   route.post('/', controller.create);
+  route.post('/prod', controller.createProd);
+  route.post('/prodpal', controller.createPAL);
   route.get('/', controller.findAll);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
   route.put('/:id', controller.update);
+  route.post('/upd', controller.updated);
 };

@@ -18,7 +18,7 @@ const LoadRequestDetails = sequelize.define(
             unique: true
         },
         
-        date_experation:{type:Sequelize.DATE},
+        date_expiration:{type:Sequelize.DATEONLY},
         line:{type: Sequelize.INTEGER},
 
         

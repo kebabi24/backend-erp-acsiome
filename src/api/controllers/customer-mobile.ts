@@ -149,12 +149,10 @@ const findCategoryByCode = async (req: Request, res: Response, next: NextFunctio
 
 const findAllClusters = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const clusters = await customerMobileServiceInstance.findAllClusters({});
-    console.log(clusters);
 
     return res.status(201).json({ message: 'Clusters found ', data: { clusters } });
   } catch (e) {
@@ -348,6 +346,54 @@ const deleteCategoryTypeById = async (req: Request, res: Response, next: NextFun
   }
 };
 
+const getDataForCustomerCreate = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  logger.debug('Calling find all categories types endpoint with body: %o', req.body);
+  try {
+    const customerMobileServiceInstance = Container.get(CustomerMobileService);
+
+    const clusters = await customerMobileServiceInstance.findAllClusters({});
+    const categories = await customerMobileServiceInstance.findAllCategories({});
+    const sales_channels = await customerMobileServiceInstance.findAllSalesChannels();
+
+    for (const cluster of clusters) {
+      delete cluster.dataValues.createdAt;
+      delete cluster.dataValues.updatedAt;
+
+      const subClusters = await customerMobileServiceInstance.findAllSubClusterByCode({
+        cluster_code: cluster.cluster_code,
+      });
+      subClusters.forEach(subCluster => {
+        delete subCluster.dataValues.createdAt;
+        delete subCluster.dataValues.updatedAt;
+      });
+      cluster.dataValues.subClusters = subClusters;
+    }
+
+    for (const category of categories) {
+      delete category.dataValues.createdAt;
+      delete category.dataValues.updatedAt;
+
+      const categoryTypes = await customerMobileServiceInstance.findAllCategoriesTypesByCode({
+        category_code: category.category_code,
+      });
+      categoryTypes.forEach(categoryType => {
+        delete categoryType.dataValues.createdAt;
+        delete categoryType.dataValues.updatedAt;
+      });
+
+      category.dataValues.categoryTypes = categoryTypes;
+    }
+
+    return res.status(201).json({ message: 'create data found ', data: { categories, clusters, sales_channels } });
+  } catch (e) {
+    logger.error('🔥 error from getDataForCustomerCreate ');
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const createSalesChannels = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
 
@@ -368,7 +414,6 @@ const createSalesChannels = async (req: Request, res: Response, next: NextFuncti
     return next(e);
   }
 };
-
 const findOneCustomer = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
@@ -431,4 +476,5 @@ export default {
   createSalesChannels,
   findOneCustomer,
   update,
+  getDataForCustomerCreate,
 };

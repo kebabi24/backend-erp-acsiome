@@ -181,5 +181,6 @@ declare global {
     export type projectAssetDownDetailsModel = S.Model;
     export type DealModel = S.Model;
     export type PrinterModel = S.Model;
+    export type RepertoryModel = S.Model;
   }
 }

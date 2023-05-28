@@ -28,7 +28,7 @@ const InventoryLine = sequelize.define(
 
         product_code : {type: Sequelize.STRING},
         lot:{ type:Sequelize.STRING},
-        expiringDate:{ type:Sequelize.STRING},
+        expiring_date:{ type:Sequelize.DATEONLY}, // DATEONLY
         availableQty:{ type:Sequelize.DOUBLE},
         qtyOnhand:{ type:Sequelize.DOUBLE},
        

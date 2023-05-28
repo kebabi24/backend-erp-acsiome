@@ -146,6 +146,17 @@ export default class customersMobileSercice {
     }
   }
 
+  public async findAllSubClusterByCode(query: any): Promise<any> {
+    try {
+      const subCluster = await this.subClusterModel.findAll({ where: query });
+      this.logger.silly('sub cluster', subCluster);
+      return subCluster;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async findCategoryTypeByCode(query: any): Promise<any> {
     try {
       const categogryType = await this.categoryTypeModel.findOne({ where: query });
@@ -160,6 +171,17 @@ export default class customersMobileSercice {
   public async findAllCategoriesTypes(query: any): Promise<any> {
     try {
       const categoriesTypes = await this.categoryTypeModel.findAll({});
+      this.logger.silly('categories types', categoriesTypes);
+      return categoriesTypes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findAllCategoriesTypesByCode(query: any): Promise<any> {
+    try {
+      const categoriesTypes = await this.categoryTypeModel.findAll({ where: query });
       this.logger.silly('categories types', categoriesTypes);
       return categoriesTypes;
     } catch (e) {
@@ -240,6 +262,17 @@ export default class customersMobileSercice {
       });
       this.logger.silly('update one inventoryStatus mstr');
       return bank;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findAllSalesChannels(): Promise<any> {
+    try {
+      const salesChannels = await this.salesChannelModel.findAll({});
+      this.logger.silly('found all sales channels');
+      return salesChannels;
     } catch (e) {
       this.logger.error(e);
       throw e;

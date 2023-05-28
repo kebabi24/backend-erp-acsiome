@@ -318,7 +318,7 @@ export default class LoadRequestService {
         }
     }
 
-    public async getLoadRequestDataV2(user_mobile_code: any, load_request_code :any): Promise<any> {
+    public async getLoadRequestDataV2(user_mobile_code: any, load_request_code :any, site : any , loc : any): Promise<any> {
         try {
             // get user mobile and profile & pages codes of the profile
             const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
@@ -353,7 +353,8 @@ export default class LoadRequestService {
                     })
 
                     // GET PRODUCT QUANTITY STORED
-                    const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
+                    // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
+                    const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
                     
                     // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES 
                     var index = -1
@@ -442,9 +443,11 @@ export default class LoadRequestService {
 
     public async getStoredQuantityOfProduct(ld_loc: any, ld_site : any , product_code :any): Promise<any> {
         try {
+
+            console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
             const quantities = await this.locationDetailModel.findAll({
                 where : {
-                    ld_loc: ld_loc, ld_part: product_code, ld_site : ld_site
+                    ld_loc: ld_loc, ld_part: product_code, ld_site : ld_site,
                 },
                 attributes: ["ld_qty_oh"]
             })

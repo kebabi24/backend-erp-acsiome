@@ -101,7 +101,8 @@ const getLoadRequestData = async (req: Request, res: Response, next: NextFunctio
         const loadRequest = await loadRequestService.findLoadRequest({load_request_code :load_request_code})
         const user_mobile_code = loadRequest.user_mobile_code
         const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
-        const loadRequestData = await loadRequestService.getLoadRequestData(user_mobile_code,load_request_code,loadRequest.role_loc,loadRequest.role_site )
+        
+        const loadRequestData = await loadRequestService.getLoadRequestData(user_mobile_code,load_request_code,role.role_loc,role.role_site )
         
         return res
             .status(200)
@@ -122,8 +123,10 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         const load_request_code = req.params.load_request_code
         
         const loadRequest = await loadRequestService.findLoadRequest({load_request_code :load_request_code})
+        
         const user_mobile_code = loadRequest.user_mobile_code
-        const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code)
+        const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
+        const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , role.role_site, role.role_loc)
         
         return res
             .status(200)
@@ -143,7 +146,9 @@ const findLotsOfProduct = async (req: Request, res: Response, next: NextFunction
         const ld_loc = req.body.ld_loc
         const ld_site = req.body.ld_site
         const product_code = req.body.product_code 
-
+        console.log(ld_loc)
+        console.log(ld_site)
+        console.log(product_code)
         
         const lots = await loadRequestService.getLotsOfProduct(ld_loc,ld_site,product_code)
         

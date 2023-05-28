@@ -29,4 +29,5 @@ export default (app: Router) => {
   route.get('/findCategoryType/:category_type_code', controller.findCategoryTypeByCode);
   route.get('/:id', controller.findOneCustomer);
   route.put('/:id', controller.update);
+  route.get('/getDataCreateCustomer', controller.getDataForCustomerCreate);
 };

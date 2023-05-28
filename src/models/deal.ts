@@ -38,6 +38,7 @@ const Deal = sequelize.define(
     
 
         deal_open: {type: Sequelize.BOOLEAN, defaultValue : false  },
+        deal_inv: {type: Sequelize.BOOLEAN, defaultValue : false  },
         deal_domain:  Sequelize.STRING,
         
         ...base,

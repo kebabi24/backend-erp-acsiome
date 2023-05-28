@@ -19,6 +19,7 @@ const Label = sequelize.define(
         lb_site: Sequelize.STRING, 
 
         lb_loc: Sequelize.STRING, 
+        lb_pal: Sequelize.STRING,
 
         lb_part: Sequelize.STRING, 
 
