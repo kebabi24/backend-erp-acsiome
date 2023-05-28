@@ -59,10 +59,8 @@ const Sequence = sequelize.define(
     seq_dig_range_inf: { type: Sequelize.DECIMAL, defaultValue: 0 },
     seq_dig_range_sup: { type: Sequelize.DECIMAL, defaultValue: 0 },
     seq_curr_val: { type: Sequelize.DECIMAL, defaultValue: 0 },
-    seq_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'acsiome',
-    },
+    seq_domain: Sequelize.STRING,
+      
     oid_seq_mstr: { type: Sequelize.DECIMAL, defaultValue: 0 },
     ...base,
   },

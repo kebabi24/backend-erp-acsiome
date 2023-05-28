@@ -8,6 +8,7 @@ export default (app: Router) => {
   route.get('/group', controller.findGroup);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
+  route.post('/cab', controller.createCab);
   route.post('/:distinct/:liste', controller.findAllDistinct);
   route.post('/distinct', controller.findDistinct);
   route.post('/grouprcp', controller.findGroupRCP);
