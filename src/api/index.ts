@@ -18,6 +18,7 @@ import account from './routes/account';
 import subaccount from './routes/subaccount';
 import taxe from './routes/taxe';
 import auth from './routes/auth';
+import printers from './routes/printer';
 import mesure from './routes/mesure';
 import vendorProposal from './routes/vendor-proposal';
 import quote from './routes/quote';
@@ -93,6 +94,7 @@ import tokenSerie from './routes/token-serie';
 
 import deal from './routes/deal';
 import Label from './routes/label';
+import repertory from './routes/repertory';
 
 // guaranteed to get dependencies
 export default () => {
@@ -189,7 +191,9 @@ export default () => {
   domain(app);
   productPage(app);
   tokenSerie(app);
-  Label(app)
+  Label(app);
   deal(app);
+  printers(app);
+  repertory(app);
   return app;
 };

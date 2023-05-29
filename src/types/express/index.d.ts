@@ -152,7 +152,6 @@ declare global {
     export type messagesModel = S.Model;
     export type visitsModel = S.Model;
 
-
     // CRM models
     export type paramHeaderModel = S.Model;
     export type paramDetailsModel = S.Model;
@@ -181,5 +180,7 @@ declare global {
     export type PjdDetailsModel = S.Model;
     export type projectAssetDownDetailsModel = S.Model;
     export type DealModel = S.Model;
+    export type PrinterModel = S.Model;
+    export type RepertoryModel = S.Model;
   }
 }

@@ -12,14 +12,15 @@ export const prepareItData = (rawData : any, name : string) => {
         titre = "Bon de réception non planifiée N° "
         rcp = true
     }
+    console.log("rawData.adr.ad_name",rawData.adr)
     let data_it = {
         rcp : rcp,
         titre : titre.concat(rawData.nlot), // à utiliser pour nommer le fichier
         nbr : rawData.nlot,
         info : {
-            addr : rawData.it.tr_addr,
-            name : rawData.adr.ad_name,
-            line1 : rawData.adr.ad_line1,
+            addr : (rawData.it.tr_addr!= null) ? rawData.it.tr_addr : "" ,
+            name : (rawData.adr  != null) ? rawData.adr.ad_name: "",
+            line1 : (rawData.adr != null) ? rawData.adr.ad_name : "",
             date : rawData.it.tr_effdate,
 
         },

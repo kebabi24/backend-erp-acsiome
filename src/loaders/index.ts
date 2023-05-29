@@ -32,6 +32,8 @@ export default async ({ expressApp }) => {
   await dependencyInjectorLoader({
     models: [
       testModel,
+      { name: 'repertoryModel', model: require('../models/repertory').default },
+
       { name: 'addressModel', model: require('../models/address').default },
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
@@ -162,9 +164,9 @@ export default async ({ expressApp }) => {
       { name: 'posOrderModel', model: require('../models/pos-order').default },
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
-      
+
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
-      
+
       { name: 'bkhModel', model: require('../models/bkh').default },
       { name: 'ordersHistoryModel', model: require('../models/order-history').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
@@ -224,6 +226,8 @@ export default async ({ expressApp }) => {
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
 
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
+      { name: 'printerModel', model: require('../models/printer').default },
+      { name: 'RepertoryModel', model: require('../models/repertory').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
     ],
   });
@@ -354,16 +358,17 @@ export default async ({ expressApp }) => {
   );
 
   // INVENTORY
-  require('../models/mobile_models/inventory').default.hasOne(require('../models/mobile_models/inventory_line').default, {
-    foreignKey: 'inventory_code',
-    sourceKey: 'inventory_code',
-  });
+  require('../models/mobile_models/inventory').default.hasOne(
+    require('../models/mobile_models/inventory_line').default,
+    {
+      foreignKey: 'inventory_code',
+      sourceKey: 'inventory_code',
+    },
+  );
   require('../models/mobile_models/inventory_line').default.belongsTo(
     require('../models/mobile_models/inventory').default,
     { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
   );
-
-  
 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
@@ -887,8 +892,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-   // await sequelizeConnection.sync();
-   await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })
@@ -899,7 +904,7 @@ export default async ({ expressApp }) => {
   //     console.log(err);
   //   });
 
- 
+
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

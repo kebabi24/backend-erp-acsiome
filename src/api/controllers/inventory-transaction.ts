@@ -318,6 +318,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
       });
 
       if (ld)
@@ -1106,6 +1107,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  code endpoint');
   try {
     const { detail, it } = req.body;
+    console.log(it)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
@@ -1123,6 +1125,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -1150,6 +1153,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           ld_status: item.tr_status,
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
+          ld_ref: item.tr_ref,
           ld__log01: status.is_nettable,
         });
       }
@@ -1179,7 +1183,8 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         tr_ovh_std: sct.sct_ovh_tl,
         tr_sub_std: sct.sct_sub_tl,
         tr_prod_line: pt.pt_prod_line,
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+        tr_price : Number(sct.sct_cst_tot),
+        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -1203,7 +1208,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-const issWo = async (req: Request, res: Response, next: NextFunction) => {
+const issWoD = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -2349,6 +2354,118 @@ const findAllissSo = async (req: Request, res: Response, next: NextFunction) => 
     return next(e);
   }
 };
+
+
+
+
+const issWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail, it } = req.body;
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(itemService);
+    const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
+
+    for (const item of detail) {
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_part: item.tr_part,
+        sct_site: item.tr_site,
+        sct_sim: 'STDCG',
+      });
+
+
+      
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: item.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: item.tr_site,
+        ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
+      });
+
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      await inventoryTransactionServiceInstance.create({
+        ...item,
+        ...it,
+        tr_gl_date: it.tr_effdate,
+        tr_qty_loc: -1 * Number(item.tr_qty_loc),
+        tr_qty_chg: -1 * Number(item.tr_qty_loc),
+        tr_loc_begin: Number(ld.ld_qty_oh),
+        tr_type: 'ISS-WO',
+        tr_date: new Date(),
+        tr_price: sct.sct_mtl_tl,
+        tr_mtl_std: sct.sct_mtl_tl,
+        tr_lbr_std: sct.sct_lbr_tl,
+        tr_bdn_std: sct.sct_bdn_tl,
+        tr_ovh_std: sct.sct_ovh_tl,
+        tr_sub_std: sct.sct_sub_tl,
+        tr_prod_line: pt.pt_prod_line,
+        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+  if( !isNaN(item.wodid)) {
+        const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
+        if(wod)  {
+          var bool = false
+
+          if(Number(wod.wod_qty_req) - ( Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >= 0) { bool = true}
+          await workOrderDetailServiceInstance.update(
+          {
+            wod__qadl01 : true ? (bool) : false,
+            wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: wod.id },
+        );
+      } 
+  }else {
+
+    await workOrderDetailServiceInstance.create({
+      wod_nbr     : it.tr_nbr,
+      wod_lot     : it.tr_lot,
+      wod_part    : item.tr_part,
+      wod_qty_req : 0,
+      wod_qty_iss : item.tr_qty_loc,
+      wod_site    : item.tr_site,
+      wod_loc     : item.tr_loc,
+      wod_um      : item.tr_um,
+      wod_serial  : item.tr_serial,
+      wod_ref     : item.tr_ref,
+      wod__qadl01 : true,
+
+    })
+
+
+
+
+  }
+
+    }
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -2367,6 +2484,7 @@ export default {
   inventoryOfSecurity,
   rctWo,
   issWo,
+  issWoD,
   //issSo,
   findtrDate,
   findTrType,
