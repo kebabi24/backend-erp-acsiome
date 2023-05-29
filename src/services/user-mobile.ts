@@ -1076,7 +1076,6 @@ export default class UserMobileService {
                const ld_part = element.ld_part 
                const ld_lot = element.ld_lot
 
-               console.log(ld_site,ld_loc,ld_part,ld_lot)
 
                const exist = await this.locationDetailModel.findOne({
                 where:{ld_site : ld_site , ld_loc : ld_loc , ld_lot : ld_lot ,ld_part : ld_part} 
@@ -1084,7 +1083,6 @@ export default class UserMobileService {
 
                if(exist){
                 // UPDATE
-                console.log("updating")
                 
                 const location = await this.locationDetailModel.update(element, {
                     where: {ld_site : element.ld_site , ld_loc : ld_loc , ld_lot : ld_lot ,ld_part : ld_part},
@@ -1092,9 +1090,7 @@ export default class UserMobileService {
 
                }else{
                 // CREATE
-                console.log("creating")
                 const location = await this.locationDetailModel.create(element)
-                console.log("location detail created")
                 locationCreated.push(location)
                } 
 

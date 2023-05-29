@@ -41,7 +41,10 @@ const LoadRequest = sequelize.define(
                 model: "aa_userMobile",
                 key: "user_mobile_code",
             },
-        }
+        },
+        role_loc:{ type:Sequelize.STRING},
+        role_site:{ type:Sequelize.STRING},
+    
     
         // ...base
     },
