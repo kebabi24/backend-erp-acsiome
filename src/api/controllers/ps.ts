@@ -271,8 +271,7 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
     const ps = await psServiceInstance.find({
       ...req.body,ps_domain:user_domain
     });
-    console.log('hhhhhhhhhhhhhbbbbbbbb');
-
+    
     for (let entry of ps) {
       const sct = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
@@ -280,8 +279,7 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
 
         sct_sim: 'STDCG',
       });
-      console.log(sct.sct_cst_tot);
-
+    
       price = price + entry.ps_qty_per * sct.sct_cst_tot;
     }
 

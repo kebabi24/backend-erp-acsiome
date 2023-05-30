@@ -21,6 +21,7 @@ const Project = sequelize.define(
 
     pm_desc: Sequelize.STRING,
     pm_status: Sequelize.STRING,
+    pm_site: Sequelize.STRING,
 
     pm_cust: {
       type: Sequelize.STRING,

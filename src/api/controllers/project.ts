@@ -27,7 +27,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    
+    /* creation specification documents*/ 
     const project_code = Project.pm_code;
     let data = [];
     docs_codes.forEach(doc => {
@@ -152,6 +152,12 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
       pmd_domain: user_domain,
     });
 
+    // for(let det of details) {
+    //   det.desc = det.task.tk_desc
+
+
+    // }
+     console.log(details)
     return res.status(200).json({
       message: 'fetched succesfully',
       data: { project, details },
@@ -202,9 +208,10 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const projectServiceInstance = Container.get(ProjectService);
     const projectDetailServiceInstance = Container.get(ProjectDetailService);
     const { id } = req.params;
-    const { project, details } = req.body;
+    const { project, details , docs_codes} = req.body;
+    console.log("project",project)
     const pj = await projectServiceInstance.update(
-      { ...req.body, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { ...project, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
     );
     await projectDetailServiceInstance.delete({ pmd_code: project.pm_code, pmd_domain: user_domain });
@@ -220,6 +227,21 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       };
       await projectDetailServiceInstance.create(entry);
     }
+    const project_code = project.pm_code;
+    let data = [];
+    docs_codes.forEach(doc => {
+      console.log("*************************")
+      console.log(doc)
+      data.push({
+        pjd_nbr: project_code,
+        mp_nbr: doc.code_doc,
+        pjd_trigger: doc.trigger,
+        pjd_domain: user_domain,
+      });
+    });
+    
+    const pjDetails = await projectServiceInstance.createDocsDetails(data);
+
     return res.status(200).json({ message: 'fetched succesfully', data: pj });
   } catch (e) {
     logger.error('🔥 error: %o', e);
