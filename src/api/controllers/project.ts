@@ -229,6 +229,8 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     }
     const project_code = project.pm_code;
     let data = [];
+
+    await projectServiceInstance.deleteSpec({pjd_nbr: project_code});
     docs_codes.forEach(doc => {
       console.log("*************************")
       console.log(doc)
