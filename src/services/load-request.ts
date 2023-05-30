@@ -192,6 +192,20 @@ export default class LoadRequestService {
         }
     }
 
+    public async updateLoadRequestLineQtAffected(load_request_code: any , product_code: any , qntValidated : any): Promise<any> {
+        try {
+            const qt_validated = qntValidated
+            const loadRequestLine = await this.loadRequestLineModel.update({ qt_effected:qt_validated }, 
+                { where: {load_request_code:load_request_code , product_code:product_code} })
+              
+            this.logger.silly("updated load request lines")
+            return loadRequestLine
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
     public async createLoadRequestLine(load_request_code: any , product_code: any , qntValidated : any, qntRequested: any,productPrice:any): Promise<any> {
         try {
             
@@ -248,7 +262,6 @@ export default class LoadRequestService {
             this.logger.silly("find all lots")
             lots.forEach(lot => {
              lot.dataValues["qty_selected"] = 0  
-            console.log(lot)
             });
             
             return lots
@@ -299,11 +312,10 @@ export default class LoadRequestService {
                     if(index != -1){
                         const load_request_line = loadRequesLines[index].dataValues
                         products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})         
-                        console.log(' requested')
+                      
                     
                     // product was requested 
                     }else{
-                        console.log('not requested')
                         products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: 0, qt_validated: 0, qt_stored : sum})         
 
                     }
@@ -361,7 +373,7 @@ export default class LoadRequestService {
                     index = loadRequesLines.findIndex(line=>{
                         return line.dataValues.product_code == product.dataValues.pt_part;
                     })
-                    console.log(index)
+                    // console.log(index)
 
                     // PRODUCT EXIST  
                     if(index != -1){
@@ -444,7 +456,7 @@ export default class LoadRequestService {
     public async getStoredQuantityOfProduct(ld_loc: any, ld_site : any , product_code :any): Promise<any> {
         try {
 
-            console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+            // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
             const quantities = await this.locationDetailModel.findAll({
                 where : {
                     ld_loc: ld_loc, ld_part: product_code, ld_site : ld_site,

@@ -102,7 +102,7 @@ const getLoadRequestData = async (req: Request, res: Response, next: NextFunctio
         const user_mobile_code = loadRequest.user_mobile_code
         const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
         
-        const loadRequestData = await loadRequestService.getLoadRequestData(user_mobile_code,load_request_code,role.role_loc,role.role_site )
+        const loadRequestData = await loadRequestService.getLoadRequestData(user_mobile_code,load_request_code,loadRequest.role_loc,loadRequest.role_site )
         
         return res
             .status(200)
@@ -126,7 +126,7 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         
         const user_mobile_code = loadRequest.user_mobile_code
         const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
-        const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , role.role_site, role.role_loc)
+        const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , loadRequest.role_site, loadRequest.role_loc)
         
         return res
             .status(200)
@@ -146,9 +146,9 @@ const findLotsOfProduct = async (req: Request, res: Response, next: NextFunction
         const ld_loc = req.body.ld_loc
         const ld_site = req.body.ld_site
         const product_code = req.body.product_code 
-        console.log(ld_loc)
-        console.log(ld_site)
-        console.log(product_code)
+        // console.log(ld_loc)
+        // console.log(ld_site)
+        // console.log(product_code)
         
         const lots = await loadRequestService.getLotsOfProduct(ld_loc,ld_site,product_code)
         
@@ -258,9 +258,10 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
         // STATUS 0
         if(LoadRequestStatus0){
             LoadRequestStatus0.forEach(loadRequest => {
+                loadRequest.date_creation = formatDateOnlyFromMobileToBack(loadRequest.date_creation) 
                 delete loadRequest.id
-                const formatted_date = loadRequest.date_creation+'.63682+01'
-                loadRequest.date_creation = formatted_date
+                // const formatted_date = loadRequest.date_creation+'.63682+01'
+                // loadRequest.date_creation = formatted_date
                
             });
             const loadRequests = await loadRequestService.createMultipleLoadRequests(LoadRequestStatus0)
@@ -272,8 +273,9 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
             loadRequestsLines0.forEach(loadRequestLine => {
                 console.log(loadRequestLine)
                 delete loadRequestLine.line_code
-                const formatted_date = loadRequestLine.date_creation+'.63682+01'
-                loadRequestLine.date_creation = formatted_date
+                loadRequestLine.date_creation = formatDateOnlyFromMobileToBack(loadRequestLine.date_creation)
+                // const formatted_date = loadRequestLine.date_creation+'.63682+01'
+                // loadRequestLine.date_creation = formatted_date
             });
             const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines(loadRequestsLines0)
             
@@ -353,6 +355,11 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         const loadRequestService = Container.get(LoadRequestService)
         
         const load_request_details = req.body.load_request_details
+        const load_request_lines = req.body.load_request_lines
+
+        for(const line of load_request_lines){
+            const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(line.load_request_code,line.product_code, line.qt_effected)
+        }
         
         
         const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(
@@ -391,9 +398,19 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     }
 }
 
-function dateIsValid(date) {
-    return !Number.isNaN(new Date(date).getTime());
+function formatDateFromMobileToBackAddTimezone(timeString){
+    let elements = timeString.split(" ") 
+    let dateComponents = elements[0].split("-")
+    const str = dateComponents[2]+'-'+dateComponents[1]+'-'+dateComponents[0] +' '+elements[1]+'.63682+01' 
+    return str
   }
+ 
+  function formatDateOnlyFromMobileToBack(timeString){
+    let dateComponents = timeString.split("-")
+    const str = dateComponents[2]+'-'+dateComponents[1]+'-'+dateComponents[0] 
+    return str
+  }
+  
 
 export default {
     findAllLoadRequeusts,

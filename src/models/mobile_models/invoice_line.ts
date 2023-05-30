@@ -39,6 +39,7 @@ const InvoiceLine = sequelize.define(
         user_field1:{type: Sequelize.STRING}, 
         user_field2:{type: Sequelize.STRING}, 
         loyalty_necessary_score:{type: Sequelize.INTEGER}, 
+        lot:{type:Sequelize.STRING}
 
         
        

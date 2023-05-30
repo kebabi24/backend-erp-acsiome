@@ -36,6 +36,7 @@
     "agendash": "^1.0.0",
     "argon2": "^0.28.5",
     "body-parser": "^1.18.2",
+    "bwip-js": "^3.4.0",
     "celebrate": "^9.1.0",
     "check-internet-connected": "^2.0.6",
     "cors": "^2.8.4",
