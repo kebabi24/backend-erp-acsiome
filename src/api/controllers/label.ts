@@ -178,7 +178,10 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
+  const pageWidth = 118 * 2.83465; // Width of the page in points
+  const pageHeight = 120 * 2.83465; // Height of the page in points
 
+  const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
   logger.debug('Calling Create label endpoint');
   //console.log("heeeeeeeeeeeeeeeeeeeee",req.body)
   try {
@@ -238,6 +241,136 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    const pageWidth = 118 * 2.83465; // Width of the page in points
+    const pageHeight = 120 * 2.83465; // Height of the page in points
+
+    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    const imagePath = './logo.png';
+    console.log(req.body);
+    // Set the options for the image
+    const imageOptions = {
+      fit: [150, 150], // Size of the image
+      // align: 'center', // Center the image horizontally
+      // valign: 'top', // Align the image to the top of the page
+    };
+
+    // Add the image to the document
+    // doc.image(imagePath, imageOptions);
+
+    // Define the properties of the rectangles
+    const rectWidth = 300;
+    const rectHeight = 50;
+    const rectSpacing = 5;
+    const rectX = (doc.page.width - rectWidth) / 2;
+    let rectY = 15;
+
+    // Define the texts for each rectangle
+    const texts = [
+      'REFERENCE: ' + req.body.lb_part,
+      'Total unité :' + req.body.lb_qty,
+      // '' + labelId,
+      'Description : ' + req.body.lb_desc,
+      'Groupe: ' + req.body.lb_desc,
+      'Date: ' + req.body.lb_date,
+    ];
+
+    // Set the options for the rectangle text
+    const textOptions = {
+      align: 'center',
+      valign: 'center',
+    };
+
+    for (let i = 0; i < 5; i++) {
+      let textX: number = 0;
+      let textY: number = 0;
+      // Draw the rectangle
+      doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
+
+      // Calculate the position for the text
+      if (i !== 4) {
+        textX = rectX + rectWidth / 6;
+        textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
+
+        // Save the current transformation matrix
+        doc.save();
+
+        // // Translate to the center of the rectangle
+        // doc.translate(textX, textY);
+
+        // // Rotate the text
+        // doc.rotate(-Math.PI / 4);
+
+        // // Translate back to the original position
+        // doc.translate(-textX, -textY);
+
+        // Add the text inside the rectangle
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(14)
+          .text(texts[i], textX, textY, textOptions);
+
+        // doc.restore();
+
+        // Move to the next rectangle position
+
+        rectY += rectHeight + rectSpacing;
+      } else {
+        textX = rectX + rectWidth / 6;
+        textY = 250;
+        // // Translate to the center of the rectangle
+        // doc.translate(textX, textY);
+
+        // // Rotate the text
+        // // doc.rotate(-Math.PI / 4);
+
+        // // Translate back to the original position
+        // doc.translate(-textX, -textY);
+
+        // Add the text inside the rectangle
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(14)
+          .text(texts[i], textX, textY, textOptions);
+      }
+      // textX = rectX + rectWidth / 6;
+      // textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6;
+
+      // // Save the current transformation matrix
+      // doc.save();
+
+      // // Translate to the center of the rectangle
+      // doc.translate(textX, textY);
+
+      // // Rotate the text
+      // doc.rotate(-Math.PI / 4);
+
+      // // Translate back to the original position
+      // doc.translate(-textX, -textY);
+
+      // // Add the text inside the rectangle
+      // doc
+      //   .font('Helvetica-Bold')
+      //   .fontSize(14)
+      //   .text(texts[i], textX, textY, textOptions);
+
+      // Restore the transformation matrix
+    }
+
+    // Save the PDF document
+    doc.pipe(fs.createWriteStream('output.pdf'));
+    doc.end();
+
+    const filePath = './output.pdf';
+    const printerName = 'Xprinter XP-TT426B';
+
+    printer
+      .print(filePath, { printer: printerName })
+      .then(() => {
+        console.log('Printing completed.');
+      })
+      .catch(error => {
+        console.error('Error while printing:', error);
+      });
     return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
@@ -332,12 +465,143 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const labelServiceInstance = Container.get(LabelService);
     const detail = req.body.detail;
     const palnbr = req.body.nbr;
+    const pageWidth = 118 * 2.83465; // Width of the page in points
+    const pageHeight = 120 * 2.83465; // Height of the page in points
+
+    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     for (let data of detail) {
       const label = await labelServiceInstance.update(
         { lb_pal: palnbr, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
         { lb_ref: data.tr_ref },
       );
     }
+
+    const imagePath = './logo.png';
+    console.log(req.body);
+    // Set the options for the image
+    const imageOptions = {
+      fit: [150, 150], // Size of the image
+      // align: 'center', // Center the image horizontally
+      // valign: 'top', // Align the image to the top of the page
+    };
+
+    // Add the image to the document
+    // doc.image(imagePath, imageOptions);
+
+    // Define the properties of the rectangles
+    const rectWidth = 300;
+    const rectHeight = 50;
+    const rectSpacing = 5;
+    const rectX = (doc.page.width - rectWidth) / 2;
+    let rectY = 15;
+
+    // Define the texts for each rectangle
+    const texts = [
+      'REFERENCE: ' + req.body.lb_part,
+      'Total unité :' + req.body.lb_qty,
+      // '' + labelId,
+      'Description : ' + req.body.lb_desc,
+      'Groupe: ' + req.body.lb_desc,
+      'Date: ' + req.body.lb_date,
+    ];
+
+    // Set the options for the rectangle text
+    const textOptions = {
+      align: 'center',
+      valign: 'center',
+    };
+
+    for (let i = 0; i < 5; i++) {
+      let textX: number = 0;
+      let textY: number = 0;
+      // Draw the rectangle
+      doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
+
+      // Calculate the position for the text
+      if (i !== 4) {
+        textX = rectX + rectWidth / 6;
+        textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
+
+        // Save the current transformation matrix
+        doc.save();
+
+        // // Translate to the center of the rectangle
+        // doc.translate(textX, textY);
+
+        // // Rotate the text
+        // doc.rotate(-Math.PI / 4);
+
+        // // Translate back to the original position
+        // doc.translate(-textX, -textY);
+
+        // Add the text inside the rectangle
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(14)
+          .text(texts[i], textX, textY, textOptions);
+
+        // doc.restore();
+
+        // Move to the next rectangle position
+
+        rectY += rectHeight + rectSpacing;
+      } else {
+        textX = rectX + rectWidth / 6;
+        textY = 250;
+        // // Translate to the center of the rectangle
+        // doc.translate(textX, textY);
+
+        // // Rotate the text
+        // // doc.rotate(-Math.PI / 4);
+
+        // // Translate back to the original position
+        // doc.translate(-textX, -textY);
+
+        // Add the text inside the rectangle
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(14)
+          .text(texts[i], textX, textY, textOptions);
+      }
+      // textX = rectX + rectWidth / 6;
+      // textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6;
+
+      // // Save the current transformation matrix
+      // doc.save();
+
+      // // Translate to the center of the rectangle
+      // doc.translate(textX, textY);
+
+      // // Rotate the text
+      // doc.rotate(-Math.PI / 4);
+
+      // // Translate back to the original position
+      // doc.translate(-textX, -textY);
+
+      // // Add the text inside the rectangle
+      // doc
+      //   .font('Helvetica-Bold')
+      //   .fontSize(14)
+      //   .text(texts[i], textX, textY, textOptions);
+
+      // Restore the transformation matrix
+    }
+
+    // Save the PDF document
+    doc.pipe(fs.createWriteStream('output.pdf'));
+    doc.end();
+
+    const filePath = './output.pdf';
+    const printerName = 'Xprinter XP-TT426B';
+
+    printer
+      .print(filePath, { printer: printerName })
+      .then(() => {
+        console.log('Printing completed.');
+      })
+      .catch(error => {
+        console.error('Error while printing:', error);
+      });
     return res.status(200).json({ message: 'fetched succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
