@@ -124,6 +124,7 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         
         const loadRequest = await loadRequestService.findLoadRequest({load_request_code :load_request_code})
         
+        
         const user_mobile_code = loadRequest.user_mobile_code
         const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
         const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , loadRequest.role_site, loadRequest.role_loc)

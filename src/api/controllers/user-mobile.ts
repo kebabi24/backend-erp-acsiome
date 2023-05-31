@@ -174,7 +174,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
   const userMobileServiceInstanse = Container.get(UserMobileService);
 
   try {
-    const role_code = req.body.role_code;
+    // const role_code = req.body.role_code;
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
@@ -199,7 +199,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
-      const messages = await userMobileServiceInstanse.getMessages(role_code)
+      const messages = await userMobileServiceInstanse.getMessages(role.role_code)
       var role_controller = {};
       var profile_controller = {};
 

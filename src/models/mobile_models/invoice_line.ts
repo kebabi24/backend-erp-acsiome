@@ -29,7 +29,7 @@ const InvoiceLine = sequelize.define(
         invoice_line:{type: Sequelize.INTEGER},
         product_code:{type: Sequelize.STRING}, 
         designation:{type: Sequelize.STRING}, 
-        quantity:{type: Sequelize.INTEGER}, 
+        quantity:{type: Sequelize.DOUBLE}, 
         returned_quantity:{type: Sequelize.INTEGER}, 
         returned_damaged_quantity:{type: Sequelize.INTEGER}, 
         unit_price:{type: Sequelize.DOUBLE}, 
