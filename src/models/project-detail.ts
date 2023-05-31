@@ -37,6 +37,7 @@ const ProjectDetail = sequelize.define(
         pmd_start: Sequelize.DATEONLY,
         pmd_end: Sequelize.DATEONLY,
         pmd_bom_code: Sequelize.STRING,
+        pmd_bom_cost: {type: Sequelize.DECIMAL, defaultValue : 0  },
         pmd_part: {
             type: Sequelize.STRING,
             references:{

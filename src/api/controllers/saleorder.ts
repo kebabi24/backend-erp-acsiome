@@ -549,7 +549,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  
+  console.log("so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso")   
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -561,7 +561,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       { ...saleOrder, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
     );
-    console.log(saleOrder.so_nbr);
+    console.log(saleOrderDetail);
     await saleOrderDetailServiceInstance.delete({sod_domain:user_domain, sod_nbr: saleOrder.so_nbr });
     for (let entry of saleOrderDetail) {
       entry = {
@@ -574,6 +574,53 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       };
       await saleOrderDetailServiceInstance.create(entry);
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: so });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const updateProj = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  console.log("so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso")   
+  logger.debug('Calling update one  inventoryStatus endpoint');
+  try {
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const { id } = req.params;
+    const { saleOrder, saleOrderDetail } = req.body;
+    //console.log(id);
+    const so = await saleOrderServiceInstance.update(
+      { ...saleOrder, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { id },
+    );
+    //console.log(saleOrderDetail);
+    //await saleOrderDetailServiceInstance.delete({sod_domain:user_domain, sod_nbr: saleOrder.so_nbr });
+    for (let entry of saleOrderDetail) {
+      entry = {
+        ...entry,
+        sod_domain: user_domain,
+        sod_nbr: saleOrder.so_nbr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+
+      const sod = await  saleOrderDetailServiceInstance.findOne({
+        sod_nbr: saleOrder.so_nbr,
+        sod__chr01 : entry.sod__chr01,
+        sod_domain: user_domain
+      });
+      if(sod) {
+        await saleOrderDetailServiceInstance.update({ ...entry }, { id: sod.id });; 
+      }else {
+        await saleOrderDetailServiceInstance.create(entry); 
+      }
     }
     return res.status(200).json({ message: 'fetched succesfully', data: so });
   } catch (e) {
@@ -768,6 +815,7 @@ export default {
   findAll,
   findByrange,
   update,
+  updateProj,
   updateSo,
   updateSod,
   findAllwithDetails,

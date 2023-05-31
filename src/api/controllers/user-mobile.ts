@@ -252,7 +252,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       
         loadRequestsDetails.forEach(load => {
           const date = load.date_expiration
-          load.date_expiration = formatDateOnlyFromBackToMobile(date)
+          // load.date_expiration = formatDateOnlyFromBackToMobile(date)
         });
       }
       // LOCATION DETAILS
@@ -464,12 +464,13 @@ const getDataBack = async function(socket) {
       
       for(const invoice of invoices){
         if(invoice.MAJ == 0) {
-          console.log(invoice)
-          invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.thedate)
-          invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.periode_active_date)
+          // console.log(invoice)
+          invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
+          invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
           delete invoice.MAJ
           invoicesToCreate.push(invoice)
           for (const line of invoicesLines){
+            console.log(line)
             if(line.invoice_code === invoice.invoice_code) invoicesLinesToCreate.push(line)
           }
         }else if(invoice.MAJ == 2){
@@ -477,7 +478,7 @@ const getDataBack = async function(socket) {
           console.log(invoice)
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
-          const udpatedInvoice = await userMobileServiceInstanse.updateService(
+          const udpatedInvoice = await userMobileServiceInstanse.updateInvoice(
             {invoice},{invoice_code:invoice.invoice_code});
           console.log("UPDATING ONE INVOICE END")
         }
@@ -493,7 +494,7 @@ const getDataBack = async function(socket) {
     if(data.payments){
       const dataa = data.payments
       dataa.forEach(payment => {
-        payment.the_date = formatDateFromMobileToBackAddTimezone(payment.thedate)
+        payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date)
       });
       const payments = await userMobileServiceInstanse.createPayments(dataa);
     }
@@ -501,11 +502,10 @@ const getDataBack = async function(socket) {
     // LOCATION DETAILS
     if(data.locationsDetails){
       const dataa = data.locationsDetails
-      console.log(dataa)
       dataa.forEach(ld => {
         ld.ld_expire = formatDateOnlyFromMobileToBack(ld.ld_expire)
-        ld.ld_qty_oh = ld.ld_qnt_oh 
-        delete ld.ld_qnt_oh
+        // ld.ld_qty_oh = ld.ld_qnt_oh 
+        // delete ld.ld_qnt_oh
       });
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
@@ -515,28 +515,75 @@ const getDataBack = async function(socket) {
       console.log("CREATING LOAD REQUESTS")
       const loadRequests = data.loadRequests
       const loadRequestsLines = data.loadRequestsLines
+
+    
       
       const loadRequestService = Container.get(LoadRequestService)
+      let loadRequest0 = []
+      let loadRequestLines0 = []
+      let loadRequest50 = []
+      let loadRequestM10 = []
       
       for(const load of loadRequests) {
-        if(load.status = 0){
-          console.log(load)
+        // console.log(load)
+        // CREATION
+        if(load.status == 0){
+          const laod_code = load.load_request_code
+          const role_code = load.role_code
+
           delete load.id
-          load.date_creation = formatDateOnlyFromMobileToBack(load.date_creation)  
-          const createdLoadRequestes = await loadRequestService.createMultipleLoadRequests(loadRequests)
-          console.log("LOAD REQUESTS END")
-          console.log("LOAD REQUESTS LINES")
+          const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
+          
+          load.date_creation = formatDateOnlyFromMobileToBack(load.date_creation) 
+          load.role_loc =  role.role_loc
+          load.role_site =  role.role_site
+          
+          loadRequest0.push(load)
+
+          // GET LOAD REQUEST CODE LINES THAT HAS STATUS = 0
+
           loadRequestsLines.forEach(line => {
-            console.log(line)
-            delete line.line_code
-            line.date_creation = formatDateOnlyFromMobileToBack(line.date_creation)
-            line.date_charge = null
-            console.log(line)
+            if(line.load_request_code == laod_code){
+              delete line.line_code
+              line.date_creation = formatDateOnlyFromMobileToBack(line.date_creation)
+              line.date_charge = null
+              loadRequestLines0.push(line)
+
+            }
           }); 
-          const createdloadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines(loadRequestsLines)
-          console.log("LOAD REQUESTS LINES END")
+         
+        }
+        else if(load.status == 50){
+          const laod_code = load.load_request_code
+          loadRequest50.push(laod_code)
+        }else if (load.status == -10){
+          const laod_code = load.load_request_code
+          loadRequestM10.push(laod_code)
         }
       };   
+
+      
+
+      console.log("LOAD REQUESTS END")
+      const createdLoadRequestes = await loadRequestService.createMultipleLoadRequests(loadRequest0)
+      console.log("LOAD REQUESTS LINES CREATION")
+      const createdloadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines(loadRequestLines0)
+      console.log("LOAD REQUESTS LINES CREATION END")
+      console.log("LOAD REQUESTS STATUS 50 UPDATE")
+      if(loadRequest50.length >0){
+        for(const load of loadRequest50){
+          const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, 50)
+        }
+      }
+      console.log("LOAD REQUESTS STATUS 50 UPDATE END")
+      console.log("LOAD REQUESTS STATUS -10 UPDATE")
+      if(loadRequestM10.length >0){
+        console.log(loadRequestM10)
+        for(const load of loadRequestM10){
+          const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, -10)
+        }
+      }
+      console.log("LOAD REQUESTS STATUS -10 UPDATE END ")
     }   
 
     // INVENTORY & INVENTORY LINE 
@@ -545,7 +592,7 @@ const getDataBack = async function(socket) {
       const inventories = data.inventaires
       inventories.forEach(inventory => {
         console.log(inventory)
-        inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.thedate)
+        inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.the_date)
       });
       const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
       console.log("INVENTORIES CREATION END")
@@ -554,7 +601,7 @@ const getDataBack = async function(socket) {
         const inventoriesLines = data.inventairesLines
         inventoriesLines.forEach(line => {
           
-          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiringDate)
+          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date)
         });
         const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
         console.log("INVENTORIES LINES CREATION END")
@@ -568,32 +615,32 @@ const getDataBack = async function(socket) {
     // SERVICE
     // CREATED FROM BACKEDN
      const {service , service_creation} = data
-    // if(service_creation == true){ 
-    //   // created from backend 
-    //   console.log("UPDATING SERVICE")
-    //   const udpatedService = await userMobileServiceInstanse.updateService(
-    //     {
-    //       service_open:false,
-    //       service_kmdep:service.service_kmdep,
-    //       service_kmarr:service.service_kmarr,
-    //       service_closing_date : formatDateFromMobileToBackAddTimezone(service.service_closing_date)
-    //     },
-    //     {service_code:service.service_code}
-    //     );
-    //     console.log("UPDATING SERVICE END")
-    // }else{
-    //     // CREATED FROM MOBILE  // false  
-    //     console.log("CREATING SERVICE")
-    //     delete service.id
-    //     console.log(service)
-    //     service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date)
-    //     service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date)
-    //     service.service_period_activate_date = formatDateOnlyFromMobileToBack( service.service_period_activate_date)
-    //     service.service_open = false
-    //     console.log(service)
-    //     const createdService = await userMobileServiceInstanse.createService(service)
-    //     console.log("CREATING SERVICE END")
-    // }
+     if(service_creation == true){ 
+      // created from backend 
+      console.log("UPDATING SERVICE")
+      const udpatedService = await userMobileServiceInstanse.updateService(
+        {
+          service_open:false,
+          service_kmdep:service.service_kmdep,
+          service_kmarr:service.service_kmarr,
+          service_closing_date : formatDateFromMobileToBackAddTimezone(service.service_closing_date)
+        },
+        {service_code:service.service_code}
+        );
+        console.log("UPDATING SERVICE END")
+    }else{
+        // CREATED FROM MOBILE  // false  
+        console.log("CREATING SERVICE")
+        delete service.id
+        console.log(service)
+        service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date)
+        service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date)
+        service.service_period_activate_date = formatDateOnlyFromMobileToBack( service.service_period_activate_date)
+        service.service_open = false
+        console.log(service)
+        const createdService = await userMobileServiceInstanse.createService(service)
+        console.log("CREATING SERVICE END")
+    }
  
     socket.emit('dataUpdated')
   });
