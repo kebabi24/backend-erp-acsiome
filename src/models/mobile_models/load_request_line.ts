@@ -40,9 +40,9 @@ const LoadRequestLine = sequelize.define(
         },
 
         
-        qt_request:{type: Sequelize.INTEGER},
-        qt_validated:{type: Sequelize.INTEGER},
-        qt_effected:{type: Sequelize.INTEGER},
+        qt_request:{type: Sequelize.DOUBLE},
+        qt_validated:{type: Sequelize.DOUBLE},
+        qt_effected:{type: Sequelize.DOUBLE},
         pt_price : {type : Sequelize.DOUBLE}
 
         // ...base

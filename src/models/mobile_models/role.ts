@@ -53,7 +53,9 @@ const Role = sequelize.define(
     role_loc: { type: Sequelize.STRING },
     role_site: { type: Sequelize.STRING },
     role_loc_from: { type: Sequelize.STRING },
-    printer_adress:{type: Sequelize.STRING }
+    printer_adress:{type: Sequelize.STRING },
+    device_id : {type: Sequelize.STRING},
+    role_domain : {type: Sequelize.STRING},
     // role_loc_from , string   , stock details - ld_det , stock info  - loc_mstr
     // ...base,
   },

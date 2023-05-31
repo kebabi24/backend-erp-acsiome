@@ -716,7 +716,7 @@ export default class UserMobileService {
                 { where: {pt_part : productsCodes},
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
-                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking']
+                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking','pt_rollup']
                     },
                 ) 
                 
@@ -1120,12 +1120,10 @@ export default class UserMobileService {
     }
 
     // ******************** GET DOMAIN  **************************
-    public async getDomain(user_domain : any): Promise<any> {
+    public async getDomain(query : any): Promise<any> {
         try {
-            const domain = await this.domainModel.findAll({
-                where:{
-                    dom_domain : user_domain
-                }
+            const domain = await this.domainModel.findOne({
+                where:query
             })
             return domain
         } catch (e) {
