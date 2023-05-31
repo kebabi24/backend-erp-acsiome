@@ -5,6 +5,7 @@ export default class projectDetailService {
     constructor(
         @Inject("projectDetailModel") private projectDetailModel: Models.ProjectDetailModel,
         @Inject("taskModel") private taskModel: Models.TaskModel,
+        @Inject("itemModel") private itemModel: Models.ItemModel,
         @Inject("logger") private logger
     ) {}
 
@@ -32,7 +33,7 @@ export default class projectDetailService {
 
     public async find(query: any): Promise<any> {
         try {
-            const projectDetails = await this.projectDetailModel.findAll({ where: query, include: this.taskModel })
+            const projectDetails = await this.projectDetailModel.findAll({ where: query, include: [this.taskModel, this.itemModel] })
             this.logger.silly("find All projectDetails mstr")
             return projectDetails
         } catch (e) {

@@ -161,4 +161,16 @@ export default class projectService {
             throw e
         }
       }
+      public async deleteSpec(query: any): Promise<any> {
+        try {
+          const specproject = await this.pjdDetailsModel.destroy({
+            where: query,
+          });
+          this.logger.silly('delete one project mstr');
+          return specproject;
+        } catch (e) {
+          this.logger.error(e);
+          throw e;
+        }
+      }
 }
