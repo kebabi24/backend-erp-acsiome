@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op } from 'sequelize';
 import * as os from 'os';
+import CustomerItineraryService from '../../services/customer-itinerary';
 
 // CREATE CUSTOMER MOBILE
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -452,6 +453,22 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getCustomersOfItinerary = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  itn endpoint');
+  try {
+    const customerItineraryServiceInstance = Container.get(CustomerItineraryService);
+    const { itinerary_code } = req.body;
+    console.log(itinerary_code);
+    const itn = await customerItineraryServiceInstance.find({ itinerary_code: itinerary_code });
+    console.log(itn);
+    return res.status(200).json({ message: 'fetched succesfully', data: itn });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findByOne,
@@ -477,4 +494,5 @@ export default {
   findOneCustomer,
   update,
   getDataForCustomerCreate,
+  getCustomersOfItinerary,
 };
