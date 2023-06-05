@@ -22,26 +22,27 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
-    // var labelId = null;
-    // const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
-    // console.log(seq);
-    // labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
-    // await sequenceServiceInstance.update(
-    //   { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-    //   { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
-    // );
-    // const label = await labelServiceInstance.create({
-    //   ...req.body,
-    //   lb_ref: labelId,
-    //   lb_cab: labelId,
-    //   lb_domain: user_domain,
-    //   created_by: user_code,
-    //   created_ip_adr: req.headers.origin,
-    //   last_modified_by: user_code,
-    //   last_modified_ip_adr: req.headers.origin,
-    // });
+
     const pageWidth = 284; // Width of the page in points
     const pageHeight = 426; // Height of the page in points
+    var labelId = null;
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
+    console.log(seq);
+    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+    );
+    const label = await labelServiceInstance.create({
+      ...req.body,
+      lb_ref: labelId,
+      lb_cab: labelId,
+      lb_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
 
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };

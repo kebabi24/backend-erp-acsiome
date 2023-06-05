@@ -174,8 +174,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
   const userMobileServiceInstanse = Container.get(UserMobileService);
 
   try {
-    const role_code = req.body.role_code;
-    const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
+    // const role_code = req.body.role_code;
+    const device_id = req.body.device_id;
+    // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
+    const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
 
     // if the role id doesn't exist
     if (!role) {
@@ -197,9 +199,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
-      const messages = await userMobileServiceInstanse.getMessages(role_code)
+      const messages = await userMobileServiceInstanse.getMessages(role.role_code)
       var role_controller = {};
       var profile_controller = {};
+
+       const domain  = await userMobileServiceInstanse.getDomain({dom_domain : role.role_domain})
 
       
       if(role['controller_role']!=null && role['controller_role'].length != 0){
@@ -283,15 +287,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       // service created on backend
       if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
-        // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
+        // UPDATE SERVICE DATES
+        if(service){
+          service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date)
+          service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date)
+          service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date)
+        }
+
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
-        // if(itinerary2==null){itinerary2=[]}
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
-        const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
-        // const categories = await userMobileServiceInstanse.getCategories( customers )
-        // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-        // const clusters = await userMobileServiceInstanse.getClusters( customers )
-        // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+        const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });  
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
         const clusters = await userMobileServiceInstanse.findAllClusters({});
@@ -332,22 +337,18 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
+          domain:domain
         });
       }
       // service created by mobile user
       else {
-        // const iitineraries = await userMobileServiceInstanse.getItineraries({role_code : role.role_code })
+        
         const iitineraries = await userMobileServiceInstanse.getItinerariesOnly({ role_code: role.role_code });
         const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({
           role_code: role.role_code,
         });
         const customers = await userMobileServiceInstanse.getCustomersOnly({ role_code: role.role_code });
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
-        // const categories = await userMobileServiceInstanse.getCategories( customers )
-        // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-        // const clusters = await userMobileServiceInstanse.getClusters( customers )
-        // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
-
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
         const clusters = await userMobileServiceInstanse.findAllClusters({});
@@ -388,6 +389,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
+          domain:domain
         });
       }
     }
@@ -755,7 +757,7 @@ function formatDateOnlyFromBackToMobile(timeString){
 function formatDateFromBackToMobile(date){
   const d = String(date.getDate()).padStart(2, '0');
   const m = String(date.getMonth() + 1).padStart(2, '0')
-  const str = d +'-' + m +'-' +  date.getFullYear()+' '+ date.getHours() + ':' + date.getMinutes() +  ':' + date.getSeconds()
+  const str = d +'-' + m +'-' +  date.getFullYear()+' '+ date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0') +  ':' + String(date.getSeconds()).padStart(2, '0')
  
   return str
 }
