@@ -5,7 +5,7 @@ import ProductPageService from "./product-page";
 const { Op } = require("sequelize");
 
 @Service()
-export default class LoadRequestService {
+export default class UnloadRequestService {
     constructor(
         
         @Inject("roleModel") private roleModel: Models.RoleModel,
@@ -18,6 +18,8 @@ export default class LoadRequestService {
         @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
         @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
         @Inject("locationDetailModel") private locationDetailModel: Models.LocationDetailModel,
+        @Inject("unloadRequestModel") private unloadRequestModel: Models.unloadRequestModel,
+        @Inject("unloadRequestDetailsModel") private unloadRequestDetailsModel: Models.unloadRequestDetailsModel,
         @Inject("logger") private logger
     ) {}
     
@@ -35,9 +37,6 @@ export default class LoadRequestService {
     public async createMultipleLoadRequests(data: any): Promise<any> {
         try {
 
-            // data.forEach(element => {
-            //     console.log(element)
-            // });
             const loadRequests = await this.loadReuestModel.bulkCreate(data )
             this.logger.silly("created load requests")
             return loadRequests
@@ -45,23 +44,13 @@ export default class LoadRequestService {
             this.logger.error(e)
             throw e
         }
-    }
+    } 
 
-    public async createMultipleLoadRequestsLines(data: any): Promise<any> {
+    // USED
+    public async createMultipleUnoadRequestsDetails(data: any): Promise<any> {
         try {
-            const loadRequestsLines = await this.loadRequestLineModel.bulkCreate(data )
-            this.logger.silly("created load requests lines")
-            return loadRequestsLines
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    public async createMultipleLoadRequestsDetails(data: any): Promise<any> {
-        try {
-            const loadRequestsDetails = await this.loadRequestDetailsModel.bulkCreate(data )
-            this.logger.silly("created load requests details")
+            const loadRequestsDetails = await this.unloadRequestDetailsModel.bulkCreate(data )
+            this.logger.silly("created unload requests details")
             console.log(loadRequestsDetails)
             return loadRequestsDetails
         } catch (e) {
@@ -70,6 +59,7 @@ export default class LoadRequestService {
         }
     }
 
+    // USED
     public async findAllRolesByUpperRoleCode(query: any): Promise<any> {
         try {
             const roles = await this.roleModel.findAll({where : query })
@@ -81,10 +71,11 @@ export default class LoadRequestService {
         }
     }
 
-    public async findAllLoadRequestsByRoleCode(role_code: any): Promise<any> {
+    // USED
+    public async findAllUnloadRequestsByRoleCode(role_code: any): Promise<any> {
         try {
-            const loadRequests = await this.loadReuestModel.findAll({where : {role_code:role_code , status : 0}})
-            this.logger.silly("find all loadRequests")
+            const loadRequests = await this.unloadRequestModel.findAll({where : {role_code:role_code , status : 0}})
+            this.logger.silly("find all unloadRequests")
             return loadRequests
         } catch (e) {
             this.logger.error(e)
@@ -120,10 +111,11 @@ export default class LoadRequestService {
         }
     }
 
-    public async findAllLoadRequests10ByRoleCode(role_code: any): Promise<any> {
+    // USED
+    public async findAlUnloadRequests10ByRoleCode(role_code: any): Promise<any> {
         try {
-            const loadRequests = await this.loadReuestModel.findAll({where : {role_code:role_code , status : 10}})
-            this.logger.silly("find all loadRequests")
+            const loadRequests = await this.unloadRequestModel.findAll({where : {role_code:role_code , status : 10}})
+            this.logger.silly("find all unloadRequests")
             return loadRequests
         } catch (e) {
             this.logger.error(e)
@@ -131,16 +123,6 @@ export default class LoadRequestService {
         }
     }
 
-    // public async findAllLoadRequests20ByRoleCode(role_code: any): Promise<any> {
-    //     try {
-    //         const loadRequests = await this.loadReuestModel.findAll({where : {role_code:role_code , status : 20}})
-    //         this.logger.silly("find all loadRequests")
-    //         return loadRequests
-    //     } catch (e) {
-    //         this.logger.error(e)
-    //         throw e
-    //     }
-    // }
 
     public async findAllLoadRequests20(): Promise<any> {
         try {
@@ -227,24 +209,26 @@ export default class LoadRequestService {
         }
     }
 
-    public async updateLoadRequestStatusTo10(load_request_code: any): Promise<any> {
+   // USED
+    public async updateUnloadRequestStatusTo10(unload_request_code: any): Promise<any> {
         try {
-            const loadRequest = await this.loadReuestModel.update({ status:10 }, 
-                { where: {load_request_code:load_request_code} })
+            const unloadRequest = await this.unloadRequestModel.update({ status:10 }, 
+                { where: {unload_request_code:unload_request_code} })
               
-            this.logger.silly("load request status updated to 10")
-            return loadRequest
+            this.logger.silly("unload request status updated to 10")
+            return unloadRequest
         } catch (e) {
             this.logger.error(e)
             throw e
         }
     }
 
-    public async findLoadRequest(query: any): Promise<any> {
+    // USED
+    public async findUnloadRequest(query: any): Promise<any> {
         try {
-            const loadRequest = await this.loadReuestModel.findOne({where : query})
-            this.logger.silly("find one loadRequest")
-            return loadRequest
+            const unloadRequest = await this.unloadRequestModel.findOne({where : query})
+            this.logger.silly("find one unloadRequest")
+            return unloadRequest
         } catch (e) {
             this.logger.error(e)
             throw e
@@ -271,59 +255,20 @@ export default class LoadRequestService {
         }
     }
 
-    public async getLoadRequestData(user_mobile_code: any, load_request_code :any, ld_loc:any, ld_site:any): Promise<any> {
+    // USED
+    public async getUnloadRequestData( unload_request_code :any): Promise<any> {
         try {
-            // get user mobile and profile & pages codes of the profile
-            const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
-            const profile = await this.profileMobileModel.findOne({where:{profile_code :user_mobile.profile_code }})
-            const pages_codes = await this.profileProductPageModel.findAll({where : {profile_code:profile.profile_code} ,attributes: ['product_page_code']})
-            // get load request lines of the load request (exisiting)
-            const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
-            
-            // obj : page code + products_codes []
-            const pagesProducts = []
-            for(const pageCode of pages_codes){
-                const products_codes = await this.productPageDetailsModel.findAll({where : {product_page_code:pageCode.product_page_code },attributes: ['product_code']})
-                pagesProducts.push({page_code : pageCode.product_page_code, products: products_codes})
-            }    
-            
-            
-            const pagesProductsWithDetails = []
-          
-            for(const page of pagesProducts){
-                const products = []
-
-                // FOR EACH PRODUCT 
-                for(const productd of  page.products){
-                    // get product data
-                    const product = await this.itemModel.findOne({
-                        where :{pt_part : productd.dataValues.product_code},
-                        attributes:['pt_desc1', 'pt_price','pt_part']
-                    })
-
-                    // CALCULATE STORED QUANTITY  
-                    const sum = await this.getStoredQuantityOfProduct(ld_loc,ld_site,product.pt_part)
-                    var index = -1
-                    index = loadRequesLines.findIndex(line=>{
-                        return line.dataValues.product_code == product.dataValues.pt_part;
-                    })
-
-                    // product was not requested
-                    if(index != -1){
-                        const load_request_line = loadRequesLines[index].dataValues
-                        products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})         
-                      
-                    
-                    // product was requested 
-                    }else{
-                        products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: 0, qt_validated: 0, qt_stored : sum})         
-
-                    }
-                    
-                }   
-                pagesProductsWithDetails.push({page_code:page.page_code, products:products})
-            }   
-            return pagesProductsWithDetails
+     
+            const unloadRequestDetails = await this.unloadRequestDetailsModel.findAll({where:{unload_request_code :unload_request_code }})
+            for(const detail of unloadRequestDetails){
+                const product = await this.itemModel.findOne({
+                    where :{pt_part : detail.product_code},
+                    attributes:['pt_desc1', 'pt_price','pt_part']
+                })
+                detail.dataValues.product_desc = product.dataValues.pt_desc1
+            }
+             
+            return unloadRequestDetails
         } catch (e) {
             this.logger.error(e)
             throw e
@@ -430,13 +375,14 @@ export default class LoadRequestService {
         }
     }
 
-    public async updateLoadRequestStatusToX(load_request_codes: any , x : any): Promise<any> {
+    // USED
+    public async updateUnloadRequestStatusToX(unload_request_codes: any , x : any): Promise<any> {
         try {
-            const loadRequest = await this.loadReuestModel.update({ status: x }, 
-                { where: {load_request_code:load_request_codes} })
+            const unloadRequest = await this.unloadRequestModel.update({ status: x }, 
+                { where: {unload_request_code:unload_request_codes} })
               
-            this.logger.silly("load request status updated to " + x)
-            return loadRequest
+            this.logger.silly("unloadRequest status updated to " + x)
+            return unloadRequest
         } catch (e) {
             this.logger.error(e)
             throw e
@@ -485,24 +431,18 @@ export default class LoadRequestService {
         }
     }
 
-    public async deleteLoadRequestDetail(query: any  ): Promise<any> {
+    // USED
+    public async deleteUnloadRequestDetail(query: any  ): Promise<any> {
         try {
-            const loadRequestDetail = await this.loadRequestDetailsModel.destroy({where : query})
+            const loadRequestDetail = await this.unloadRequestDetailsModel.destroy({where : query})
               
-            this.logger.silly("deleted one load request detail")
+            this.logger.silly("deleted one unload request detail")
             return loadRequestDetail
         } catch (e) {
             this.logger.error(e)
             throw e
         }
     }
-
-
-
-    // const product = await this.itemModel.findOne({
-    //     where :{pt_part : productd.dataValues.product_code},
-    //     attributes:['pt_desc1', 'pt_price','pt_part']
-    // })
 
     public async getStoredQuantityOfProduct(ld_loc: any, ld_site : any , product_code :any): Promise<any> {
         try {

@@ -189,6 +189,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users =[];
       var profiles = [];
+      console.log(user_mobile_code)
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });

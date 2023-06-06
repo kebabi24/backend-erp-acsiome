@@ -12,7 +12,7 @@ const createTokens = async (req: Request, res: Response, next: NextFunction) => 
     try {
         const tokenSerieService = Container.get(TokenSerieService)
         
-        const tokens = req.body.tokens
+        const tokens = req.body.token
         tokens.forEach(token => {
             delete token.id
         });

@@ -96,6 +96,8 @@ import deal from './routes/deal';
 import Label from './routes/label';
 import repertory from './routes/repertory';
 
+import unloadRequest from './routes/unload-request';
+
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -195,5 +197,6 @@ export default () => {
   deal(app);
   printers(app);
   repertory(app);
+  unloadRequest(app);
   return app;
 };

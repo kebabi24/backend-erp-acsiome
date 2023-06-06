@@ -229,6 +229,9 @@ export default async ({ expressApp }) => {
       { name: 'printerModel', model: require('../models/printer').default },
       { name: 'RepertoryModel', model: require('../models/repertory').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
+
+      { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
+      { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
