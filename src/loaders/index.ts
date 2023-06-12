@@ -904,7 +904,6 @@ export default async ({ expressApp }) => {
   //     console.log(err);
   //   });
 
-
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
   Logger.info('✌️ Express loaded');

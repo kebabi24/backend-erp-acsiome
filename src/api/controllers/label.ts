@@ -33,16 +33,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
     );
-    const label = await labelServiceInstance.create({
-      ...req.body,
-      lb_ref: labelId,
-      lb_cab: labelId,
-      lb_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
+    // const label = await labelServiceInstance.create({
+    //   ...req.body,
+    //   lb_ref: labelId,
+    //   lb_cab: labelId,
+    //   lb_domain: user_domain,
+    //   created_by: user_code,
+    //   created_ip_adr: req.headers.origin,
+    //   last_modified_by: user_code,
+    //   last_modified_ip_adr: req.headers.origin,
+    // });
 
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -58,13 +58,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('CLIENT : ', 20, 90)
+      .text('CLIENT : ' + 'KAMEL', 20, 90)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('ADRESSE :', 20, 115)
+      .text('ADRESSE :' + 'REGAHAIA', 20, 115)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('TEL :', 20, 140);
+      .text('TEL :' + '0778988767', 20, 140);
 
     // Define the second rectangle and its text lines
     doc
@@ -72,19 +72,19 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PRODUIT :', 20, 180)
+      .text('PRODUIT :' + req.body.lb_desc, 20, 180)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('MICRONAGE/ LAIZE :', 20, 203)
+      .text('MICRONAGE/ LAIZE :' + 'INT', 20, 203)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('QTE :', 20, 228)
+      .text('QTE :' + req.body.lb_qty, 20, 228)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('N° Lot:', 20, 253)
+      .text('N° Lot:' + req.body.lb_lot, 20, 253)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('GROUPE:', 20, 278);
+      .text('GROUPE:' + 'LBL001', 20, 278);
 
     // Define the third rectangle and its text lines
     doc
@@ -100,11 +100,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: 'barcode1', // Barcode data
+        text: '12345678', // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
-        width: 72,
+        width: 60,
       },
       function(err, png) {
         if (err) {
@@ -120,22 +120,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
-        doc.pipe(fs.createWriteStream('output.pdf'));
+        doc.pipe(fs.createWriteStream('output2.pdf'));
         doc.end();
       },
     );
 
-    // const filePath = './output.pdf';
-    // const printerName = 'Xprinter XP-TT426B';
+    const filePath = './output1.pdf';
+    const printerName = 'Xprinter XP-TT426B';
 
-    // printer
-    //   .print(filePath, { printer: printerName })
-    //   .then(() => {
-    //     console.log('Printing completed.');
-    //   })
-    //   .catch(error => {
-    //     console.error('Error while printing:', error);
-    //   });
+    printer
+      .print(filePath, { printer: printerName })
+      .then(() => {
+        console.log('Printing completed.');
+      })
+      .catch(error => {
+        console.error('Error while printing:', error);
+      });
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     //#
