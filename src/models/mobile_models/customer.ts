@@ -44,6 +44,8 @@ const CustomerMobile = sequelize.define(
     longitude: { type: Sequelize.STRING },
     latitude: { type: Sequelize.STRING },
 
+    balance:{type: Sequelize.DOUBLE},
+
     // category and cluster
     category_code: {
       type: Sequelize.STRING,

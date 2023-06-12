@@ -40,9 +40,9 @@ const Invoice = sequelize.define(
         devise_code:{type: Sequelize.STRING}, 
         description:{type: Sequelize.STRING}, 
         discount:{type: Sequelize.DOUBLE}, 
-        taxe_amount : { type: Sequelize.INTEGER},
-        stamp_amount : { type: Sequelize.INTEGER},
-        horstax_amount : { type: Sequelize.INTEGER},
+        taxe_amount : { type: Sequelize.INTEGER}, // double default 0
+        stamp_amount : { type: Sequelize.INTEGER},// double default 0
+        horstax_amount : { type: Sequelize.INTEGER},// double default 0
         canceled : { type: Sequelize.BOOLEAN},
         cancelation_reason_code : { type: Sequelize.STRING}, // from cancelation reason 
         progress_level : { type: Sequelize.INTEGER}, 

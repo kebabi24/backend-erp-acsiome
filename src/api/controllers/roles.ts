@@ -140,6 +140,23 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const findOneByDeviceId = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  role endpoint")
+    try {
+        const RoleServiceInstance = Container.get(RoleService)
+        const {device_id} = req.params
+        const role = await RoleServiceInstance.findOne({device_id})
+        console.log("hello")
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: role  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 export default {
     create,
     findOne,
@@ -148,5 +165,6 @@ export default {
     findByOne,
     update,
     updated,
-    deleteOne
+    deleteOne,
+    findOneByDeviceId
 }

@@ -9,6 +9,7 @@ export default (app: Router) => {
     route.get("/", controller.findAll)
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
+    route.get("/deviceId/:device_id", controller.findOneByDeviceId)
     route.post("/find", controller.findBy)
     route.post("/findone", controller.findByOne)
     route.put("/up:id", controller.updated)

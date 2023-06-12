@@ -27,11 +27,11 @@ const Role = sequelize.define(
     user_mobile_code: {
       type: Sequelize.STRING,
       primaryKey: true,
-      unique: true,
-      // references: {
-      //     model: "aa_userMobile",
-      //     key: "user_mobile_code",
-      // },
+      unique: true, 
+      references: {
+          model: "aa_userMobile",
+          key: "user_mobile_code",
+      },
     },
     controller_role: {  // person who verifie loads
       type: Sequelize.STRING,

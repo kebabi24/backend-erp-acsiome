@@ -182,5 +182,8 @@ declare global {
     export type DealModel = S.Model;
     export type PrinterModel = S.Model;
     export type RepertoryModel = S.Model;
+    
+    export type unloadRequestModel = S.Model;
+    export type unloadRequestDetailsModel = S.Model;
   }
 }
