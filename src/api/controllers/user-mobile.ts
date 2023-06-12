@@ -178,7 +178,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
-
+    console.log(role)
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
@@ -467,13 +467,11 @@ const getDataBack = async function(socket) {
       
       for(const invoice of invoices){
         if(invoice.MAJ == 0) {
-          // console.log(invoice)
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
           delete invoice.MAJ
           invoicesToCreate.push(invoice)
           for (const line of invoicesLines){
-            console.log(line)
             if(line.invoice_code === invoice.invoice_code) invoicesLinesToCreate.push(line)
           }
         }else if(invoice.MAJ == 2){
@@ -497,6 +495,7 @@ const getDataBack = async function(socket) {
     if(data.payments){
       const dataa = data.payments
       dataa.forEach(payment => {
+        console.log(payment)
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date)
       });
       const payments = await userMobileServiceInstanse.createPayments(dataa);
@@ -507,8 +506,6 @@ const getDataBack = async function(socket) {
       const dataa = data.locationsDetails
       dataa.forEach(ld => {
         ld.ld_expire = formatDateOnlyFromMobileToBack(ld.ld_expire)
-        // ld.ld_qty_oh = ld.ld_qnt_oh 
-        // delete ld.ld_qnt_oh
       });
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }

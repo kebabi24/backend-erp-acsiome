@@ -342,6 +342,36 @@ export default async ({ expressApp }) => {
     targetKey: 'service_code',
   });
 
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/role').default, {
+    foreignKey: 'role_code',
+    sourceKey: 'role_code',
+  });
+  require('../models/mobile_models/role').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'role_code',
+    targetKey: 'role_code',
+  });
+
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/userMobile').default, {
+    foreignKey: 'user_mobile_code',
+    sourceKey: 'user_mobile_code',
+  });
+  require('../models/mobile_models/userMobile').default.belongsTo(require('../models/mobile_models/role').default, {
+    foreignKey: 'user_mobile_code',
+    targetKey: 'user_mobile_code',
+  });
+
+  // ******
+  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/userMobile').default, {
+    foreignKey: 'profile_code',
+    sourceKey: 'profile_code',
+  });
+  require('../models/mobile_models/userMobile').default.belongsTo(require('../models/mobile_models/profile').default, {
+    foreignKey: 'profile_code',
+    targetKey: 'profile_code',
+  });
+  // ****
+
+
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
     foreignKey: 'role_code',
     sourceKey: 'role_code',
