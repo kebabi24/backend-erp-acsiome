@@ -10,6 +10,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create service endpoint');
   try {
     const MobileServiceInstance = Container.get(MobileService);
+    console.log(req.body);
     const service = await MobileServiceInstance.create({
       ...req.body,
       service_domain: user_domain,
