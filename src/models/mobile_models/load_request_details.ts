@@ -39,7 +39,7 @@ const LoadRequestDetails = sequelize.define(
         },
 
         lot : {type:Sequelize.STRING},
-        qt_effected:{type: Sequelize.INTEGER},
+        qt_effected:{type: Sequelize.DOUBLE},
         pt_price : {type : Sequelize.DOUBLE}
 
         // ...base

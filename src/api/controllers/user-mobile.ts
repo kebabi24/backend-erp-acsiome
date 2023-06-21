@@ -174,9 +174,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
   const userMobileServiceInstanse = Container.get(UserMobileService);
 
   try {
-    const role_code = req.body.role_code;
-    const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
-
+    // const role_code = req.body.role_code;
+    const device_id = req.body.device_id;
+    // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
+    const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
+    console.log(role)
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
@@ -187,6 +189,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users =[];
       var profiles = [];
+      console.log(user_mobile_code)
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });
@@ -197,9 +200,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
-      const messages = await userMobileServiceInstanse.getMessages(role_code)
+      const messages = await userMobileServiceInstanse.getMessages(role.role_code)
       var role_controller = {};
       var profile_controller = {};
+
+       const domain  = await userMobileServiceInstanse.getDomain({dom_domain : role.role_domain})
 
       
       if(role['controller_role']!=null && role['controller_role'].length != 0){
@@ -283,15 +288,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       // service created on backend
       if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
-        // const itinerary = await userMobileServiceInstanse.getItineraryFromService({id :service.service_itineraryId })
+        // UPDATE SERVICE DATES
+        if(service){
+          service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date)
+          service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date)
+          service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date)
+        }
+
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
-        // if(itinerary2==null){itinerary2=[]}
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
-        const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
-        // const categories = await userMobileServiceInstanse.getCategories( customers )
-        // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-        // const clusters = await userMobileServiceInstanse.getClusters( customers )
-        // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
+        const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });  
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
         const clusters = await userMobileServiceInstanse.findAllClusters({});
@@ -332,22 +338,18 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
+          domain:domain
         });
       }
       // service created by mobile user
       else {
-        // const iitineraries = await userMobileServiceInstanse.getItineraries({role_code : role.role_code })
+        
         const iitineraries = await userMobileServiceInstanse.getItinerariesOnly({ role_code: role.role_code });
         const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({
           role_code: role.role_code,
         });
         const customers = await userMobileServiceInstanse.getCustomersOnly({ role_code: role.role_code });
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
-        // const categories = await userMobileServiceInstanse.getCategories( customers )
-        // const categoriesTypes = await userMobileServiceInstanse.getCategoriesTypes( customers )
-        // const clusters = await userMobileServiceInstanse.getClusters( customers )
-        // const subClusters = await userMobileServiceInstanse.getSubClusters( customers )
-
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
         const clusters = await userMobileServiceInstanse.findAllClusters({});
@@ -388,6 +390,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
+          domain:domain
         });
       }
     }
@@ -464,13 +467,11 @@ const getDataBack = async function(socket) {
       
       for(const invoice of invoices){
         if(invoice.MAJ == 0) {
-          // console.log(invoice)
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
           delete invoice.MAJ
           invoicesToCreate.push(invoice)
           for (const line of invoicesLines){
-            console.log(line)
             if(line.invoice_code === invoice.invoice_code) invoicesLinesToCreate.push(line)
           }
         }else if(invoice.MAJ == 2){
@@ -494,6 +495,7 @@ const getDataBack = async function(socket) {
     if(data.payments){
       const dataa = data.payments
       dataa.forEach(payment => {
+        console.log(payment)
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date)
       });
       const payments = await userMobileServiceInstanse.createPayments(dataa);
@@ -504,8 +506,6 @@ const getDataBack = async function(socket) {
       const dataa = data.locationsDetails
       dataa.forEach(ld => {
         ld.ld_expire = formatDateOnlyFromMobileToBack(ld.ld_expire)
-        // ld.ld_qty_oh = ld.ld_qnt_oh 
-        // delete ld.ld_qnt_oh
       });
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
@@ -755,7 +755,7 @@ function formatDateOnlyFromBackToMobile(timeString){
 function formatDateFromBackToMobile(date){
   const d = String(date.getDate()).padStart(2, '0');
   const m = String(date.getMonth() + 1).padStart(2, '0')
-  const str = d +'-' + m +'-' +  date.getFullYear()+' '+ date.getHours() + ':' + date.getMinutes() +  ':' + date.getSeconds()
+  const str = d +'-' + m +'-' +  date.getFullYear()+' '+ date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0') +  ':' + String(date.getSeconds()).padStart(2, '0')
  
   return str
 }

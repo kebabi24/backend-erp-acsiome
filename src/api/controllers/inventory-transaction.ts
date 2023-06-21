@@ -173,7 +173,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
-      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_domain:user_domain });
+      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_ref:item.tr_ref, ld_domain:user_domain });
       const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STDCG' });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
@@ -211,6 +211,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
         ld_domain:user_domain
       });
       if (ld)
@@ -232,6 +233,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
           ld_lot: item.tr_serial,
+          ld_ref: item.tr_ref,
           ld_date: new Date(),
           ld_site: item.tr_site,
           ld_loc: item.tr_loc,
@@ -532,38 +534,43 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  code endpoint');
   try {
     const it = req.body;
+    console.log(it)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
 
-    const sct = await costSimulationServiceInstance.findOne({
-      sct_domain:user_domain,
-      sct_part: it.tr_part,
-      sct_site: it.tr_site,
-      sct_sim: 'STDCG',
-    });
-    const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part,pt_domain:user_domain });
-
-    console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc);
-    const ld = await locationDetailServiceInstance.findOne({
+    const ld = await locationDetailServiceInstance.find({
       ld_domain:user_domain,
       ld_part: it.tr_part,
-      ld_lot: it.tr_serial,
+      ld_lot: it.tr_vend_lot,
       ld_site: it.tr_site,
       ld_loc: it.tr_loc,
     });
-    console.log(ld);
+    for (let obj of ld) { 
+      
+    const sct = await costSimulationServiceInstance.findOne({
+      sct_domain:user_domain,
+      sct_part: obj.ld_part,
+      sct_site: obj.ld_site,
+      sct_sim: 'STDCG',
+    });
+    const pt = await itemServiceInstance.findOne({ pt_part: obj.ld_part,pt_domain:user_domain });
+
+    //console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc);
+    //console.log(ld);
     await inventoryTransactionServiceInstance.create({
       ...it,
       tr_domain:user_domain,
-      tr_status: ld.ld_status,
-      tr_expire: ld.ld_expire,
+      tr_serial: it.tr_vend_lot,
+      tr_status: obj.ld_status,
+      tr_expire: obj.ld_expire,
+      tr_ref: obj.ld_ref,
       tr_qty_loc: 0,
       tr_type: 'ISS-CHL',
       tr_line: 1,
-      tr_um: ld.ld_um,
+      tr_um: obj.ld_um,
       tr_effdate: new Date(),
       tr_date: new Date(),
       tr_price: sct.sct_mtl_tl,
@@ -578,7 +585,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    if (ld) {
+   
       const status = await statusServiceInstance.findOne({
         is_domain:user_domain,
         is_status: it.tr_status,
@@ -587,20 +594,22 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
         {
           ld_status: it.tr_status,
           ld_expire: it.tr_expire,
+          ld_lot: it.tr_serial,
           ld__log01: status.is_nettable,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { id: ld.id },
+        { id: obj.id },
       );
-    }
+    
     await inventoryTransactionServiceInstance.create({
       ...it,
       tr_domain:user_domain,
       tr_qty_loc: 0,
+      tr_ref: obj.ld_ref,
       tr_type: 'RCT-CHL',
       tr_line: 1,
-      tr_um: ld.ld_um,
+      tr_um: obj.ld_um,
       tr_effdate: new Date(),
       tr_date: new Date(),
       tr_price: sct.sct_mtl_tl,
@@ -615,7 +624,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-
+  }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -2466,6 +2475,110 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const it = req.body;
+    console.log(it)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(itemService);
+    const statusServiceInstance = Container.get(statusService);
+
+    const ld = await locationDetailServiceInstance.find({
+      ld_domain:user_domain,
+      ld_ref: it.tr_ref,
+    });
+    console.log(ld)
+    for (let obj of ld) { 
+      //console.log(obj)
+    const sct = await costSimulationServiceInstance.findOne({
+      sct_domain:user_domain,
+      sct_part: obj.ld_part,
+      sct_site: obj.ld_site,
+      sct_sim: 'STDCG',
+    });
+    const pt = await itemServiceInstance.findOne({ pt_part: obj.ld_part,pt_domain:user_domain });
+
+    //console.log(it.tr_part, it.tr_serial, it.tr_site, it.tr_loc);
+    //console.log(ld);
+    await inventoryTransactionServiceInstance.create({
+      ...it,
+      tr_serial: it.tr_vend_lot,
+      tr_domain:user_domain,
+      tr_status: obj.ld_status,
+      tr_expire: obj.ld_expire,
+      tr_ref: obj.tr_ref,
+      tr_qty_loc: 0,
+      tr_type: 'ISS-CHL',
+      tr_line: 1,
+      tr_um: obj.ld_um,
+      tr_effdate: new Date(),
+      tr_date: new Date(),
+      tr_price: sct.sct_mtl_tl,
+      tr_mtl_std: sct.sct_mtl_tl,
+      tr_lbr_std: sct.sct_lbr_tl,
+      tr_bdn_std: sct.sct_bdn_tl,
+      tr_ovh_std: sct.sct_ovh_tl,
+      tr_sub_std: sct.sct_sub_tl,
+      tr_prod_line: pt.pt_prod_line,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+   
+      const status = await statusServiceInstance.findOne({
+        is_domain:user_domain,
+        is_status: it.tr_status,
+      });
+      await locationDetailServiceInstance.update(
+        {
+          ld_status: it.tr_status,
+          ld_expire: it.tr_expire,
+          ld_lot : it.tr_serial,
+          ld__log01: status.is_nettable,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        { id: obj.id },
+      );
+    
+    await inventoryTransactionServiceInstance.create({
+      ...it,
+      tr_domain:user_domain,
+      tr_ref: obj.tr_ref,
+      tr_qty_loc: 0,
+      tr_type: 'RCT-CHL',
+      tr_line: 1,
+      tr_um: obj.ld_um,
+      tr_effdate: new Date(),
+      tr_date: new Date(),
+      tr_price: sct.sct_mtl_tl,
+      tr_mtl_std: sct.sct_mtl_tl,
+      tr_lbr_std: sct.sct_lbr_tl,
+      tr_bdn_std: sct.sct_bdn_tl,
+      tr_ovh_std: sct.sct_ovh_tl,
+      tr_sub_std: sct.sct_sub_tl,
+      tr_prod_line: pt.pt_prod_line,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+  }
+    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -2497,5 +2610,7 @@ export default {
   findByInv,
   findByRct,
   findBySpec,
-  findAllissSo
+  findAllissSo,
+  issChlRef,
+  
 };

@@ -127,6 +127,7 @@ export default async ({ expressApp }) => {
       { name: 'employeScoreModel', model: require('../models/employe-score').default },
       { name: 'employeJobModel', model: require('../models/employe-job').default },
       { name: 'dealModel', model: require('../models/deal').default },
+      { name: 'employeSalaryModel', model: require('../models/employe-salary').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -229,6 +230,9 @@ export default async ({ expressApp }) => {
       { name: 'printerModel', model: require('../models/printer').default },
       { name: 'RepertoryModel', model: require('../models/repertory').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
+
+      { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
+      { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -338,6 +342,36 @@ export default async ({ expressApp }) => {
     foreignKey: 'service_code',
     targetKey: 'service_code',
   });
+
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/role').default, {
+    foreignKey: 'role_code',
+    sourceKey: 'role_code',
+  });
+  require('../models/mobile_models/role').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'role_code',
+    targetKey: 'role_code',
+  });
+
+  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/userMobile').default, {
+    foreignKey: 'user_mobile_code',
+    sourceKey: 'user_mobile_code',
+  });
+  require('../models/mobile_models/userMobile').default.belongsTo(require('../models/mobile_models/role').default, {
+    foreignKey: 'user_mobile_code',
+    targetKey: 'user_mobile_code',
+  });
+
+  // ******
+  require('../models/mobile_models/profile').default.hasOne(require('../models/mobile_models/userMobile').default, {
+    foreignKey: 'profile_code',
+    sourceKey: 'profile_code',
+  });
+  require('../models/mobile_models/userMobile').default.belongsTo(require('../models/mobile_models/profile').default, {
+    foreignKey: 'profile_code',
+    targetKey: 'profile_code',
+  });
+  // ****
+
 
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
     foreignKey: 'role_code',
@@ -873,6 +907,14 @@ export default async ({ expressApp }) => {
   //   foreignKey: 'loc_loc',
   //   targetKey: 'loc_loc',
   // });
+  require('../models/employe').default.hasOne(require('../models/employe-salary').default, {
+    foreignKey: 'salary_code',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-salary').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'salary_code',
+    targetKey: 'emp_addr',
+  });
   require('../models/employe').default.hasOne(require('../models/employe-score').default, {
     foreignKey: 'emps_addr',
     sourceKey: 'emp_addr',
@@ -903,7 +945,6 @@ export default async ({ expressApp }) => {
   //   .catch(err => {
   //     console.log(err);
   //   });
-
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

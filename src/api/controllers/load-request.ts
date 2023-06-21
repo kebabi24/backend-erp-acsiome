@@ -1,12 +1,7 @@
 import LoadRequestService from "../../services/load-request"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-import { DATE, Op, Sequelize } from 'sequelize';
-import sequelize from '../../loaders/sequelize';
-import { isNull } from "lodash";
-import loadRequest from "../routes/load-request";
-import { Console } from "console";
-import moment from "moment-timezone";
+
 
 const findAllRoles = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -123,6 +118,7 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         const load_request_code = req.params.load_request_code
         
         const loadRequest = await loadRequestService.findLoadRequest({load_request_code :load_request_code})
+        
         
         const user_mobile_code = loadRequest.user_mobile_code
         const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
@@ -381,14 +377,25 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     try {
 
         const loadRequestService = Container.get(LoadRequestService)
-        
         const load_request_details = req.body.load_request_details
+        const load_request_lines = req.body.load_request_lines
         const load_request_code = req.body.load_request_code
-        const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(
-           load_request_details
-        )
+        
+        // UPDATE LOAD REQUEST LINES
+        for(const line of load_request_lines){
+            const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(line.load_request_code,line.product_code, line.qt_effected)
+        }
+
+        // DELETE OLD LOAD REQUEST DETAILS 
+        for(const load of load_request_details){
+            const deletedLoadRequest = await loadRequestService.deleteLoadRequestDetail({product_code : load.product_code, load_request_code : load.load_request_code })
+        }
+
+        // CREATE NEW LOAD REQUEST DETAILS 
+        const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details)
+        // UPDATE LOAD REQUEST STATUS TO 20
         const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code,20)
-        console.log(loadRequestsDetails)    
+  
         return res
             .status(201)
             .json({ message: "created succesfully", data:  loadRequestsDetails   })

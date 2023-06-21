@@ -6,13 +6,15 @@ import { Container } from "typedi"
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{role_name} = req.headers
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
     const {role, itinerary} = req.body
     //console.log(role.role_name)
     logger.debug("Calling Create role endpoint")
     try {
         const RoleServiceInstance = Container.get(RoleService)
         const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
-        const new_role = await RoleServiceInstance.create({...role, created_by:role.role_name,created_ip_adr: req.headers.origin,last_modified_by:role.role_name,last_modified_ip_adr: req.headers.origin})
+        const new_role = await RoleServiceInstance.create({...role, created_by:user_code,created_ip_adr: req.headers.origin,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of itinerary) {
             entry = { itinerary_code: entry, role_code: new_role.role_code }
             await RoleItineraryServiceInstance.create(entry)
@@ -109,15 +111,26 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const updated = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{role_name} = req.headers
-
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+    const {role, itinerary} = req.body
     logger.debug("Calling update one  role endpoint")
     try {
         const RoleServiceInstance = Container.get(RoleService)
+        const RoleItineraryServiceInstance = Container.get(RoleItineraryService)
+       
+      
         const {id} = req.params
-        const role = await RoleServiceInstance.updated({...req.body, last_modified_by:role_name,last_modified_ip_adr: req.headers.origin},{id})
+        console.log(req.body)
+        const roleup = await RoleServiceInstance.updated({...role, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        await RoleItineraryServiceInstance.delete({role_code: role.role_code})
+        for (let entry of itinerary) {
+            entry = { itinerary_code: entry, role_code: role.role_code }
+            await RoleItineraryServiceInstance.create(entry)
+        }
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: role  })
+            .json({ message: "fetched succesfully", data: roleup  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -140,6 +153,23 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const findOneByDeviceId = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  role endpoint")
+    try {
+        const RoleServiceInstance = Container.get(RoleService)
+        const {device_id} = req.params
+        const role = await RoleServiceInstance.findOne({device_id})
+        console.log("hello")
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: role  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 export default {
     create,
     findOne,
@@ -148,5 +178,6 @@ export default {
     findByOne,
     update,
     updated,
-    deleteOne
+    deleteOne,
+    findOneByDeviceId
 }

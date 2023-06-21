@@ -37,6 +37,9 @@ const TokenSerie = sequelize.define(
         load_request_prefix :{type: Sequelize.STRING ,unique:true},
         load_request_next_number :{type : Sequelize.INTEGER},
 
+        unload_request_prefix :{type: Sequelize.STRING ,unique:true},
+        unload_request_next_number :{type : Sequelize.INTEGER},
+
 
         // NEEDS ALTER
         inventory_prefix :{type: Sequelize.STRING ,unique:true},

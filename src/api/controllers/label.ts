@@ -12,15 +12,19 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  const pageWidth = 118 * 2.83465; // Width of the page in points
-  const pageHeight = 120 * 2.83465; // Height of the page in points
 
-  const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+  // doc.rect(0, 0, doc.page.width, doc.page.height).fill('black');
+
+  // // Set the text color
+  // doc.fillColor('white');
   logger.debug('Calling Create label endpoint');
   console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
+
+    const pageWidth = 284; // Width of the page in points
+    const pageHeight = 426; // Height of the page in points
     var labelId = null;
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
     console.log(seq);
@@ -29,133 +33,99 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
     );
-    const label = await labelServiceInstance.create({
-      ...req.body,
-      lb_ref: labelId,
-      lb_cab: labelId,
-      lb_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
+    // const label = await labelServiceInstance.create({
+    //   ...req.body,
+    //   lb_ref: labelId,
+    //   lb_cab: labelId,
+    //   lb_domain: user_domain,
+    //   created_by: user_code,
+    //   created_ip_adr: req.headers.origin,
+    //   last_modified_by: user_code,
+    //   last_modified_ip_adr: req.headers.origin,
+    // });
+
+    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
+    const image = doc.openImage('./edel.jpg');
+
+    // Draw the barcode image on the PDF document
+    doc.image(image, 50, 0, {
+      fit: [180, 150], // Adjust the size of the barcode image as needed
     });
 
-    const imagePath = './logo.png';
-    console.log(req.body);
-    // Set the options for the image
-    const imageOptions = {
-      fit: [150, 150], // Size of the image
-      // align: 'center', // Center the image horizontally
-      // valign: 'top', // Align the image to the top of the page
-    };
+    doc
+      .rect(10, 80, 265, 80)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('CLIENT : ' + 'KAMEL', 20, 90)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('ADRESSE :' + 'REGAHAIA', 20, 115)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('TEL :' + '0778988767', 20, 140);
 
-    // Add the image to the document
-    // doc.image(imagePath, imageOptions);
+    // Define the second rectangle and its text lines
+    doc
+      .rect(10, 170, 265, 130)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PRODUIT :' + req.body.lb_desc, 20, 180)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('MICRONAGE/ LAIZE :' + 'INT', 20, 203)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('QTE :' + req.body.lb_qty, 20, 228)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('N° Lot:' + req.body.lb_lot, 20, 253)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('GROUPE:' + 'LBL001', 20, 278);
 
-    // Define the properties of the rectangles
-    const rectWidth = 300;
-    const rectHeight = 50;
-    const rectSpacing = 5;
-    const rectX = (doc.page.width - rectWidth) / 2;
-    let rectY = 15;
+    // Define the third rectangle and its text lines
+    doc
+      .rect(10, 310, 265, 70)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('BARCODE:', 20, 320)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('FABRIQUE EN ALGERIE', 75, 405);
 
-    // Define the texts for each rectangle
-    const texts = [
-      'REFERENCE: ' + req.body.lb_part,
-      'Total unité :' + req.body.lb_qty,
-      // '' + labelId,
-      'Description : ' + req.body.lb_desc,
-      'Groupe: ' + req.body.lb_desc,
-      'Date: ' + req.body.lb_date,
-    ];
+    bwipjs.toBuffer(
+      {
+        bcid: 'code128', // Barcode type (replace with the desired barcode format)
+        text: '12345678', // Barcode data
+        scale: 3, // Scaling factor for the barcode image
+        includetext: true, // Include the barcode text
+        height: 10,
+        width: 60,
+      },
+      function(err, png) {
+        if (err) {
+          console.log(err);
+          return;
+        }
 
-    // Set the options for the rectangle text
-    const textOptions = {
-      align: 'center',
-      valign: 'center',
-    };
+        // Load the barcode image from the generated PNG buffer
+        const image = doc.openImage(png);
 
-    for (let i = 0; i < 5; i++) {
-      let textX: number = 0;
-      let textY: number = 0;
-      // Draw the rectangle
-      doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
+        // Draw the barcode image on the PDF document
+        doc.image(image, 50, 335, {
+          fit: [5400, 40], // Adjust the size of the barcode image as needed
+        });
+        // Save the PDF document
+        doc.pipe(fs.createWriteStream('output2.pdf'));
+        doc.end();
+      },
+    );
 
-      // Calculate the position for the text
-      if (i !== 4) {
-        textX = rectX + rectWidth / 6;
-        textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
-
-        // Save the current transformation matrix
-        doc.save();
-
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-
-        // doc.restore();
-
-        // Move to the next rectangle position
-
-        rectY += rectHeight + rectSpacing;
-      } else {
-        textX = rectX + rectWidth / 6;
-        textY = 250;
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-      }
-      // textX = rectX + rectWidth / 6;
-      // textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6;
-
-      // // Save the current transformation matrix
-      // doc.save();
-
-      // // Translate to the center of the rectangle
-      // doc.translate(textX, textY);
-
-      // // Rotate the text
-      // doc.rotate(-Math.PI / 4);
-
-      // // Translate back to the original position
-      // doc.translate(-textX, -textY);
-
-      // // Add the text inside the rectangle
-      // doc
-      //   .font('Helvetica-Bold')
-      //   .fontSize(14)
-      //   .text(texts[i], textX, textY, textOptions);
-
-      // Restore the transformation matrix
-    }
-
-    // Save the PDF document
-    doc.pipe(fs.createWriteStream('output.pdf'));
-    doc.end();
-
-    const filePath = './output.pdf';
+    const filePath = './output1.pdf';
     const printerName = 'Xprinter XP-TT426B';
 
     printer
@@ -205,6 +175,95 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    const pageWidth = 284; // Width of the page in points
+    const pageHeight = 426; // Height of the page in points
+
+    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
+    const image = doc.openImage('./edel.jpg');
+
+    // Draw the barcode image on the PDF document
+    doc.image(image, 50, 0, {
+      fit: [180, 150], // Adjust the size of the barcode image as needed
+    });
+
+    doc
+      .rect(10, 80, 265, 80)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PRODUIT : ', 20, 90)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('QTE :', 20, 115)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('N° LOT :', 20, 140);
+
+    // Define the second rectangle and its text lines
+    doc
+      .rect(10, 170, 265, 80)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PAR :', 20, 180)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('DATE DE RECEPTION :', 20, 203)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PAL N° :', 20, 228);
+
+    // Define the third rectangle and its text lines
+    doc
+      .rect(10, 310, 265, 70)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('BARCODE:', 20, 320)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('FABRIQUE EN ALGERIE', 75, 405);
+
+    bwipjs.toBuffer(
+      {
+        bcid: 'code128', // Barcode type (replace with the desired barcode format)
+        text: 'barcode1', // Barcode data
+        scale: 3, // Scaling factor for the barcode image
+        includetext: true, // Include the barcode text
+        height: 10,
+        width: 72,
+      },
+      function(err, png) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+
+        // Load the barcode image from the generated PNG buffer
+        const image = doc.openImage(png);
+
+        // Draw the barcode image on the PDF document
+        doc.image(image, 50, 335, {
+          fit: [5400, 40], // Adjust the size of the barcode image as needed
+        });
+        // Save the PDF document
+        doc.pipe(fs.createWriteStream('output.pdf'));
+        doc.end();
+      },
+    );
+
+    // const filePath = './output.pdf';
+    // const printerName = 'Xprinter XP-TT426B';
+
+    // printer
+    //   .print(filePath, { printer: printerName })
+    //   .then(() => {
+    //     console.log('Printing completed.');
+    //   })
+    //   .catch(error => {
+    //     console.error('Error while printing:', error);
+    //   });
     return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
@@ -241,124 +300,83 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    const pageWidth = 118 * 2.83465; // Width of the page in points
-    const pageHeight = 120 * 2.83465; // Height of the page in points
+    const pageWidth = 284; // Width of the page in points
+    const pageHeight = 426; // Height of the page in points
 
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
-    const imagePath = './logo.png';
-    console.log(req.body);
-    // Set the options for the image
-    const imageOptions = {
-      fit: [150, 150], // Size of the image
-      // align: 'center', // Center the image horizontally
-      // valign: 'top', // Align the image to the top of the page
-    };
+    doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
+    const image = doc.openImage('./edel.jpg');
 
-    // Add the image to the document
-    // doc.image(imagePath, imageOptions);
+    // Draw the barcode image on the PDF document
+    doc.image(image, 50, 0, {
+      fit: [180, 150], // Adjust the size of the barcode image as needed
+    });
 
-    // Define the properties of the rectangles
-    const rectWidth = 300;
-    const rectHeight = 50;
-    const rectSpacing = 5;
-    const rectX = (doc.page.width - rectWidth) / 2;
-    let rectY = 15;
+    doc
+      .rect(10, 80, 265, 80)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PRODUIT : ', 20, 90)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('QTE :', 20, 115)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('N° LOT :', 20, 140);
 
-    // Define the texts for each rectangle
-    const texts = [
-      'REFERENCE: ' + req.body.lb_part,
-      'Total unité :' + req.body.lb_qty,
-      // '' + labelId,
-      'Description : ' + req.body.lb_desc,
-      'Groupe: ' + req.body.lb_desc,
-      'Date: ' + req.body.lb_date,
-    ];
+    // Define the second rectangle and its text lines
+    doc
+      .rect(10, 170, 265, 80)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PAR :', 20, 180)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('DATE DE RECEPTION :', 20, 203)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('PAL N° :', 20, 228);
 
-    // Set the options for the rectangle text
-    const textOptions = {
-      align: 'center',
-      valign: 'center',
-    };
+    // Define the third rectangle and its text lines
+    doc
+      .rect(10, 310, 265, 70)
+      .stroke()
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('BARCODE:', 20, 320)
+      .font('Helvetica-Bold')
+      .fontSize(12)
+      .text('FABRIQUE EN ALGERIE', 75, 405);
 
-    for (let i = 0; i < 5; i++) {
-      let textX: number = 0;
-      let textY: number = 0;
-      // Draw the rectangle
-      doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
+    bwipjs.toBuffer(
+      {
+        bcid: 'code128', // Barcode type (replace with the desired barcode format)
+        text: 'barcode1', // Barcode data
+        scale: 3, // Scaling factor for the barcode image
+        includetext: true, // Include the barcode text
+        height: 10,
+        width: 72,
+      },
+      function(err, png) {
+        if (err) {
+          console.log(err);
+          return;
+        }
 
-      // Calculate the position for the text
-      if (i !== 4) {
-        textX = rectX + rectWidth / 6;
-        textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
+        // Load the barcode image from the generated PNG buffer
+        const image = doc.openImage(png);
 
-        // Save the current transformation matrix
-        doc.save();
-
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-
-        // doc.restore();
-
-        // Move to the next rectangle position
-
-        rectY += rectHeight + rectSpacing;
-      } else {
-        textX = rectX + rectWidth / 6;
-        textY = 250;
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-      }
-      // textX = rectX + rectWidth / 6;
-      // textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6;
-
-      // // Save the current transformation matrix
-      // doc.save();
-
-      // // Translate to the center of the rectangle
-      // doc.translate(textX, textY);
-
-      // // Rotate the text
-      // doc.rotate(-Math.PI / 4);
-
-      // // Translate back to the original position
-      // doc.translate(-textX, -textY);
-
-      // // Add the text inside the rectangle
-      // doc
-      //   .font('Helvetica-Bold')
-      //   .fontSize(14)
-      //   .text(texts[i], textX, textY, textOptions);
-
-      // Restore the transformation matrix
-    }
-
-    // Save the PDF document
-    doc.pipe(fs.createWriteStream('output.pdf'));
-    doc.end();
+        // Draw the barcode image on the PDF document
+        doc.image(image, 50, 335, {
+          fit: [5400, 40], // Adjust the size of the barcode image as needed
+        });
+        // Save the PDF document
+        doc.pipe(fs.createWriteStream('output.pdf'));
+        doc.end();
+      },
+    );
 
     const filePath = './output.pdf';
     const printerName = 'Xprinter XP-TT426B';
@@ -465,10 +483,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const labelServiceInstance = Container.get(LabelService);
     const detail = req.body.detail;
     const palnbr = req.body.nbr;
-    const pageWidth = 118 * 2.83465; // Width of the page in points
-    const pageHeight = 120 * 2.83465; // Height of the page in points
 
-    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     for (let data of detail) {
       const label = await labelServiceInstance.update(
         { lb_pal: palnbr, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
@@ -476,132 +491,6 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
       );
     }
 
-    const imagePath = './logo.png';
-    console.log(req.body);
-    // Set the options for the image
-    const imageOptions = {
-      fit: [150, 150], // Size of the image
-      // align: 'center', // Center the image horizontally
-      // valign: 'top', // Align the image to the top of the page
-    };
-
-    // Add the image to the document
-    // doc.image(imagePath, imageOptions);
-
-    // Define the properties of the rectangles
-    const rectWidth = 300;
-    const rectHeight = 50;
-    const rectSpacing = 5;
-    const rectX = (doc.page.width - rectWidth) / 2;
-    let rectY = 15;
-
-    // Define the texts for each rectangle
-    const texts = [
-      'REFERENCE: ' + req.body.lb_part,
-      'Total unité :' + req.body.lb_qty,
-      // '' + labelId,
-      'Description : ' + req.body.lb_desc,
-      'Groupe: ' + req.body.lb_desc,
-      'Date: ' + req.body.lb_date,
-    ];
-
-    // Set the options for the rectangle text
-    const textOptions = {
-      align: 'center',
-      valign: 'center',
-    };
-
-    for (let i = 0; i < 5; i++) {
-      let textX: number = 0;
-      let textY: number = 0;
-      // Draw the rectangle
-      doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
-
-      // Calculate the position for the text
-      if (i !== 4) {
-        textX = rectX + rectWidth / 6;
-        textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
-
-        // Save the current transformation matrix
-        doc.save();
-
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-
-        // doc.restore();
-
-        // Move to the next rectangle position
-
-        rectY += rectHeight + rectSpacing;
-      } else {
-        textX = rectX + rectWidth / 6;
-        textY = 250;
-        // // Translate to the center of the rectangle
-        // doc.translate(textX, textY);
-
-        // // Rotate the text
-        // // doc.rotate(-Math.PI / 4);
-
-        // // Translate back to the original position
-        // doc.translate(-textX, -textY);
-
-        // Add the text inside the rectangle
-        doc
-          .font('Helvetica-Bold')
-          .fontSize(14)
-          .text(texts[i], textX, textY, textOptions);
-      }
-      // textX = rectX + rectWidth / 6;
-      // textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6;
-
-      // // Save the current transformation matrix
-      // doc.save();
-
-      // // Translate to the center of the rectangle
-      // doc.translate(textX, textY);
-
-      // // Rotate the text
-      // doc.rotate(-Math.PI / 4);
-
-      // // Translate back to the original position
-      // doc.translate(-textX, -textY);
-
-      // // Add the text inside the rectangle
-      // doc
-      //   .font('Helvetica-Bold')
-      //   .fontSize(14)
-      //   .text(texts[i], textX, textY, textOptions);
-
-      // Restore the transformation matrix
-    }
-
-    // Save the PDF document
-    doc.pipe(fs.createWriteStream('output.pdf'));
-    doc.end();
-
-    const filePath = './output.pdf';
-    const printerName = 'Xprinter XP-TT426B';
-
-    printer
-      .print(filePath, { printer: printerName })
-      .then(() => {
-        console.log('Printing completed.');
-      })
-      .catch(error => {
-        console.error('Error while printing:', error);
-      });
     return res.status(200).json({ message: 'fetched succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
