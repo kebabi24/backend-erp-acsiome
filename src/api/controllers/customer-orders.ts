@@ -14,7 +14,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerOrdersServiceInstance = Container.get(CustomerOrdersModel);
     const customersOrders = await customerOrdersServiceInstance.find({});
-
+    console.log('here', customersOrders);
     return res.status(200).json({ message: 'fetched succesfully', data: customersOrders });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -45,6 +45,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerOrdersServiceInstance = Container.get(CustomerOrdersModel);
     const customer = await customerOrdersServiceInstance.find({ ...req.body, lad_domain: 'acsiome' });
+    console.log(customer);
     return res.status(200).json({ message: 'fetched succesfully', data: customer });
   } catch (e) {
     logger.error('🔥 error: %o', e);
