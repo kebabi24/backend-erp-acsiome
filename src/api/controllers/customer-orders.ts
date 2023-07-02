@@ -52,9 +52,26 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const getData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all customer endpoint');
+  const { user_domain } = req.headers;
+
+  try {
+    console.log(req.body);
+    // const customerOrdersServiceInstance = Container.get(CustomerOrdersModel);
+    // const customer = await customerOrdersServiceInstance.find({ ...req.body, lad_domain: 'acsiome' });
+    // console.log(customer);
+    return res.status(200).json({ message: 'fetched succesfully', data: null });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
   findAll,
   findBy,
   findByAll,
+  getData,
 };

@@ -11,4 +11,5 @@ export default (app: Router) => {
   route.post('/find', controller.findBy);
 
   route.post('/findall', controller.findByAll);
+  route.post('/getData', controller.getData);
 };
