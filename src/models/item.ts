@@ -223,6 +223,7 @@ const Item = sequelize.define(
     oid_pt_mstr: Sequelize.STRING,
     pt_loadpacking: Sequelize.INTEGER,
     pt_salepacking: Sequelize.INTEGER,
+  
     ...base,
   },
   {

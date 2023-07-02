@@ -1,16 +1,16 @@
 import { Service, Inject, Container } from "typedi"
 
 @Service()
-export default class EmployeTimeService {
+export default class EmployeSalaryService {
     constructor(
-        @Inject("employeTimeModel")
-        private employeTimeModel: Models.EmployeTimeModel,
+        @Inject("employeSalaryModel")
+        private employeSalaryModel: Models.EmployeSalaryModel,
         @Inject("logger") private logger
     ) {}
 
     public async create(data: any): Promise<any> {
         try {
-            const employe = await this.employeTimeModel.create({ ...data })
+            const employe = await this.employeSalaryModel.create({ ...data })
             this.logger.silly("create employe mstr")
             return employe
         } catch (e) {
@@ -21,7 +21,7 @@ export default class EmployeTimeService {
 
     public async findOne(query: any): Promise<any> {
         try {
-            const employe = await this.employeTimeModel.findOne({
+            const employe = await this.employeSalaryModel.findOne({
                 where: query,
             })
             this.logger.silly("find one employe mstr")
@@ -34,7 +34,7 @@ export default class EmployeTimeService {
 
     public async find(query: any): Promise<any> {
         try {
-            const employes = await this.employeTimeModel.findAll({
+            const employes = await this.employeSalaryModel.findAll({
                 where: query,
                 
             })
@@ -48,7 +48,7 @@ export default class EmployeTimeService {
 
     public async findsum(query: any): Promise<any> {
         try {
-            const employes = await this.employeTimeModel.findAll({...query })
+            const employes = await this.employeSalaryModel.findAll({...query })
             this.logger.silly("find All employes mstr")
             return employes
         } catch (e) {
@@ -58,7 +58,7 @@ export default class EmployeTimeService {
     }
     public async update(data: any, query: any): Promise<any> {
         try {
-            const employe = await this.employeTimeModel.update(data, {
+            const employe = await this.employeSalaryModel.update(data, {
                 where: query,
             })
             this.logger.silly("update one employe mstr")
@@ -70,7 +70,7 @@ export default class EmployeTimeService {
     }
     public async delete(query: any): Promise<any> {
         try {
-            const employe = await this.employeTimeModel.destroy({
+            const employe = await this.employeSalaryModel.destroy({
                 where: query,
             })
             this.logger.silly("delete one employe mstr")

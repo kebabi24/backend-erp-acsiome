@@ -17,6 +17,7 @@ export default (app: Router) => {
   route.post('/iss-unp', controller.issUnp);
   route.post('/iss-tr', controller.issTr);
   route.post('/iss-chl', controller.issChl);
+  route.post('/iss-chlref', controller.issChlRef);
   route.post('/inventoryOfDate', controller.inventoryToDate);
   route.post('/inventoryactivity', controller.inventoryActivity);
   route.post('/inventorybyloc', controller.inventoryByLoc);

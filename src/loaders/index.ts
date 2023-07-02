@@ -127,6 +127,7 @@ export default async ({ expressApp }) => {
       { name: 'employeScoreModel', model: require('../models/employe-score').default },
       { name: 'employeJobModel', model: require('../models/employe-job').default },
       { name: 'dealModel', model: require('../models/deal').default },
+      { name: 'employeSalaryModel', model: require('../models/employe-salary').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -906,6 +907,14 @@ export default async ({ expressApp }) => {
   //   foreignKey: 'loc_loc',
   //   targetKey: 'loc_loc',
   // });
+  require('../models/employe').default.hasOne(require('../models/employe-salary').default, {
+    foreignKey: 'salary_code',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-salary').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'salary_code',
+    targetKey: 'emp_addr',
+  });
   require('../models/employe').default.hasOne(require('../models/employe-score').default, {
     foreignKey: 'emps_addr',
     sourceKey: 'emp_addr',

@@ -97,7 +97,10 @@ import Label from './routes/label';
 import repertory from './routes/repertory';
 
 import unloadRequest from './routes/unload-request';
+
 import customerOrder from './routes/customer-orders';
+
+import employeSalary from './routes/employe-salary';
 
 // guaranteed to get dependencies
 export default () => {
@@ -199,6 +202,10 @@ export default () => {
   printers(app);
   repertory(app);
   unloadRequest(app);
+
   customerOrder(app);
+
+  employeSalary(app);
+
   return app;
 };

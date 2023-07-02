@@ -36,7 +36,7 @@ export default class locationDetailService {
 
       const locationDetails = await this.locationDetailModel.findAll({
         where: query,
-        include: [{ model: this.itemModel, where: { pt_cyc_int: 1 }, required: false, left: true, right: true }],
+        include: [this.itemModel],
       });
       this.logger.silly('find All locationDetails mstr');
       return locationDetails;

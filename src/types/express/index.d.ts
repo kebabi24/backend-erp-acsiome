@@ -175,6 +175,8 @@ declare global {
     export type QualityTestBillDetails = S.Model;
     export type QualityInspectionRoutingDetails = S.Model;
     export type EmployeScoreModel = S.Model;
+    export type EmployeTimeModel = S.Model;
+    export type EmployeSalaryModel = S.Model;
     export type EmployeJobModel = S.Model;
 
     export type PjdDetailsModel = S.Model;
