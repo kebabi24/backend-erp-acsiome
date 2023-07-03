@@ -18,4 +18,5 @@ export default (app: Router) => {
   route.post('/signin', controller.signin);
   route.post('/getData', controller.getDataBack);
   route.post('/getDataTest', controller.getDataBackTest);
+  route.post('/getAllInvoice', controller.findAllInvoice);
 };

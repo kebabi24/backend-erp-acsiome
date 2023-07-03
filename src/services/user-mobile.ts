@@ -876,8 +876,24 @@ export default class UserMobileService {
             throw e
         }
     }
+// ******************** GET ALL INVOICE     **************************
+    public async getAllInvoice(query: any): Promise<any> {
+        try {
+            const invoice = await this.invoiceModel.findAll({ where: query })
+            return invoice
+        } catch (e) {
+            console.log('Error from service- getInvoice')
+            this.logger.error(e)
+            throw e
+        }
+    }
 
+    
+    
     // ******************** UPDATE ONE CUSTOMER **************************
+
+
+
     public async updateCustomer(data: any, query: any): Promise<any> {
         try {
             if(data.id){

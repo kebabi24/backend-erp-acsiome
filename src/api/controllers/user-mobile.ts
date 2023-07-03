@@ -1,7 +1,7 @@
 import UserMobileService from '../../services/user-mobile';
 import LoadRequestService from "../../services/load-request"
 import RoleService from '../../services/role';
-import { Router, Request, ponse, NextFunction } from 'express';
+import { Router, Request, ponse, NextFunction, query } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
@@ -773,6 +773,20 @@ function formatDateOnlyFromMobileToBack(timeString){
   return str
 }
 
+const findAllInvoice = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
   create,
@@ -787,4 +801,5 @@ export default {
   signin,
   getDataBack,
   getDataBackTest,
+  findAllInvoice
 };
