@@ -404,6 +404,8 @@ export default async ({ expressApp }) => {
     { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
   );
 
+
+ 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
   //   sourceKey: 'pricelist_code',

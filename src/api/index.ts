@@ -97,11 +97,8 @@ import Label from './routes/label';
 import repertory from './routes/repertory';
 
 import unloadRequest from './routes/unload-request';
-<<<<<<< HEAD
 import employeSalary from './routes/employe-salary';
-=======
 
->>>>>>> 40a080ab7cf4abc2adf65b79ef7b9e74741c6b6b
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -202,9 +199,6 @@ export default () => {
   printers(app);
   repertory(app);
   unloadRequest(app);
-<<<<<<< HEAD
   employeSalary(app);
-=======
->>>>>>> 40a080ab7cf4abc2adf65b79ef7b9e74741c6b6b
   return app;
 };
