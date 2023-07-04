@@ -175,6 +175,8 @@ declare global {
     export type QualityTestBillDetails = S.Model;
     export type QualityInspectionRoutingDetails = S.Model;
     export type EmployeScoreModel = S.Model;
+    export type EmployeTimeModel = S.Model;
+    export type EmployeSalaryModel = S.Model;
     export type EmployeJobModel = S.Model;
 
     export type PjdDetailsModel = S.Model;
@@ -182,8 +184,9 @@ declare global {
     export type DealModel = S.Model;
     export type PrinterModel = S.Model;
     export type RepertoryModel = S.Model;
-    
+
     export type unloadRequestModel = S.Model;
     export type unloadRequestDetailsModel = S.Model;
+    export type customerOrdersModel = S.Model;
   }
 }

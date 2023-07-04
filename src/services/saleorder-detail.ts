@@ -32,7 +32,9 @@ export default class SaleOrderDetailService {
 
     public async find(query: any): Promise<any> {
         try {
-            const saleorderDetails = await this.saleorderDetailModel.findAll({ where: query ,include: this.itemModel})
+            const saleorderDetails = await this.saleorderDetailModel.findAll({ order: [
+                ['sod_line', 'ASC'],
+            ], where: query ,include: this.itemModel})
             this.logger.silly("find All saleorderDetails mstr")
             return saleorderDetails
         } catch (e) {

@@ -40,7 +40,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const ih = await invoiceOrderServiceInstance.create({...invoiceOrderTemp,ith_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         for (let entry of invoiceOrderTempDetail) {
-             
+            
             entry = { ...entry,  itdh_domain:user_domain,itdh_inv_nbr: ih.ith_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
         
             await invoiceOrderDetailServiceInstance.create(entry)

@@ -223,6 +223,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
       const details = await saleOrderDetailServiceInstance.find({
         sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
+        
       });
       return res.status(200).json({
         message: 'fetched succesfully',
@@ -794,7 +795,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const sos = await sequelize.query(
-      'SELECT *  FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
+      'SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
       { replacements: [user_domain],type: QueryTypes.SELECT },
     );
 

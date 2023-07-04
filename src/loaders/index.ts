@@ -127,6 +127,7 @@ export default async ({ expressApp }) => {
       { name: 'employeScoreModel', model: require('../models/employe-score').default },
       { name: 'employeJobModel', model: require('../models/employe-job').default },
       { name: 'dealModel', model: require('../models/deal').default },
+      { name: 'employeSalaryModel', model: require('../models/employe-salary').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -232,6 +233,7 @@ export default async ({ expressApp }) => {
 
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
+      { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -370,7 +372,6 @@ export default async ({ expressApp }) => {
     targetKey: 'profile_code',
   });
   // ****
-
 
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
     foreignKey: 'role_code',
@@ -906,6 +907,14 @@ export default async ({ expressApp }) => {
   //   foreignKey: 'loc_loc',
   //   targetKey: 'loc_loc',
   // });
+  require('../models/employe').default.hasOne(require('../models/employe-salary').default, {
+    foreignKey: 'salary_code',
+    sourceKey: 'emp_addr',
+  });
+  require('../models/employe-salary').default.belongsTo(require('../models/employe').default, {
+    foreignKey: 'salary_code',
+    targetKey: 'emp_addr',
+  });
   require('../models/employe').default.hasOne(require('../models/employe-score').default, {
     foreignKey: 'emps_addr',
     sourceKey: 'emp_addr',
@@ -926,7 +935,7 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
-  //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })
@@ -936,7 +945,6 @@ export default async ({ expressApp }) => {
   //   .catch(err => {
   //     console.log(err);
   //   });
-
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

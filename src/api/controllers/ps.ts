@@ -73,8 +73,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const psServiceInstance = Container.get(PsService);
     const ps = await psServiceInstance.findby({ ...req.body,ps_domain:user_domain });
-    //console.log(ps)
-
+    
     var i = 1;
     for (let p of ps) {
       p.int01 = i;
