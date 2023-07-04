@@ -233,6 +233,7 @@ export default async ({ expressApp }) => {
 
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
+      { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -371,7 +372,6 @@ export default async ({ expressApp }) => {
     targetKey: 'profile_code',
   });
   // ****
-
 
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/inventory').default, {
     foreignKey: 'role_code',
@@ -937,7 +937,7 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
-  //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

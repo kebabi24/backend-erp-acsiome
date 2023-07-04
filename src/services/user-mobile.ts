@@ -1,5 +1,6 @@
 import { Service, Inject } from "typedi"
 import argon2 from 'argon2'
+var Crypto = require('crypto');
 @Service()
 export default class UserMobileService {
     constructor(
@@ -47,10 +48,26 @@ export default class UserMobileService {
 
 
     // ******************** CREATE **************************
+     
+    
     public async create(data: any): Promise<any> {
         try {
+            var secret_key = 'fd85b494-aaaa';
+            var secret_iv = 'smslt';
+            var encryptionMethod = 'AES-256-CBC';
+            var key = Crypto.createHash('sha512').update(secret_key, 'utf-8').digest('hex').substr(0, 32);
+            var iv = Crypto.createHash('sha512').update(secret_iv, 'utf-8').digest('hex').substr(0, 16);
+
+           
+            
+            data.password = encrypt_string(data.password, encryptionMethod, key, iv);
+            // console.log(encryptedPassword)
             const password = await argon2.hash(data.password)
-            const user = await this.userMobileModel.create({ ...data, password })
+
+            const newPassword = Crypto.createHash('md5','secret_key').update(data.password).digest("hex");
+
+            console.log(newPassword)
+            const user = await this.userMobileModel.create({ ...data })
             this.logger.silly("user mobile created")
             return user
         } catch (e) {
@@ -1048,14 +1065,14 @@ export default class UserMobileService {
             data.forEach(element => {
                 // console.log(element)
                 if(element.id) delete element.id
-                element.due_amount = element.dueamout 
+                // element.due_amount = element.dueamout 
                 //    element.period_active_day = element.periode_active_date 
-               element.progress_level = element.progresslevel 
+            //    element.progress_level = element.progresslevel 
                 //    element.the_date = element.thedate 
-               delete element.dueamount
-               delete element.periode_active_date
-               delete element.progress_level
-               delete element.thedate
+            //    delete element.dueamount
+            //    delete element.periode_active_date
+            //    delete element.progress_level
+            //    delete element.thedate
                delete element.MAJ
             });
             const invoices = await this.invoiceModel.bulkCreate(data)
@@ -1226,3 +1243,8 @@ export default class UserMobileService {
    
 }
 
+function encrypt_string(plain_text, encryptionMethod, secret, iv) {
+    var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);
+    var aes_encrypted = encryptor.update(plain_text, 'utf8', 'base64') + encryptor.final('base64');
+    return Buffer.from(aes_encrypted).toString('base64');
+  };

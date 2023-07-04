@@ -44,6 +44,7 @@ const LoadRequest = sequelize.define(
         },
         role_loc:{ type:Sequelize.STRING},
         role_site:{ type:Sequelize.STRING},
+        role_loc_from :{type:Sequelize.STRING}
     
     
         // ...base

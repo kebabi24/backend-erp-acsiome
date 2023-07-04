@@ -100,7 +100,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: '12345678', // Barcode data
+        text: 'PL-4', // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -120,12 +120,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
-        doc.pipe(fs.createWriteStream('output2.pdf'));
+        doc.pipe(fs.createWriteStream('output12.pdf'));
         doc.end();
       },
     );
 
-    const filePath = './output1.pdf';
+    const filePath = './output12.pdf';
     const printerName = 'Xprinter XP-TT426B';
 
     printer

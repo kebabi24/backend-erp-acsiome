@@ -9598,6 +9598,330 @@
 2023-05-25T17:51:52.558Z - info: Rendering (child) request finished in 2544 ms rootId=ucl1u3qwibxptib, id=l6t4kjghux1u73p, fromEmitProfile=true
 2023-05-25T17:51:54.792Z - info: Rendering request 1 finished in 4859 ms rootId=ucl1u3qwibxptib, id=ucl1u3qwibxptib, fromEmitProfile=true
 2023-05-25T20:36:58.521Z - info: fs store is loading data
+2023-07-03T10:12:22.195Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\NEW ERP\BACKEND\backend-erp-acsiome\jsreport.config.json, nodejs: 16.15.1)
+2023-07-03T10:12:22.202Z - info: Searching for available extensions in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T10:12:22.228Z - info: Extensions location cache not found, crawling directories
+2023-07-03T10:12:52.456Z - info: Found 35 extension(s)
+2023-07-03T10:12:54.066Z - info: Using extension base@3.0.1
+2023-07-03T10:12:54.090Z - info: Using extension child-templates@3.1.0
+2023-07-03T10:12:54.118Z - info: Using extension cli@3.2.3
+2023-07-03T10:12:54.245Z - info: Using extension components@3.3.0
+2023-07-03T10:12:54.293Z - info: Using extension data@3.1.0
+2023-07-03T10:12:54.317Z - info: Using extension express@3.6.0
+2023-07-03T10:13:00.764Z - info: Using extension freeze@3.0.1
+2023-07-03T10:13:00.801Z - info: Using extension fs-store@3.2.4
+2023-07-03T10:13:02.645Z - info: Using extension handlebars@3.2.1
+2023-07-03T10:13:02.677Z - info: Using extension import-export@3.2.0
+2023-07-03T10:13:03.254Z - info: Using extension jsrender@3.0.0
+2023-07-03T10:13:03.357Z - info: Using extension licensing@3.0.2
+2023-07-03T10:13:04.269Z - info: Using extension localization@3.2.1
+2023-07-03T10:13:04.289Z - info: Using extension npm@3.1.2
+2023-07-03T10:13:04.324Z - info: Using extension pdf-utils@3.7.0
+2023-07-03T10:13:04.376Z - info: Using extension reports@3.1.1
+2023-07-03T10:13:04.420Z - info: Using extension tags@3.1.1
+2023-07-03T10:13:04.481Z - info: Using extension text@3.0.0
+2023-07-03T10:13:04.502Z - info: Using extension version-control@3.1.2
+2023-07-03T10:13:04.752Z - info: Using extension assets@3.6.0
+2023-07-03T10:13:05.047Z - info: Using extension authorization@3.3.0
+2023-07-03T10:13:05.203Z - info: Using extension browser-client@3.1.1
+2023-07-03T10:13:05.308Z - info: Using extension chrome-pdf@3.3.0
+2023-07-03T10:13:05.349Z - info: Using extension docx@3.6.0
+2023-07-03T10:13:05.384Z - info: Using extension html-to-xlsx@3.3.0
+2023-07-03T10:13:08.731Z - info: html-to-xlsx detected chrome as available html engine
+2023-07-03T10:13:08.733Z - info: Using extension pptx@3.4.0
+2023-07-03T10:13:08.774Z - info: Using extension scheduling@3.0.3
+2023-07-03T10:13:09.164Z - info: Using extension scripts@3.4.0
+2023-07-03T10:13:09.193Z - info: Using extension static-pdf@3.0.1
+2023-07-03T10:13:09.221Z - info: Using extension studio@3.9.0
+2023-07-03T10:13:12.021Z - info: Using extension xlsx@3.4.0
+2023-07-03T10:13:12.980Z - info: Using extension public-templates@3.0.0
+2023-07-03T10:13:13.014Z - info: Using extension sample-template@3.2.1
+2023-07-03T10:13:13.050Z - info: Using extension studio-theme-dark@3.0.1
+2023-07-03T10:13:13.107Z - info: Using general timeout for rendering (reportTimeout: 60000)
+2023-07-03T10:13:13.108Z - info: Using fs provider for template store.
+2023-07-03T10:13:13.135Z - info: fs store is persisting using fs for D:\NEW ERP\BACKEND\backend-erp-acsiome\data
+2023-07-03T10:13:13.229Z - info: fs store is loading data
+2023-07-03T10:13:13.309Z - info: fs store is initialized successfully
+2023-07-03T10:13:13.347Z - info: Creating default express app.
+2023-07-03T10:13:14.473Z - info: jsreport server successfully started on http port: 6759
+2023-07-03T10:13:14.521Z - info: Verifying license key free
+2023-07-03T10:13:14.533Z - info: Using free license
+2023-07-03T10:13:14.555Z - info: Initializing worker threads
+2023-07-03T10:13:18.748Z - info: 2 worker threads initialized in 4193ms
+2023-07-03T10:13:18.751Z - info: Starting temp files cleanup with 180000ms threshold
+2023-07-03T10:13:18.758Z - info: reporter initialized
+2023-07-03T10:13:18.771Z - info: Render request 1 queued for execution and waiting for available worker fromEmitProfile=true, rootId=e2wwnf99sacc800, id=e2wwnf99sacc800
+2023-07-03T10:13:18.874Z - info: Starting rendering request 1 rootId=e2wwnf99sacc800, id=e2wwnf99sacc800, fromEmitProfile=true
+2023-07-03T10:13:18.876Z - info: Rendering anonymous template { recipe: chrome-pdf, engine: handlebars } rootId=e2wwnf99sacc800, id=e2wwnf99sacc800, fromEmitProfile=true
+2023-07-03T10:13:27.705Z - info: Starting rendering (child) request rootId=e2wwnf99sacc800, id=grwzrz6mi9q8iu7, fromEmitProfile=true
+2023-07-03T10:13:27.707Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=e2wwnf99sacc800, id=grwzrz6mi9q8iu7, fromEmitProfile=true
+2023-07-03T10:13:27.779Z - info: Rendering (child) request finished in 9006 ms rootId=e2wwnf99sacc800, id=grwzrz6mi9q8iu7, fromEmitProfile=true
+2023-07-03T10:13:27.784Z - info: Starting rendering (child) request rootId=e2wwnf99sacc800, id=vdyc27uw57qew9r, fromEmitProfile=true
+2023-07-03T10:13:27.785Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=e2wwnf99sacc800, id=vdyc27uw57qew9r, fromEmitProfile=true
+2023-07-03T10:13:28.647Z - info: Rendering (child) request finished in 9068 ms rootId=e2wwnf99sacc800, id=vdyc27uw57qew9r, fromEmitProfile=true
+2023-07-03T10:13:33.916Z - info: Rendering request 1 finished in 15148 ms rootId=e2wwnf99sacc800, id=e2wwnf99sacc800, fromEmitProfile=true
+2023-07-03T10:14:13.312Z - warn: Cleaning fs journal failed, will reload Unexpected end of JSON input stack=SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at parse (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-fs-store\lib\customUtils.js:83:15)
+    at Object.clean (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-fs-store\lib\journal.js:185:24)
+    at lock (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-fs-store\lib\customUtils.js:163:12)
+2023-07-03T10:52:15.018Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\NEW ERP\BACKEND\backend-erp-acsiome\jsreport.config.json, nodejs: 16.15.1)
+2023-07-03T10:52:15.022Z - info: Searching for available extensions in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T10:52:15.058Z - info: Extensions location cache contains up to date information, skipping crawling in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T10:52:17.685Z - info: Found 35 extension(s)
+2023-07-03T10:52:17.920Z - info: Using extension base@3.0.1
+2023-07-03T10:52:17.937Z - info: Using extension child-templates@3.1.0
+2023-07-03T10:52:17.955Z - info: Using extension cli@3.2.3
+2023-07-03T10:52:17.967Z - info: Using extension components@3.3.0
+2023-07-03T10:52:17.978Z - info: Using extension data@3.1.0
+2023-07-03T10:52:17.984Z - info: Using extension express@3.6.0
+2023-07-03T10:52:18.576Z - info: Using extension freeze@3.0.1
+2023-07-03T10:52:18.587Z - info: Using extension fs-store@3.2.4
+2023-07-03T10:52:18.813Z - info: Using extension handlebars@3.2.1
+2023-07-03T10:52:18.828Z - info: Using extension import-export@3.2.0
+2023-07-03T10:52:18.946Z - info: Using extension jsrender@3.0.0
+2023-07-03T10:52:18.951Z - info: Using extension licensing@3.0.2
+2023-07-03T10:52:19.036Z - info: Using extension localization@3.2.1
+2023-07-03T10:52:19.041Z - info: Using extension npm@3.1.2
+2023-07-03T10:52:19.056Z - info: Using extension pdf-utils@3.7.0
+2023-07-03T10:52:19.069Z - info: Using extension reports@3.1.1
+2023-07-03T10:52:19.083Z - info: Using extension tags@3.1.1
+2023-07-03T10:52:19.094Z - info: Using extension text@3.0.0
+2023-07-03T10:52:19.098Z - info: Using extension version-control@3.1.2
+2023-07-03T10:52:19.162Z - info: Using extension assets@3.6.0
+2023-07-03T10:52:19.204Z - info: Using extension authorization@3.3.0
+2023-07-03T10:52:19.221Z - info: Using extension browser-client@3.1.1
+2023-07-03T10:52:19.230Z - info: Using extension chrome-pdf@3.3.0
+2023-07-03T10:52:19.244Z - info: Using extension docx@3.6.0
+2023-07-03T10:52:19.257Z - info: Using extension html-to-xlsx@3.3.0
+2023-07-03T10:52:19.604Z - info: html-to-xlsx detected chrome as available html engine
+2023-07-03T10:52:19.606Z - info: Using extension pptx@3.4.0
+2023-07-03T10:52:19.612Z - info: Using extension scheduling@3.0.3
+2023-07-03T10:52:19.651Z - info: Using extension scripts@3.4.0
+2023-07-03T10:52:19.656Z - info: Using extension static-pdf@3.0.1
+2023-07-03T10:52:19.659Z - info: Using extension studio@3.9.0
+2023-07-03T10:52:19.920Z - info: Using extension xlsx@3.4.0
+2023-07-03T10:52:20.011Z - info: Using extension public-templates@3.0.0
+2023-07-03T10:52:20.019Z - info: Using extension sample-template@3.2.1
+2023-07-03T10:52:20.026Z - info: Using extension studio-theme-dark@3.0.1
+2023-07-03T10:52:20.033Z - info: Using general timeout for rendering (reportTimeout: 60000)
+2023-07-03T10:52:20.034Z - info: Using fs provider for template store.
+2023-07-03T10:52:20.058Z - info: fs store is persisting using fs for D:\NEW ERP\BACKEND\backend-erp-acsiome\data
+2023-07-03T10:52:20.079Z - info: fs store is loading data
+2023-07-03T10:52:20.191Z - info: fs store is initialized successfully
+2023-07-03T10:52:20.254Z - info: Creating default express app.
+2023-07-03T10:52:20.361Z - info: jsreport server successfully started on http port: 6759
+2023-07-03T10:52:20.376Z - info: Verifying license key free
+2023-07-03T10:52:20.418Z - info: Using free license
+2023-07-03T10:52:20.458Z - info: Initializing worker threads
+2023-07-03T10:52:21.357Z - info: 2 worker threads initialized in 899ms
+2023-07-03T10:52:21.360Z - info: Starting temp files cleanup with 180000ms threshold
+2023-07-03T10:52:21.364Z - info: reporter initialized
+2023-07-03T10:52:21.376Z - info: Render request 1 queued for execution and waiting for available worker fromEmitProfile=true, rootId=sn5ha3nbm7lmfry, id=sn5ha3nbm7lmfry
+2023-07-03T10:52:21.591Z - info: Starting rendering request 1 rootId=sn5ha3nbm7lmfry, id=sn5ha3nbm7lmfry, fromEmitProfile=true
+2023-07-03T10:52:21.593Z - info: Rendering anonymous template { recipe: chrome-pdf, engine: handlebars } rootId=sn5ha3nbm7lmfry, id=sn5ha3nbm7lmfry, fromEmitProfile=true
+2023-07-03T10:52:23.556Z - info: Starting rendering (child) request rootId=sn5ha3nbm7lmfry, id=e8nfxe46q24kx5v, fromEmitProfile=true
+2023-07-03T10:52:23.558Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=sn5ha3nbm7lmfry, id=e8nfxe46q24kx5v, fromEmitProfile=true
+2023-07-03T10:52:23.640Z - info: Rendering (child) request finished in 2258 ms rootId=sn5ha3nbm7lmfry, id=e8nfxe46q24kx5v, fromEmitProfile=true
+2023-07-03T10:52:23.644Z - info: Starting rendering (child) request rootId=sn5ha3nbm7lmfry, id=79ie6s6sfcfzda4, fromEmitProfile=true
+2023-07-03T10:52:23.648Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=sn5ha3nbm7lmfry, id=79ie6s6sfcfzda4, fromEmitProfile=true
+2023-07-03T10:52:23.720Z - info: Rendering (child) request finished in 2338 ms rootId=sn5ha3nbm7lmfry, id=79ie6s6sfcfzda4, fromEmitProfile=true
+2023-07-03T10:52:28.695Z - info: Rendering request 1 finished in 7324 ms rootId=sn5ha3nbm7lmfry, id=sn5ha3nbm7lmfry, fromEmitProfile=true
+2023-07-03T11:02:59.683Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\NEW ERP\BACKEND\backend-erp-acsiome\jsreport.config.json, nodejs: 16.15.1)
+2023-07-03T11:02:59.693Z - info: Searching for available extensions in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:02:59.719Z - info: Extensions location cache contains up to date information, skipping crawling in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:03:01.683Z - info: Found 35 extension(s)
+2023-07-03T11:03:02.412Z - info: Using extension base@3.0.1
+2023-07-03T11:03:02.446Z - info: Using extension child-templates@3.1.0
+2023-07-03T11:03:02.462Z - info: Using extension cli@3.2.3
+2023-07-03T11:03:02.480Z - info: Using extension components@3.3.0
+2023-07-03T11:03:02.490Z - info: Using extension data@3.1.0
+2023-07-03T11:03:02.496Z - info: Using extension express@3.6.0
+2023-07-03T11:03:03.904Z - info: Using extension freeze@3.0.1
+2023-07-03T11:03:03.952Z - info: Using extension fs-store@3.2.4
+2023-07-03T11:03:04.254Z - info: Using extension handlebars@3.2.1
+2023-07-03T11:03:04.296Z - info: Using extension import-export@3.2.0
+2023-07-03T11:03:04.494Z - info: Using extension jsrender@3.0.0
+2023-07-03T11:03:04.505Z - info: Using extension licensing@3.0.2
+2023-07-03T11:03:04.675Z - info: Using extension localization@3.2.1
+2023-07-03T11:03:04.701Z - info: Using extension npm@3.1.2
+2023-07-03T11:03:04.719Z - info: Using extension pdf-utils@3.7.0
+2023-07-03T11:03:04.761Z - info: Using extension reports@3.1.1
+2023-07-03T11:03:04.811Z - info: Using extension tags@3.1.1
+2023-07-03T11:03:04.832Z - info: Using extension text@3.0.0
+2023-07-03T11:03:04.845Z - info: Using extension version-control@3.1.2
+2023-07-03T11:03:04.910Z - info: Using extension assets@3.6.0
+2023-07-03T11:03:04.950Z - info: Using extension authorization@3.3.0
+2023-07-03T11:03:04.970Z - info: Using extension browser-client@3.1.1
+2023-07-03T11:03:04.979Z - info: Using extension chrome-pdf@3.3.0
+2023-07-03T11:03:04.998Z - info: Using extension docx@3.6.0
+2023-07-03T11:03:05.010Z - info: Using extension html-to-xlsx@3.3.0
+2023-07-03T11:03:05.802Z - info: html-to-xlsx detected chrome as available html engine
+2023-07-03T11:03:05.807Z - info: Using extension pptx@3.4.0
+2023-07-03T11:03:05.820Z - info: Using extension scheduling@3.0.3
+2023-07-03T11:03:05.897Z - info: Using extension scripts@3.4.0
+2023-07-03T11:03:05.901Z - info: Using extension static-pdf@3.0.1
+2023-07-03T11:03:05.909Z - info: Using extension studio@3.9.0
+2023-07-03T11:03:06.182Z - info: Using extension xlsx@3.4.0
+2023-07-03T11:03:06.260Z - info: Using extension public-templates@3.0.0
+2023-07-03T11:03:06.265Z - info: Using extension sample-template@3.2.1
+2023-07-03T11:03:06.271Z - info: Using extension studio-theme-dark@3.0.1
+2023-07-03T11:03:06.279Z - info: Using general timeout for rendering (reportTimeout: 60000)
+2023-07-03T11:03:06.280Z - info: Using fs provider for template store.
+2023-07-03T11:03:06.300Z - info: fs store is persisting using fs for D:\NEW ERP\BACKEND\backend-erp-acsiome\data
+2023-07-03T11:03:06.350Z - info: fs store is loading data
+2023-07-03T11:03:06.503Z - info: fs store is initialized successfully
+2023-07-03T11:03:06.547Z - info: Creating default express app.
+2023-07-03T11:03:06.605Z - info: jsreport server successfully started on http port: 6759
+2023-07-03T11:03:06.608Z - info: Verifying license key free
+2023-07-03T11:03:06.610Z - info: Using free license
+2023-07-03T11:03:06.617Z - info: Initializing worker threads
+2023-07-03T11:03:07.469Z - info: 2 worker threads initialized in 853ms
+2023-07-03T11:03:07.478Z - info: Starting temp files cleanup with 180000ms threshold
+2023-07-03T11:03:07.493Z - info: reporter initialized
+2023-07-03T11:03:07.507Z - info: Render request 1 queued for execution and waiting for available worker fromEmitProfile=true, rootId=t4akegi9d0fahbh, id=t4akegi9d0fahbh
+2023-07-03T11:03:07.718Z - info: Starting rendering request 1 rootId=t4akegi9d0fahbh, id=t4akegi9d0fahbh, fromEmitProfile=true
+2023-07-03T11:03:07.720Z - info: Rendering anonymous template { recipe: chrome-pdf, engine: handlebars } rootId=t4akegi9d0fahbh, id=t4akegi9d0fahbh, fromEmitProfile=true
+2023-07-03T11:03:10.089Z - info: Starting rendering (child) request rootId=t4akegi9d0fahbh, id=j7cboj29shevmot, fromEmitProfile=true
+2023-07-03T11:03:10.095Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=t4akegi9d0fahbh, id=j7cboj29shevmot, fromEmitProfile=true
+2023-07-03T11:03:10.398Z - info: Rendering (child) request finished in 2882 ms rootId=t4akegi9d0fahbh, id=j7cboj29shevmot, fromEmitProfile=true
+2023-07-03T11:03:10.404Z - info: Starting rendering (child) request rootId=t4akegi9d0fahbh, id=i8by4acaqbnftn2, fromEmitProfile=true
+2023-07-03T11:03:10.412Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=t4akegi9d0fahbh, id=i8by4acaqbnftn2, fromEmitProfile=true
+2023-07-03T11:03:10.695Z - info: Rendering (child) request finished in 3073 ms rootId=t4akegi9d0fahbh, id=i8by4acaqbnftn2, fromEmitProfile=true
+2023-07-03T11:03:16.160Z - info: Rendering request 1 finished in 8659 ms rootId=t4akegi9d0fahbh, id=t4akegi9d0fahbh, fromEmitProfile=true
+2023-07-03T11:13:39.298Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\NEW ERP\BACKEND\backend-erp-acsiome\jsreport.config.json, nodejs: 16.15.1)
+2023-07-03T11:13:39.303Z - info: Searching for available extensions in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:13:39.324Z - info: Extensions location cache contains up to date information, skipping crawling in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:13:41.342Z - info: Found 35 extension(s)
+2023-07-03T11:13:41.694Z - info: Using extension base@3.0.1
+2023-07-03T11:13:41.711Z - info: Using extension child-templates@3.1.0
+2023-07-03T11:13:41.721Z - info: Using extension cli@3.2.3
+2023-07-03T11:13:41.729Z - info: Using extension components@3.3.0
+2023-07-03T11:13:41.740Z - info: Using extension data@3.1.0
+2023-07-03T11:13:41.744Z - info: Using extension express@3.6.0
+2023-07-03T11:13:42.463Z - info: Using extension freeze@3.0.1
+2023-07-03T11:13:42.473Z - info: Using extension fs-store@3.2.4
+2023-07-03T11:13:42.847Z - info: Using extension handlebars@3.2.1
+2023-07-03T11:13:42.858Z - info: Using extension import-export@3.2.0
+2023-07-03T11:13:42.992Z - info: Using extension jsrender@3.0.0
+2023-07-03T11:13:42.997Z - info: Using extension licensing@3.0.2
+2023-07-03T11:13:43.086Z - info: Using extension localization@3.2.1
+2023-07-03T11:13:43.091Z - info: Using extension npm@3.1.2
+2023-07-03T11:13:43.097Z - info: Using extension pdf-utils@3.7.0
+2023-07-03T11:13:43.108Z - info: Using extension reports@3.1.1
+2023-07-03T11:13:43.118Z - info: Using extension tags@3.1.1
+2023-07-03T11:13:43.128Z - info: Using extension text@3.0.0
+2023-07-03T11:13:43.135Z - info: Using extension version-control@3.1.2
+2023-07-03T11:13:43.201Z - info: Using extension assets@3.6.0
+2023-07-03T11:13:43.263Z - info: Using extension authorization@3.3.0
+2023-07-03T11:13:43.347Z - info: Using extension browser-client@3.1.1
+2023-07-03T11:13:43.363Z - info: Using extension chrome-pdf@3.3.0
+2023-07-03T11:13:43.395Z - info: Using extension docx@3.6.0
+2023-07-03T11:13:43.422Z - info: Using extension html-to-xlsx@3.3.0
+2023-07-03T11:13:43.825Z - info: html-to-xlsx detected chrome as available html engine
+2023-07-03T11:13:43.828Z - info: Using extension pptx@3.4.0
+2023-07-03T11:13:43.840Z - info: Using extension scheduling@3.0.3
+2023-07-03T11:13:43.895Z - info: Using extension scripts@3.4.0
+2023-07-03T11:13:43.902Z - info: Using extension static-pdf@3.0.1
+2023-07-03T11:13:43.909Z - info: Using extension studio@3.9.0
+2023-07-03T11:13:44.286Z - info: Using extension xlsx@3.4.0
+2023-07-03T11:13:44.551Z - info: Using extension public-templates@3.0.0
+2023-07-03T11:13:44.627Z - info: Using extension sample-template@3.2.1
+2023-07-03T11:13:44.645Z - info: Using extension studio-theme-dark@3.0.1
+2023-07-03T11:13:44.684Z - info: Using general timeout for rendering (reportTimeout: 60000)
+2023-07-03T11:13:44.721Z - info: Using fs provider for template store.
+2023-07-03T11:13:44.797Z - info: fs store is persisting using fs for D:\NEW ERP\BACKEND\backend-erp-acsiome\data
+2023-07-03T11:13:44.829Z - info: fs store is loading data
+2023-07-03T11:13:45.152Z - info: fs store is initialized successfully
+2023-07-03T11:13:45.211Z - info: Creating default express app.
+2023-07-03T11:13:45.290Z - info: jsreport server successfully started on http port: 6759
+2023-07-03T11:13:45.310Z - info: Verifying license key free
+2023-07-03T11:13:45.345Z - info: Using free license
+2023-07-03T11:13:45.357Z - info: Initializing worker threads
+2023-07-03T11:13:46.427Z - info: 2 worker threads initialized in 1069ms
+2023-07-03T11:13:46.429Z - info: Starting temp files cleanup with 180000ms threshold
+2023-07-03T11:13:46.433Z - info: reporter initialized
+2023-07-03T11:13:46.444Z - info: Render request 1 queued for execution and waiting for available worker fromEmitProfile=true, rootId=unmlhze6efdcwxf, id=unmlhze6efdcwxf
+2023-07-03T11:13:46.684Z - info: Starting rendering request 1 rootId=unmlhze6efdcwxf, id=unmlhze6efdcwxf, fromEmitProfile=true
+2023-07-03T11:13:46.687Z - info: Rendering anonymous template { recipe: chrome-pdf, engine: handlebars } rootId=unmlhze6efdcwxf, id=unmlhze6efdcwxf, fromEmitProfile=true
+2023-07-03T11:13:49.891Z - info: Starting rendering (child) request rootId=unmlhze6efdcwxf, id=7m4iupmtigv1tyw, fromEmitProfile=true
+2023-07-03T11:13:49.917Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=unmlhze6efdcwxf, id=7m4iupmtigv1tyw, fromEmitProfile=true
+2023-07-03T11:13:50.047Z - info: Rendering (child) request finished in 3588 ms rootId=unmlhze6efdcwxf, id=7m4iupmtigv1tyw, fromEmitProfile=true
+2023-07-03T11:13:50.055Z - info: Starting rendering (child) request rootId=unmlhze6efdcwxf, id=jvzmpdz4ww1gfgy, fromEmitProfile=true
+2023-07-03T11:13:50.102Z - info: Rendering anonymous template { recipe: html, engine: handlebars } rootId=unmlhze6efdcwxf, id=jvzmpdz4ww1gfgy, fromEmitProfile=true
+2023-07-03T11:13:50.739Z - info: Rendering (child) request finished in 4151 ms rootId=unmlhze6efdcwxf, id=jvzmpdz4ww1gfgy, fromEmitProfile=true
+2023-07-03T11:13:56.184Z - info: Rendering request 1 finished in 9741 ms rootId=unmlhze6efdcwxf, id=unmlhze6efdcwxf, fromEmitProfile=true
+2023-07-03T11:21:09.060Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\NEW ERP\BACKEND\backend-erp-acsiome\jsreport.config.json, nodejs: 16.15.1)
+2023-07-03T11:21:09.089Z - info: Searching for available extensions in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:21:09.220Z - info: Extensions location cache contains up to date information, skipping crawling in D:\NEW ERP\BACKEND\backend-erp-acsiome\
+2023-07-03T11:21:11.498Z - info: Found 35 extension(s)
+2023-07-03T11:21:11.686Z - info: Using extension base@3.0.1
+2023-07-03T11:21:11.690Z - info: Using extension child-templates@3.1.0
+2023-07-03T11:21:11.694Z - info: Using extension cli@3.2.3
+2023-07-03T11:21:11.699Z - info: Using extension components@3.3.0
+2023-07-03T11:21:11.702Z - info: Using extension data@3.1.0
+2023-07-03T11:21:11.704Z - info: Using extension express@3.6.0
+2023-07-03T11:21:11.711Z - info: Using extension freeze@3.0.1
+2023-07-03T11:21:11.715Z - info: Using extension fs-store@3.2.4
+2023-07-03T11:21:11.726Z - info: Using extension handlebars@3.2.1
+2023-07-03T11:21:11.733Z - info: Using extension import-export@3.2.0
+2023-07-03T11:21:11.737Z - info: Using extension jsrender@3.0.0
+2023-07-03T11:21:11.739Z - info: Using extension licensing@3.0.2
+2023-07-03T11:21:11.742Z - info: Using extension localization@3.2.1
+2023-07-03T11:21:11.744Z - info: Using extension npm@3.1.2
+2023-07-03T11:21:11.754Z - info: Using extension pdf-utils@3.7.0
+2023-07-03T11:21:11.757Z - info: Using extension reports@3.1.1
+2023-07-03T11:21:11.765Z - info: Using extension tags@3.1.1
+2023-07-03T11:21:11.769Z - info: Using extension text@3.0.0
+2023-07-03T11:21:11.771Z - info: Using extension version-control@3.1.2
+2023-07-03T11:21:11.776Z - info: Using extension assets@3.6.0
+2023-07-03T11:21:11.786Z - info: Using extension authorization@3.3.0
+2023-07-03T11:21:11.790Z - info: Using extension browser-client@3.1.1
+2023-07-03T11:21:11.793Z - info: Using extension chrome-pdf@3.3.0
+2023-07-03T11:21:11.807Z - info: Using extension docx@3.6.0
+2023-07-03T11:21:11.819Z - info: Using extension html-to-xlsx@3.3.0
+2023-07-03T11:21:11.833Z - info: html-to-xlsx detected chrome as available html engine
+2023-07-03T11:21:11.836Z - info: Using extension pptx@3.4.0
+2023-07-03T11:21:11.842Z - info: Using extension scheduling@3.0.3
+2023-07-03T11:21:11.852Z - info: Using extension scripts@3.4.0
+2023-07-03T11:21:11.854Z - info: Using extension static-pdf@3.0.1
+2023-07-03T11:21:11.856Z - info: Using extension studio@3.9.0
+2023-07-03T11:21:11.922Z - info: Using extension xlsx@3.4.0
+2023-07-03T11:21:11.927Z - info: Using extension public-templates@3.0.0
+2023-07-03T11:21:11.934Z - info: Using extension sample-template@3.2.1
+2023-07-03T11:21:11.938Z - info: Using extension studio-theme-dark@3.0.1
+2023-07-03T11:21:11.941Z - info: Using general timeout for rendering (reportTimeout: 60000)
+2023-07-03T11:21:11.942Z - info: Using fs provider for template store.
+2023-07-03T11:21:11.952Z - info: fs store is persisting using fs for D:\NEW ERP\BACKEND\backend-erp-acsiome\data
+2023-07-03T11:21:12.074Z - info: fs store is loading data
+2023-07-03T11:21:12.210Z - info: fs store is initialized successfully
+2023-07-03T11:21:12.268Z - info: Creating default express app.
+2023-07-03T11:21:12.371Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:333:30)
+    at ListenerCollection.fire (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-07-03T11:21:12.387Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1372:16)
+    at listenInCluster (node:net:1420:12)
+    at Server.listen (node:net:1508:7)
+    at D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:333:30)
+    at ListenerCollection.fire (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-07-03T14:37:18.415Z - info: fs store is loading data
+2023-07-03T14:37:18.972Z - info: fs store is loading data
+2023-07-04T13:19:19.511Z - info: fs store is loading data
+2023-07-04T13:19:19.619Z - info: fs store is loading data
 2023-06-12T13:20:18.315Z - info: Initializing jsreport (version: 3.10.0, configuration file: D:\ERP-AXIOM\backend\jsreport.config.json, nodejs: 16.11.1)
 2023-06-12T13:20:18.317Z - info: Searching for available extensions in D:\ERP-AXIOM\backend\
 2023-06-12T13:20:18.333Z - info: Extensions location cache C:\Users\ADMINI~1\AppData\Local\Temp\jsreport\core\locations.json contains older information, crawling

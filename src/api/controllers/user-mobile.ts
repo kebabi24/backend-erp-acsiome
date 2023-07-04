@@ -1,7 +1,8 @@
 import UserMobileService from '../../services/user-mobile';
 import LoadRequestService from "../../services/load-request"
+import UnloadRequestService from "../../services/unload-request"
 import RoleService from '../../services/role';
-import { Router, Request, ponse, NextFunction, query } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
@@ -418,6 +419,15 @@ const getDataBack = async function(socket) {
     console.log("Data keys :\n ")
     console.log(Object.keys(data))
     
+    //  USER MOBILE  
+    if(data.userMobile){
+      console.log("UPDATING USER MOBILE")
+      let user = data.userMobile
+      if(user.id) delete user.id
+      const updatedUser = await this.userMobileServiceInstance.updated(user , {user_mobile_code : user.user_mobile_code})
+      console.log("UPDATING USER MOBILE END")
+    } 
+    
     // CUSTOMERS
     if(data.customers.length >0){
       console.log("CUSTOMERS CREATION ")
@@ -465,23 +475,28 @@ const getDataBack = async function(socket) {
       const invoicesLines = data.invoicesLines
       let invoicesToCreate = []
       let invoicesLinesToCreate = []
-      
+     
       for(const invoice of invoices){
         if(invoice.MAJ == 0) {
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
           delete invoice.MAJ
+          console.log("INVOICE TO CREATE")
+          // console.log(Object.keys(invoice))
+          // console.log(Object.values(invoice))
           invoicesToCreate.push(invoice)
           for (const line of invoicesLines){
             if(line.invoice_code === invoice.invoice_code) invoicesLinesToCreate.push(line)
           }
         }else if(invoice.MAJ == 2){
           console.log("UPDATING ONE INVOICE")
-          console.log(invoice)
+          
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
+          delete invoice.id 
+          delete invoice.MAJ
           const udpatedInvoice = await userMobileServiceInstanse.updateInvoice(
-            {invoice},{invoice_code:invoice.invoice_code});
+            invoice,{invoice_code:invoice.invoice_code});
           console.log("UPDATING ONE INVOICE END")
         }
       }
@@ -611,8 +626,29 @@ const getDataBack = async function(socket) {
       
     }
 
-    // return console.error("EXECUTION END");
+    
 
+     console.log("CREATING UNLOAD REQUESTS AND THEIR DETAILS")
+     if(data.unloadRequests){
+       const unloadRequestes = data.unloadRequests
+       const unloadRequestsDetails = data.unloadRequestsDetails
+       unloadRequestes.forEach(load => {
+        load.date_creation = formatDateFromMobileToBackAddTimezone(load.date_creation)
+       });
+       unloadRequestsDetails.forEach(detail => {
+        if(detail.date_expiration != null || detail.date_expiration != ""){
+          detail.date_expiration = formatDateOnlyFromMobileToBack(detail.date_expiration)
+        }
+       });
+       const loadRequestService = Container.get(UnloadRequestService)
+       const createdUnloadRequests = await loadRequestService.createMultipleUnoadRequests(unloadRequestes)
+       if(createdUnloadRequests){
+         
+         const createdUnloadRequestsDetails = await loadRequestService.createMultipleUnoadRequestsDetails(unloadRequestsDetails)
+        }
+      }
+      console.log("CREATING UNLOAD REQUESTS AND THEIR DETAILS END ")
+      
     // SERVICE
     // CREATED FROM BACKEDN
      const {service , service_creation} = data
@@ -633,12 +669,10 @@ const getDataBack = async function(socket) {
         // CREATED FROM MOBILE  // false  
         console.log("CREATING SERVICE")
         delete service.id
-        console.log(service)
         service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date)
         service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date)
         service.service_period_activate_date = formatDateOnlyFromMobileToBack( service.service_period_activate_date)
         service.service_open = false
-        console.log(service)
         const createdService = await userMobileServiceInstanse.createService(service)
         console.log("CREATING SERVICE END")
     }
@@ -781,6 +815,8 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   const{user_domain} = req.headers
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
+
+
 
     console.log(req.body);
     if (req.body.site == '*') {
@@ -936,6 +972,22 @@ const findAllVisits = async (req: Request, res: Response, next: NextFunction) =>
     return next(e);
   }
 };
+// ********************** FIND ONE USER MOBILE BY CODE *************
+const findUserPassword = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  user endpoint');
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+    const { user_mobile_code } = req.params;
+    const user = await userMobileServiceInstance.findOne({ user_mobile_code: user_mobile_code });
+
+    return res.status(200).json({data: user.password });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -954,5 +1006,6 @@ export default {
   findByInvoiceLine,
   findPaymentBy,
   findVisitBy,
-  findAllVisits
+  findAllVisits,
+  findUserPassword,
 };

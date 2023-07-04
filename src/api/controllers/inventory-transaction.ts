@@ -452,6 +452,7 @@ console.log(user_domain)
         ld_ref:item.tr_ref,
         ld_domain: user_domain,
       });
+      console.log(ld1)
       if (ld1)
         await locationDetailServiceInstance.update(
           {
