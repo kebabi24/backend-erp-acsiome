@@ -121,12 +121,12 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         
         
         const user_mobile_code = loadRequest.user_mobile_code
-        const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
+        const role = await loadRequestService.getRole({role_code :loadRequest.role_code })
         const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , loadRequest.role_site, loadRequest.role_loc)
         
         return res
             .status(200)
-            .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData })
+            .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData , role: role })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -405,6 +405,44 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     }
 }
 
+const findLoadRequestsBetweenDates = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling findLoadRequestsBetweenDates endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const {startDate , endDate} = req.body
+        const loadRequests = await loadRequestService.getLoadRequestsBetweenDates(startDate,endDate)
+        return res
+            .status(200)
+            .json({ message: "found all load requests", data: loadRequests  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  code endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const load_request_code = req.params.load_request_code
+        const loadRequestLines = await loadRequestService.findAllLoadRequestLines(load_request_code)
+        const loadRequestDetails= await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load_request_code)
+
+        console.log(loadRequestLines)
+        console.log("********")
+        console.log(loadRequestDetails)
+        return res
+            .status(200)
+            .json({ message: "found all load request lines", data: {loadRequestLines , loadRequestDetails}  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+
 function formatDateFromMobileToBackAddTimezone(timeString){
     let elements = timeString.split(" ") 
     let dateComponents = elements[0].split("-")
@@ -434,6 +472,8 @@ export default {
     findAllLoadRequeusts20,
     findAllLoadRequest20Details,
     updateLoadRequests4O,
+    findLoadRequestsBetweenDates,
+    findAllLoadRequestLinesDetails
 }
 
 // validation 0-10   

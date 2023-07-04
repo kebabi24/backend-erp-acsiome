@@ -1,8 +1,8 @@
 
-import { Sequelize } from "sequelize/types"
+
 import { Service, Inject } from "typedi"
 import ProductPageService from "./product-page";
-const { Op } = require("sequelize");
+import { Op, Sequelize } from 'sequelize';
 
 @Service()
 export default class LoadRequestService {
@@ -361,12 +361,14 @@ export default class LoadRequestService {
                     // GET PRODUCT DATA 
                     const product = await this.itemModel.findOne({
                         where :{pt_part : productd.dataValues.product_code},
-                        attributes:['pt_desc1', 'pt_price','pt_part']
+                        attributes:['pt_desc1', 'pt_price','pt_part','pt_um']
                     })
 
                     // GET PRODUCT QUANTITY STORED
                     // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
-                    const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
+                    // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
+                    console.log("loc from : "+load_request.role_loc_from)
+                    const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from,site,product.pt_part)
                     
                     // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES 
                     var index = -1
@@ -382,12 +384,15 @@ export default class LoadRequestService {
                         let lots = []
                         let qt_eff = 0 
                         for(const element of details) {
-                            const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
+                            // const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
+                            const qnt = await this.getProductQuantityPerLot(load_request.role_loc_from,site,element.product_code,element.dataValues.lot )
                             console.log(qnt)
                             lots.push({
                                 lot_code :element.dataValues.lot,
                                 qnt_lot:qnt.dataValues.ld_qty_oh,
-                                qt_effected : element.dataValues.qt_effected
+                                qt_effected : element.dataValues.qt_effected,
+                                ld_status :qnt.dataValues.ld_status,
+                                ld_expire :qnt.dataValues.ld_expire
                             })
                             qt_eff += element.dataValues.qt_effected
                         };
@@ -539,7 +544,7 @@ export default class LoadRequestService {
                 where : {
                     ld_loc: ld_loc, ld_part: product_code, ld_site : ld_site,ld_lot : lot
                 },
-                attributes: ["ld_qty_oh"]
+                attributes: ["ld_qty_oh", "ld_status","ld_expire"]
             })
             
             this.logger.silly("quantity sum calculated")
@@ -549,4 +554,27 @@ export default class LoadRequestService {
             throw e
         }
     }
+
+    public async getLoadRequestsBetweenDates(startDate: any, endDate : any ): Promise<any> {
+        try {
+
+             const loadRequests = await this.loadReuestModel.findAll({
+                where: Sequelize.and(
+                // {del_comp  :{[Op.not]: "null"}},
+                { date_creation: { [Op.gte]: new Date(startDate) } },
+                { date_creation: { [Op.lte]: new Date(endDate) } },
+                )
+            });
+                    
+            this.logger.silly("found all loadrequests")
+            return loadRequests
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
+
+    
 }

@@ -18,6 +18,7 @@ const BarcodeInfos = sequelize.define(
             unique: true
 
         },
+        //add field : code etiq 
         item:{type:Sequelize.STRING},
         description:{type:Sequelize.STRING},
         start:{type: Sequelize.INTEGER},

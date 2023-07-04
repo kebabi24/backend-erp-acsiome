@@ -10,6 +10,7 @@ export default (app: Router) => {
   route.get('/findAllwithDetails', controller.findAllwithDetails);
   route.post('/', controller.create);
   route.get('/:user_mobile_code', controller.findOne);
+  route.get('/getPassword/:user_mobile_code', controller.findUserPassword);
   route.post('/find', controller.findBy);
   route.post('/findone', controller.findByOne);
   route.put('/up:user_mobile_code', controller.updated);
