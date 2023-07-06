@@ -39,7 +39,18 @@ export default class workroutingService {
             throw e
         }
     }
-
+    public async finddist(query: any): Promise<any> {
+        try {
+            const ros = await this.workroutingModel.findAll({...query }
+               
+        )
+            this.logger.silly("find All ros mstr")
+            return ros
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async findsome(query: any): Promise<any> {
         try {
             const ros = await this.workroutingModel.findAll( {attributes: ['ro_routing',  'ro_op'], where: query })
