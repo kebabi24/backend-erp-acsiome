@@ -49,7 +49,7 @@ const Item = sequelize.define(
     pt_plan_ord: { type: Sequelize.BOOLEAN, defaultValue: false },
     pt_mrp: { type: Sequelize.BOOLEAN, defaultValue: false },
     pt_ord_pol: Sequelize.STRING,
-    pt_ord_qty: { type: Sequelize.DECIMAL, defaultValue: 0 },
+    pt_ord_qty: { type: Sequelize.DECIMAL, defaultValue: 1 },
     pt_ord_per: Sequelize.INTEGER,
     pt_sfty_stk: { type: Sequelize.DECIMAL, defaultValue: 0 },
     pt_sfty_time: { type: Sequelize.DECIMAL, defaultValue: 0 },

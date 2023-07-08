@@ -69,6 +69,7 @@ declare global {
     export type OperationHistoryModel = S.Model;
     export type ReasonModel = S.Model;
     export type FraisModel = S.Model;
+    export type FraisDetailModel = S.Model;
     export type JobModel = S.Model;
     export type JobDetailModel = S.Model;
     export type ToolModel = S.Model;

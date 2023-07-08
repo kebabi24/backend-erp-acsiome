@@ -174,29 +174,46 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     for (let ro of ros) {
 
        // console.log(ro.ro_routing)
-        let lbr_tl = 0
-        let bdn_tl = 0
-
-        const rops = await workroutingServiceInstance.find({  ro_routing:ro.ro_routing ,ro_domain: user_domain})
-
-        for(let rop of rops ) {
-            const wc = await workCenterServiceInstance.findOne({wc_domain: user_domain, wc_wkctr: rop.ro_wkctr,wc_mch:rop.ro_mch})
-              lbr_tl = lbr_tl + ( (1 / Number(rop.ro_run) * Number(wc.wc_lbr_rate) * Number(wc.wc_men_mch) ) + (Number(rop.ro_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)))
-              bdn_tl = bdn_tl + ( (1/ Number(rop.ro_run)) + Number(rop.ro_setup)*Number(wc.wc_bdn_rate))        
-        }
-
        
+
+
         const items = await itemServiceInstance.find({ pt_routing: ro.ro_routing ,pt_domain:user_domain });
         var old_lbr = 0
         var old_bdn = 0 
-      for (let item of items) {
-          console.log(item.pt_part,item.pt_routing )
-          const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
-          if (scts!= null) {  old_lbr = scts.sct_lbr_tl 
-         old_bdn = scts.sct_bdn_tl} 
-          result.push({id: i, site:req.body.site,sim:req.body.type,routing: ro.ro_routing, part:item.pt_part,desc: item.pt_desc1, old_lbr : old_lbr, old_bdn: old_bdn,lbr: Number(lbr_tl.toFixed(2)),bdn:  Number(bdn_tl.toFixed(2))})
-          i = i + 1
-      }
+        let lbr_tl = 0
+        let bdn_tl = 0
+         for (let item of items) {    
+        const rops = await workroutingServiceInstance.find({  ro_routing:item.pt_routing ,ro_domain: user_domain})
+
+        for(let rop of rops ) {
+            const wc = await workCenterServiceInstance.findOne({wc_domain: user_domain, wc_wkctr: rop.ro_wkctr,wc_mch:rop.ro_mch})
+              lbr_tl = lbr_tl + ( (1 / Number(rop.ro_run) * Number(wc.wc_lbr_rate) * Number(wc.wc_men_mch) ) + ((Number(rop.ro_setup)/ Number(item.pt_ord_qty)) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)))
+              bdn_tl = bdn_tl + ( (1/ Number(rop.ro_run)) + (Number(rop.ro_setup) / Number(item.pt_ord_qty))*Number(wc.wc_bdn_rate))        
+        }
+            console.log(item.pt_part,item.pt_routing )
+            const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
+            if (scts!= null) {  old_lbr = scts.sct_lbr_tl 
+            old_bdn = scts.sct_bdn_tl} 
+            else {
+                old_lbr = 0
+            old_bdn = 0
+            }
+            result.push({id: i, site:req.body.site,sim:req.body.type,routing: ro.ro_routing, part:item.pt_part,desc: item.pt_desc1, old_lbr : old_lbr, old_bdn: old_bdn,lbr: Number(lbr_tl.toFixed(2)),bdn:  Number(bdn_tl.toFixed(2))})
+            i = i + 1
+        }
+       
+    //     const items = await itemServiceInstance.find({ pt_routing: ro.ro_routing ,pt_domain:user_domain });
+    //     var old_lbr = 0
+    //     var old_bdn = 0 
+    //   for (let item of items) {
+    //       console.log(item.pt_part,item.pt_routing )
+    //       const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
+    //       if (scts!= null) {  old_lbr = scts.sct_lbr_tl 
+    //      old_bdn = scts.sct_bdn_tl} 
+    //       result.push({id: i, site:req.body.site,sim:req.body.type,routing: ro.ro_routing, part:item.pt_part,desc: item.pt_desc1, old_lbr : old_lbr, old_bdn: old_bdn,lbr: Number(lbr_tl.toFixed(2)),bdn:  Number(bdn_tl.toFixed(2))})
+    //       i = i + 1
+    //   }
+
     }
       //  console.log("herehere",result)
         return res

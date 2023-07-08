@@ -12,7 +12,7 @@ import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import purchaseOrderService from '../../services/purchase-order';
 import AddressService from '../../services/address';
-
+import {Op, Sequelize } from 'sequelize';
 import { generatePdf } from '../../reporting/generator';
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -1144,6 +1144,39 @@ const findGroupRCP = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+const findGroupAmt = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
+
+  const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+  try {
+    const prhs = await purchaseReceiveServiceInstance.findspec({
+      attributes: ['prh_receiver', 'prh_rcp_date', 'prh_vend', [Sequelize.fn('sum', Sequelize.literal('prh_rcvd * prh_pur_cost')), 'total_amt']],
+      group: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
+
+      raw: true,
+    });
+    var i = 1;
+    let result = [];
+    for (let prh of prhs) {
+      result.push({
+        id: i,
+        prh_receiver: prh.prh_receiver,
+        prh_rcp_date: prh.prh_rcp_date,
+        prh_vend: prh.prh_vend,
+        total_amt: prh.total_amt,
+      });
+      i = i + 1;
+    }
+console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   createCab,
@@ -1157,4 +1190,5 @@ export default {
   deleteOne,
   rctPo,
   findGroupRCP,
+  findGroupAmt
 };
