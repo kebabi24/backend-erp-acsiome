@@ -6,10 +6,12 @@ const route = Router()
 export default (app: Router) => {
     app.use("/fraiss", route)
 
-    route.get("/", controller.findAll)
+   
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
+    route.post("/findAll", controller.findByAll)
+    route.get("/", controller.findAll)
 }

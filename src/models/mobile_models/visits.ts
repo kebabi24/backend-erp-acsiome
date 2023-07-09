@@ -25,8 +25,8 @@ const Visits = sequelize.define(
         itinerary_code : {type: Sequelize.STRING },
         customer_code  : {type : Sequelize.STRING},
         periode_active_date : {type : Sequelize.DATEONLY},
-        start_time   : {type : Sequelize.DATE},
-        end_time   : {type : Sequelize.DATE},
+        start_time   : {type : Sequelize.STRING},
+        end_time   : {type : Sequelize.STRING},
         role_code    : {type : Sequelize.STRING},
         user_code    : {type : Sequelize.STRING},
         service_code    : {type : Sequelize.STRING},
@@ -34,6 +34,7 @@ const Visits = sequelize.define(
         longitude     : {type : Sequelize.STRING},
         latitude     : {type : Sequelize.STRING},
         notes      : {type : Sequelize.STRING},
+        site: {type : Sequelize.STRING},
         // ...base,
     },
     {

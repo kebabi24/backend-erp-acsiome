@@ -37,6 +37,18 @@ export default class bomService {
     }
   }
 
+  public async finddist(query: any): Promise<any> {
+    try {
+      const boms = await this.bomModel.findAll(query);
+      this.logger.silly('find All boms mstr');
+      return boms;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
   public async update(data: any, query: any): Promise<any> {
     try {
       const bom = await this.bomModel.update(data, { where: query });

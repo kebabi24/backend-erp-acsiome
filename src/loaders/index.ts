@@ -99,6 +99,7 @@ export default async ({ expressApp }) => {
       { name: 'operationHistoryModel', model: require('../models/operation-history').default },
       { name: 'reasonModel', model: require('../models/reason').default },
       { name: 'fraisModel', model: require('../models/frais').default },
+      { name: 'fraisDetailModel', model: require('../models/frais-detail').default },
       { name: 'jobModel', model: require('../models/job').default },
       { name: 'jobDetailModel', model: require('../models/job-detail').default },
       { name: 'toolModel', model: require('../models/tool').default },
@@ -404,6 +405,8 @@ export default async ({ expressApp }) => {
     { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
   );
 
+
+ 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
   //   sourceKey: 'pricelist_code',
@@ -934,9 +937,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
-  // await sequelizeConnection.sync();
-
+  await sequelizeConnection.sync();
+  
   // await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

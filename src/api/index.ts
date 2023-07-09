@@ -202,10 +202,11 @@ export default () => {
   printers(app);
   repertory(app);
   unloadRequest(app);
+  employeSalary(app);
 
   customerOrder(app);
 
-  employeSalary(app);
+ 
 
   return app;
 };

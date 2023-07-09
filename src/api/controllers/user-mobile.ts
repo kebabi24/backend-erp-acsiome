@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
+import {Op, Sequelize } from 'sequelize';
 
 // ********************** CREATE NEW USER MOBILE *************
 
@@ -807,6 +808,170 @@ function formatDateOnlyFromMobileToBack(timeString){
   return str
 }
 
+const findAllInvoice = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+
+
+    console.log(req.body);
+    if (req.body.site == '*') {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+       
+      });
+    } else {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: {site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+       
+      });
+    }
+   // console.log("invoices",invoices);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findPaymentterm = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const codes = await userMobileServiceInstance.getPaymentMethods();
+    
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.payment_method_code, label: code.description });
+    }
+   
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  console.log("rrrrrrrrrrrrrrrrrr",req.body)
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+      var invoicesline = await userMobileServiceInstance.getInvoiceLineBy({
+        where: {invoice_code:req.body.invoicecode} ,
+       attributes: {
+       
+        include: [[Sequelize.literal('unit_price * quantity'), 'Montant']],
+       },
+       
+    });
+    
+    console.log(invoicesline);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+const findPaymentBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+    console.log(req.body);
+    if (req.body.site == '*') {
+      var invoices = await userMobileServiceInstance.getPaymentsBy({
+        period_active_date: { [Op.between]: [req.body.date, req.body.date1] } ,
+       
+      });
+    } else {
+      var invoices = await userMobileServiceInstance.getPaymentsBy({
+       site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1] } ,
+       
+      });
+    }
+    console.log("invoices",invoices);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findVisitBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+   // console.log(req.body);
+    if (req.body.site == '*') {
+      var visits = await userMobileServiceInstance.getVisitsBy({
+        where: { periode_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+      });
+    } else {
+      var visits = await userMobileServiceInstance.getVisitsBy({
+        where: {site: req.body.site, periode_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+       
+      });
+    }
+  //  console.log("visit",visits);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: visits });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+const findAllVisits = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+  
+      var visits = await userMobileServiceInstance.getVisits();
+    
+   // console.log("invoices",invoices);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: visits });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 // ********************** FIND ONE USER MOBILE BY CODE *************
 const findUserPassword = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -855,6 +1020,11 @@ export default {
   signin,
   getDataBack,
   getDataBackTest,
+  findAllInvoice,
+  findPaymentterm,
+  findByInvoiceLine,
+  findPaymentBy,
+  findVisitBy,
+  findAllVisits,
   findUserPassword,
-  getAllVisits
 };

@@ -36,7 +36,7 @@ export default class UserMobileService {
         @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
         @Inject("priceListModel") private priceListModel: Models.PricelistModel,
         @Inject("invoiceModel") private invoiceModel: Models.invoiceModel,
-        @Inject("invoiceLineModel") private invoiceLineModel: Models.InventoryLineModel,
+        @Inject("invoiceLineModel") private invoiceLineModel: Models.invoiceLineModel,
         @Inject("taxeModel") private taxeModel: Models.TaxeModel,
         @Inject("visitsModel") private visitsModel: Models.visitsModel,
         @Inject("inventoryModel") private inventoryModel: Models.InventoryModel,
@@ -825,6 +825,7 @@ export default class UserMobileService {
     // ******************** GET PAYMENT METHOD  **************************
     public async getPaymentMethods(): Promise<any> {
         try {
+           
             const paymentMethods = await this.paymentMethodModel.findAll()
             return paymentMethods
         } catch (e) {
@@ -846,6 +847,19 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** GET PAYMENT BY   **************************
+    public async getPaymentsBy(query:any): Promise<any> {
+        try {
+            const payment = await this.paymentModel.findAll({ where: query,
+            
+            });
+            return payment
+        } catch (e) {
+            console.log('Error from service- getPayments')
+            this.logger.error(e)
+            throw e
+        }
+    }
     // ******************** GET CANCELATION REASONS   **************************
     public async getCancelationReasons(): Promise<any> {
         try {
@@ -893,8 +907,35 @@ export default class UserMobileService {
             throw e
         }
     }
+    // ******************** GET INVOICE LINE query   **************************
+    public async getInvoiceLineBy(query: any): Promise<any> {
+        try {
+            const invoice_line = await this.invoiceLineModel.findAll(query)
+            return invoice_line
+        } catch (e) {
+            console.log('Error from service- getInvoiceLine')
+            this.logger.error(e)
+            throw e
+        }
+    }
+// ******************** GET ALL INVOICE     **************************
+    public async getAllInvoice(query: any): Promise<any> {
+        try {
+            const invoice = await this.invoiceModel.findAll(query)
+            return invoice
+        } catch (e) {
+            console.log('Error from service- getInvoice')
+            this.logger.error(e)
+            throw e
+        }
+    }
 
+    
+    
     // ******************** UPDATE ONE CUSTOMER **************************
+
+
+
     public async updateCustomer(data: any, query: any): Promise<any> {
         try {
             if(data.id){
@@ -996,6 +1037,41 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** GET visit BY   **************************
+    public async getVisitsBy(query:any): Promise<any> {
+        try {
+            console.log("here",query)
+            const visits = await this.visitsModel.findAll(query)
+            return visits
+        } catch (e) {
+            console.log('Error from service- visits')
+            this.logger.error(e)
+            throw e
+        }
+    }
+     // ******************** GET visit all   **************************
+     public async getVisits(): Promise<any> {
+        try {
+
+            const visits = await this.visitsModel.findAll({})
+            this.logger.silly(" visits found")
+            return visits
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    // public async getAllVisits(): Promise<any> {
+    //     try {
+
+    //         const visits = await this.visitsModel.findAll({})
+    //         this.logger.silly(" visits found")
+    //         return visits
+    //     } catch (e) {
+    //         this.logger.error(e)
+    //         throw e
+    //     }
+    // }
     // ******************** CREATE INVOICES    **************************
     public async createInvoices(data : any): Promise<any> {
         try {
