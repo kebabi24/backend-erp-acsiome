@@ -8,6 +8,7 @@ export default (app: Router) => {
 
   route.get('/', controller.findAll);
   route.get('/findAllwithDetails', controller.findAllwithDetails);
+  route.get('/getVisits/', controller.getAllVisits);
   route.post('/', controller.create);
   route.get('/:user_mobile_code', controller.findOne);
   route.get('/getPassword/:user_mobile_code', controller.findUserPassword);

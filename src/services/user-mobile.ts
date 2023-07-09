@@ -983,6 +983,19 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** CREATE VISITS **************************
+    public async getAllVisits(): Promise<any> {
+        try {
+            
+            const visits = await this.visitsModel.findAll({})
+            this.logger.silly(" visits found")
+            return visits
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
     // ******************** CREATE INVOICES    **************************
     public async createInvoices(data : any): Promise<any> {
         try {
@@ -1161,9 +1174,6 @@ export default class UserMobileService {
             throw e
         }
     }
-
-
-
    
 }
 

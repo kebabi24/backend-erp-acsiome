@@ -824,6 +824,23 @@ const findUserPassword = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+// ********************** FIND ONE USER MOBILE BY CODE *************
+const getAllVisits = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  user endpoint');
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+    console.log("getting all visits")
+    const visits = await userMobileServiceInstance.getAllVisits();
+
+    return res.status(200).json({data: visits });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 
 export default {
   create,
@@ -838,5 +855,6 @@ export default {
   signin,
   getDataBack,
   getDataBackTest,
-  findUserPassword
+  findUserPassword,
+  getAllVisits
 };
