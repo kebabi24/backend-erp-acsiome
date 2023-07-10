@@ -409,6 +409,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
         pt_part: wo.wo_part,
       
     });
+    var qtywo = Number(wo.wo_qty_comp) + Number(wo.wo_qty_rjct)
       const tr = await inventoryTransactionServiceInstance.find({
         where : {
           tr_domain: user_domain, tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,
@@ -426,15 +427,27 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
 
       let lbr = 0
       let bdn = 0
+      let mtl = tr.mtl
       for (let op of ops) {
         const wc = await workcenterServiceInstance.findOne({wc_wkctr:op. op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
             lbr = lbr + (Number(op.op_act_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_act_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
             bdn = bdn + (Number(op.op_act_setup) + Number(op.op_act_run)) * Number(wc.wc_bdn_rate)
           }
-       result.push({id:i,wonbr: wo.wo_nbr, woid:wo.id, wopart:wo.wo_part, desc:item.pt_desc1,wodate: wo.wo_ord_date, mtl:tr.mtl, lbr:lbr, bdn:bdn })
+
+       if (qtywo != 0) {
+        mtl = tr.mtl / qtywo
+        lbr = lbr / qtywo
+        bdn = bdn / qtywo
+       }
+       else {
+         mtl = tr.mtl 
+        lbr = lbr 
+        bdn = bdn 
+       }
+       result.push({id:i,wonbr: wo.wo_nbr, woid:wo.id, wopart:wo.wo_part, desc:item.pt_desc1,wodate: wo.wo_ord_date, mtl:mtl, lbr:lbr, bdn:bdn, qtycomp: wo.wo_qty_comp, qtyrjct: wo.wo_qty_rjct })
        i = i + 1 
        await workOrderServiceInstance.update(
-        { wo__dec01:tr.mtl, wo__dec02: lbr, wo__dec03:bdn, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { wo__dec01:mtl , wo__dec02: lbr, wo__dec03:bdn, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
         { id:wo.id },
       );
 
