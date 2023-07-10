@@ -215,7 +215,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
     const itemServiceInstance = Container.get(ItemService);
-    const fraisServiceInstance = Container.get(FraisService)
+    const costSimulationServiceInstance = Container.get(CostSimulationService)
     const fraisDetailServiceInstance = Container.get(FraisDetailService)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(LocationDetailService);
@@ -243,9 +243,19 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
       
       }) 
 
+      var coutMA = 0
+      var cmpA   = 0
+      if (old_tr.length == 0) {
+
+        const sct = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_part:item.pt_part, sct_sim:"init"})
+         coutMA = sct.sct_mtl_tl
+         cmpA   = sct.sct_mtl_tl
+      } 
+      else {
       console.log(old_tr)
-      let coutMA = old_tr.tr__dec01
-      let cmpA   = old_tr.tr__dec02
+       coutMA = old_tr.tr__dec01
+       cmpA   = old_tr.tr__dec02
+      }
 /*get cout avant calcul*/
 /*get stock avant calcul*/
       const res = await locationDetailServiceInstance.findSpecial({

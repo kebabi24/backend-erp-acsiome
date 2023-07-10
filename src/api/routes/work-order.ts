@@ -15,4 +15,5 @@ export default (app: Router) => {
   route.post('/findOne', controller.findByOne);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
+  route.post('/calccost', controller.CalcCost);
 };
