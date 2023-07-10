@@ -34,7 +34,7 @@ export default class ItemService {
       throw e;
     }
   }
-
+  
   public async findBySupp(query: any): Promise<any> {
     try {
       const codes = await this.itemModel.findAll({

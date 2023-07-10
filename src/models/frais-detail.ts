@@ -29,7 +29,7 @@ frpd_prh_nbr : Sequelize.STRING,
 frpd_po_nbr : Sequelize.STRING, 
 
 frpd_inv_nbr : Sequelize.STRING,
-
+frpd_effdate: Sequelize.DATEONLY,
 
 frpd_amt : { type: Sequelize.DECIMAL, defaultValue: 0 },
 

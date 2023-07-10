@@ -178,17 +178,19 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
 
 
         const items = await itemServiceInstance.find({ pt_routing: ro.ro_routing ,pt_domain:user_domain });
-        var old_lbr = 0
-        var old_bdn = 0 
-        let lbr_tl = 0
-        let bdn_tl = 0
-         for (let item of items) {    
+       
+        
+         for (let item of items) {   
+            var old_lbr = 0
+            var old_bdn = 0  
+            let lbr_tl = 0
+            let bdn_tl = 0 
         const rops = await workroutingServiceInstance.find({  ro_routing:item.pt_routing ,ro_domain: user_domain})
 
         for(let rop of rops ) {
             const wc = await workCenterServiceInstance.findOne({wc_domain: user_domain, wc_wkctr: rop.ro_wkctr,wc_mch:rop.ro_mch})
               lbr_tl = lbr_tl + ( (1 / Number(rop.ro_run) * Number(wc.wc_lbr_rate) * Number(wc.wc_men_mch) ) + ((Number(rop.ro_setup)/ Number(item.pt_ord_qty)) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)))
-              bdn_tl = bdn_tl + ( (1/ Number(rop.ro_run)) + (Number(rop.ro_setup) / Number(item.pt_ord_qty))*Number(wc.wc_bdn_rate))        
+              bdn_tl = bdn_tl + ( (1/ Number(rop.ro_run)) + (Number(rop.ro_setup)) / Number(item.pt_ord_qty)*Number(wc.wc_bdn_rate))        
         }
             console.log(item.pt_part,item.pt_routing )
             const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})

@@ -1,5 +1,10 @@
 import ItemService from '../../services/item';
 import LocationDetailService from '../../services/location-details';
+import FraisService from "../../services/frais"
+import FraisDetailService from "../../services/frais-detail"
+import CostSimulationService from "../../services/cost-simulation"
+import InventoryTransactionService from '../../services/inventory-transaction';
+
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
@@ -199,6 +204,139 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+
+
+
+const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const itemServiceInstance = Container.get(ItemService);
+    const fraisServiceInstance = Container.get(FraisService)
+    const fraisDetailServiceInstance = Container.get(FraisDetailService)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    console.log(req.body);
+     let result=[] 
+     let i = 1
+    const items = await itemServiceInstance.find({
+      
+        pt_domain: user_domain,
+        pt_part: { [Op.between]: [req.body.part1, req.body.part2]},
+      
+    });
+    for (let item of items) {
+
+
+      /*get cout avant calcul*/
+      const old_tr = await inventoryTransactionServiceInstance.findOne({
+        where : {
+      tr_domain: user_domain, tr_effdate: { [Op.lt]: [req.body.date]} ,
+      tr_part: item.pt_part,
+        },
+      order: [['tr_effdate', 'DESC'],['id', 'DESC']], 
+      
+      
+      
+      }) 
+
+      console.log(old_tr)
+      let coutMA = old_tr.tr__dec01
+      let cmpA   = old_tr.tr__dec02
+/*get cout avant calcul*/
+/*get stock avant calcul*/
+      const res = await locationDetailServiceInstance.findSpecial({
+        where: { ld_part: item.pt_part,ld_domain:user_domain },
+        attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total']],
+        group: ['ld_part'],
+        raw: true,
+      });
+      const stkact = res.total
+      console.log(stkact)
+      var trqty = await inventoryTransactionServiceInstance.find({
+        where : {
+      tr_domain: user_domain, tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,
+      tr_part: item.pt_part,
+      tr_ship_type: { [Op.ne]: 'M' },
+        },
+        attributes: [ [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'totalqtyloc']],
+        group: ['tr_part'],
+        raw: true,
+      }) 
+
+      var stkA = Number(stkact) - Number(trqty.totalqtyloc)
+/*get stock avant calcul*/
+
+
+
+      var trs = await inventoryTransactionServiceInstance.findSpecial({
+        where : {
+      tr_domain: user_domain, tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,
+      tr_part: item.pt_part,
+        },
+      order: [['tr_effdate', 'ASC'],['id', 'ASC']], 
+      
+      
+      
+      }) 
+      
+      
+      for (let tr of trs) {
+
+          if(tr.tr_type = "RCT-PO" && tr.tr_qty_loc != 0) {
+            const frpd = await fraisDetailServiceInstance.findBet({
+              where: {
+                          frpd_domain : user_domain,
+                          frpd_prh_nbr : tr.tr_lot,
+                          frpd_imput   : false,
+                          frpd_part    : tr.tr_part 
+              },
+              attributes: [ [Sequelize.fn('sum', Sequelize.col('frpd_amt')), 'totalamt']],
+              
+        raw: true,
+            }) 
+            let coutM =  Number(tr.tr_price) + Number(frpd.totalamt) / Number(tr.tr_qty_loc)
+            let cmpM  = (Number(stkA) + Number(tr.tr_qty_loc) != 0 ) ? ( ( Number(cmpA) * Number(stkA) + Number(coutM) * Number(tr.tr_qty_loc)) / (Number(stkA) + Number(tr.tr_qty_loc) )) : 0
+             await inventoryTransactionServiceInstance.update({tr__dec01 : coutM,tr__dec02:cmpM},{id: tr.id})
+             result.push({id:i,date: tr.tr_effdate, nbr : tr.tr_lot, part: tr.tr_part, desc: item.pt_desc1, qtym : tr.tr_qty_loc, qtys: stkA,coutm: coutM,cmpM: cmpM})
+             cmpA = cmpM
+             stkA = stkA + Number( tr.tr_qty_loc)
+              i = i + 1
+
+
+              const frp = await fraisDetailServiceInstance.update({frpd_imput:true},{
+                            frpd_domain : user_domain,
+                            frpd_prh_nbr : tr.tr_lot,
+                            frpd_imput   : false,
+                            frpd_part    : tr.tr_part}) 
+
+          } else {
+
+              await inventoryTransactionServiceInstance.update({tr__dec01 : cmpA,tr__dec02:cmpA},{id: tr.id})
+              result.push({id:i,date: tr.tr_effdate, nbr : tr.tr_lot, part: tr.tr_part,desc: item.pt_desc1, qtym : tr.tr_qty_loc, qtys: stkA,coutm: cmpA,cmpM: cmpA})
+              i = i + 1
+              stkA = stkA + Number(tr.tr_qty_loc)
+            
+          }
+
+
+      }
+
+
+    }
+       
+    console.log("trs",trs.length);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: trs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -210,4 +348,5 @@ export default {
   findProd,
   findAllwithstk,
   update,
+  CalcCmp,
 };
