@@ -86,9 +86,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const{user_code} = req.headers 
   const{user_domain} = req.headers
   try {
+    console.log("here tr here tr here tr")
+    console.log(req.body)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const devise = await inventoryTransactionServiceInstance.findOne({ ...req.body,tr_domain:user_domain });
-    return res.status(200).json({ message: 'fetched succesfully', data: devise });
+    const trs = await inventoryTransactionServiceInstance.find({ ...req.body,tr_domain:user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: trs });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1248,9 +1250,10 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
       const ld = await locationDetailServiceInstance.findOne({
         ld_domain:user_domain,
         ld_part: item.tr_part,
-        // ld_lot: item.tr_nbr,
+        ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
       });
       // console.log(ld);
       if (ld) {
@@ -2387,9 +2390,9 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STDCG',
       });
+console.log("sct",sct)
 
-
-      
+      console.log("ref",item.tr_ref)
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,

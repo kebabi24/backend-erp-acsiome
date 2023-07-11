@@ -19,7 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
 
-    const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot , wod_domain: user_domain});
+    const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot , wo_domain: user_domain});
 
     if (wo)
       await workOrderServiceInstance.update(
