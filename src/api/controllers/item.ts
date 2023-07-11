@@ -316,8 +316,8 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
              stkA = stkA + Number( tr.tr_qty_loc)
               i = i + 1
 
-
-              const frp = await fraisDetailServiceInstance.update({frpd_imput:true},{
+          /*update frais dapproche*/
+               await fraisDetailServiceInstance.update({frpd_imput:true},{
                             frpd_domain : user_domain,
                             frpd_prh_nbr : tr.tr_lot,
                             frpd_imput   : false,
