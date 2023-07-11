@@ -491,25 +491,33 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
 
       let lbr = 0
       let bdn = 0
+      let lbrstd = 0
+      let bdnstd= 0
       for (let op of ops) {
         const wc = await workcenterServiceInstance.findOne({wc_wkctr:op. op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
             lbr = lbr + (Number(op.op_act_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_act_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
             bdn = bdn + (Number(op.op_act_setup) + Number(op.op_act_run)) * Number(wc.wc_bdn_rate)
+
+            lbrstd = lbrstd + (Number(op.op_std_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_std_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
+            bdnstd = bdnstd + (Number(op.op_std_setup) + (Number(op.op_std_run)* Number(qtywo))) * Number(wc.wc_bdn_rate)
           }
 
        if (qtywo != 0) {
-         lbr = lbr / qtywo
+        lbr = lbr / qtywo
         bdn = bdn / qtywo
+        lbrstd = lbrstd / qtywo
+        bdnstd = bdnstd / qtywo
        }
        else {
        
         lbr = lbr 
         bdn = bdn 
+
        }
       
     
   //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
-    return res.status(200).json({ message: 'fetched succesfully', data: {lbr,bdn} });
+    return res.status(200).json({ message: 'fetched succesfully', data: {lbr,bdn,lbrstd,bdnstd} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

@@ -429,7 +429,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           sct_domain: user_domain,
           sct_part: item.wod_part,
           sct_site: item.wod_site,
-          sct_sim: 'STDCG',
+          sct_sim: 'STD-CG',
         });
 
         const pt = await itemServiceInstance.findOne({ pt_part: item.wod_part, pt_domain: user_domain });

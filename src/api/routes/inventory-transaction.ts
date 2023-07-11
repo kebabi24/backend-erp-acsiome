@@ -24,7 +24,7 @@ export default (app: Router) => {
   route.post('/inventorybystatus', controller.inventoryByStatus);
   route.post('/inventoryofsecurity', controller.inventoryOfSecurity);
   route.post('/rct-wo', controller.rctWo);
-  route.post('/iss-wo', controller.issWoD);
+  route.post('/iss-wo', controller.issWo);
   // route.post('/iss-so', controller.issSo);
   route.post('/findtrdate', controller.findtrDate);
   route.post('/findtrtype', controller.findTrType);

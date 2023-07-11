@@ -36,6 +36,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           ...op,
           op_domain:user_domain,
           op_type: "labor", 
+          op_std_run:1 / ro.ro_run,
+          op_std_setup: ro.ro_setup,
           op_act_run :totalSeconds - totalSecondsd,
          // op_std_run : item.op_qty_comp * Number(ro.ro_run),
           created_by: user_code,

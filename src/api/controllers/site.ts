@@ -52,7 +52,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const sct = await costSimulationServiceInstance.create({
         sct_domain: user_domain,
         sct_site: req.body.si_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
         sct_part: item.pt_part,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -62,7 +62,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const sct2 = await costSimulationServiceInstance.create({
         sct_domain: user_domain,
         sct_site: req.body.si_site,
-        sct_sim: 'STDCR',
+        sct_sim: 'STD-CR',
         sct_part: item.pt_part,
         created_by: user_code,
         created_ip_adr: req.headers.origin,

@@ -276,7 +276,7 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain:user_domain,
         sct_part: entry.ps_comp,
 
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
     
       price = price + entry.ps_qty_per * sct.sct_cst_tot;

@@ -232,7 +232,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
 
 
       /*get cout avant calcul*/
-      const old_tr = await inventoryTransactionServiceInstance.findOne({
+      const old_tr = await inventoryTransactionServiceInstance.findOneS({
         where : {
       tr_domain: user_domain, tr_effdate: { [Op.lt]: [req.body.date]} ,
       tr_part: item.pt_part,
