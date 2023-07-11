@@ -347,6 +347,38 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+
+const findlast = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const Sequelize = require('sequelize');
+  const Op = Sequelize.Op;
+  console.log(req.body.pmcode);
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const old_tr = await inventoryTransactionServiceInstance.findOneS({
+      where : {
+    tr_domain: user_domain, 
+   
+      },
+    order: [['tr_effdate', 'DESC'],['id', 'DESC']], 
+    
+    
+    
+    }) 
+
+    return res.status(200).json({ message: 'fetched succesfully', data: old_tr });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findBySpec,
@@ -359,4 +391,5 @@ export default {
   findAllwithstk,
   update,
   CalcCmp,
+  findlast,
 };

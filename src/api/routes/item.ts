@@ -17,4 +17,5 @@ export default (app: Router) => {
   route.post('/stk', controller.findAllwithstk);
   route.put('/:id', controller.update);
   route.post('/calccmp', controller.CalcCmp);
+  route.post('/findlast', controller.findlast);
 };

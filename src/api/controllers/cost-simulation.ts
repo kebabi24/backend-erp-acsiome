@@ -91,8 +91,10 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     try {
+        console.log(req.body)
         const costSimulationServiceInstance = Container.get(costSimulationService)
         const scts = await costSimulationServiceInstance.findOne({...req.body,sct_domain:user_domain})
+        console.log(scts)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: scts })

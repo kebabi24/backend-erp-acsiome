@@ -2374,6 +2374,7 @@ const findAllissSo = async (req: Request, res: Response, next: NextFunction) => 
 const issWo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -2414,6 +2415,7 @@ console.log("sct",sct)
       await inventoryTransactionServiceInstance.create({
         ...item,
         ...it,
+        tr_domain: user_domain,
         tr_gl_date: it.tr_effdate,
         tr_qty_loc: -1 * Number(item.tr_qty_loc),
         tr_qty_chg: -1 * Number(item.tr_qty_loc),
