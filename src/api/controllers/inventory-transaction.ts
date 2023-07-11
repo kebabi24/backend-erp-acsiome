@@ -2589,8 +2589,8 @@ const findByCost = async (req: Request, res: Response, next: NextFunction) => {
   const{user_code} = req.headers 
   const{user_domain} = req.headers
   try {
-    console.log("here tr here tr here tr")
-    console.log(req.body)
+    // console.log("here tr here tr here tr")
+    // console.log(req.body)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const trs = await inventoryTransactionServiceInstance.findbetw({ where : {...req.body,tr_domain:user_domain,},
       attributes: {

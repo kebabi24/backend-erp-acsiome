@@ -463,6 +463,58 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+
+const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const itemServiceInstance = Container.get(ItemService);
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const operationHistoryServiceInstance = Container.get(OperationHistoryService)
+    const workcenterServiceInstance = Container.get(WorkCenterService)
+    console.log(req.body);
+     
+    const wo = await workOrderServiceInstance.findOne({
+    
+        wo_domain: user_domain,
+        id: req.body.id
+      
+    });
+   
+    var qtywo = Number(wo.wo_qty_comp) + Number(wo.wo_qty_rjct)
+     
+      const ops = await operationHistoryServiceInstance.find({op_wo_lot:wo.id ,op_wo_nbr: wo.wo_nbr,op_type:"labor",op_domain:user_domain})
+
+      let lbr = 0
+      let bdn = 0
+      for (let op of ops) {
+        const wc = await workcenterServiceInstance.findOne({wc_wkctr:op. op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
+            lbr = lbr + (Number(op.op_act_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_act_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
+            bdn = bdn + (Number(op.op_act_setup) + Number(op.op_act_run)) * Number(wc.wc_bdn_rate)
+          }
+
+       if (qtywo != 0) {
+         lbr = lbr / qtywo
+        bdn = bdn / qtywo
+       }
+       else {
+       
+        lbr = lbr 
+        bdn = bdn 
+       }
+      
+    
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: {lbr,bdn} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createDirect,
@@ -474,4 +526,5 @@ export default {
   update,
   deleteOne,
   CalcCost,
+  CalcCostWo,
 };

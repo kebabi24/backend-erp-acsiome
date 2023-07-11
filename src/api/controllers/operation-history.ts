@@ -128,6 +128,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const operationHistoryServiceInstance = Container.get(OperationHistoryService)
         const ops = await operationHistoryServiceInstance.find({...req.body,op_domain:user_domain})
+        console.log(ops)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ops })

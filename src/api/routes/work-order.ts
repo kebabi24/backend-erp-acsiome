@@ -16,4 +16,5 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/calccost', controller.CalcCost);
+  route.post('/calccostwo', controller.CalcCostWo);
 };

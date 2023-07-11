@@ -935,6 +935,23 @@ export default async ({ expressApp }) => {
     targetKey: 'jb_code',
   });
 
+  require('../models/item').default.hasOne(require('../models/operation-history').default, {
+    foreignKey: 'op_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/operation-history').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'op_part',
+    targetKey: 'pt_part',
+  });
+
+  require('../models/work-order').default.hasOne(require('../models/operation-history').default, {
+    foreignKey: 'op_wo_lot',
+    sourceKey: 'id',
+  });
+  require('../models/operation-history').default.belongsTo(require('../models/work-order').default, {
+    foreignKey: 'op_wo_lot',
+    targetKey: 'id',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
