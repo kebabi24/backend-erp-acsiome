@@ -39,5 +39,6 @@ export default (app: Router) => {
   route.post('/findrct', controller.findByRct);
   route.post("/findoa", controller.findBySpec);
   route.get('/', controller.findAll);
+  route.post('/findcost', controller.findByCost);
   
 };

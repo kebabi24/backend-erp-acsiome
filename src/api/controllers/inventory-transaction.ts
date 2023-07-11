@@ -2583,6 +2583,33 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findByCost = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    console.log("here tr here tr here tr")
+    console.log(req.body)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findbetw({ where : {...req.body,tr_domain:user_domain,},
+      attributes: {
+         include: [[Sequelize.literal('-tr_qty_loc * tr__dec02'), 'tr__dec04'],[Sequelize.literal('-tr_qty_loc * tr_price'), 'tr__dec05']],
+      },
+    });
+    for (let tr of trs) {
+    
+      if (tr.tr__dec04 == 0 ) {
+        tr.tr__dec04 = tr.tr__dec05
+      }
+    }
+   
+    return res.status(200).json({ message: 'fetched succesfully', data: trs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -2616,5 +2643,6 @@ export default {
   findBySpec,
   findAllissSo,
   issChlRef,
+  findByCost,
   
 };
