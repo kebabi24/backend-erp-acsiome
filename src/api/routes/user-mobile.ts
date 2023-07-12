@@ -12,6 +12,7 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.get('/findterms', controller.findPaymentterm)
   route.get('/findvisits', controller.findAllVisits)
+  route.get('/testHash', controller.testHash)
   
   route.get('/:user_mobile_code', controller.findOne);
   route.get('/getPassword/:user_mobile_code', controller.findUserPassword);

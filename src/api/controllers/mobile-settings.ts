@@ -87,11 +87,104 @@ const getVisitList = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 
-// for(const itinerary of itineraries ){
-//     const customer = await this.getCustomers({itinerary_code:itinerary.itinerary_code})
+const getPaymentMethods = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPaymentMethods  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
     
-//     customers.push( customer)
-// }
+    try{
+            const paymenetMethods = await mobileSettingsServiceInstanse.getPaymentMethods()
+    
+                return res
+                    .status(202)
+                    .json({
+                        message: "Data correct !",
+                        paymenetMethods:paymenetMethods
+                    })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+const getCanelationReasons = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getCanelationReasons  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{
+            const cancelationReasons = await mobileSettingsServiceInstanse.getCanelationReasons()
+    
+                return res
+                    .status(202)
+                    .json({
+                        message: "Data correct !",
+                        cancelationReasons:cancelationReasons
+                    })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+
+const createCancelationReasons = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling createCancelationReasons  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{
+        const {data} =  req.body
+        
+        const cancelationReasons = await mobileSettingsServiceInstanse.createCancelationReasons(data)
+        return res.status(200)
+            .json({
+                message: "Data inserted !",
+                cancelationReasons:cancelationReasons
+             })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+const createPaymentMethods = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling createPaymentMethods  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{
+        const {data} =  req.body
+        
+        const paymentMethods = await mobileSettingsServiceInstanse.createPaymentMethods(data)
+        return res.status(200)
+            .json({
+                message: "Data inserted !",
+                paymentMethods:paymentMethods
+             })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+
 
 
 
@@ -99,5 +192,9 @@ const getVisitList = async (req: Request, res: Response, next: NextFunction) => 
 
 export default {
     submitVisitResultData,
-    getVisitList
+    getVisitList,
+    getPaymentMethods,
+    getCanelationReasons,
+    createCancelationReasons,
+    createPaymentMethods
 }

@@ -1024,54 +1024,6 @@ export default class UserMobileService {
         }
     }
 
-    // ******************** CREATE VISITS **************************
-    public async getAllVisits(): Promise<any> {
-        try {
-            
-            const visits = await this.visitsModel.findAll({})
-            this.logger.silly(" visits found")
-            return visits
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-
-    // ******************** GET visit BY   **************************
-    public async getVisitsBy(query:any): Promise<any> {
-        try {
-            console.log("here",query)
-            const visits = await this.visitsModel.findAll(query)
-            return visits
-        } catch (e) {
-            console.log('Error from service- visits')
-            this.logger.error(e)
-            throw e
-        }
-    }
-     // ******************** GET visit all   **************************
-     public async getVisits(): Promise<any> {
-        try {
-
-            const visits = await this.visitsModel.findAll({})
-            this.logger.silly(" visits found")
-            return visits
-        } catch (e) {
-            this.logger.error(e)
-            throw e
-        }
-    }
-    // public async getAllVisits(): Promise<any> {
-    //     try {
-
-    //         const visits = await this.visitsModel.findAll({})
-    //         this.logger.silly(" visits found")
-    //         return visits
-    //     } catch (e) {
-    //         this.logger.error(e)
-    //         throw e
-    //     }
-    // }
     // ******************** CREATE INVOICES    **************************
     public async createInvoices(data : any): Promise<any> {
         try {

@@ -35,6 +35,8 @@
     "agenda": "^2.0.2",
     "agendash": "^1.0.0",
     "argon2": "^0.28.5",
+    "bcrypt": "^5.1.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "bwip-js": "^3.4.0",
     "celebrate": "^9.1.0",

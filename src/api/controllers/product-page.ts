@@ -113,9 +113,27 @@ const updateProfileProductPages = async (req: Request, res: Response, next: Next
 
 }
 
+
+const findPageProductsByPageCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  code endpoint")
+    try {
+        const productPageService = Container.get(ProductPageService)
+        const {product_page_code} = req.params
+        const products_codes = await productPageService.getPageProducts(product_page_code)
+        return res
+            .status(200)
+            .json( {products_codes})
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 export default {
     createProductPage,
     findOneByCode,
     findAllProductPages,
-    updateProfileProductPages
+    updateProfileProductPages,
+    findPageProductsByPageCode
 }

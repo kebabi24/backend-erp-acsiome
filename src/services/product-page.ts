@@ -33,19 +33,6 @@ export default class ProductPageService {
         }
     }
 
-    // public async find(query: any): Promise<any> {
-    //     try {
-    //         const codes = await this.itemModel.findAll({ where: query,include: this.taxeModel,incluse: this.locationModel  })
-    //         this.logger.silly("find item ")
-    //         return codes
-    //     } catch (e) {
-    //         this.logger.error(e)
-    //         throw e
-    //     }
-    // }
-
-
-
     public async findOneByCode(product_page_code: any): Promise<any> {
         try {
             const productPage = await this.productPageModel.findOne({ where: {product_page_code :product_page_code }})
@@ -70,17 +57,6 @@ export default class ProductPageService {
 
     
 
-    // public async update(data: any, query: any): Promise<any> {
-    //     try {
-    //         const item = await this.itemModel.update(data, { where: query ,include: this.taxeModel })
-    //         this.logger.silly("update one item mstr")
-    //         return item
-    //     } catch (e) {
-    //         this.logger.error(e)
-    //         throw e
-    //     }
-    // }
-
     public async updateProfileProductPages( profileCode : any,pagesCodesList: any): Promise<any> {
         try {
             const profile_code = profileCode.profileCode
@@ -100,6 +76,19 @@ export default class ProductPageService {
 
            
             return addProfilePages
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getPageProducts( productPageCode : any): Promise<any> {
+        try {
+            
+           
+            const productPageDetails = await this.productPageDetailsModel.findAll({where : {product_page_code:productPageCode } ,ttributes: ['product_code'] })
+            this.logger.silly("productPageDetails created ", productPageDetails)
+            return productPageDetails
         } catch (e) {
             this.logger.error(e)
             throw e

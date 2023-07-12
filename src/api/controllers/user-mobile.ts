@@ -7,6 +7,7 @@ import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
 import {Op, Sequelize } from 'sequelize';
+const bcrypt = require('bcryptjs');
 
 // ********************** CREATE NEW USER MOBILE *************
 
@@ -1006,6 +1007,21 @@ const getAllVisits = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+// ********************** FIND ONE USER MOBILE BY CODE *************
+const testHash = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  user endpoint');
+  try {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync('test', salt);
+
+    return res.status(200).json({data: hash });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 
 export default {
   create,
@@ -1027,4 +1043,5 @@ export default {
   findVisitBy,
   findAllVisits,
   findUserPassword,
+  testHash
 };
