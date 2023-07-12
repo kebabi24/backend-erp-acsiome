@@ -15,7 +15,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const fraisDetailServiceInstance = Container.get(FraisDetailService)
         const frai = await fraisServiceInstance.create({...frais,frp_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of fraisDetail) {
-            entry = { ...entry, frpd_inv_nbr: frais.frp_inv_nbr }
+            entry = { ...entry, frpd_inv_nbr: frais.frp_inv_nbr, frpd_effdate: frais.frp_effdate }
             await fraisDetailServiceInstance.create({...entry,frpd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
             
@@ -155,6 +155,7 @@ export default {
     findBy,
     update,
     deleteOne,
-    findByAll
+    findByAll,
+   
 }
 

@@ -33,6 +33,16 @@ export default class inventoryTransactionService {
       throw e;
     }
   }
+  public async findOneS(query: any): Promise<any> {
+    try {
+      const inventoryTransaction = await this.inventoryTransactionModel.findOne(query);
+      this.logger.silly('find one inventoryTransaction mstr');
+      return inventoryTransaction;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findOneI(query: any): Promise<any> {
     try {
       const inventoryTransaction = await this.inventoryTransactionModel.findOne({ where: query });

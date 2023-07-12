@@ -226,13 +226,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       let qty = 0;
       lds.map(elem => {
@@ -262,7 +262,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_domain: user_domain, sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STDCG' },
+        { sct_domain: user_domain, sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STD-CG' },
       );
       //console.log(tr_status);
       const status = await statusServiceInstance.findOne({
@@ -666,13 +666,13 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       let qty = 0;
       lds.map(elem => {
@@ -702,7 +702,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_domain: user_domain, sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STDCG' },
+        { sct_domain: user_domain, sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STD-CG' },
       );
       //console.log(tr_status);
       const status = await statusServiceInstance.findOne({
@@ -905,13 +905,13 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain: user_domain,
         sct_part: po.pod_part,
         sct_site: po.pod_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: po.pod_part,
         sct_site: po.pod_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       let qty = 0;
       lds.map(elem => {
@@ -934,7 +934,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_domain: user_domain, sct_part: po.pod_part, sct_site: po.pod_site, sct_sim: 'STDCG' },
+        { sct_domain: user_domain, sct_part: po.pod_part, sct_site: po.pod_site, sct_sim: 'STD-CG' },
       );
 
       const ld = await locationDetailServiceInstance.findOne({

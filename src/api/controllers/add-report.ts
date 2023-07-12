@@ -75,7 +75,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                     sct_domain:user_domain,
                   sct_part: item.tr_part,
                   sct_site: item.tr_site,
-                  sct_sim: 'STDCG',
+                  sct_sim: 'STD-CG',
                 });
                 const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain });
                 const ld = await locationDetailServiceInstance.findOne({

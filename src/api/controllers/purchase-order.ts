@@ -28,6 +28,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const { purchaseOrder, purchaseOrderDetail } = req.body;
+    console.log(purchaseOrderDetail)
     const po = await purchaseOrderServiceInstance.create({
       ...purchaseOrder,
       created_by: user_code,
@@ -37,29 +38,31 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     for (let entry of purchaseOrderDetail) {
+      console.log(entry)
       entry = { ...entry, pod_domain: user_domain, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
-      logger.debug('Calling Create sequence endpoint');
-      try {
-        const addressServiceInstance = Container.get(AddressService);
-        // const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
-
-        // const pdfData = {
-        //   pod: purchaseOrderDetail,
-        //   po: po,
-        //   adr: addr,
-        // };
-        // console.log('\n\n', pdfData);
-
-        // let pdf = await generatePdf(pdfData, 'po');
-
-        return res.status(201).json({ message: 'created succesfully', data: po /*pdf: pdf.content*/ });
-      } catch (e) {
-        //#
-        logger.error('🔥 error: %o', e);
-        return next(e);
-      }
     }
+      //logger.debug('Calling Create sequence endpoint');
+      // try {
+      //   const addressServiceInstance = Container.get(AddressService);
+      //   // const addr = await addressServiceInstance.findOne({ ad_addr: purchaseOrder.po_vend });
+
+      //   // const pdfData = {
+      //   //   pod: purchaseOrderDetail,
+      //   //   po: po,
+      //   //   adr: addr,
+      //   // };
+      //   // console.log('\n\n', pdfData);
+
+      //   // let pdf = await generatePdf(pdfData, 'po');
+
+      //   return res.status(201).json({ message: 'created succesfully', data: po /*pdf: pdf.content*/ });
+      // } catch (e) {
+      //   //#
+      //   logger.error('🔥 error: %o', e);
+      //   return next(e);
+      // }
+    
     return res.status(201).json({ message: 'created succesfully', data: po });
   } catch (e) {
     //#

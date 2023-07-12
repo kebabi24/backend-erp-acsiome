@@ -39,7 +39,16 @@ export default class fraisDetailService {
             throw e
         }
     }
-
+    public async findBet(query: any): Promise<any> {
+        try {
+            const fraisDetails = await this.fraisDetailModel.findAll(query)
+            this.logger.silly("find All fraisDetails mstr")
+            return fraisDetails
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const fraisDetail = await this.fraisDetailModel.update(data, { where: query })

@@ -302,7 +302,7 @@ const findAllbomDetails = async (req: Request, res: Response, next: NextFunction
   logger.debug('Calling find all purchaseOrder endpoint');
   try {
     const pos = await sequelize.query(
-      "SELECT   PUBLIC.sct_det.sct_cst_tot * PUBLIC.ps_mstr.ps_qty_per as TCOST, PUBLIC.pt_mstr.pt_price * PUBLIC.ps_mstr.ps_qty_per as THT, PUBLIC.ps_mstr.id , PUBLIC.sct_det.sct_cst_tot, PUBLIC.pm_mstr.pm_code, PUBLIC.pm_mstr.pm_desc, PUBLIC.ps_mstr.ps_comp, PUBLIC.ps_mstr.ps_qty_per, PUBLIC.pt_mstr.pt_price, PUBLIC.pt_mstr.pt_um  FROM   PUBLIC.pm_mstr,  PUBLIC.pmd_det , PUBLIC.ps_mstr, PUBLIC.pt_mstr, PUBLIC.sct_det where PUBLIC.pmd_det.pmd_code = PUBLIC.pm_mstr.pm_code  and PUBLIC.ps_mstr.ps_parent = PUBLIC.pmd_det.pmd_bom_code and PUBLIC.pt_mstr.pt_part = PUBLIC.ps_mstr.ps_comp and PUBLIC.sct_det.sct_part = PUBLIC.ps_mstr.ps_comp and PUBLIC.sct_det.sct_site = '1000' and PUBLIC.sct_det.sct_sim = 'STDCG' ",
+      "SELECT   PUBLIC.sct_det.sct_cst_tot * PUBLIC.ps_mstr.ps_qty_per as TCOST, PUBLIC.pt_mstr.pt_price * PUBLIC.ps_mstr.ps_qty_per as THT, PUBLIC.ps_mstr.id , PUBLIC.sct_det.sct_cst_tot, PUBLIC.pm_mstr.pm_code, PUBLIC.pm_mstr.pm_desc, PUBLIC.ps_mstr.ps_comp, PUBLIC.ps_mstr.ps_qty_per, PUBLIC.pt_mstr.pt_price, PUBLIC.pt_mstr.pt_um  FROM   PUBLIC.pm_mstr,  PUBLIC.pmd_det , PUBLIC.ps_mstr, PUBLIC.pt_mstr, PUBLIC.sct_det where PUBLIC.pmd_det.pmd_code = PUBLIC.pm_mstr.pm_code  and PUBLIC.ps_mstr.ps_parent = PUBLIC.pmd_det.pmd_bom_code and PUBLIC.pt_mstr.pt_part = PUBLIC.ps_mstr.ps_comp and PUBLIC.sct_det.sct_part = PUBLIC.ps_mstr.ps_comp and PUBLIC.sct_det.sct_site = '1000' and PUBLIC.sct_det.sct_sim = 'STD-CG' ",
       { type: QueryTypes.SELECT },
     );
     for (var i = 0; i < pos.length; i++) {

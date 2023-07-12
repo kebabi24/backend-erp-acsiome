@@ -6,7 +6,7 @@ const route = Router();
 export default (app: Router) => {
   app.use('/inventory-transactions', route);
 
-  route.get('/', controller.findAll);
+  
   route.post('/', controller.create);
   route.get('/findAllissSo', controller.findAllissSo);
   route.get('/:id', controller.findOne);
@@ -37,6 +37,8 @@ export default (app: Router) => {
   route.post('/findByOneinv', controller.findByOneinv);
   route.post('/findinv', controller.findByInv);
   route.post('/findrct', controller.findByRct);
-  route.post("/findoa", controller.findBySpec)
+  route.post("/findoa", controller.findBySpec);
+  route.get('/', controller.findAll);
+  route.post('/findcost', controller.findByCost);
   
 };

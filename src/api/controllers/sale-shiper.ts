@@ -59,7 +59,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain: user_domain,
         sct_part: remain.psh_part,
         sct_site: remain.psh_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const pt = await itemServiceInstance.findOne({ pt_domain: user_domain,pt_part: remain.psh_part });
       //console.log(remain.psh_part, remain.psh_site)

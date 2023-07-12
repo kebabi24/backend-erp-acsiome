@@ -372,7 +372,7 @@ const{user_domain} = req.headers
           { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
         )
       }
-      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STDCG' });
+      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STD-CG' });
      // console.log({ ...tag.dataValues,tag_posted: true })
       await tagServiceInstance.update({ ...tag.dataValues,tag_posted: true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id: tag.id });
       /*onst {
