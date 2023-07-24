@@ -14,6 +14,7 @@ export default class LoadRequestService {
         @Inject("profileMobileModel") private profileMobileModel: Models.Profile_menuModel,
         @Inject("profileProductPageModel") private profileProductPageModel: Models.profileProductPageModel,
         @Inject("productPageDetailsModel") private productPageDetailsModel: Models.productPageDetailsModel,
+        @Inject("productPageModel") private productPageModel: Models.productPageModel,
         @Inject("itemModel") private itemModel: Models.ItemModel,
         @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
         @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
@@ -567,6 +568,105 @@ export default class LoadRequestService {
             });
                     
             this.logger.silly("found all loadrequests")
+            return loadRequests
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getLoadRequestCreationData(): Promise<any> {
+        try {
+            // get user mobile and profile & pages codes of the profile
+            // const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
+            // const profile = await this.profileMobileModel.findOne({where:{profile_code :user_mobile.profile_code }})
+            // const pages_codes = await this.profileProductPageModel.findAll({where : {profile_code:profile.profile_code} ,attributes: ['product_page_code']})
+
+            // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
+            
+            const pages_codes = await this.productPageModel.findAll({where:{},attributes:['product_page_code']})
+            // obj : page code + products_codes []
+            const pagesProducts = []
+            for(const pageCode of pages_codes){
+                const products_codes = await this.productPageDetailsModel.findAll({where : {product_page_code:pageCode.product_page_code },attributes: ['product_code']})
+                pagesProducts.push({page_code : pageCode.product_page_code, products: products_codes})
+            }    
+            
+            
+            const pagesProductsWithDetails = []
+          
+            for(const page of pagesProducts){
+                const products = []
+
+                // FOR EACH PRODUCT 
+                for(const productd of  page.products){
+                    // get product data
+                    const product = await this.itemModel.findOne({
+                        where :{pt_part : productd.dataValues.product_code},
+                        attributes:['pt_desc1', 'pt_price','pt_part']
+                    })
+
+                    // CALCULATE STORED QUANTITY  
+                    const sum = await this.getStoredQuantityOfProductWithoutLocSite(product.pt_part)
+
+                    // var index = -1
+                    // index = loadRequesLines.findIndex(line=>{
+                    //     return line.dataValues.product_code == product.dataValues.pt_part;
+                    // })
+
+                    // product was requested
+                    // if(index != -1){
+                    //     const load_request_line = loadRequesLines[index].dataValues
+                    //     products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})         
+                      
+                    
+                    // product was not requested 
+                   
+                    products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: 0, qt_validated: 0, qt_stored : sum})         
+
+                    
+                    
+                }   
+                pagesProductsWithDetails.push({page_code:page.page_code, products:products})
+            }   
+            return pagesProductsWithDetails
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getStoredQuantityOfProductWithoutLocSite( product_code :any): Promise<any> {
+        try {
+
+            // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+            const quantities = await this.locationDetailModel.findAll({
+                where : {
+                   ld_part: product_code
+                },
+                attributes: ["ld_qty_oh"]
+            })
+            let sum = 0 
+            if(quantities){
+                quantities.forEach(quantity => {
+                    // console.log(quantity.dataValues.ld_qty_oh)
+                    sum += +quantity.dataValues.ld_qty_oh
+                });
+            } 
+            this.logger.silly("quantity sum calculated")
+           
+            
+            return sum
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async createLoadRequest(data: any): Promise<any> {
+        try {
+            const loadRequests = await this.loadReuestModel.create(data )
+            this.logger.silly("created load request")
             return loadRequests
         } catch (e) {
             this.logger.error(e)

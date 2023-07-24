@@ -5,6 +5,7 @@ import { Container } from "typedi"
 import { QueryTypes } from 'sequelize'
 
 
+
 // ********************** CREATE NEW USER MOBILE *************
 
 const submitVisitResultData = async (req: Request, res: Response, next: NextFunction) => {

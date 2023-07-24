@@ -235,6 +235,12 @@ export default async ({ expressApp }) => {
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
       { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
+
+      // PROMOTION
+      { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
+      { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
+      { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
+
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
