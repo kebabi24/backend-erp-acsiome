@@ -8,6 +8,7 @@ export default (app: Router) => {
 
     route.get("/findOneByCode/:product_page_code", controller.findOneByCode)
     route.post("/createProductPage", controller.createProductPage)
+    route.get("/getPageProducts/:product_page_code", controller.findPageProductsByPageCode)
     route.get("/", controller.findAllProductPages)
     route.post("/updateProfileProductsPages", controller.updateProfileProductPages)
     // route.post("/find", controller.findBy)

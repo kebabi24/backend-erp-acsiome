@@ -7,6 +7,10 @@ export default (app: Router) => {
     app.use("/mobile-settings", route)
 
     route.post("/sumbitVisitResultsData", controller.submitVisitResultData)
+    route.post("/createCancelReasons", controller.createCancelationReasons)
+    route.post("/createPaymentMethods", controller.createPaymentMethods)
     route.get("/getVisitList", controller.getVisitList)
+    route.get("/paymentMethods", controller.getPaymentMethods)
+    route.get("/cancelationReasons", controller.getCanelationReasons)
     
 }

@@ -7,6 +7,9 @@ import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
 import {Op, Sequelize } from 'sequelize';
+import CryptoJS from '../../utils/CryptoJS';
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // ********************** CREATE NEW USER MOBILE *************
 
@@ -1006,6 +1009,44 @@ const getAllVisits = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+// ********************** FIND ONE USER MOBILE BY CODE *************
+const testHash = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  user endpoint');
+  try {
+
+    const algorithm = 'aes-192-cbc';
+    const word = 'test';
+    // const secretKey = '123456asdf'
+    // const secretKey = crypto.randomBytes(32);
+    
+
+
+    // const iv = crypto.randomBytes(16);
+    // const cipher = crypto.createCipheriv("aes-256-cbc", secretKey, iv);
+    // let encryptedText = cipher.update(word, "utf-8", "hex");
+    // encryptedText += cipher.final("hex");
+
+    // crypto.scrypt(word, secretKey ,16 , (err, key)=>{
+     
+    // })
+
+    // const salt = bcrypt.genSaltSync(10);
+    // const hash = bcrypt.hashSync('test', salt);
+
+    var encryptionKey2 = CryptoJS.lib.WordArray.random(256 / 8).toString();
+    // var secretKey = '123456asdf';
+    var secretKey = "b4cb72173ee45d8c7d188e8f77eb16c2";
+    let encryptedValue=CryptoJS.AES.encrypt('test', secretKey).toString()
+    console.log("encrypt  "+encryptedValue);
+
+    return res.status(200).json({data: encryptedValue });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 
 export default {
   create,
@@ -1027,4 +1068,5 @@ export default {
   findVisitBy,
   findAllVisits,
   findUserPassword,
+  testHash
 };
