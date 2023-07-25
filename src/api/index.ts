@@ -101,6 +101,8 @@ import unloadRequest from './routes/unload-request';
 import customerOrder from './routes/customer-orders';
 
 import employeSalary from './routes/employe-salary';
+import transportcost from './routes/transportcost';
+import costlist from './routes/costlist';
 
 // guaranteed to get dependencies
 export default () => {
@@ -205,6 +207,8 @@ export default () => {
   employeSalary(app);
 
   customerOrder(app);
+  transportcost(app);
+  costlist(app)
 
  
 

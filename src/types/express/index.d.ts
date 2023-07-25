@@ -190,5 +190,9 @@ declare global {
     export type unloadRequestModel = S.Model;
     export type unloadRequestDetailsModel = S.Model;
     export type customerOrdersModel = S.Model;
+
+    export type TransportcostModel = S.Model;
+    export type CostlistModel = S.Model;
+    export type CostlistDetailModel = S.Model;
   }
 }
