@@ -937,14 +937,14 @@ export default async ({ expressApp }) => {
   //await sequelizeConnection.sync();
   // await sequelizeConnection.sync();
 
-  // await sequelizeConnection
-  //   .sync({ alter: true })
-  //   .then(() => {
-  //     console.log('database updated');
-  //   })
-  //   .catch(err => {
-  //     console.log(err);
-  //   });
+  await sequelizeConnection
+    .sync({ alter: true })
+    .then(() => {
+      console.log('database updated');
+    })
+    .catch(err => {
+      console.log(err);
+    });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
