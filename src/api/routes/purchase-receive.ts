@@ -18,4 +18,6 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/rct-po', controller.rctPo);
+
+  route.post('/groupamt', controller.findGroupAmt);
 };

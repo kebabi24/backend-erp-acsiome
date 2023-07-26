@@ -113,7 +113,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
         sct_domain: user_domain,
         sct_part: remain.sod_part,
         sct_site: remain.sod_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const pt = await itemServiceInstance.findOne({pt_domain: user_domain, pt_part: remain.sod_part });
       console.log(remain.sod_part, remain.sod_site);
@@ -693,7 +693,7 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
           sct_domain: user_domain,
           sct_part: details.sod_part,
           sct_site: details.sod_site,
-          sct_sim: 'STDCG',
+          sct_sim: 'STD-CG',
         });
         const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: details.sod_part });
         console.log(details.sod_part, details.sod_site);

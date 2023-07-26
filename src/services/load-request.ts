@@ -1,8 +1,8 @@
 
-import { Sequelize } from "sequelize/types"
+
 import { Service, Inject } from "typedi"
 import ProductPageService from "./product-page";
-const { Op } = require("sequelize");
+import { Op, Sequelize } from 'sequelize';
 
 @Service()
 export default class LoadRequestService {
@@ -14,6 +14,7 @@ export default class LoadRequestService {
         @Inject("profileMobileModel") private profileMobileModel: Models.Profile_menuModel,
         @Inject("profileProductPageModel") private profileProductPageModel: Models.profileProductPageModel,
         @Inject("productPageDetailsModel") private productPageDetailsModel: Models.productPageDetailsModel,
+        @Inject("productPageModel") private productPageModel: Models.productPageModel,
         @Inject("itemModel") private itemModel: Models.ItemModel,
         @Inject("loadRequestLineModel") private loadRequestLineModel: Models.loadRequestLineModel,
         @Inject("loadRequestDetailsModel") private loadRequestDetailsModel: Models.loadRequestDetailsModel,
@@ -361,12 +362,14 @@ export default class LoadRequestService {
                     // GET PRODUCT DATA 
                     const product = await this.itemModel.findOne({
                         where :{pt_part : productd.dataValues.product_code},
-                        attributes:['pt_desc1', 'pt_price','pt_part']
+                        attributes:['pt_desc1', 'pt_price','pt_part','pt_um']
                     })
 
                     // GET PRODUCT QUANTITY STORED
                     // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
-                    const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
+                    // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
+                    console.log("loc from : "+load_request.role_loc_from)
+                    const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from,site,product.pt_part)
                     
                     // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES 
                     var index = -1
@@ -382,12 +385,15 @@ export default class LoadRequestService {
                         let lots = []
                         let qt_eff = 0 
                         for(const element of details) {
-                            const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
+                            // const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
+                            const qnt = await this.getProductQuantityPerLot(load_request.role_loc_from,site,element.product_code,element.dataValues.lot )
                             console.log(qnt)
                             lots.push({
                                 lot_code :element.dataValues.lot,
                                 qnt_lot:qnt.dataValues.ld_qty_oh,
-                                qt_effected : element.dataValues.qt_effected
+                                qt_effected : element.dataValues.qt_effected,
+                                ld_status :qnt.dataValues.ld_status,
+                                ld_expire :qnt.dataValues.ld_expire
                             })
                             qt_eff += element.dataValues.qt_effected
                         };
@@ -539,7 +545,7 @@ export default class LoadRequestService {
                 where : {
                     ld_loc: ld_loc, ld_part: product_code, ld_site : ld_site,ld_lot : lot
                 },
-                attributes: ["ld_qty_oh"]
+                attributes: ["ld_qty_oh", "ld_status","ld_expire"]
             })
             
             this.logger.silly("quantity sum calculated")
@@ -549,4 +555,126 @@ export default class LoadRequestService {
             throw e
         }
     }
+
+    public async getLoadRequestsBetweenDates(startDate: any, endDate : any ): Promise<any> {
+        try {
+
+             const loadRequests = await this.loadReuestModel.findAll({
+                where: Sequelize.and(
+                // {del_comp  :{[Op.not]: "null"}},
+                { date_creation: { [Op.gte]: new Date(startDate) } },
+                { date_creation: { [Op.lte]: new Date(endDate) } },
+                )
+            });
+                    
+            this.logger.silly("found all loadrequests")
+            return loadRequests
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getLoadRequestCreationData(): Promise<any> {
+        try {
+            // get user mobile and profile & pages codes of the profile
+            // const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
+            // const profile = await this.profileMobileModel.findOne({where:{profile_code :user_mobile.profile_code }})
+            // const pages_codes = await this.profileProductPageModel.findAll({where : {profile_code:profile.profile_code} ,attributes: ['product_page_code']})
+
+            // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
+            
+            const pages_codes = await this.productPageModel.findAll({where:{},attributes:['product_page_code']})
+            // obj : page code + products_codes []
+            const pagesProducts = []
+            for(const pageCode of pages_codes){
+                const products_codes = await this.productPageDetailsModel.findAll({where : {product_page_code:pageCode.product_page_code },attributes: ['product_code']})
+                pagesProducts.push({page_code : pageCode.product_page_code, products: products_codes})
+            }    
+            
+            
+            const pagesProductsWithDetails = []
+          
+            for(const page of pagesProducts){
+                const products = []
+
+                // FOR EACH PRODUCT 
+                for(const productd of  page.products){
+                    // get product data
+                    const product = await this.itemModel.findOne({
+                        where :{pt_part : productd.dataValues.product_code},
+                        attributes:['pt_desc1', 'pt_price','pt_part']
+                    })
+
+                    // CALCULATE STORED QUANTITY  
+                    const sum = await this.getStoredQuantityOfProductWithoutLocSite(product.pt_part)
+
+                    // var index = -1
+                    // index = loadRequesLines.findIndex(line=>{
+                    //     return line.dataValues.product_code == product.dataValues.pt_part;
+                    // })
+
+                    // product was requested
+                    // if(index != -1){
+                    //     const load_request_line = loadRequesLines[index].dataValues
+                    //     products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})         
+                      
+                    
+                    // product was not requested 
+                   
+                    products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: 0, qt_validated: 0, qt_stored : sum})         
+
+                    
+                    
+                }   
+                pagesProductsWithDetails.push({page_code:page.page_code, products:products})
+            }   
+            return pagesProductsWithDetails
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getStoredQuantityOfProductWithoutLocSite( product_code :any): Promise<any> {
+        try {
+
+            // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+            const quantities = await this.locationDetailModel.findAll({
+                where : {
+                   ld_part: product_code
+                },
+                attributes: ["ld_qty_oh"]
+            })
+            let sum = 0 
+            if(quantities){
+                quantities.forEach(quantity => {
+                    // console.log(quantity.dataValues.ld_qty_oh)
+                    sum += +quantity.dataValues.ld_qty_oh
+                });
+            } 
+            this.logger.silly("quantity sum calculated")
+           
+            
+            return sum
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async createLoadRequest(data: any): Promise<any> {
+        try {
+            const loadRequests = await this.loadReuestModel.create(data )
+            this.logger.silly("created load request")
+            return loadRequests
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
+
+    
 }

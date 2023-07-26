@@ -1,5 +1,6 @@
 import { Service, Inject } from "typedi"
 import argon2 from 'argon2'
+var Crypto = require('crypto');
 @Service()
 export default class UserMobileService {
     constructor(
@@ -35,7 +36,7 @@ export default class UserMobileService {
         @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
         @Inject("priceListModel") private priceListModel: Models.PricelistModel,
         @Inject("invoiceModel") private invoiceModel: Models.invoiceModel,
-        @Inject("invoiceLineModel") private invoiceLineModel: Models.InventoryLineModel,
+        @Inject("invoiceLineModel") private invoiceLineModel: Models.invoiceLineModel,
         @Inject("taxeModel") private taxeModel: Models.TaxeModel,
         @Inject("visitsModel") private visitsModel: Models.visitsModel,
         @Inject("inventoryModel") private inventoryModel: Models.InventoryModel,
@@ -47,10 +48,26 @@ export default class UserMobileService {
 
 
     // ******************** CREATE **************************
+     
+    
     public async create(data: any): Promise<any> {
         try {
+            var secret_key = 'fd85b494-aaaa';
+            var secret_iv = 'smslt';
+            var encryptionMethod = 'AES-256-CBC';
+            var key = Crypto.createHash('sha512').update(secret_key, 'utf-8').digest('hex').substr(0, 32);
+            var iv = Crypto.createHash('sha512').update(secret_iv, 'utf-8').digest('hex').substr(0, 16);
+
+           
+            
+            data.password = encrypt_string(data.password, encryptionMethod, key, iv);
+            // console.log(encryptedPassword)
             const password = await argon2.hash(data.password)
-            const user = await this.userMobileModel.create({ ...data, password })
+
+            const newPassword = Crypto.createHash('md5','secret_key').update(data.password).digest("hex");
+
+            console.log(newPassword)
+            const user = await this.userMobileModel.create({ ...data })
             this.logger.silly("user mobile created")
             return user
         } catch (e) {
@@ -808,6 +825,7 @@ export default class UserMobileService {
     // ******************** GET PAYMENT METHOD  **************************
     public async getPaymentMethods(): Promise<any> {
         try {
+           
             const paymentMethods = await this.paymentMethodModel.findAll()
             return paymentMethods
         } catch (e) {
@@ -829,6 +847,19 @@ export default class UserMobileService {
         }
     }
 
+    // ******************** GET PAYMENT BY   **************************
+    public async getPaymentsBy(query:any): Promise<any> {
+        try {
+            const payment = await this.paymentModel.findAll({ where: query,
+            
+            });
+            return payment
+        } catch (e) {
+            console.log('Error from service- getPayments')
+            this.logger.error(e)
+            throw e
+        }
+    }
     // ******************** GET CANCELATION REASONS   **************************
     public async getCancelationReasons(): Promise<any> {
         try {
@@ -876,8 +907,35 @@ export default class UserMobileService {
             throw e
         }
     }
+    // ******************** GET INVOICE LINE query   **************************
+    public async getInvoiceLineBy(query: any): Promise<any> {
+        try {
+            const invoice_line = await this.invoiceLineModel.findAll(query)
+            return invoice_line
+        } catch (e) {
+            console.log('Error from service- getInvoiceLine')
+            this.logger.error(e)
+            throw e
+        }
+    }
+// ******************** GET ALL INVOICE     **************************
+    public async getAllInvoice(query: any): Promise<any> {
+        try {
+            const invoice = await this.invoiceModel.findAll(query)
+            return invoice
+        } catch (e) {
+            console.log('Error from service- getInvoice')
+            this.logger.error(e)
+            throw e
+        }
+    }
 
+    
+    
     // ******************** UPDATE ONE CUSTOMER **************************
+
+
+
     public async updateCustomer(data: any, query: any): Promise<any> {
         try {
             if(data.id){
@@ -972,14 +1030,14 @@ export default class UserMobileService {
             data.forEach(element => {
                 // console.log(element)
                 if(element.id) delete element.id
-                element.due_amount = element.dueamout 
+                // element.due_amount = element.dueamout 
                 //    element.period_active_day = element.periode_active_date 
-               element.progress_level = element.progresslevel 
+            //    element.progress_level = element.progresslevel 
                 //    element.the_date = element.thedate 
-               delete element.dueamount
-               delete element.periode_active_date
-               delete element.progress_level
-               delete element.thedate
+            //    delete element.dueamount
+            //    delete element.periode_active_date
+            //    delete element.progress_level
+            //    delete element.thedate
                delete element.MAJ
             });
             const invoices = await this.invoiceModel.bulkCreate(data)
@@ -1144,9 +1202,11 @@ export default class UserMobileService {
             throw e
         }
     }
-
-
-
    
 }
 
+function encrypt_string(plain_text, encryptionMethod, secret, iv) {
+    var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);
+    var aes_encrypted = encryptor.update(plain_text, 'utf8', 'base64') + encryptor.final('base64');
+    return Buffer.from(aes_encrypted).toString('base64');
+  };

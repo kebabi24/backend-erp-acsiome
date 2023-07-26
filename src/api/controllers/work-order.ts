@@ -2,15 +2,20 @@ import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
 import WorkroutingService from '../../services/workrouting';
 import ItemService from '../../services/item';
-
+import InventoryTransactionService from '../../services/inventory-transaction';
+import OperationHistoryService from "../../services/operation-history"
+import WorkCenterService from "../../services/workcenter"
+import { Op, Sequelize } from 'sequelize';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import { result } from 'lodash';
+import { multiply, result } from 'lodash';
 import { IntegerDataType } from 'sequelize/types';
 import psService from '../../services/ps';
 import workOrderDetailService from '../../services/work-order-detail';
 import { Console } from 'console';
 import sequenceService from '../../services/sequence';
+import { webContents } from 'electron';
+import item from './item';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -372,6 +377,152 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+
+
+const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const itemServiceInstance = Container.get(ItemService);
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const operationHistoryServiceInstance = Container.get(OperationHistoryService)
+    const workcenterServiceInstance = Container.get(WorkCenterService)
+    console.log(req.body);
+     let result=[] 
+     let i = 1
+    const wos = await workOrderServiceInstance.find({
+      
+        wo_domain: user_domain,
+        wo_part: { [Op.between]: [req.body.part1, req.body.part2]},
+        wo_ord_date: { [Op.between]: [req.body.date, req.body.date1]},
+      
+    });
+    for(let wo of wos) {
+      const item = await itemServiceInstance.findOne({
+      
+        pt_domain: user_domain,
+        pt_part: wo.wo_part,
+      
+    });
+    var qtywo = Number(wo.wo_qty_comp) + Number(wo.wo_qty_rjct)
+      const tr = await inventoryTransactionServiceInstance.find({
+        where : {
+          tr_domain: user_domain, tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,
+          tr_part: wo.wo_part,
+          tr_ship_type: { [Op.ne]: 'M' },
+          tr_type : "ISS-WO",
+          tr_lot : wo.id,
+        },
+        attributes: [ [Sequelize.fn('sum', Sequelize.literal('tr_qty_loc * tr__dec02')), 'mtl']],
+        //group: ['tr_part'],
+        raw: true,
+      })
+
+      const ops = await operationHistoryServiceInstance.find({op_wo_lot:wo.id ,op_wo_nbr: wo.wo_nbr,op_type:"labor",op_domain:user_domain})
+
+      let lbr = 0
+      let bdn = 0
+      let mtl = tr.mtl
+      for (let op of ops) {
+        const wc = await workcenterServiceInstance.findOne({wc_wkctr:op. op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
+            lbr = lbr + (Number(op.op_act_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_act_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
+            bdn = bdn + (Number(op.op_act_setup) + Number(op.op_act_run)) * Number(wc.wc_bdn_rate)
+          }
+
+       if (qtywo != 0) {
+        mtl = tr.mtl / qtywo
+        lbr = lbr / qtywo
+        bdn = bdn / qtywo
+       }
+       else {
+         mtl = tr.mtl 
+        lbr = lbr 
+        bdn = bdn 
+       }
+       result.push({id:i,wonbr: wo.wo_nbr, woid:wo.id, wopart:wo.wo_part, desc:item.pt_desc1,wodate: wo.wo_ord_date, mtl:mtl, lbr:lbr, bdn:bdn, qtycomp: wo.wo_qty_comp, qtyrjct: wo.wo_qty_rjct })
+       i = i + 1 
+       await workOrderServiceInstance.update(
+        { wo__dec01:mtl , wo__dec02: lbr, wo__dec03:bdn, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { id:wo.id },
+      );
+
+    }
+    
+       
+    console.log("trs",wos.length);
+   
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+
+    const itemServiceInstance = Container.get(ItemService);
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const operationHistoryServiceInstance = Container.get(OperationHistoryService)
+    const workcenterServiceInstance = Container.get(WorkCenterService)
+    console.log(req.body);
+     
+    const wo = await workOrderServiceInstance.findOne({
+    
+        wo_domain: user_domain,
+        id: req.body.id
+      
+    });
+   
+    var qtywo = Number(wo.wo_qty_comp) + Number(wo.wo_qty_rjct)
+     
+      const ops = await operationHistoryServiceInstance.find({op_wo_lot:wo.id ,op_wo_nbr: wo.wo_nbr,op_type:"labor",op_domain:user_domain})
+
+      let lbr = 0
+      let bdn = 0
+      let lbrstd = 0
+      let bdnstd= 0
+      for (let op of ops) {
+        const wc = await workcenterServiceInstance.findOne({wc_wkctr:op. op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
+            lbr = lbr + (Number(op.op_act_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_act_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
+            bdn = bdn + (Number(op.op_act_setup) + Number(op.op_act_run)) * Number(wc.wc_bdn_rate)
+
+            lbrstd = lbrstd + (Number(op.op_std_setup) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)) + (Number(op.op_std_run) * Number(wc.wc_lbr_rate)* Number(wc.wc_men_mch))
+            bdnstd = bdnstd + (Number(op.op_std_setup) + (Number(op.op_std_run)* Number(qtywo))) * Number(wc.wc_bdn_rate)
+          }
+
+       if (qtywo != 0) {
+        lbr = lbr / qtywo
+        bdn = bdn / qtywo
+        lbrstd = lbrstd / qtywo
+        bdnstd = bdnstd / qtywo
+       }
+       else {
+       
+        lbr = lbr 
+        bdn = bdn 
+
+       }
+      
+    
+  //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: {lbr,bdn,lbrstd,bdnstd} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createDirect,
@@ -382,4 +533,6 @@ export default {
   findByOne,
   update,
   deleteOne,
+  CalcCost,
+  CalcCostWo,
 };

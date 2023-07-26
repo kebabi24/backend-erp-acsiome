@@ -5,6 +5,8 @@ import { type } from "os"
 export default class MobileSettingsService {
     constructor(
         @Inject("visitresultModel") private visitresultModel: Models.visitresultModel,
+        @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
+        @Inject("paymentMethodModel") private paymentMethodModel: Models.paymentModel,
         @Inject("logger") private logger
     ) {}
 
@@ -62,6 +64,63 @@ export default class MobileSettingsService {
             })
             this.logger.silly("update one visit list ")
             return user
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** GET PAYMENT METHODS **************************
+     public async getPaymentMethods(): Promise<any> {
+        try {
+            const paymentMethods = await this.paymentMethodModel.findAll()
+            return paymentMethods
+        } catch (e) {
+            console.log('Error from getPaymentMethod')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CANCELATION REASONS  **************************
+    public async getCanelationReasons(): Promise<any> {
+        try {
+            const cancelationReasons = await this.cancelationReasonModel.findAll()
+            return cancelationReasons
+        } catch (e) {
+            console.log('Error from getCanelationReasons')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ****************** CREATE CANCELATION REASONS ************
+    public async createCancelationReasons(data: any): Promise<any> {
+        try {
+            const deleteData =  await this.cancelationReasonModel.destroy({where:{}})
+            data.forEach(element => {
+              delete element.id  
+            });
+            const reasons = await this.cancelationReasonModel.bulkCreate(data)
+            this.logger.silly("visitResults", reasons)
+            return reasons
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ****************** CREATE PAYMENT METHODS ************
+    public async createPaymentMethods(data: any): Promise<any> {
+        try {
+            const deleteData =  await this.paymentMethodModel.destroy({where:{}})
+            data.forEach(element => {
+              delete element.id  
+            });
+            const methods = await this.paymentMethodModel.bulkCreate(data)
+           
+            this.logger.silly("methods", methods)
+            return methods
         } catch (e) {
             this.logger.error(e)
             throw e

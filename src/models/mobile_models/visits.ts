@@ -20,12 +20,13 @@ const Visits = sequelize.define(
             type: Sequelize.STRING,
             primaryKey: true,
         },
-       
+        visitresult_code : {type: Sequelize.STRING }, // add relation 
+        site : {type: Sequelize.STRING },// add relation
         itinerary_code : {type: Sequelize.STRING },
         customer_code  : {type : Sequelize.STRING},
-        periode_active_date : {type : Sequelize.STRING},
-        start_time   : {type : Sequelize.STRING},
-        end_time   : {type : Sequelize.STRING},
+        periode_active_date : {type : Sequelize.DATEONLY},
+        start_time   : {type : Sequelize.DATE},
+        end_time   : {type : Sequelize.DATE},
         role_code    : {type : Sequelize.STRING},
         user_code    : {type : Sequelize.STRING},
         service_code    : {type : Sequelize.STRING},

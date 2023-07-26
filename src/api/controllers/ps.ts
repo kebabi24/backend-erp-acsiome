@@ -7,6 +7,7 @@ import { Container } from 'typedi';
 import costSimulationService from '../../services/cost-simulation';
 import { INTEGER } from 'sequelize';
 import { readlink } from 'fs';
+import site from './site';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -275,13 +276,13 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
       const sct = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
         sct_part: entry.ps_comp,
-
-        sct_sim: 'STDCG',
+        sct_site: "1000",
+        sct_sim: 'STD-CG',
       });
     
       price = price + entry.ps_qty_per * sct.sct_cst_tot;
     }
-
+console.log(price)
     return res.status(200).json({
       message: 'fetched succesfully',
       data: price,

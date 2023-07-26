@@ -69,6 +69,7 @@ declare global {
     export type OperationHistoryModel = S.Model;
     export type ReasonModel = S.Model;
     export type FraisModel = S.Model;
+    export type FraisDetailModel = S.Model;
     export type JobModel = S.Model;
     export type JobDetailModel = S.Model;
     export type ToolModel = S.Model;
@@ -139,6 +140,7 @@ declare global {
     export type complaintDetailsModel = S.Model;
     export type SatisfactionModel = S.Model;
     export type invoiceModel = S.Model;
+    export type invoiceLineModel = S.Model;
     export type forcastModel = S.Model;
     export type InventoryStatusMouvementModel = S.Model;
     // new models
@@ -188,5 +190,18 @@ declare global {
     export type unloadRequestModel = S.Model;
     export type unloadRequestDetailsModel = S.Model;
     export type customerOrdersModel = S.Model;
+<<<<<<< HEAD
+
+    export type TransportcostModel = S.Model;
+    export type CostlistModel = S.Model;
+    export type CostlistDetailModel = S.Model;
+=======
+    
+    // PROMOTION 
+    export type populationArticleModel = S.Model;
+    export type promotionModel = S.Model;
+    export type advantageModel = S.Model;
+
+>>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
   }
 }

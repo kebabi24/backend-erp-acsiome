@@ -58,16 +58,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sod_part: pmd.pmd_part,
         sod__chr01: pmd.pmd_task,
       });
-
-      await saleorderDetailServiceInstance.update(
-        {
-          sod_qty_ship: Number(sod.sod_qty_ship) + 1,
-          sod_qty_cons: Number(sod.sod_qty_cons) + 1,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        },
-        { id: sod.id },
-      );
     }
     for (let entry of empDetail) {
       await addReportServiceInstance.create({
@@ -81,8 +71,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         pmr_close: addReport.pmr_close,
         pmr_mobilisation: addReport.pmr_mobilisation,
         pmr_demobilisation: addReport.pmr_demobilisation,
-        pmr_stndby: addReport.pmr_stndby,
         pmr_separe: addReport.pmr_separe,
+        pmr_stndby: addReport.pmr_stndby,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -95,7 +85,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain: user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part, pt_domain: user_domain });
       const ld = await locationDetailServiceInstance.findOne({

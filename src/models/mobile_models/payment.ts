@@ -41,7 +41,9 @@ const Payment = sequelize.define(
         
         rank:{type: Sequelize.INTEGER},
         canceled:{type:Sequelize.BOOLEAN},
-
+        period_active_date:{type:Sequelize.DATEONLY},
+        site:{type: Sequelize.STRING},
+        itinerary_code:{type: Sequelize.STRING}, // from itinerary 
         
         
         // ...base,

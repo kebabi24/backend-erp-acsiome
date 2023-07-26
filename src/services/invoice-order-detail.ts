@@ -3,7 +3,7 @@ import { Service, Inject } from "typedi"
 @Service()
 export default class invoiceOrderDetailService {
     constructor(
-        @Inject("invoiceOrderDetailModel") private invoiceOrderDetailModel: Models.InvoiceOrderDetailService,
+        @Inject("invoiceOrderDetailModel") private invoiceOrderDetailModel: Models.InvoiceOrderDetailModel,
         @Inject("itemModel") private itemModel: Models.ItemModel,
         @Inject("logger") private logger
     ) {}

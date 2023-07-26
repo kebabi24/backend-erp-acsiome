@@ -86,9 +86,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const{user_code} = req.headers 
   const{user_domain} = req.headers
   try {
+    console.log("here tr here tr here tr")
+    console.log(req.body)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const devise = await inventoryTransactionServiceInstance.findOne({ ...req.body,tr_domain:user_domain });
-    return res.status(200).json({ message: 'fetched succesfully', data: devise });
+    const trs = await inventoryTransactionServiceInstance.find({ ...req.body,tr_domain:user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: trs });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -169,17 +171,17 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
       const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_ref:item.tr_ref, ld_domain:user_domain });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STDCG' });
+      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
 
       let qty = 0;
@@ -204,7 +206,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
-        { sct_part: item.tr_part, sct_site: item.tr_site, sct_sim: 'STDCG',sct_domain:user_domain },
+        { sct_part: item.tr_part, sct_site: item.tr_site, sct_sim: 'STD-CG',sct_domain:user_domain },
       );
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
@@ -311,7 +313,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain });
       const ld = await locationDetailServiceInstance.findOne({
@@ -395,13 +397,13 @@ console.log(user_domain)
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
         sct_domain: user_domain,
       });
       const sctrct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_ref_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
         sct_domain: user_domain
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
@@ -452,6 +454,7 @@ console.log(user_domain)
         ld_ref:item.tr_ref,
         ld_domain: user_domain,
       });
+      console.log(ld1)
       if (ld1)
         await locationDetailServiceInstance.update(
           {
@@ -554,7 +557,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       sct_domain:user_domain,
       sct_part: obj.ld_part,
       sct_site: obj.ld_site,
-      sct_sim: 'STDCG',
+      sct_sim: 'STD-CG',
     });
     const pt = await itemServiceInstance.findOne({ pt_part: obj.ld_part,pt_domain:user_domain });
 
@@ -1176,7 +1179,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain:user_domain,
         sct_part: it.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
       await inventoryTransactionServiceInstance.create({
         ...item,
@@ -1240,16 +1243,17 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         sct_domain:user_domain,
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
 
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain:user_domain});
       const ld = await locationDetailServiceInstance.findOne({
         ld_domain:user_domain,
         ld_part: item.tr_part,
-        // ld_lot: item.tr_nbr,
+        ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
       });
       // console.log(ld);
       if (ld) {
@@ -1353,7 +1357,7 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
 //       const sctdet = await costSimulationServiceInstance.findOne({
 //         sct_part: remain.tr_part,
 //         sct_site: remain.tr_site,
-//         sct_sim: 'STDCG',
+//         sct_sim: 'STD-CG',
 //       });
 //       const pt = await itemsServiceInstance.findOne({ pt_part: remain.tr_part });
 //       // console.log(remain.tr_part, remain.tr_site);
@@ -1466,7 +1470,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           sct_domain:user_domain,
           sct_part: remain.ld_part,
           sct_site: remain.ld_site,
-          sct_sim: 'STDCG',
+          sct_sim: 'STD-CG',
         });
         const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part ,pt_domain:user_domain});
         // console.log(remain.tr_part, remain.tr_site);
@@ -1606,7 +1610,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
           sct_domain:user_domain,
           sct_part: remain.ld_part,
           sct_site: remain.ld_site,
-          sct_sim: 'STDCG',
+          sct_sim: 'STD-CG',
         });
         const pt = await itemsServiceInstance.findOne({ pt_part: remain.ld_part ,pt_domain:user_domain});
         // console.log(remain.tr_part, remain.tr_site);
@@ -2370,6 +2374,7 @@ const findAllissSo = async (req: Request, res: Response, next: NextFunction) => 
 const issWo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling update one  code endpoint');
   try {
@@ -2384,11 +2389,11 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: item.tr_site,
-        sct_sim: 'STDCG',
+        sct_sim: 'STD-CG',
       });
+console.log("sct",sct)
 
-
-      
+      console.log("ref",item.tr_ref)
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
@@ -2410,6 +2415,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
       await inventoryTransactionServiceInstance.create({
         ...item,
         ...it,
+        tr_domain: user_domain,
         tr_gl_date: it.tr_effdate,
         tr_qty_loc: -1 * Number(item.tr_qty_loc),
         tr_qty_chg: -1 * Number(item.tr_qty_loc),
@@ -2501,7 +2507,7 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
       sct_domain:user_domain,
       sct_part: obj.ld_part,
       sct_site: obj.ld_site,
-      sct_sim: 'STDCG',
+      sct_sim: 'STD-CG',
     });
     const pt = await itemServiceInstance.findOne({ pt_part: obj.ld_part,pt_domain:user_domain });
 
@@ -2579,6 +2585,33 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findByCost = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    // console.log("here tr here tr here tr")
+    // console.log(req.body)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findbetw({ where : {...req.body,tr_domain:user_domain,},
+      attributes: {
+         include: [[Sequelize.literal('-tr_qty_loc * tr__dec02'), 'tr__dec04'],[Sequelize.literal('-tr_qty_loc * tr_price'), 'tr__dec05']],
+      },
+    });
+    for (let tr of trs) {
+    
+      if (tr.tr__dec04 == 0 ) {
+        tr.tr__dec04 = tr.tr__dec05
+      }
+    }
+   
+    return res.status(200).json({ message: 'fetched succesfully', data: trs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -2612,5 +2645,6 @@ export default {
   findBySpec,
   findAllissSo,
   issChlRef,
+  findByCost,
   
 };

@@ -207,7 +207,6 @@ export default class posOrderService {
 
   public async findAllPosOrders(startDate: any, endDate: any, shop: any): Promise<any> {
     try {
-      console.log(shop);
       let orders;
       if (shop.length == 0) {
         orders = await this.posOrderModel.findAll({

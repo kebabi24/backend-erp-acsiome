@@ -1,4 +1,5 @@
 import LoadRequestService from "../../services/load-request"
+import TokenSerieService from "../../services/token-serie"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -121,12 +122,12 @@ const getLoadRequestDataV2 = async (req: Request, res: Response, next: NextFunct
         
         
         const user_mobile_code = loadRequest.user_mobile_code
-        const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
+        const role = await loadRequestService.getRole({role_code :loadRequest.role_code })
         const loadRequestData = await loadRequestService.getLoadRequestDataV2(user_mobile_code,load_request_code , loadRequest.role_site, loadRequest.role_loc)
         
         return res
             .status(200)
-            .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData })
+            .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData , role: role })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -405,6 +406,111 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     }
 }
 
+const findLoadRequestsBetweenDates = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling findLoadRequestsBetweenDates endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const {startDate , endDate} = req.body
+        const loadRequests = await loadRequestService.getLoadRequestsBetweenDates(startDate,endDate)
+        return res
+            .status(200)
+            .json({ message: "found all load requests", data: loadRequests  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  code endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const load_request_code = req.params.load_request_code
+        const loadRequestLines = await loadRequestService.findAllLoadRequestLines(load_request_code)
+        const loadRequestDetails= await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load_request_code)
+
+        console.log(loadRequestLines)
+        console.log("********")
+        console.log(loadRequestDetails)
+        return res
+            .status(200)
+            .json({ message: "found all load request lines", data: {loadRequestLines , loadRequestDetails}  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const getLoadRequestCreationData = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getLoadRequestData endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+
+        // const load_request_code = req.params.load_request_code 
+        
+        // const loadRequest = await loadRequestService.findLoadRequest({load_request_code :load_request_code})
+        // const user_mobile_code = loadRequest.user_mobile_code
+        // const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
+        
+        const loadRequestData = await loadRequestService.getLoadRequestCreationData()
+        
+        return res
+            .status(200)
+            // .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData })
+            .json({ message: "data ready",loadRequestData:loadRequestData })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const createLoadRequestAndLines = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling updateLoadRequestStauts10 controller endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const tokenSerieService = Container.get(TokenSerieService)
+
+        const { loadRequest , lines} = req.body
+        const role_code = loadRequest.role_code
+
+        const role = await loadRequestService.getRole({role_code :role_code })
+
+         
+        
+        const token = await tokenSerieService.findOne({token_code : role.token_serie_code})
+        let code = token.load_request_prefix +'-'+ token.load_request_next_number.toString().padStart(token.token_digitcount,"0")
+        const updatedToken = await tokenSerieService.update({ load_request_next_number : token.load_request_next_number + 1}, {token_code : role.token_serie_code})
+        
+        
+        loadRequest.user_mobile_code = role.user_mobile_code  
+        loadRequest.role_loc = role.role_loc 
+        loadRequest.role_site = role.role_site  
+        loadRequest.role_loc_from = role.role_loc_from 
+        loadRequest.load_request_code = code
+
+        lines.forEach(line => {
+            line.load_request_code = code
+        });
+       
+
+         const createdLoadRequest = await loadRequestService.createLoadRequest(loadRequest)
+         const createdLoadRequestLines = await loadRequestService.createMultipleLoadRequestsLines(lines)
+       
+        return res
+            .status(200)
+            .json({ message: "data ready", data: loadRequest  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+
+
 function formatDateFromMobileToBackAddTimezone(timeString){
     let elements = timeString.split(" ") 
     let dateComponents = elements[0].split("-")
@@ -434,6 +540,10 @@ export default {
     findAllLoadRequeusts20,
     findAllLoadRequest20Details,
     updateLoadRequests4O,
+    findLoadRequestsBetweenDates,
+    findAllLoadRequestLinesDetails,
+    getLoadRequestCreationData,
+    createLoadRequestAndLines
 }
 
 // validation 0-10   

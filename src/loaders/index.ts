@@ -99,6 +99,7 @@ export default async ({ expressApp }) => {
       { name: 'operationHistoryModel', model: require('../models/operation-history').default },
       { name: 'reasonModel', model: require('../models/reason').default },
       { name: 'fraisModel', model: require('../models/frais').default },
+      { name: 'fraisDetailModel', model: require('../models/frais-detail').default },
       { name: 'jobModel', model: require('../models/job').default },
       { name: 'jobDetailModel', model: require('../models/job-detail').default },
       { name: 'toolModel', model: require('../models/tool').default },
@@ -234,6 +235,14 @@ export default async ({ expressApp }) => {
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
       { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
+      { name: 'TransportcostModel', model: require('../models/transportcost').default },
+      { name: 'CostlistModel', model: require('../models/costlist').default },
+      { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
+
+      // PROMOTION
+      { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
+      { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
+      { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -932,9 +941,52 @@ export default async ({ expressApp }) => {
     targetKey: 'jb_code',
   });
 
+  require('../models/item').default.hasOne(require('../models/operation-history').default, {
+    foreignKey: 'op_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/operation-history').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'op_part',
+    targetKey: 'pt_part',
+  });
+
+  require('../models/work-order').default.hasOne(require('../models/operation-history').default, {
+    foreignKey: 'op_wo_lot',
+    sourceKey: 'id',
+  });
+  require('../models/operation-history').default.belongsTo(require('../models/work-order').default, {
+    foreignKey: 'op_wo_lot',
+    targetKey: 'id',
+  });
+
+  require('../models/project').default.hasOne(require('../models/transportcost').default, {
+    foreignKey: 'trc_project',
+    sourceKey: 'pm_code',
+  });
+  require('../models/transportcost').default.belongsTo(require('../models/project').default, {
+    foreignKey: 'trc_project',
+    targetKey: 'pm_code',
+  });
+
+  require('../models/site').default.hasOne(require('../models/costlist').default, {
+    foreignKey: 'ltrc_site',
+    sourceKey: 'si_site',
+  });
+  require('../models/costlist').default.belongsTo(require('../models/site').default, {
+    foreignKey: 'ltrc_site',
+    targetKey: 'si_site',
+  });
+  require('../models/transportcost').default.hasOne(require('../models/costlist').default, {
+    foreignKey: 'ltrc_trc_code',
+    sourceKey: 'trc_code',
+  });
+  require('../models/costlist').default.belongsTo(require('../models/transportcost').default, {
+    foreignKey: 'ltrc_trc_code',
+    targetKey: 'trc_code',
+  });
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
   // await sequelizeConnection.sync();
 
   await sequelizeConnection
@@ -945,6 +997,15 @@ export default async ({ expressApp }) => {
     .catch(err => {
       console.log(err);
     });
+
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

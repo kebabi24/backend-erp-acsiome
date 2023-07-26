@@ -12,4 +12,7 @@ export default (app: Router) => {
     route.post("/find", controller.findBy)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
+    route.post("/findone", controller.findByOne)
+    route.post("/calcbomcost", controller.CalcCost)
+    route.post("/addbomcost", controller.UpdateBomCost)
 }
