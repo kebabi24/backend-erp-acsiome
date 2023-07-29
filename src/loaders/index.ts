@@ -235,12 +235,18 @@ export default async ({ expressApp }) => {
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
       { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
+<<<<<<< HEAD
+      { name: 'TransportcostModel', model: require('../models/transportcost').default },
+      { name: 'CostlistModel', model: require('../models/costlist').default },
+      { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
+=======
 
       // PROMOTION
       { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
 
+>>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -958,9 +964,41 @@ export default async ({ expressApp }) => {
     foreignKey: 'op_wo_lot',
     targetKey: 'id',
   });
+
+  
+  require('../models/project').default.hasOne(require('../models/transportcost').default, {
+    foreignKey: 'trc_project',
+    sourceKey: 'pm_code',
+  });
+  require('../models/transportcost').default.belongsTo(require('../models/project').default, {
+    foreignKey: 'trc_project',
+    targetKey: 'pm_code',
+  });
+
+  require('../models/site').default.hasOne(require('../models/costlist').default, {
+    foreignKey: 'ltrc_site',
+    sourceKey: 'si_site',
+  });
+  require('../models/costlist').default.belongsTo(require('../models/site').default, {
+    foreignKey: 'ltrc_site',
+    targetKey: 'si_site',
+  });
+  require('../models/transportcost').default.hasOne(require('../models/costlist').default, {
+    foreignKey: 'ltrc_trc_code',
+    sourceKey: 'trc_code',
+  });
+  require('../models/costlist').default.belongsTo(require('../models/transportcost').default, {
+    foreignKey: 'ltrc_trc_code',
+    targetKey: 'trc_code',
+  });
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
+<<<<<<< HEAD
+  await sequelizeConnection.sync();
+=======
   // await sequelizeConnection.sync();
+>>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
   
   // await sequelizeConnection
   //   .sync({ alter: true })

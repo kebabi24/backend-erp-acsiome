@@ -101,7 +101,12 @@ import unloadRequest from './routes/unload-request';
 import customerOrder from './routes/customer-orders';
 
 import employeSalary from './routes/employe-salary';
+<<<<<<< HEAD
+import transportcost from './routes/transportcost';
+import costlist from './routes/costlist';
+=======
 import promotion from './routes/promotion';
+>>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
 
 // guaranteed to get dependencies
 export default () => {
@@ -206,7 +211,12 @@ export default () => {
   employeSalary(app);
 
   customerOrder(app);
+<<<<<<< HEAD
+  transportcost(app);
+  costlist(app)
+=======
   promotion(app);
+>>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
 
  
 
