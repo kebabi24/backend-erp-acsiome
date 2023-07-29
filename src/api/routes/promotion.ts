@@ -11,5 +11,10 @@ export default (app: Router) => {
     route.post("/createAdv", controller.createAdvantage)
     route.post("/createPromo", controller.createPromotion)
     route.get("/getPopsArt", controller.findPopulationsArticle)
+    route.get("/getAdvantages", controller.findAdvantages)
+
+    route.get("/findPromo/:code", controller.getPromoByCode)
+    route.get("/findAdv/:code", controller.getAdvantageByCode)
+    route.get("/findPopArt/:code", controller.getPopulationArticleByCode)
   
 }

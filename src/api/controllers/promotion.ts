@@ -69,25 +69,85 @@ const findPopulationsArticle = async (req: Request, res: Response, next: NextFun
     logger.debug("Calling createPromotion controller endpoint")
     try {
         const promotionService = Container.get(PromotionService)
-      
+        
 
         const popsArticle= await promotionService.findAllPopArticle()
 
-        const unique = [ ...new Set(popsArticle)]  
-
-        // const filtered = _.mapValues(_.groupBy(popsArticle, 'population_code'));
-        // console.log(filtered)
-        //  const data = [];
-        //     for (const [key, value] of Object.entries(filtered)) {
-        //         data.push({
-        //         population_code: key,
-        //         description : value.length,
-        //     });
-            
-        //  } 
         return res
             .status(200)
-            .json({ message: "data created", data: unique  })
+            .json({ message: "data created", data: popsArticle  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const findAdvantages = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling findAdvantages controller endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+      
+
+        const advantages= await promotionService.findAllAdvantages()
+
+        return res
+            .status(200)
+            .json({ message: "data created", data: advantages  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const getPromoByCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPromoByCode controller endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+        const {code} = req.params
+
+        const promo= await promotionService.getPromotion({promo_code :code })
+
+        return res
+            .status(200)
+            .json({ message: "promo found", data: promo  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const getAdvantageByCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPromoByCode controller endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+        const {code} = req.params
+
+        const adv= await promotionService.getAdvantage({adv_code :code })
+
+        return res
+            .status(200)
+            .json({ message: "adv found", data: adv  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const getPopulationArticleByCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPromoByCode controller endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+        const {code} = req.params
+
+        const pop= await promotionService.getPopArticle({adv_code :code })
+
+        return res
+            .status(200)
+            .json({ message: "pop found", data: pop  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -98,5 +158,9 @@ export default {
     createPopulationArticle,
     createAdvantage,
     createPromotion,
-    findPopulationsArticle
+    findPopulationsArticle,
+    findAdvantages,
+    getPromoByCode,
+    getAdvantageByCode,
+    getPopulationArticleByCode
 }

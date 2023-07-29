@@ -1,8 +1,8 @@
 import { group } from 'console';
-import { Sequelize } from 'sequelize/types';
+// import { Sequelize } from 'sequelize/types';
 import { Service, Inject } from 'typedi';
 
-const { Op } = require('sequelize')
+const { Op ,Sequelize} = require('sequelize')
 
 @Service()
 export default class CRMService {
@@ -436,13 +436,11 @@ export default class CRMService {
     try {
      
       const populations = await this.populationModel.findAll({
-          attributes: [
+        attributes: [
             // [Sequelize.fn('DISTINCT', Sequelize.col('population_code')) ],
              "id","population_code","population_desc"
           ],
-         })
-
-        
+         })        
         this.logger.silly("found populations ")
         return populations
     } catch (e) {
@@ -466,6 +464,8 @@ export default class CRMService {
         throw e
     }
   }
+
+  
 
   public async getPopulationElements(population_code: any): Promise<any> {
     try {
