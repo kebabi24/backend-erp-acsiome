@@ -337,23 +337,24 @@ const { Op } = require('sequelize')
         const populations = await crmServiceInstance.getPopulations()
 
         // EXTRACT POPULATIONS DATA
-        let populatiosData = []
-        populations.forEach(population => {
-            populatiosData.push(population.dataValues)
-        });
+        // let populatiosData = []
+        // populations.forEach(population => {
+        //     populatiosData.push(population.dataValues)
+        // });
 
         // FILTER UNIQUE POPULATIONS
         
-        const unique = Array.from(new Set(populatiosData.map(pop =>pop.population_code ))).map(code=>{
-            return{
-                population_code : code,
-                population_desc : populatiosData.find(elem => elem.population_code === code).population_desc
-            }
-        })
+        // const unique = Array.from(new Set(populatiosData.map(pop =>pop.population_code ))).map(code=>{
+        //     return{
+        //         population_code : code,
+        //         population_desc : populatiosData.find(elem => elem.population_code === code).population_desc
+        //     }
+        // })
         
+       
         return res
             .status(200)
-            .json({ message: "populations found succesfully", data: unique  })
+            .json({ message: "populations found succesfully", data: populations  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
