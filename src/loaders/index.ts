@@ -235,18 +235,15 @@ export default async ({ expressApp }) => {
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
       { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
-<<<<<<< HEAD
       { name: 'TransportcostModel', model: require('../models/transportcost').default },
       { name: 'CostlistModel', model: require('../models/costlist').default },
       { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
-=======
 
       // PROMOTION
       { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
 
->>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -994,11 +991,8 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-<<<<<<< HEAD
   await sequelizeConnection.sync();
-=======
   // await sequelizeConnection.sync();
->>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
   
   // await sequelizeConnection
   //   .sync({ alter: true })
