@@ -30,6 +30,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const saleorderDetailServiceInstance = Container.get(SaleorderDetailService);
     const saleorderServiceInstance = Container.get(SaleorderService);
     const { addReport, empDetail, cnsDetail, nbr } = req.body;
+    console.log('req body', req.body);
     console.log(nbr);
     const task = await projectTaskDetailServiceInstance.findOne({
       pmt_code: addReport.pmr_pm_code,
@@ -58,6 +59,33 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sod_part: pmd.pmd_part,
         sod__chr01: pmd.pmd_task,
       });
+    }
+    for (let entry of empDetail) {
+      const pm = await projectServiceInstance.findOne({ pm_code: addReport.pmr_pm_code, pm_domain: user_domain });
+
+      const pmd = await projectDetailServiceInstance.findOne({
+        pmd_code: addReport.pmr_pm_code,
+        pmd_domain: user_domain,
+        pmd_task: addReport.pmr_inst,
+      });
+
+      const so = await saleorderServiceInstance.findOne({ so_po: addReport.pmr_pm_code, sod_domain: user_domain });
+      const sod = await saleorderDetailServiceInstance.findOne({
+        sod_nbr: so.so_nbr,
+        sod_domain: user_domain,
+        sod_part: pmd.pmd_part,
+        sod__chr01: pmd.pmd_task,
+      });
+
+      await saleorderDetailServiceInstance.update(
+        {
+          sod_mobilisation: entry.pmr_mobilisation,
+          sod_demobilisation: entry.pmr_demobilisation,
+          sod_separe: entry.pmr_separe,
+          sod_stndby: entry.pmr_stndby,
+        },
+        { sod_nbr: sod.so_nbr, sod_domain: user_domain, sod_part: pmd.pmd_part, sod__chr01: pmd.pmd_task },
+      );
     }
     for (let entry of empDetail) {
       await addReportServiceInstance.create({

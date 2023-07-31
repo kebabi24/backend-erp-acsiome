@@ -253,14 +253,14 @@ const findCost = async (req: Request, res: Response, next: NextFunction) => {
           jbd_code: entry.tkd_job,
           jbd_level: entry.tkd_level,
         });
-        console.log(jbd.jbd_code);
+        // console.log(jbd.jbd_code);
 
-        cost = cost + entry.tkd_duration * jbd.jbd_time_rate;
+        // cost = cost + entry.tkd_duration * jbd.jbd_time_rate;
       }
 
       return res.status(200).json({
         message: 'fetched succesfully',
-        data: cost,
+        data: null,
       });
     } else {
       return res.status(200).json({

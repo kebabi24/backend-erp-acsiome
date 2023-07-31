@@ -22,10 +22,7 @@ const AddReport = sequelize.define(
     pmr_start_date: Sequelize.DATEONLY,
     pmr_end_date: Sequelize.DATEONLY,
     pmr_internal: Sequelize.BOOLEAN,
-    pmr_mobilisation: Sequelize.BOOLEAN,
-    pmr_demobilisation: Sequelize.BOOLEAN,
-    pmr_stndby: Sequelize.BOOLEAN,
-    pmr_separe: Sequelize.BOOLEAN,
+
     pmr_close: { type: Sequelize.BOOLEAN, defaultValue: false },
     pmr_employe: Sequelize.STRING,
     pmr_duration: Sequelize.DECIMAL,
