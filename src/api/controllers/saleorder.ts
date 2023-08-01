@@ -49,20 +49,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       };
       await saleOrderDetailServiceInstance.create(entry);
     }
-    const addressServiceInstance = Container.get(AddressService);
-    // const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: saleOrder.so_cust });
+    // const addressServiceInstance = Container.get(AddressService);
+    // console.log(saleOrder.so_cust)
+    //  const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: saleOrder.so_cust });
 
-    const pdfData = {
-      so: so,
-      sod: saleOrderDetail,
-      // adr: addr,
-    };
+    // const pdfData = {
+    //   so: so,
+    //   sod: saleOrderDetail,
+    //    adr: addr,
+    // };
 
-    console.log('pdfData', pdfData);
+    // console.log('pdfData', pdfData);
 
-    let pdf = await generatePdf(pdfData, 'so');
+    // let pdf = await generatePdf(pdfData, 'so');
 
-    return res.status(201).json({ message: 'created succesfully', data: so, pdf: pdf.content });
+    return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
