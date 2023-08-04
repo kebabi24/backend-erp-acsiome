@@ -69,7 +69,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         pmd_task: addReport.pmr_inst,
       });
 
-      const so = await saleorderServiceInstance.findOne({ so_po: addReport.pmr_pm_code, sod_domain: user_domain });
+      const so = await saleorderServiceInstance.findOne({ so_po: addReport.pmr_pm_code, so_domain: user_domain });
       const sod = await saleorderDetailServiceInstance.findOne({
         sod_nbr: so.so_nbr,
         sod_domain: user_domain,
