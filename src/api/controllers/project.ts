@@ -1,6 +1,11 @@
 import ProjectService from '../../services/project';
 import ProjectDetailService from '../../services/project-detail';
 import ProjectTaskDetailService from '../../services/project-task-detail';
+import SaleOrderService from '../../services/saleorder';
+import SaleOrderDetailService from '../../services/saleorder-detail';
+import DealService from '../../services/deal';
+import itemService from '../../services/item';
+import CustomerService from '../../services/customer';
 import AffectEmployeService from '../../services/affect-employe';
 import TaskDetailService from '../../services/task-detail';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -18,6 +23,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const projectDetailServiceInstance = Container.get(ProjectDetailService);
     const projectTaskDetailServiceInstance = Container.get(ProjectTaskDetailService);
     const taskDetailServiceInstance = Container.get(TaskDetailService);
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const customerServiceInstance = Container.get(CustomerService);
+    const dealServiceInstance = Container.get(DealService);
+    const itemServiceInstance = Container.get(itemService);
     const { Project, ProjectDetails, docs_codes } = req.body;
     const pj = await projectServiceInstance.create({
       ...Project,
@@ -67,7 +77,89 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         console.log(tk);
         await projectTaskDetailServiceInstance.create({ ...tk, pmt_code: Project.pm_code, pmt_inst: entry.pmd_task });
       }
+
+
     }
+       /*so*/
+       let cr_terms : String
+       const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
+       cr_terms = customer.cm_cr_terms
+ 
+ if(Project.pm_deal != null) {
+       const deal = await dealServiceInstance.findOne({deal_code: Project.pm_deal});
+ 
+ cr_terms = deal.deal_pay_meth
+ }
+ 
+ let SaleOrder ={
+ so_category : "SO",
+ so_cust : Project.pm_cust,
+ so_ord_date : Project.pm_ord_date,
+ so_due_date : Project.pm_ord_date,
+ so_po : Project.pm_code,
+ so_amt : Project.pm_amt,
+ so_cr_terms : cr_terms,
+ so_curr : customer.cm_curr,
+ so_taxable : customer.address.ad_taxable,
+ so_taxc : customer.address.ad_taxc,
+ so_ex_rate : 1,
+ so_ex_rate2 : 1,
+ }
+       let sodataset=[]
+      let type: String
+ for (let data of ProjectDetails) {
+   const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
+       if (pt.pt_phantom) {
+         type = "M";
+       } else {
+         type = null;
+       }
+      sodataset.push({
+         sod_line: data.pmd_line,
+         sod_part: pt.pt_part,
+         sod_um: pt.pt_um,
+         sod__chr01: data.pmd_task,
+         sod__chr02: data.pmd_bom_code,
+         sod_qty_ord: data.pmd_qty,
+         sod_qty_ret: data.int01,
+         sod_qty_cons: 0,
+         sod_desc: pt.pt_desc1,
+         sod_site: pt.pt_site,
+         sod_loc: pt.pt_loc,
+         sod_um_conv: 1,
+         sod_type: type,
+         sod_price: pt.pt_price,
+         sod_disc_pct: 0,
+         sod_tax_code: pt.pt_taxc,
+         sod_taxc: pt.taxe.tx2_tax_pct,
+         sod_taxable: pt.pt_taxable,
+       });
+    
+   }
+ 
+   const so = await saleOrderServiceInstance.create({
+     ...SaleOrder,
+     so_domain: user_domain,
+     created_by: user_code,
+     created_ip_adr: req.headers.origin,
+     last_modified_by: user_code,
+     last_modified_ip_adr: req.headers.origin,
+   });
+   for (let entry of sodataset) {
+     entry = {
+       ...entry,
+       sod_domain: user_domain,
+       sod_nbr: so.so_nbr,
+       created_by: user_code,
+       created_ip_adr: req.headers.origin,
+       last_modified_by: user_code,
+       last_modified_ip_adr: req.headers.origin,
+     };
+     await saleOrderDetailServiceInstance.create(entry);
+   }
+ 
+ /*so*/
+ 
     return res.status(201).json({ message: 'created succesfully', data: pj });
   } catch (e) {
     //#
@@ -100,6 +192,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         message: 'fetched succesfully',
         data: { project, details },
       });
+
+
     } else {
       return res.status(200).json({
         message: 'not FOund',

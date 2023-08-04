@@ -27,7 +27,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    console.log(req.body)
     const { saleOrder, saleOrderDetail } = req.body;
+    
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
       so_domain: user_domain,
@@ -37,6 +39,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
 
+    //console.log(saleOrderDetail)
     for (let entry of saleOrderDetail) {
       entry = {
         ...entry,
