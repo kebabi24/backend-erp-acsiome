@@ -27,11 +27,8 @@ const AddReport = sequelize.define(
     pmr_employe: Sequelize.STRING,
     pmr_duration: Sequelize.DECIMAL,
     pmr_cmmt: Sequelize.TEXT,
-    pmr_domain: {
-      type: Sequelize.STRING,
-      defaultValue: 'acsiome',
-    },
-
+    pmr_domain: Sequelize.STRING,
+     
     ...base,
   },
   {

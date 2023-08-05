@@ -60,6 +60,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sod__chr01: pmd.pmd_task,
       });
     }
+    console.log("empDetail",empDetail)
     for (let entry of empDetail) {
       const pm = await projectServiceInstance.findOne({ pm_code: addReport.pmr_pm_code, pm_domain: user_domain });
 
@@ -75,17 +76,65 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sod_domain: user_domain,
         sod_part: pmd.pmd_part,
         sod__chr01: pmd.pmd_task,
+        sod_separe: false,
       });
 
+      
+      if(entry.pmr_separe == false) {
       await saleorderDetailServiceInstance.update(
         {
           sod_mobilisation: entry.pmr_mobilisation,
           sod_demobilisation: entry.pmr_demobilisation,
           sod_separe: entry.pmr_separe,
           sod_stndby: entry.pmr_stndby,
+          sod_qty_cons: Number(sod.sod_qty_cons) + Number(entry.days_nbr),
         },
-        { sod_nbr: sod.so_nbr, sod_domain: user_domain, sod_part: pmd.pmd_part, sod__chr01: pmd.pmd_task },
+        { sod_nbr: sod.sod_nbr, sod_domain: user_domain, sod_part: pmd.pmd_part, sod__chr01: pmd.pmd_task, sod_separe:false },
       );
+      } else {
+
+        const lastsod = await saleorderDetailServiceInstance.findOneS({
+          where : {
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+          },
+        order: [['sod_line', 'DESC']], 
+        
+        }) 
+        console.log("days_nbr",entry.pmr_separe,entry.days_nbr)
+        await saleorderDetailServiceInstance.create( { 
+          sod_nbr: sod.sod_nbr,
+          sod_part: sod.sod_part,
+          sod_qty_ord: 1,
+          sod__chr01 : sod.sod__chr01,
+          sod_um: sod.sod_um,
+          
+          sod_site: sod.sod_site,
+
+
+          sod_line: Number(lastsod.sod_line) + Number(1) ,
+          sod__chr02: sod.sod__chr02,
+          sod_qty_ret: 1,
+          sod_desc: sod.sod_desc,
+          sod_loc: sod.sod_loc,
+          sod_um_conv: 1,
+          sod_type: sod.sod_type,
+          sod_price: sod.sod_price,
+          sod_disc_pct: 0,
+          sod_tax_code: sod.sod_tax_code,
+          sod_taxc: sod.sod_taxc,
+          sod_taxable: sod.sod_taxable,
+          sod_domain: user_domain,
+          sod_mobilisation: entry.pmr_mobilisation,
+          sod_demobilisation: entry.pmr_demobilisation,
+          sod_separe: entry.pmr_separe,
+          sod_stndby: entry.pmr_stndby,
+          sod_qty_cons:  Number(entry.days_nbr),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,})
+      }
     }
     for (let entry of empDetail) {
       await addReportServiceInstance.create({
