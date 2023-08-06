@@ -19,55 +19,59 @@ import { generatePdf } from '../../reporting/generator';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  const{user_code} = req.headers 
-  const{user_domain} = req.headers
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling Create sequence endpoint');
- 
-      try {
-        const saleOrderServiceInstance = Container.get(SaleOrderService);
-        const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-        const { saleOrder, saleOrderDetail } = req.body;
-        const so = await saleOrderServiceInstance.create({
-          ...saleOrder,
-          so_domain: user_domain,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
-        for (let entry of saleOrderDetail) {
-          entry = {
-            ...entry,
-            sod_domain: user_domain,
-            sod_nbr: so.so_nbr,
-            created_by: user_code,
-            created_ip_adr: req.headers.origin,
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
-          };
-          await saleOrderDetailServiceInstance.create(entry);
-        }
-        const addressServiceInstance = Container.get(AddressService);
-        const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: saleOrder.so_cust });
 
-        const pdfData = {
-          so: so,
-          sod: saleOrderDetail,
-          adr: addr,
-        };
-
-        console.log('pdfData', pdfData);
-
-        let pdf = await generatePdf(pdfData, 'so');
-
-        return res.status(201).json({ message: 'created succesfully', data: so, pdf: pdf.content });
-      } catch (e) {
-        //#
-        logger.error('🔥 error: %o', e);
-        return next(e);
-      }
+  try {
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    console.log(req.body)
+    const { saleOrder, saleOrderDetail } = req.body;
     
+    const so = await saleOrderServiceInstance.create({
+      ...saleOrder,
+      so_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    //console.log(saleOrderDetail)
+    for (let entry of saleOrderDetail) {
+      entry = {
+        ...entry,
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await saleOrderDetailServiceInstance.create(entry);
+    }
+    // const addressServiceInstance = Container.get(AddressService);
+    // console.log(saleOrder.so_cust)
+    //  const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: saleOrder.so_cust });
+
+    // const pdfData = {
+    //   so: so,
+    //   sod: saleOrderDetail,
+    //    adr: addr,
+    // };
+
+    // console.log('pdfData', pdfData);
+
+    // let pdf = await generatePdf(pdfData, 'so');
+
+    return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
 };
 const createdirect = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -115,7 +119,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
         sct_site: remain.sod_site,
         sct_sim: 'STD-CG',
       });
-      const pt = await itemServiceInstance.findOne({pt_domain: user_domain, pt_part: remain.sod_part });
+      const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: remain.sod_part });
       console.log(remain.sod_part, remain.sod_site);
 
       console.log(remain.qty_oh);
@@ -217,13 +221,13 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const saleOrder = await saleOrderServiceInstance.findOne({
-      ...req.body, so_domain: user_domain
+      ...req.body,
+      so_domain: user_domain,
     });
     if (saleOrder) {
       const details = await saleOrderDetailServiceInstance.find({
         sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
-        
       });
       return res.status(200).json({
         message: 'fetched succesfully',
@@ -244,14 +248,15 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  saleOrder endpoint');
-  const { user_domain} = req.headers;
+  const { user_domain } = req.headers;
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const { id } = req.params;
     const saleOrder = await saleOrderServiceInstance.findOne({ id });
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const details = await saleOrderDetailServiceInstance.find({
-      sod_domain: user_domain, sod_nbr: saleOrder.so_nbr,
+      sod_domain: user_domain,
+      sod_nbr: saleOrder.so_nbr,
     });
 
     return res.status(200).json({
@@ -272,7 +277,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
-    const sos = await saleOrderServiceInstance.find({ ...req.body,so_domain: user_domain });
+    const sos = await saleOrderServiceInstance.find({ ...req.body, so_domain: user_domain });
     console.log(sos);
     return res.status(202).json({
       message: 'sec',
@@ -287,12 +292,12 @@ const findByAllSo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
   const { user_domain } = req.headers;
-  
+
   logger.debug('Calling find by  all requisition endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
-    const sos = await saleOrderServiceInstance.find({ ...req.body , so_domain: user_domain});
+    const sos = await saleOrderServiceInstance.find({ ...req.body, so_domain: user_domain });
     let result = [];
     var i = 1;
     for (let so of sos) {
@@ -315,12 +320,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all purchaseOrder endpoint');
   const { user_domain } = req.headers;
-  
+
   try {
     let result = [];
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    const sos = await saleOrderServiceInstance.find({so_domain: user_domain});
+    const sos = await saleOrderServiceInstance.find({ so_domain: user_domain });
     for (const so of sos) {
       const details = await saleOrderDetailServiceInstance.find({
         sod_domain: user_domain,
@@ -339,7 +344,7 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   console.log(req.body);
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
-  
+
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
@@ -408,7 +413,7 @@ const getActivity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
   const { user_domain } = req.headers;
-  
+
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleShiperServiceInstance = Container.get(SaleShiperService);
@@ -497,7 +502,7 @@ const getCA = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all customer endpoint');
   const { user_domain } = req.headers;
-  
+
   try {
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
     const customerServiceInstance = Container.get(CustomerService);
@@ -550,7 +555,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log("so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso")   
+  console.log('so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso');
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -563,7 +568,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       { id },
     );
     console.log(saleOrderDetail);
-    await saleOrderDetailServiceInstance.delete({sod_domain:user_domain, sod_nbr: saleOrder.so_nbr });
+    await saleOrderDetailServiceInstance.delete({ sod_domain: user_domain, sod_nbr: saleOrder.so_nbr });
     for (let entry of saleOrderDetail) {
       entry = {
         ...entry,
@@ -587,7 +592,7 @@ const updateProj = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log("so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso")   
+  console.log('so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso');
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -612,15 +617,15 @@ const updateProj = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       };
 
-      const sod = await  saleOrderDetailServiceInstance.findOne({
+      const sod = await saleOrderDetailServiceInstance.findOne({
         sod_nbr: saleOrder.so_nbr,
-        sod__chr01 : entry.sod__chr01,
-        sod_domain: user_domain
+        sod__chr01: entry.sod__chr01,
+        sod_domain: user_domain,
       });
-      if(sod) {
-        await saleOrderDetailServiceInstance.update({ ...entry }, { id: sod.id });; 
-      }else {
-        await saleOrderDetailServiceInstance.create(entry); 
+      if (sod) {
+        await saleOrderDetailServiceInstance.update({ ...entry }, { id: sod.id });
+      } else {
+        await saleOrderDetailServiceInstance.create(entry);
       }
     }
     return res.status(200).json({ message: 'fetched succesfully', data: so });
@@ -653,7 +658,6 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  
 
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
@@ -796,7 +800,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
 
     const sos = await sequelize.query(
       'SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
-      { replacements: [user_domain],type: QueryTypes.SELECT },
+      { replacements: [user_domain], type: QueryTypes.SELECT },
     );
 
     return res.status(200).json({ message: 'fetched succesfully', data: sos });

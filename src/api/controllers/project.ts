@@ -1,6 +1,11 @@
 import ProjectService from '../../services/project';
 import ProjectDetailService from '../../services/project-detail';
 import ProjectTaskDetailService from '../../services/project-task-detail';
+import SaleOrderService from '../../services/saleorder';
+import SaleOrderDetailService from '../../services/saleorder-detail';
+import DealService from '../../services/deal';
+import itemService from '../../services/item';
+import CustomerService from '../../services/customer';
 import AffectEmployeService from '../../services/affect-employe';
 import TaskDetailService from '../../services/task-detail';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -18,6 +23,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const projectDetailServiceInstance = Container.get(ProjectDetailService);
     const projectTaskDetailServiceInstance = Container.get(ProjectTaskDetailService);
     const taskDetailServiceInstance = Container.get(TaskDetailService);
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const customerServiceInstance = Container.get(CustomerService);
+    const dealServiceInstance = Container.get(DealService);
+    const itemServiceInstance = Container.get(itemService);
     const { Project, ProjectDetails, docs_codes } = req.body;
     const pj = await projectServiceInstance.create({
       ...Project,
@@ -27,12 +37,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    /* creation specification documents*/ 
+    /* creation specification documents*/
+
     const project_code = Project.pm_code;
     let data = [];
     docs_codes.forEach(doc => {
-      console.log("*************************")
-      console.log(doc)
+      console.log('*************************');
+      console.log(doc);
       data.push({
         pjd_nbr: project_code,
         mp_nbr: doc.code_doc,
@@ -66,7 +77,89 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         console.log(tk);
         await projectTaskDetailServiceInstance.create({ ...tk, pmt_code: Project.pm_code, pmt_inst: entry.pmd_task });
       }
+
+
     }
+       /*so*/
+       let cr_terms : String
+       const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
+       cr_terms = customer.cm_cr_terms
+ 
+ if(Project.pm_deal != null) {
+       const deal = await dealServiceInstance.findOne({deal_code: Project.pm_deal});
+ 
+ cr_terms = deal.deal_pay_meth
+ }
+ 
+ let SaleOrder ={
+ so_category : "SO",
+ so_cust : Project.pm_cust,
+ so_ord_date : Project.pm_ord_date,
+ so_due_date : Project.pm_ord_date,
+ so_po : Project.pm_code,
+ so_amt : Project.pm_amt,
+ so_cr_terms : cr_terms,
+ so_curr : customer.cm_curr,
+ so_taxable : customer.address.ad_taxable,
+ so_taxc : customer.address.ad_taxc,
+ so_ex_rate : 1,
+ so_ex_rate2 : 1,
+ }
+       let sodataset=[]
+      let type: String
+ for (let data of ProjectDetails) {
+   const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
+       if (pt.pt_phantom) {
+         type = "M";
+       } else {
+         type = null;
+       }
+      sodataset.push({
+         sod_line: data.pmd_line,
+         sod_part: pt.pt_part,
+         sod_um: pt.pt_um,
+         sod__chr01: data.pmd_task,
+         sod__chr02: data.pmd_bom_code,
+         sod_qty_ord: data.pmd_qty,
+         sod_qty_ret: data.int01,
+         sod_qty_cons: 0,
+         sod_desc: pt.pt_desc1,
+         sod_site: pt.pt_site,
+         sod_loc: pt.pt_loc,
+         sod_um_conv: 1,
+         sod_type: type,
+         sod_price: pt.pt_price,
+         sod_disc_pct: 0,
+         sod_tax_code: pt.pt_taxc,
+         sod_taxc: pt.taxe.tx2_tax_pct,
+         sod_taxable: pt.pt_taxable,
+       });
+    
+   }
+ 
+   const so = await saleOrderServiceInstance.create({
+     ...SaleOrder,
+     so_domain: user_domain,
+     created_by: user_code,
+     created_ip_adr: req.headers.origin,
+     last_modified_by: user_code,
+     last_modified_ip_adr: req.headers.origin,
+   });
+   for (let entry of sodataset) {
+     entry = {
+       ...entry,
+       sod_domain: user_domain,
+       sod_nbr: so.so_nbr,
+       created_by: user_code,
+       created_ip_adr: req.headers.origin,
+       last_modified_by: user_code,
+       last_modified_ip_adr: req.headers.origin,
+     };
+     await saleOrderDetailServiceInstance.create(entry);
+   }
+ 
+ /*so*/
+ 
     return res.status(201).json({ message: 'created succesfully', data: pj });
   } catch (e) {
     //#
@@ -99,20 +192,19 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         message: 'fetched succesfully',
         data: { project, details },
       });
+
+
     } else {
       return res.status(200).json({
         message: 'not FOund',
         data: { project, details: null },
       });
     }
-
-} catch (e) {
-  logger.error('🔥 error: %o', e);
-  return next(e);
-}
-}
-
-
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 const findByTask = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -122,6 +214,7 @@ const findByTask = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const projectTaskDetailServiceInstance = Container.get(ProjectTaskDetailService);
+    console.log('req body', req.body);
     const details = await projectTaskDetailServiceInstance.find({
       ...req.body,
       pmt_domain: user_domain,
@@ -155,9 +248,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     // for(let det of details) {
     //   det.desc = det.task.tk_desc
 
-
     // }
-     console.log(details)
+    console.log(details);
     return res.status(200).json({
       message: 'fetched succesfully',
       data: { project, details },
@@ -208,8 +300,8 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const projectServiceInstance = Container.get(ProjectService);
     const projectDetailServiceInstance = Container.get(ProjectDetailService);
     const { id } = req.params;
-    const { project, details , docs_codes} = req.body;
-    console.log("project",project)
+    const { project, details, docs_codes } = req.body;
+    console.log('project', project);
     const pj = await projectServiceInstance.update(
       { ...project, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
@@ -230,10 +322,10 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const project_code = project.pm_code;
     let data = [];
 
-    await projectServiceInstance.deleteSpec({pjd_nbr: project_code});
+    await projectServiceInstance.deleteSpec({ pjd_nbr: project_code });
     docs_codes.forEach(doc => {
-      console.log("*************************")
-      console.log(doc)
+      console.log('*************************');
+      console.log(doc);
       data.push({
         pjd_nbr: project_code,
         mp_nbr: doc.code_doc,
@@ -241,7 +333,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         pjd_domain: user_domain,
       });
     });
-    
+
     const pjDetails = await projectServiceInstance.createDocsDetails(data);
 
     return res.status(200).json({ message: 'fetched succesfully', data: pj });
@@ -398,85 +490,76 @@ const findAssignedEmpOfProject = async (req: Request, res: Response, next: NextF
   }
 };
 
-     const findInstructionsOfProject = async (req: Request, res: Response, next: NextFunction) => {
-        const logger = Container.get("logger")
-    
-        logger.debug("Calling findAssignedEmpOfProject endpoint")
-        const{user_code} = req.headers 
-        const{user_domain} = req.headers
-        try {
-            const projectServiceInstance = Container.get(ProjectService)
-            const { project_code } = req.params
-            const instructions = await projectServiceInstance.findAllProjectDetails({
-                pme_pm_code : project_code,pme_domain:user_domain
-            })
-           
-            return res
-                .status(201)
-                .json({ message: "instructions found succesfully", data: instructions })
-        } catch (e) {
-            //#
-            logger.error("🔥 error: %o", e)
-            return next(e)
-        }
-     }     
+const findInstructionsOfProject = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
 
-     
-     const createAssetDown = async (req: Request, res: Response, next: NextFunction) => {
-        const logger = Container.get("logger")
-        logger.debug("Calling createAssetDown endpoint")
-        const{user_domain} = req.headers
-        const {  data} = req.body
-        try {
-            data.forEach(line => {
-                delete line.id
-                line.pad_domain = user_domain
-            });
-            const projectServiceInstance = Container.get(ProjectService)
-            const assetsDown = await projectServiceInstance.createAssetDown(data)
-            return res
-                .status(200)
-                .json({ message: "created succesfully", data: assetsDown })
-        } catch (e) {
-            logger.error("🔥 error: %o", e)
-            return next(e)
-        }
-    }
+  logger.debug('Calling findAssignedEmpOfProject endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const projectServiceInstance = Container.get(ProjectService);
+    const { project_code } = req.params;
+    const instructions = await projectServiceInstance.findAllProjectDetails({
+      pme_pm_code: project_code,
+      pme_domain: user_domain,
+    });
 
-    const getAssetDownTypes = async (req: Request, res: Response, next: NextFunction) => {
-      const logger = Container.get("logger")
-      logger.debug("Calling createAssetDown endpoint")
-      const{user_domain} = req.headers
-      try {
-          
-          const projectServiceInstance = Container.get(ProjectService)
-          const types = await projectServiceInstance.getAssetDownTypes()
-          return res
-              .status(200)
-              .json({ message: "fetched succesfully", data: types })
-      } catch (e) {
-          logger.error("🔥 error: %o", e)
-          return next(e)
-      }
+    return res.status(201).json({ message: 'instructions found succesfully', data: instructions });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
   }
+};
 
+const createAssetDown = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling createAssetDown endpoint');
+  const { user_domain } = req.headers;
+  const { data } = req.body;
+  try {
+    data.forEach(line => {
+      delete line.id;
+      line.pad_domain = user_domain;
+    });
+    const projectServiceInstance = Container.get(ProjectService);
+    const assetsDown = await projectServiceInstance.createAssetDown(data);
+    return res.status(200).json({ message: 'created succesfully', data: assetsDown });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
+const getAssetDownTypes = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling createAssetDown endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const projectServiceInstance = Container.get(ProjectService);
+    const types = await projectServiceInstance.getAssetDownTypes();
+    return res.status(200).json({ message: 'fetched succesfully', data: types });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
-    create,
-    findBy,
-    findByTask,
-    findOne,
-    findAll,
-    findAllBy,
-    update,
-    updateM,
-    findAllwithDetails,
-    findAllbomDetails,
-    findpmdetail,
-    getProjectTypes,
-    findAssignedEmpOfProject,
-    findInstructionsOfProject,
-    createAssetDown,
-    getAssetDownTypes
-}
+  create,
+  findBy,
+  findByTask,
+  findOne,
+  findAll,
+  findAllBy,
+  update,
+  updateM,
+  findAllwithDetails,
+  findAllbomDetails,
+  findpmdetail,
+  getProjectTypes,
+  findAssignedEmpOfProject,
+  findInstructionsOfProject,
+  createAssetDown,
+  getAssetDownTypes,
+};

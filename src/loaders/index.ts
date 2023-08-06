@@ -243,7 +243,6 @@ export default async ({ expressApp }) => {
       { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
-
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -415,7 +414,6 @@ export default async ({ expressApp }) => {
   );
 
 
- 
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
   //   sourceKey: 'pricelist_code',
@@ -962,7 +960,7 @@ export default async ({ expressApp }) => {
     targetKey: 'id',
   });
 
-  
+
   require('../models/project').default.hasOne(require('../models/transportcost').default, {
     foreignKey: 'trc_project',
     sourceKey: 'pm_code',
@@ -991,8 +989,17 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
   
+
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
+
   // await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

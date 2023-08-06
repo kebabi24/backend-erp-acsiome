@@ -209,10 +209,8 @@ export default () => {
 
   customerOrder(app);
   transportcost(app);
-  costlist(app)
+  costlist(app);
   promotion(app);
-
- 
 
   return app;
 };
