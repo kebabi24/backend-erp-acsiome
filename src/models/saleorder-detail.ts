@@ -168,6 +168,7 @@ const saleOrderDetail = sequelize.define(
     sod_ca_line: Sequelize.INTEGER,
     sod_qty_cons: { type: Sequelize.DECIMAL, defaultValue: 0 },
     sod_qty_ret: { type: Sequelize.DECIMAL, defaultValue: 0 },
+    sod_qty_val: { type: Sequelize.DECIMAL, defaultValue: 0 },
     sod_ca_nbr: Sequelize.STRING,
     sod_qty_pend: { type: Sequelize.DECIMAL, defaultValue: 0 },
     sod_to_loc: Sequelize.STRING,
@@ -233,8 +234,8 @@ const saleOrderDetail = sequelize.define(
 
     sod_mobilisation: Sequelize.BOOLEAN,
     sod_demobilisation: Sequelize.BOOLEAN,
-    sod_stndby: Sequelize.BOOLEAN,
-    sod_separe: Sequelize.BOOLEAN,
+    sod_stndby: Sequelize.DECIMAL,
+    sod_separe: { type: Sequelize.BOOLEAN, defaultValue: false },
     sod_domain: Sequelize.STRING,
     oid_sod_det: { type: Sequelize.DECIMAL, defaultValue: 0 },
     ...base,
