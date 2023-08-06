@@ -13,7 +13,6 @@ const createProductPage = async (req: Request, res: Response, next: NextFunction
     const { user_domain } = req.headers;
   
     try {
-        console.log("heyyyy")
         const productPageService = Container.get(ProductPageService)
         
         const productPageCode = req.body.productPage.productPage.product_page_code
@@ -101,8 +100,6 @@ const updateProfileProductPages = async (req: Request, res: Response, next: Next
         const updateProfileProductPages = await productPageService.updateProfileProductPages(
             {profileCode},{pagesCodes}
         )
-        
-
         return res
             .status(201)
             .json({ message: "updated profile pages succesfully", data: { updateProfileProductPages  } })
@@ -121,9 +118,10 @@ const findPageProductsByPageCode = async (req: Request, res: Response, next: Nex
         const productPageService = Container.get(ProductPageService)
         const {product_page_code} = req.params
         const products_codes = await productPageService.getPageProducts(product_page_code)
+        const page = await productPageService.findOneByCode(product_page_code)
         return res
             .status(200)
-            .json( {products_codes})
+            .json( {products_codes , page})
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

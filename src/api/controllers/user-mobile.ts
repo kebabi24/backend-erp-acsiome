@@ -8,6 +8,7 @@ import { QueryTypes } from 'sequelize';
 import Payment from '../../models/mobile_models/payment';
 import {Op, Sequelize } from 'sequelize';
 import CryptoJS from '../../utils/CryptoJS';
+import PromotionService from '../../services/promotion';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -177,6 +178,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling user mobile login endpoint');
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
+  const promoServiceInstanse = Container.get(PromotionService);
 
   try {
     // const role_code = req.body.role_code;
@@ -209,7 +211,18 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       var role_controller = {};
       var profile_controller = {};
 
-       const domain  = await userMobileServiceInstanse.getDomain({dom_domain : role.role_domain})
+      const domain  = await userMobileServiceInstanse.getDomain({dom_domain : role.role_domain})
+
+      const promos = await promoServiceInstanse.getValidePromos(role.role_site)
+      let adv_codes = [], pop_a_codes = [] , pop_c_codes = []
+      
+      promos.forEach(promo => {
+        adv_codes.push(promo.adv_code)
+        pop_a_codes.push(promo.pop_a_code)
+        pop_c_codes.push(promo.pop_c_codes)
+      });
+      const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes)
+      const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes)
 
       
       if(role['controller_role']!=null && role['controller_role'].length != 0){
@@ -343,7 +356,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
-          domain:domain
+          domain:domain,
+          promos : promos , 
+          advantages : advantages , 
+          populationsArticle : populationsArticle
         });
       }
       // service created by mobile user
@@ -395,7 +411,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           locationDetail: locationDetail,
           paymentMethods:paymentMethods,
           messages:messages,
-          domain:domain
+          domain:domain,
+          promos : promos , 
+          advantages : advantages , 
+          populationsArticle : populationsArticle,
         });
       }
     }

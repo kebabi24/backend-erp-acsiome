@@ -11,10 +11,5 @@ export default (app: Router) => {
     route.get("/getPageProducts/:product_page_code", controller.findPageProductsByPageCode)
     route.get("/", controller.findAllProductPages)
     route.post("/updateProfileProductsPages", controller.updateProfileProductPages)
-    // route.post("/find", controller.findBy)
-    // route.post("/findOne", controller.findByOne)
-    // route.get("/:id", controller.findOne)
-    // route.post("/findprod", controller.findProd)
-    // route.post("/stk", controller.findAllwithstk)
-    // route.put("/:id", controller.update)
+   
 }

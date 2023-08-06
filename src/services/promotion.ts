@@ -82,8 +82,6 @@ export default class PromotionService {
     }
 
 
-        
-    
     public async getPopArticle(query: any): Promise<any> {
         try {
             const population = await this.populationArticleModel.findOne({where : query })
@@ -116,6 +114,61 @@ export default class PromotionService {
             throw e
         }
     }
+
+    public async getValidePromos(site: any): Promise<any> {
+        try {
+            let today = new Date();
+            let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
+            const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
+
+            const adv = await this.promotionModel.findAll({where : {
+                site : site,
+                start_date :  {[Op.lte]:new Date(dt)}  ,
+                end_date :  {[Op.gte]:new Date(dt)} 
+            } })
+            this.logger.silly("promos found")
+            return adv
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getPopsArticleByCodes(codes: any): Promise<any> {
+        try {
+           
+
+            const pops = await this.populationArticleModel.findAll({where : {
+                population_code : codes
+            } })
+            this.logger.silly("pops found")
+            return pops
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getAdvantagesByCodes(codes: any): Promise<any> {
+        try {
+           
+
+            const advs = await this.populationArticleModel.findAll({where : {
+                adv_code : codes
+            } })
+            this.logger.silly("advs found")
+            return advs
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+
+    
+
+
+   
 
     
 

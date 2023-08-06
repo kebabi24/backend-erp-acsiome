@@ -17,6 +17,7 @@ const Promo = sequelize.define(
             autoIncrement: true,
             unique: true
         },
+        description : {type : Sequelize.STRING},
         promo_code: {type: Sequelize.STRING}, 
         pop_a_code: {type: Sequelize.STRING}, 
         pop_c_code: {type: Sequelize.STRING}, 
