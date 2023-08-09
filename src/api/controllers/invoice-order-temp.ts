@@ -68,7 +68,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
-          { id: sod.id },
+          { id: sod.id, sod_nbr: sod.sod_nbr, sod_line: sod.sod_line },
         );
     }
 
