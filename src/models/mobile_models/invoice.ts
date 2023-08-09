@@ -49,6 +49,9 @@ const Invoice = sequelize.define(
         score_code : { type: Sequelize.STRING}, 
         sdelivery_note_code : { type: Sequelize.STRING},
         closed : { type: Sequelize.BOOLEAN}, 
+
+        promorate: {type: Sequelize.DOUBLE},
+        promoamt: {type: Sequelize.DOUBLE},
         
 
         // NOT REQUESTED BY RIANE 

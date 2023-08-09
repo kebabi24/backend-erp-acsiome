@@ -5,6 +5,7 @@ import { Container } from 'typedi';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
 import { Op, Sequelize } from 'sequelize';
+import SaleOrderService from '../../services/saleorder';
 
 const createStandardSpecification = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -132,6 +133,7 @@ const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
     const specificationService = Container.get(QualityControlService);
+    const saleOrderService = Container.get(SaleOrderService);
     const projectService = Container.get(ProjectService);
 
     const testsHistory = req.body.testsHistory;
@@ -142,6 +144,7 @@ const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next
 
     if (update_project_status) {
       const updateProject = await projectService.update({ pm_status: 'R' }, { pm_code: project_code });
+      const updateSo = await saleOrderService.update({ so_conf : true , so_conf_date : new Date()}, { so_po: project_code });
     }
 
     return res.status(201).json({ message: 'created succesfully', data: { createdTestsHistory } });

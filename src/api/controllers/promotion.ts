@@ -143,7 +143,7 @@ const getPopulationArticleByCode = async (req: Request, res: Response, next: Nex
         const promotionService = Container.get(PromotionService)
         const {code} = req.params
 
-        const pop= await promotionService.getPopArticle({adv_code :code })
+        const pop= await promotionService.getPopArticle({population_code :code })
 
         return res
             .status(200)
@@ -153,6 +153,8 @@ const getPopulationArticleByCode = async (req: Request, res: Response, next: Nex
         return next(e)
     }
 }
+
+
 
 export default {
     createPopulationArticle,

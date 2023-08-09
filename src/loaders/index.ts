@@ -413,6 +413,7 @@ export default async ({ expressApp }) => {
     { foreignKey: 'inventory_code', targetKey: 'inventory_code' },
   );
 
+
   // require('../models/mobile_models/customer').default.hasOne(require('../models/mobile_models/price_list').default, {
   //   foreignKey: 'pricelist_code',
   //   sourceKey: 'pricelist_code',
@@ -959,6 +960,7 @@ export default async ({ expressApp }) => {
     targetKey: 'id',
   });
 
+
   require('../models/project').default.hasOne(require('../models/transportcost').default, {
     foreignKey: 'trc_project',
     sourceKey: 'pm_code',
@@ -988,8 +990,8 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   // await sequelizeConnection.sync();
+  
 
-  // await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {
   //     console.log('database updated');
