@@ -13,9 +13,10 @@ import inventoryTransactionService from '../../services/inventory-transaction';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
-import { DATE, Op } from 'sequelize';
+import { DATE, Op, Sequelize } from 'sequelize';
 
 import { generatePdf } from '../../reporting/generator';
+import ItemService from '../../services/item';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -809,6 +810,62 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+const findAllSoJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all requisition endpoint');
+  try {
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const itemServiceInstance = Container.get(ItemService);
+  
+    const soss = await saleOrderServiceInstance.find({ so_job:null,so_domain: user_domain });
+
+    let sos=[]
+for (let so of soss){
+  sos.push(so.so_nbr)
+}
+
+const orders = await saleOrderDetailServiceInstance.findgrp({
+  where: {
+    sod_domain: user_domain,
+    sod_nbr : sos
+  },
+  attributes: [
+    //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+    'sod_part',
+    [Sequelize.fn('sum', Sequelize.col('sod_qty_ord')), 'total_qty'],
+  ],
+  group: ['sod_part' ],
+  raw: true,
+});
+let result = [];
+var i = 1;
+for (let ord of orders) {
+    const items = await itemServiceInstance.findOne({ pt_part: ord.sod_part });
+  result.push({
+    id: i,
+    part: ord.sod_part,
+    desc1: items.pt_desc1,
+    nomo: items.pt_bom_code,
+    gamme: items.pt_routing,
+    ord_qty: ord.total_qty,
+    prod_qty: ord.total_qty
+  });
+  i = i + 1;
+}
+
+    console.log(result);
+    return res.status(202).json({
+      message: 'sec',
+      data: result,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
   create,
@@ -826,4 +883,5 @@ export default {
   findAllwithDetails,
   getActivity,
   getCA,
+  findAllSoJob,
 };

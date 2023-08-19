@@ -39,6 +39,16 @@ export default class SaleOrderDetailService {
             throw e
         }
     }
+    public async findgrp(query: any): Promise<any> {
+        try {
+            const saleorderDetail = await this.saleorderDetailModel.findAll( query )
+            this.logger.silly("find one saleorderDetail mstr")
+            return saleorderDetail
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async find(query: any): Promise<any> {
         try {
             const saleorderDetails = await this.saleorderDetailModel.findAll({ order: [

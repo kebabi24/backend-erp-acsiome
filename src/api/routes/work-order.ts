@@ -9,6 +9,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/createdirect', controller.createDirect);
+  route.post('/createsojob', controller.createSoJob);
   route.post('/createwopos', controller.createPosWorkOrder);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
