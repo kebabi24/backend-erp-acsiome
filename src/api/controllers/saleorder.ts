@@ -859,7 +859,7 @@ for (let ord of orders) {
     console.log(result);
     return res.status(202).json({
       message: 'sec',
-      data: result,
+      data: {result,soss},
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);

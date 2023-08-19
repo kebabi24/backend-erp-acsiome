@@ -16,6 +16,8 @@ import { Console } from 'console';
 import sequenceService from '../../services/sequence';
 import { webContents } from 'electron';
 import item from './item';
+import saleOrder from '../../models/saleorder';
+import SaleOrderService from '../../services/saleorder';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -80,13 +82,14 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
-    const { detail,profile,site} = req.body;
+    const { detail,profile,site,saleOrders} = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
     const sequenceServiceInstance = Container.get(sequenceService);
-   
+    const saleOrderServiceInstance =  Container.get(SaleOrderService)
+   console.log(saleOrders)
    let woids = []
 
     for (const item of detail) {
@@ -150,6 +153,12 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
     }
+    }
+    for (let sos of saleOrders) {
+      const so = await saleOrderServiceInstance.update(
+        { so_job: "wo", last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { id:sos.id },
+      );
     }
     console.log(woids)
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
