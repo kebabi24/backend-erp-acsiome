@@ -89,7 +89,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const sequenceServiceInstance = Container.get(sequenceService);
     const saleOrderServiceInstance =  Container.get(SaleOrderService)
-   console.log(saleOrders)
+   //console.log(saleOrders)
    let woids = []
 
     for (const item of detail) {
@@ -121,6 +121,8 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
           wo_rel_date: item.rel_date,
           wo_due_date: item.due_date,
           wo_status: "F",
+          wo_so_job: "SO",
+          wo_queue_eff: item.queue_eff,
           wo_domain: user_domain,
           wo_nbr: nof,
           created_by: user_code,
@@ -160,7 +162,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
         { id:sos.id },
       );
     }
-    console.log(woids)
+    // console.log(woids)
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
   
     return res.status(200).json({ message: 'deleted succesfully', data: wos });

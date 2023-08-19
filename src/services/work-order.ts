@@ -44,7 +44,16 @@ export default class workOrderService {
       throw e;
     }
   }
-
+  public async findSpecial(query: any): Promise<any> {
+    try {
+        const workOrders = await this.workOrderModel.findAll( query )
+        this.logger.silly("find one saleorderDetail mstr")
+        return workOrders
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
   public async update(data: any, query: any): Promise<any> {
     try {
       const workOrder = await this.workOrderModel.update(data, { where: query });
