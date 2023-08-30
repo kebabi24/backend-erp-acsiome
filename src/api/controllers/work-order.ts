@@ -16,6 +16,8 @@ import { Console } from 'console';
 import sequenceService from '../../services/sequence';
 import { webContents } from 'electron';
 import item from './item';
+import saleOrder from '../../models/saleorder';
+import SaleOrderService from '../../services/saleorder';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -73,6 +75,103 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail,profile,site,saleOrders} = req.body;
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const woroutingServiceInstance = Container.get(WoroutingService);
+    const workroutingServiceInstance = Container.get(WorkroutingService);
+    const itemServiceInstance = Container.get(ItemService);
+    const sequenceServiceInstance = Container.get(sequenceService);
+    const saleOrderServiceInstance =  Container.get(SaleOrderService)
+   //console.log(saleOrders)
+   let woids = []
+
+    for (const item of detail) {
+      if (item.nomo != null) {
+      let wolot = 0;
+
+      const sequence = await sequenceServiceInstance.findOne({
+        seq_type: 'OF',
+        seq_profile: profile,
+        seq_domain: user_domain,
+      });
+     
+      let nof = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+
+      await sequenceServiceInstance.update(
+        { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
+        {id:sequence.id},
+      );
+  
+      await workOrderServiceInstance
+        .create({
+          ...item,
+          wo_part:item.part,
+          wo_bom_code: item.nomo,
+          wo_site: site,
+          wo_routing:item.gamme,
+          wo_qty_ord: item.prod_qty,
+          wo_ord_date: new Date(),
+          wo_rel_date: item.rel_date,
+          wo_due_date: item.due_date,
+          wo_status: "F",
+          wo_so_job: "SO",
+          wo_queue_eff: item.queue_eff,
+          wo_domain: user_domain,
+          wo_nbr: nof,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        })
+        .then(result => {
+          wolot = result.id;
+          woids.push(result.id)
+        });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: item.gamme });
+      for (const ro of ros) {
+        await woroutingServiceInstance.create({
+          wr_domain: user_domain,
+          wr_nbr: nof,
+          wr_lot: wolot,
+          wr_start: item.rel_date,
+          wr_routing: ro.ro_routing,
+          wr_wkctr: ro.ro_wkctr,
+          wr_mch: ro.ro_mch,
+          wr_status: 'F',
+          wr_part: item.part,
+          wr_site: site,
+          wr_op: ro.ro_op,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+      }
+    }
+    }
+    for (let sos of saleOrders) {
+      const so = await saleOrderServiceInstance.update(
+        { so_job: "wo", last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { id:sos.id },
+      );
+    }
+    // console.log(woids)
+    const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
+  
+    return res.status(200).json({ message: 'deleted succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const createDirect = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -526,6 +625,7 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   create,
   createDirect,
+  createSoJob,
   createPosWorkOrder,
   findOne,
   findAll,

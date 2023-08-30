@@ -153,7 +153,7 @@ export default class PromotionService {
         try {
            
 
-            const advs = await this.populationArticleModel.findAll({where : {
+            const advs = await this.advantageModel.findAll({where : {
                 adv_code : codes
             } })
             this.logger.silly("advs found")
