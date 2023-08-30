@@ -1,4 +1,5 @@
 import UserService from "../../services/user"
+import DomainService from "../../services/domain"
 import CustomerService from '../../services/customer';
 import addresseService from '../../services/address';
 import CodeService from "../../services/code"
@@ -19,6 +20,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         
         const userServiceInstance = Container.get(UserService)
+        const domainServiceInstance = Container.get(DomainService)
         const { userName, password } = req.body
         const user = await userServiceInstance.findOne({
             usrd_user_name: userName,
@@ -31,10 +33,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         if (await argon2.verify(user.usrd_pwd, password)) {
            
             const token = jwt.sign({ user: user.id }, "acsiome")
-            
+            const domain = await domainServiceInstance.findOne({
+                dom_domain: user.usrd_domain,
+            })
             return res
                 .status(200)
-                .json({ message: "succesfully", data: { user, token } })
+                .json({ message: "succesfully", data: { user, token,domain } })
         } else
             return res
                 .status(401)

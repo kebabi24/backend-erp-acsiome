@@ -190,18 +190,18 @@ declare global {
     export type unloadRequestModel = S.Model;
     export type unloadRequestDetailsModel = S.Model;
     export type customerOrdersModel = S.Model;
-<<<<<<< HEAD
 
     export type TransportcostModel = S.Model;
     export type CostlistModel = S.Model;
     export type CostlistDetailModel = S.Model;
-=======
     
     // PROMOTION 
     export type populationArticleModel = S.Model;
     export type promotionModel = S.Model;
     export type advantageModel = S.Model;
 
->>>>>>> c777d966907fa2dd35e6571acc0896a02daa85e4
+    export type AccountUnplanifedModel = S.Model;
+    
+
   }
 }

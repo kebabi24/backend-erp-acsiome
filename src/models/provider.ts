@@ -43,6 +43,7 @@ const Provider = sequelize.define(
     vd_sort: Sequelize.STRING,
     vd_last_ck: Sequelize.DATEONLY,
     vd_balance: { type: Sequelize.DECIMAL, defaultValue: 0 },
+    vd_ship_balance:{type: Sequelize.DECIMAL, defaultValue : 0  },
     vd_hold: { type: Sequelize.BOOLEAN, defaultValue: false },
     vd_tax_id: Sequelize.STRING,
     vd_taxable: { type: Sequelize.BOOLEAN, defaultValue: false },
