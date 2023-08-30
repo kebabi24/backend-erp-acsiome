@@ -85,8 +85,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             sod_mobilisation: entry.pmr_mobilisation,
             sod_demobilisation: entry.pmr_demobilisation,
             sod_separe: entry.pmr_separe,
-            sod_stndby: entry.pmr_stndby ? Number(sod.sod_stndby) + Number(entry.days_nbr) : 0,
-            sod_qty_cons: Number(sod.sod_qty_cons) + Number(entry.days_nbr),
+            sod_stndby: entry.pmr_stndby && Number(sod.sod_stndby) + Number(entry.days_nbr),
+            sod_qty_cons: entry.pmr_stndby
+              ? Number(sod.sod_qty_cons)
+              : Number(sod.sod_qty_cons) + Number(entry.days_nbr),
             dec01: entry.pmr_duration,
           },
           {
