@@ -7,6 +7,7 @@ export default (app: Router) => {
     app.use("/requisitions", route)
 
     route.get("/", controller.findAll)
+    route.get("/findapp", controller.findAllApp)
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)

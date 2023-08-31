@@ -236,6 +236,7 @@ const saleOrderDetail = sequelize.define(
     sod_demobilisation: Sequelize.BOOLEAN,
     sod_stndby: Sequelize.DECIMAL,
     sod_separe: { type: Sequelize.BOOLEAN, defaultValue: false },
+    sod_job : Sequelize.STRING,
     sod_domain: Sequelize.STRING,
     oid_sod_det: { type: Sequelize.DECIMAL, defaultValue: 0 },
     ...base,
