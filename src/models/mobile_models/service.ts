@@ -44,6 +44,14 @@ const Service = sequelize.define(
     service_kmdep: { type: Sequelize.STRING },
     service_kmarr: { type: Sequelize.STRING },
     service_domain: Sequelize.STRING,
+
+    nb_visits : Sequelize.INTEGER ,
+    nb_clients_itin : Sequelize.INTEGER ,
+    nb_invoice : Sequelize.INTEGER ,
+    nb_products_sold : Sequelize.INTEGER,
+    nb_products_loaded : Sequelize.INTEGER,
+    nb_clients_created : Sequelize.INTEGER,
+    sum_invoice : Sequelize.INTEGER,
     // ...base,
   },
   {

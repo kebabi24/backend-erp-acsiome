@@ -2,6 +2,7 @@ import UserMobileService from '../../services/user-mobile';
 import LoadRequestService from "../../services/load-request"
 import UnloadRequestService from "../../services/unload-request"
 import RoleService from '../../services/role';
+import ItemService from '../../services/item';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
@@ -9,8 +10,11 @@ import Payment from '../../models/mobile_models/payment';
 import {Op, Sequelize } from 'sequelize';
 import CryptoJS from '../../utils/CryptoJS';
 import PromotionService from '../../services/promotion';
+import _ from 'lodash';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+
+const moment = require('moment');
 
 // ********************** CREATE NEW USER MOBILE *************
 
@@ -286,23 +290,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       }
       // INVOICE
       if(invoice.length > 0 ){
+        
         invoice.forEach(invoice => {
           invoice.dataValues.the_date = formatDateFromBackToMobile(invoice.dataValues.the_date)
           invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date)
         });
       }
-      // INVENTORY
-      // if(invoice.length > 0 ){
-      //   locationDetail.forEach(invoice => {
-      //     invoice.dataValues.the_date = formatDateFromBackToMobile(invoice.the_date)
-      //     invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date)
-      //   });
-      // }
-      
-      // ADD SERVICE TOO 
-
-
-
+     
       // service created on backend
       if (parameter[index].hold === true) {
         const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
@@ -429,6 +423,15 @@ const getDataBack = async function(socket) {
   const logger = Container.get('logger');
   // logger.debug("Calling user mobile login endpoint")
 
+  // itineraries_customers
+  var nb_visits 
+  var nb_invoice
+  var nb_products_sold
+  var nb_clients_created
+
+ 
+
+  
   const userMobileServiceInstanse = Container.get(UserMobileService);
 
   console.log('socket connected');
@@ -437,10 +440,13 @@ const getDataBack = async function(socket) {
 
   socket.on('sendData', async data => {
 
+
     // updated database
     console.log("Data keys :\n ")
     console.log(Object.keys(data))
-    
+
+    var {nb_clients_itin,nb_products_loaded,sum_invoice} = data
+
     //  USER MOBILE  
     if(data.userMobile){
       console.log("UPDATING USER MOBILE")
@@ -456,10 +462,11 @@ const getDataBack = async function(socket) {
       for(const customer of data.customers){
         if(customer.changed == 1 ){
           console.log("updating one customer")
-          customer.sales_channel_code = "SC-003"
+          // customer.sales_channel_code = "SC-003"
           const udpatedCustomer = await userMobileServiceInstanse.updateCustomer(customer,{customer_code:customer.customer_code});
         }
         if(customer.changed == 2 ){
+          nb_clients_created+= 1
           console.log("creating one customer")
           delete customer.id
           delete customer.changed
@@ -488,24 +495,26 @@ const getDataBack = async function(socket) {
     //VISITS
     if(data.visits){
       const dataa = data.visits
+      nb_visits = dataa.length
       const visits = await userMobileServiceInstanse.createVisits(dataa);
     }
-
+    
     // INVOICES 0 CREATE , 2 UPDATE , field : MAJ
     if(data.invoices){
+      const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
+      nb_invoice = filtered_invoices.length
       const invoices = data.invoices
       const invoicesLines = data.invoicesLines
+      const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = []
       let invoicesLinesToCreate = []
-     
+      nb_products_sold = filtered_products.legth
       for(const invoice of invoices){
         if(invoice.MAJ == 0) {
           invoice.the_date = formatDateFromMobileToBackAddTimezone(invoice.the_date)
           invoice.period_active_date = formatDateOnlyFromMobileToBack(invoice.period_active_date)
           delete invoice.MAJ
           console.log("INVOICE TO CREATE")
-          // console.log(Object.keys(invoice))
-          // console.log(Object.values(invoice))
           invoicesToCreate.push(invoice)
           for (const line of invoicesLines){
             if(line.invoice_code === invoice.invoice_code) invoicesLinesToCreate.push(line)
@@ -682,7 +691,14 @@ const getDataBack = async function(socket) {
           service_open:false,
           service_kmdep:service.service_kmdep,
           service_kmarr:service.service_kmarr,
-          service_closing_date : formatDateFromMobileToBackAddTimezone(service.service_closing_date)
+          service_closing_date : formatDateFromMobileToBackAddTimezone(service.service_closing_date),
+          nb_visits  : nb_visits  , 
+          nb_clients_itin : nb_clients_itin  , 
+          nb_invoice : nb_invoice , 
+          nb_products_sold :nb_products_sold ,
+          nb_clients_created : nb_clients_created ,
+          nb_products_loaded: nb_products_loaded,
+          sum_invoice : sum_invoice ,
         },
         {service_code:service.service_code}
         );
@@ -695,6 +711,13 @@ const getDataBack = async function(socket) {
         service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date)
         service.service_period_activate_date = formatDateOnlyFromMobileToBack( service.service_period_activate_date)
         service.service_open = false
+        service.nb_visits  = nb_visits   
+        service.nb_clients_itin = nb_clients_itin   
+        service.nb_invoice = nb_invoice  
+        service.nb_products_sold =nb_products_sold 
+        service.nb_clients_created = nb_clients_created 
+        service.nb_products_loaded= nb_products_loaded
+        service.sum_invoice = sum_invoice 
         const createdService = await userMobileServiceInstanse.createService(service)
         console.log("CREATING SERVICE END")
     }
@@ -1067,6 +1090,354 @@ const testHash = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 
+const getDashboardAddData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling getDashboardAddDataendpoint');
+  try {
+
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const itemServiceInstance = Container.get(ItemService);
+
+    const { start_date, end_date } = req.body;
+    
+    var services_data = await userMobileServiceInstance.getServices(start_date, end_date);
+    var invoices = await userMobileServiceInstance.getInvoices(start_date, end_date ,['invoice_code','customer_code','role_code','amount']);
+    var payments = await userMobileServiceInstance.getPaymentsByDates(start_date, end_date ,['customer_code','role_code','amount','service_code']);
+    var items = await itemServiceInstance.findAll();
+    
+    const filtered_services= _.mapValues(_.groupBy(services_data, 'role_code'));
+    const filtered_services_by_day= _.mapValues(_.groupBy(services_data, 'service_period_activate_date'));
+
+    payments.forEach(async payment => {
+      const service = await userMobileServiceInstance.getService({service_code : payment.dataValues.service_code})
+      payment.dataValues.nb_visits = service.sum_nb_visits
+    });
+    const filtered_payments = _.mapValues(_.groupBy(payments, 'customer_code'));
+
+    let services = []
+    for (const key in filtered_services) {
+      let nb_visits = 0 , nb_clients_itin= 0 ,nb_invoice = 0 ,nb_products_sold = 0 , nb_products_loaded = 0 , nb_clients_created = 0 ,sum_invoice = 0 
+      filtered_services[key].forEach(elem =>{
+        nb_visits +=  elem.nb_visits
+        nb_clients_itin += elem.nb_clients_itin
+        nb_invoice += elem.nb_invoice
+        nb_products_sold += elem.nb_products_sold
+        nb_products_loaded += elem.nb_products_loaded
+        nb_clients_created += elem.nb_clients_created
+        sum_invoice += elem.sum_invoice
+      })
+
+      services.push({
+        role_code : key,
+        nb_visits : nb_visits ,
+        nb_clients_itin : nb_clients_itin, 
+        nb_invoice : nb_invoice,
+        nb_products_sold:nb_products_sold,
+        nb_products_loaded: nb_products_loaded,
+        nb_clients_created: nb_clients_created,
+        sum_invoice : sum_invoice
+      })
+    }
+
+    
+
+
+    // *************** 1 *******************
+    let sum_visit_rate = 0 
+    let visit_rate_data = []
+    let sum_nb_visits = 0 // used in 2
+    let sum_nb_clients = 0  // clients_itin
+    
+    // *************** 2 *******************
+    let sucess_rate_data = []
+    let sum_nb_invoices = 0 
+
+    // *************** 3 *******************
+    let sum_nb_products_sold = 0    
+    let distribution_rate_data = []
+
+    
+    //  *************** 4 
+    let integration_data = []
+    // ***************
+    let sum_invoice_amount = 0 
+  
+    let ca_itin_data = []
+
+    let ca_new_client_data = []
+
+    // 7 
+    let sum_nb_clients_created = 0
+
+    // 10 
+    let recovery_rate_data = []
+
+    // populating integration data 
+    for (const key in filtered_services_by_day) {
+      let sum_nb_clients_itin = 0 , sum_nb_clients_created = 0 
+
+      filtered_services_by_day[key].forEach(elem =>{
+        sum_nb_clients_itin += elem.nb_clients_itin
+        sum_nb_clients_created += elem.nb_clients_created
+      }) 
+
+      integration_data.push({
+        day : key , 
+        nb_clients_itin : sum_nb_clients_itin,
+        sum_nb_client_created : sum_nb_clients_created , 
+        total : sum_nb_clients_itin + sum_nb_clients_created
+      })
+    }
+
+    // RECOVERY RATE 
+    let customers_data_with_clusters = []
+    for (const key in filtered_payments) {
+      let sum_nb_visits = 0 , sum_amount = 0
+
+      const customer = await userMobileServiceInstance.getCustomerBy({customer_code : key})
+      
+      filtered_payments[key].forEach(elem=>{
+        sum_nb_visits += elem.nb_visits
+        sum_amount += elem.amount
+      })
+      customers_data_with_clusters.push({
+        customer_code : key , 
+        sum_payment_amount : sum_amount,
+        sum_nb_visits : sum_nb_visits,
+        cluster : customer.dataValues.cluster_code , 
+        sub_cluster : customer.dataValues.sub_cluster_code
+      })
+      // recovery_rate_data.push({
+        //   cluster : key , 
+        //   sum_payment_amount : sum_amount,
+        //   sum_nb_visits : sum_nb_visits,
+        // })
+        
+    }
+    
+    const filtered_customers_data_clusters = _.mapValues(_.groupBy(customers_data_with_clusters, 'cluster'));
+    // recovery_rate_data = filtered_customers_data_clusters
+    for (const key in filtered_customers_data_clusters) {
+      let sum = 0 , l = []
+
+      filtered_customers_data_clusters[key].forEach(elem =>{
+        sum +=  elem.sum_payment_amount 
+        l.push({
+          cluster : elem.sub_cluster,
+          sum : elem.sum_payment_amount
+        })
+      })
+     
+      recovery_rate_data.push({
+        cluster : key,
+        sum : sum ,
+        breakdown : l
+      })
+
+
+    }
+
+
+
+
+
+    services.forEach(service => {
+      
+      sum_nb_visits += service.nb_visits
+      sum_nb_clients += service.nb_clients_itin
+      sum_invoice_amount += service.sum_invoice
+      sum_nb_invoices += service.nb_invoice
+      sum_nb_products_sold += service.nb_products_sold
+      sum_nb_clients_created += service.nb_clients_created
+
+    });
+
+    services.forEach(service => {
+
+      // **************** 1 VISIT RATE
+      // CALCULATE : visit rate of each role
+      let visit_rate = parseFloat(((service.nb_visits / service.nb_clients_itin) * 100).toFixed(2))  
+
+      // visit rate of roles 
+      visit_rate_data.push({
+        role_code : service.role_code,
+        visit_rate : visit_rate ,
+        unvisited_rate : parseFloat((100 - visit_rate).toFixed(2) )
+      })
+
+      // **************** 2 SUCCESS RATE
+
+      sucess_rate_data.push({
+        role_code : service.role_code,
+        nb_clients : service.nb_clients_itin, 
+        nb_invoice : service.nb_invoice , 
+        nb_visits : service.nb_visits,
+      })
+
+
+      // **************** 3 DISTRIBUTION RATE
+
+      distribution_rate_data.push({
+        role_code : service.role_code,
+        nb_products_sold : service.nb_products_sold, 
+        nb_products : items.length,
+         nb_products_loaded : service.nb_products_loaded
+      })
+
+     //****************** 4 */ later  
+      
+
+     //*****************  5 below 
+     //****************** 6 */
+     ca_itin_data.push({
+       role_code : service.role_code,
+       ca_iti : parseFloat(((sum_invoice_amount / service.nb_visits)).toFixed(2))
+      })
+      
+      //****************** 7 */
+      ca_new_client_data.push({
+        role_code : service.role_code,
+        ca_new_client : parseFloat(((service.sum_invoice / service.nb_clients_created)).toFixed(2))
+      })
+    });    
+
+    // ************** 8 *****************
+    const filtered_invoices_by_customer = _.mapValues(_.groupBy(invoices, 'customer_code'));
+    let customers_codes = []
+
+    let customers_data = []
+    for (const key in filtered_invoices_by_customer) {
+      customers_codes.push(key)
+      var customer = await userMobileServiceInstance.getCustomerBy({customer_code : key})
+      let sum = 0 
+      filtered_invoices_by_customer[key].forEach(elem=>{
+        sum += elem.dataValues.amount
+      })
+      customers_data.push({
+        customer_code : key , 
+        amount: sum ,
+        cluster_code : customer.dataValues.cluster_code
+      })
+    }
+
+    const filtered_data_by_clustes = _.mapValues(_.groupBy(customers_data, 'cluster_code'));
+    let clusters = []
+    for (const key in filtered_data_by_clustes) {
+      let sum = 0 
+      customers_data.forEach(customer=>{
+        if(customer.cluster_code === key) sum+=customer.amount
+      })
+      clusters.push({
+        cluster_code : key,
+        amount : sum
+      })
+    }
+    
+     // ************** 9 *****************
+     const invoices_filtered_by_code = _.mapValues(_.groupBy(invoices, 'invoice_code'));
+
+     let invoices_lines = []
+     for (const key in invoices_filtered_by_code) {
+      let invoice_lines = await userMobileServiceInstance.getInvoiceLineByWithSelectedFields(
+        { where : {invoice_code : key} },
+        ['product_code','unit_price','quantity']
+        )
+      invoices_lines.push(...invoice_lines)
+     }
+
+     const filtered_products = _.mapValues(_.groupBy(invoices_lines, 'product_code'));
+     let products_data = [] , ca_products_data = []
+     let qnt = 0
+
+
+     for (const key in filtered_products) {
+      let product_type = await userMobileServiceInstance.getProductType(key)
+      let sum = 0 
+      filtered_products[key].forEach(elem =>{
+        sum +=  elem.quantity * elem.unit_price
+        qnt += elem.quantity
+
+        
+      })
+
+      products_data.push({
+        product_code : key , 
+        sum : sum,
+        type : product_type.dataValues.pt_part_type ,
+      })
+      
+      
+
+      // console.log(products_data)
+
+     }
+
+     const filtered_types = _.mapValues(_.groupBy(products_data, 'type'));
+     // console.log(filtered_types)
+     for (const key in filtered_types) { 
+       let l = [], sum = 0 
+
+       filtered_types[key].forEach(elem =>{
+         sum +=  elem.sum 
+         l.push({
+           product_code : elem.product_code,
+           sum : elem.sum
+         })
+       })
+      
+       ca_products_data.push({
+         type : key,
+         sum : sum ,
+         breakdown : l
+       })
+     }
+
+    
+
+
+    // **************** RESPONSE
+
+    
+    let visit_rate = parseFloat(((sum_nb_visits / sum_nb_clients)*100).toFixed(2))  // 1 
+    let suc_visit_rate = parseFloat(((sum_nb_invoices / sum_nb_visits)*100).toFixed(2)) // 2
+    let suc_itin_rate = parseFloat(((sum_nb_invoices / sum_nb_clients) *100 ).toFixed(2)) // 2 
+    let distribution_rate = parseFloat(((sum_nb_products_sold / items.length) * 100).toFixed(2)) // 3
+    // 4 ... later 
+    let ca_visit = parseFloat(((sum_invoice_amount / sum_nb_visits)).toFixed(2))  // 5
+    let ca_new_clients = parseFloat(((sum_invoice_amount / sum_nb_clients_created)).toFixed(2)) // 7 
+
+    // SORT integration_data 
+
+    const sortedAsc = integration_data.sort(
+      (objA, objB) => Number(new Date(objA.day)) - Number(new Date(objB.day)),
+    );
+
+   
+
+    return res.status(200).json({ 
+              visit_rate : visit_rate ,
+              visit_rate_data: visit_rate_data ,
+              success_rate_visit : suc_visit_rate ,
+              success_rate_itin : suc_itin_rate ,
+              sucess_rate_data: sucess_rate_data,
+              distribution_rate_data:distribution_rate_data,
+              distribution_rate : distribution_rate,
+              ca_visit: ca_visit,
+              ca_itin: ca_itin_data,
+              ca_new_client_data:ca_new_client_data,
+              ca_new_clients: ca_new_clients,
+              ca_clusters_data:clusters,
+              integration_data:sortedAsc,
+              products_data: ca_products_data,
+              recovery_rate_data:recovery_rate_data,
+      });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+}
+
+
 export default {
   create,
   findOne,
@@ -1087,5 +1458,6 @@ export default {
   findVisitBy,
   findAllVisits,
   findUserPassword,
-  testHash
+  testHash,
+  getDashboardAddData
 };
