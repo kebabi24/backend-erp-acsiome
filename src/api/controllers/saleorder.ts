@@ -49,6 +49,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         ...entry,
         sod_domain: user_domain,
         sod_nbr: so.so_nbr,
+        sod_due_date : saleOrder.so_due_date,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -578,6 +579,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         ...entry,
         sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
+        sod_due_date: saleOrder.so_due_date,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -819,23 +821,21 @@ const findAllSoJob = async (req: Request, res: Response, next: NextFunction) => 
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all requisition endpoint');
   try {
-    const {site} = req.body;
+    const {site,date,date1} = req.body;
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const itemServiceInstance = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(locationDetailService)
     const workOrderServiceInstance = Container.get(workOrderService)
-    const soss = await saleOrderServiceInstance.find({ so_job:null,so_domain: user_domain });
- 
-    let sos=[]
-for (let so of soss){
-  sos.push(so.so_nbr)
-}
-
+    
 const orders = await saleOrderDetailServiceInstance.findgrp({
   where: {
     sod_domain: user_domain,
-    sod_nbr : sos
+    sod_job : null,
+    sod_due_date:  {
+      [Op.between]: [date, date1],
+    },
+
   },
   attributes: [
     //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
@@ -891,11 +891,12 @@ for (let ord of orders) {
   i = i + 1;
 }
 
+console.log(result)
     return res.status(202).json({
       message: 'sec',
-      data: {result,soss},
+      data: result,
     });
-  } catch (e) {
+  } catch (e){
     logger.error('🔥 error: %o', e);
     return next(e);
   }

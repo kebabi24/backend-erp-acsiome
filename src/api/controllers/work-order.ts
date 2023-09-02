@@ -17,7 +17,7 @@ import sequenceService from '../../services/sequence';
 import { webContents } from 'electron';
 import item from './item';
 import saleOrder from '../../models/saleorder';
-import SaleOrderService from '../../services/saleorder';
+import SaleOrderDetailService from '../../services/saleorder-detail';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -82,13 +82,13 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
-    const { detail,profile,site,saleOrders} = req.body;
+    const { detail,profile,site,date,date1} = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
     const sequenceServiceInstance = Container.get(sequenceService);
-    const saleOrderServiceInstance =  Container.get(SaleOrderService)
+    const saleOrderDetailServiceInstance =  Container.get(SaleOrderDetailService)
    //console.log(saleOrders)
    let woids = []
 
@@ -154,15 +154,19 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
       }
-    }
-    }
-    for (let sos of saleOrders) {
-      const so = await saleOrderServiceInstance.update(
-        { so_job: "wo", last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      const soss =   await saleOrderDetailServiceInstance.find({sod_due_date : {
+        [Op.between]: [date, date1],
+      },sod_part:item.part })
+    for (let sos of soss) {
+      const sod = await saleOrderDetailServiceInstance.update(
+        { sod_job: wolot, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
         { id:sos.id },
       );
     }
-    // console.log(woids)
+ 
+    }
+    }
+       // console.log(woids)
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
   
     return res.status(200).json({ message: 'deleted succesfully', data: wos });
@@ -177,7 +181,7 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
-  console.log("hnahnahnahnahnahnahnahna")
+ // console.log("hnahnahnahnahnahnahnahna")
   try {
     const { it, nof } = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
@@ -244,7 +248,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
-    console.log(products);
+   // console.log(products);
     for (const product of products) {
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
@@ -270,9 +274,9 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         let ps_parent = product.pt_bom_code;
 
         const ps = await psServiceInstance.find({ ps_parent ,ps_domain: user_domain});
-        console.log(ps);
+        //console.log(ps);
         if (ps.length > 0) {
-          console.log('ps l dakhel f if', ps);
+        //  console.log('ps l dakhel f if', ps);
 
           for (const pss of ps) {
             // console.log(pss.ps_scrp_pct);
@@ -292,7 +296,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             });
           }
         } else {
-          console.log('ps f else', ps);
+       //   console.log('ps f else', ps);
           await workOrderDetailServiceInstance.create({
             wod_domain: user_domain,
             wod_nbr: nbr,
@@ -328,7 +332,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           });
         }
         const sauce = product.sauces;
-        console.log(sauce);
+       // console.log(sauce);
         for (const sa of sauce) {
           const sa_part = sa.pt_part;
           await workOrderDetailServiceInstance.create({
@@ -402,7 +406,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.headers.origin);
+ // console.log(req.headers.origin);
   const { user_domain } = req.headers;
   logger.debug('Calling find all wo endpoint');
   try {
@@ -447,7 +451,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
 
-  console.log(req.body);
+  //console.log(req.body);
   logger.debug('Calling update one  wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
@@ -491,7 +495,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const operationHistoryServiceInstance = Container.get(OperationHistoryService)
     const workcenterServiceInstance = Container.get(WorkCenterService)
-    console.log(req.body);
+   // console.log(req.body);
      let result=[] 
      let i = 1
     const wos = await workOrderServiceInstance.find({
@@ -553,7 +557,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     }
     
        
-    console.log("trs",wos.length);
+   // console.log("trs",wos.length);
    
   //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: result });
@@ -575,7 +579,7 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const operationHistoryServiceInstance = Container.get(OperationHistoryService)
     const workcenterServiceInstance = Container.get(WorkCenterService)
-    console.log(req.body);
+   // console.log(req.body);
      
     const wo = await workOrderServiceInstance.findOne({
     
