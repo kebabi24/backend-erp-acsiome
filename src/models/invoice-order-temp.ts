@@ -93,6 +93,7 @@ const InvoiceOrderTemp = sequelize.define(
 		ith_pst: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ith_fst_id: Sequelize.STRING,
 		ith_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
+		ith_tot_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_tax_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_trl1_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_trl1_cd: Sequelize.STRING,

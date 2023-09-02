@@ -93,6 +93,7 @@ const InvoiceOrder = sequelize.define(
 		ih_pst: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ih_fst_id: Sequelize.STRING,
 		ih_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
+		ih_tot_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ih_tax_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ih_trl1_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ih_trl1_cd: Sequelize.STRING,
@@ -221,11 +222,11 @@ const InvoiceOrder = sequelize.define(
 				tableName: "ih_hist",
 			}
 		)
-	InvoiceOrder.addHook('beforeCreate', async (instance, option) => {
-		if(instance.ih_inv_nbr == null) {
-			const seq = await Sequence.findOne({ where: { seq_seq: instance.ih_category, seq_type: "IV"  } });
-			instance.ih_inv_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
-			await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_type: "IV", seq_seq: instance.ih_category } });
-		}
-	});
+	// InvoiceOrder.addHook('beforeCreate', async (instance, option) => {
+	// 	if(instance.ih_inv_nbr == null) {
+	// 		const seq = await Sequence.findOne({ where: { seq_seq: instance.ih_category, seq_type: "IV"  } });
+	// 		instance.ih_inv_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+	// 		await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_type: "IV", seq_seq: instance.ih_category } });
+	// 	}
+	// });
 export default InvoiceOrder;
