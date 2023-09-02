@@ -24,6 +24,8 @@ import serviceMobile from '../../services/mobile-service';
 import { type } from 'os';
 import PosOrderDetail from '../../services/pos-order-detail-product';
 import LocationDetailService from '../../services/location-details';
+import AccountUnplanifedService from '../../services/account-unplanifed';
+import ProviderService from '../../services/provider';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -164,7 +166,18 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
+    const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
+    const providerServiceInstance = Container.get(ProviderService);
 
+    let tot = 0
+    for (const data of detail) {
+      tot = tot + (Number(data.tr_qty_loc) * Number(data.tr_price))
+    }
+    if (it.tr_addr != null) {
+    const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    const vd = await providerServiceInstance.findOne({vd_addr: it.tr_addr,vd_domain : user_domain,})
+    if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(tot)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})  
+    }
     for (const data of detail) {
       const { desc, ...item } = data;
       const sct = await costSimulationServiceInstance.findOne({
@@ -275,20 +288,20 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr,ad_domain:user_domain });
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr,ad_domain:user_domain });
 
-    const pdfData = {
-      detail: detail,
-      it: it,
-      nlot: nlot,
-      adr: addr,
-    };
+    // const pdfData = {
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    //   adr: addr,
+    // };
 
-    console.log('\n\n pdfData : ', pdfData);
-    const pdf = await generatePdf(pdfData, 'rct-unp');
+    // console.log('\n\n pdfData : ', pdfData);
+    // const pdf = await generatePdf(pdfData, 'rct-unp');
 
-    return res.status(200).json({ message: 'Added succesfully', data: true, pdf: pdf.content });
+    return res.status(200).json({ message: 'Added succesfully', data: true, /*pdf: pdf.content*/ });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

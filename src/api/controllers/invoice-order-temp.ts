@@ -68,7 +68,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
-          { id: sod.id },
+          { id: sod.id, sod_nbr: sod.sod_nbr, sod_line: sod.sod_line },
         );
     }
 
@@ -233,15 +233,12 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
           ar_ex_rate: invoiceOrder.ih_ex_rate,
           ar_ex_rate2: invoiceOrder.ih_ex_rate2,
           ar_amt:
-            ((Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) *
-              Number(det.ctd_pct)) /
-            100,
+            ((Number(invoiceOrder.ih_tot_amt)) * Number(det.ctd_pct)) / 100,
           ar_base_amt:
-            ((((Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) *
+            ((((Number(invoiceOrder.ih_tot_amt)) *
               Number(invoiceOrder.ar_ex_rate2)) /
               Number(invoiceOrder.ar_ex_rate)) *
-              Number(det.ctd_pct)) /
-            100,
+              Number(det.ctd_pct)) / 100,
           created_by: user_code,
           last_modified_by: user_code,
         });
@@ -264,9 +261,9 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
         ar_curr: invoiceOrder.ih_curr,
         ar_ex_rate: invoiceOrder.ih_ex_rate,
         ar_ex_rate2: invoiceOrder.ih_ex_rate2,
-        ar_amt: Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt),
+        ar_amt: Number(invoiceOrder.ih_tot_amt),
         ar_base_amt:
-          ((Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) *
+          ((Number(invoiceOrder.ih_tot_amt)) *
             Number(invoiceOrder.ar_ex_rate2)) /
           Number(invoiceOrder.ar_ex_rate),
         created_by: user_code,

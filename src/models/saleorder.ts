@@ -43,6 +43,7 @@ const saleOrder = sequelize.define(
 		so_rmks: Sequelize.STRING,
 		so_cr_terms: Sequelize.STRING,
 		so_fob: Sequelize.STRING,
+		so_job: Sequelize.STRING,
 		so_po: Sequelize.STRING,
 		so_shipvia: Sequelize.STRING,
 		so_partial: {type: Sequelize.BOOLEAN, defaultValue : false  },

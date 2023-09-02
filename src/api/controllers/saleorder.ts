@@ -13,9 +13,13 @@ import inventoryTransactionService from '../../services/inventory-transaction';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
-import { DATE, Op } from 'sequelize';
+import { DATE, Op, Sequelize } from 'sequelize';
 
 import { generatePdf } from '../../reporting/generator';
+import ItemService from '../../services/item';
+import LocationDetail from '../../models/location-detail';
+import workOrderService from '../../services/work-order';
+import { isNull } from 'lodash';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -45,6 +49,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         ...entry,
         sod_domain: user_domain,
         sod_nbr: so.so_nbr,
+        sod_due_date : saleOrder.so_due_date,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -574,6 +579,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         ...entry,
         sod_domain: user_domain,
         sod_nbr: saleOrder.so_nbr,
+        sod_due_date: saleOrder.so_due_date,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -809,6 +815,92 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+const findAllSoJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all requisition endpoint');
+  try {
+    const {site,date,date1} = req.body;
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const itemServiceInstance = Container.get(ItemService);
+    const locationDetailServiceInstance = Container.get(locationDetailService)
+    const workOrderServiceInstance = Container.get(workOrderService)
+    
+const orders = await saleOrderDetailServiceInstance.findgrp({
+  where: {
+    sod_domain: user_domain,
+    sod_job : null,
+    sod_due_date:  {
+      [Op.between]: [date, date1],
+    },
+
+  },
+  attributes: [
+    //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+    'sod_part',
+    [Sequelize.fn('sum', Sequelize.col('sod_qty_ord')), 'total_qty'],
+  ],
+  group: ['sod_part' ],
+  raw: true,
+});
+let result = [];
+var i = 1;
+for (let ord of orders) {
+    let qtyonstok = 0
+    let qtyonprod = 0
+    const items = await itemServiceInstance.findOne({ pt_part: ord.sod_part });
+ 
+    const ld = await locationDetailServiceInstance.findSpecial({
+      where: {
+        ld_domain:user_domain,
+        ld_part: items.pt_part,
+        ld_site: site,
+      },
+      attributes: [ [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qtyoh']],
+      group: ['ld_part' ],
+      raw: true,
+    });
+    qtyonstok = ld[0] ? ld[0].total_qtyoh : 0 
+     //console.log(ld[0].total_qtyoh)
+    const wo = await workOrderServiceInstance.findSpecial({
+      where: {
+        wo_domain:user_domain,
+        wo_part: ord.sod_part,
+        wo_site: site,
+        wo_status: "R"  
+      },
+      attributes: ['wo_part', [Sequelize.fn('sum', Sequelize.col('wo_qty_ord')), 'total_qtyprod']],
+      group: ['wo_part', ],
+      raw: true,
+    });
+    qtyonprod = wo[0] ?  wo[0].total_qtyprod : 0
+  result.push({
+    id: i,
+    part: ord.sod_part,
+    desc1: items.pt_desc1,
+    nomo: items.pt_bom_code,
+    gamme: items.pt_routing,
+    qtyoh: qtyonstok,
+    sfty_qty: items.pt_sfty_stk,
+    qtylanch: qtyonprod,
+    ord_qty: ord.total_qty,
+    prod_qty: ord.total_qty
+  });
+  i = i + 1;
+}
+
+console.log(result)
+    return res.status(202).json({
+      message: 'sec',
+      data: result,
+    });
+  } catch (e){
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
   create,
@@ -826,4 +918,5 @@ export default {
   findAllwithDetails,
   getActivity,
   getCA,
+  findAllSoJob,
 };

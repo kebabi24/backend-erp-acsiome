@@ -55,7 +55,8 @@ const Employe = sequelize.define(
     emp_contact_adress: Sequelize.STRING,
     emp_contact_tel: Sequelize.STRING,
     emp_parent_liaison: Sequelize.STRING,
-    // emp_balance : { type: Sequelize.DECIMAL, defaultValue: 0 },
+    emp_balance : { type: Sequelize.DECIMAL, defaultValue: 0 },
+    emp_userid: Sequelize.STRING,
     emp_domain: Sequelize.STRING,
 
     ...base,

@@ -342,3 +342,25 @@
     at Object.start (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
     at Object.<anonymous> (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-express\lib\main.js:333:30)
     at ListenerCollection.fire (D:\NEW ERP\BACKEND\backend-erp-acsiome\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-08-30T13:59:49.959Z - error: Error when starting http server on port 6759 Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:333:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
+2023-08-30T13:59:49.961Z - error: Error occurred during reporter init: Error: listen EADDRINUSE: address already in use :::6759
+    at Server.setupListenHandle [as _listen2] (node:net:1319:16)
+    at listenInCluster (node:net:1367:12)
+    at Server.listen (node:net:1454:7)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:22:12
+    at new Promise (<anonymous>)
+    at startAsync (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:16:10)
+    at D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:50:14
+    at Object.start (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:125:13)
+    at Object.<anonymous> (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-express\lib\main.js:333:30)
+    at ListenerCollection.fire (D:\ERP-AXIOM\backend\node_modules\@jsreport\jsreport-core\lib\shared\listenerCollection.js:157:21)
