@@ -18,6 +18,7 @@ import { webContents } from 'electron';
 import item from './item';
 import saleOrder from '../../models/saleorder';
 import SaleOrderDetailService from '../../services/saleorder-detail';
+import LocationDetailService from '../../services/location-details';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -111,7 +112,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
   
       await workOrderServiceInstance
         .create({
-          ...item,
+          
           wo_part:item.part,
           wo_bom_code: item.nomo,
           wo_site: site,
@@ -154,18 +155,119 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
       }
-      const soss =   await saleOrderDetailServiceInstance.find({sod_due_date : {
-        [Op.between]: [date, date1],
-      },sod_part:item.part })
-    for (let sos of soss) {
+    //   const soss =   await saleOrderDetailServiceInstance.find({sod_domain : user_domain,sod_due_date : {
+    //     [Op.between]: [date, date1],
+    //   },sod_part:item.part })
+    // for (let sos of soss) {
       const sod = await saleOrderDetailServiceInstance.update(
         { sod_job: wolot, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
-        { id:sos.id },
+        {sod_domain : user_domain,sod_due_date : {
+          [Op.between]: [date, date1],
+        },sod_part:item.part },
       );
-    }
+    // }
  
     }
     }
+       // console.log(woids)
+    const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
+  
+    return res.status(200).json({ message: 'deleted succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const createSfJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail,profile,site,date,date1} = req.body;
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const woroutingServiceInstance = Container.get(WoroutingService);
+    const workroutingServiceInstance = Container.get(WorkroutingService);
+    const itemServiceInstance = Container.get(ItemService);
+    const sequenceServiceInstance = Container.get(sequenceService);
+   //console.log(detail)
+   let woids = []
+
+    for (const item of detail) {
+      if (item.nomo != null) {
+      let wolot = 0;
+
+      const sequence = await sequenceServiceInstance.findOne({
+        seq_type: 'OF',
+        seq_profile: profile,
+        seq_domain: user_domain,
+      });
+     
+      let nof = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+
+      await sequenceServiceInstance.update(
+        { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
+        {id:sequence.id},
+      );
+  
+      await workOrderServiceInstance
+        .create({
+          
+          wo_part:item.part,
+          wo_bom_code: item.nomo,
+          wo_site: site,
+          wo_routing:item.gamme,
+          wo_qty_ord: item.prod_qty,
+          wo_ord_date: new Date(),
+          wo_rel_date: item.rel_date,
+          wo_due_date: item.due_date,
+          wo_status: (item.create) ? "F" : "P",
+          wo_so_job: "SO",
+          wo_queue_eff: item.queue_eff,
+          wo_domain: user_domain,
+          wo_nbr: nof,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        })
+        .then(result => {
+          wolot = result.id;
+          woids.push(result.id)
+        });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: item.gamme });
+      for (const ro of ros) {
+        await woroutingServiceInstance.create({
+          wr_domain: user_domain,
+          wr_nbr: nof,
+          wr_lot: wolot,
+          wr_start: item.rel_date,
+          wr_routing: ro.ro_routing,
+          wr_wkctr: ro.ro_wkctr,
+          wr_mch: ro.ro_mch,
+          wr_status: 'F',
+          wr_part: item.part,
+          wr_site: site,
+          wr_op: ro.ro_op,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+      }
+ 
+    
+    }
+ 
+    }
+    
+  //  console.log(date,date1,item.part)
+    const wopfs = await workOrderServiceInstance.update(
+      { wo__qad01: "SF", last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { wo_rel_date : {[Op.between]: [date, date1]},wo_status:"F" ,wo_domain: user_domain},
+    );
+ 
        // console.log(woids)
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
   
@@ -626,10 +728,124 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const findBywo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  //console.log(req.body);
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all requisition endpoint');
+  try {
+    const {site,date,date1} = req.body;
+    const itemServiceInstance = Container.get(ItemService);
+    const locationDetailServiceInstance = Container.get(LocationDetailService)
+    const workOrderServiceInstance = Container.get(WorkOrderService)
+    const psServiceInstance   = Container.get(psService)
+
+const orders = await workOrderServiceInstance.findSpecial({
+  where: {
+    wo_domain: user_domain,
+    wo_status : "F",
+    wo__qad01 : null,
+    wo_rel_date:  {
+      [Op.between]: [date, date1],
+    },
+
+  },
+  attributes: [
+    //    include: [[Sequelize.literal(`${Sequelize.col('total_price').col} * 100 / (100 - ${Sequelize.col('disc_amt').col}) - ${Sequelize.col('total_price').col}`), 'Remise']],
+    'wo_part',
+    [Sequelize.fn('sum', Sequelize.col('wo_qty_ord')), 'total_qty'],
+  ],
+  group: ['wo_part' ],
+  raw: true,
+});
+//console.log(orders)
+let sf = []
+let i = 1
+for (let ord of orders) {
+const ps = await psServiceInstance.findby({ps_parent: ord.wo_part})
+for (let p of ps) {
+
+//console.log(p.ps_comp,p.ps_parent)
+}
+for (let p of ps) {
+  if(p.item.pt_bom_code != null) {
+   const sfid =  sf.findIndex(({ part }) => part == p.ps_comp);
+if (sfid < 0 ) {
+  let qtyonstok = 0
+  let qtyonprod = 0
+
+  const ld = await locationDetailServiceInstance.findSpecial({
+    where: {
+      ld_domain:user_domain,
+      ld_part: p.ps_comp,
+      ld_site: site,
+    },
+    attributes: [ [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qtyoh']],
+    group: ['ld_part' ],
+    raw: true,
+  });
+  qtyonstok = ld[0] ? ld[0].total_qtyoh : 0 
+   //console.log(ld[0].total_qtyoh)
+  const wo = await workOrderServiceInstance.findSpecial({
+    where: {
+      wo_domain:user_domain,
+      wo_part: p.ps_comp,
+      wo_site: site,
+      wo_status: "R"  
+    },
+    attributes: ['wo_part', [Sequelize.fn('sum', Sequelize.col('wo_qty_ord')), 'total_qtyprod']],
+    group: ['wo_part', ],
+    raw: true,
+  });
+  qtyonprod = wo[0] ?  wo[0].total_qtyprod : 0
+
+  let obj = {
+    id: i,
+    part: p.ps_comp,
+    desc1: p.item.pt_desc1,
+    nomo: p.item.pt_bom_code,
+    gamme: p.item.pt_routing,
+    qtyoh: qtyonstok,
+    sfty_qty: p.item.pt_sfty_stk,
+    qtylanch: qtyonprod,
+    ord_qty: ord.total_qty * p.ps_qty_per,
+    prod_qty: ord.total_qty * p.ps_qty_per
+
+  }
+sf.push(obj)
+i = i + 1
+}
+else {
+
+sf[sfid].ord_qty = sf[sfid].ord_qty +  ord.total_qty * p.ps_qty_per
+sf[sfid].prod_qty = sf[sfid].ord_qty +  ord.total_qty * p.ps_qty_per
+
+
+}
+  }
+}
+
+
+}
+  return res.status(202).json({
+    message: 'sec',
+    data: sf,
+  });
+  } catch (e){
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+
+
 export default {
   create,
   createDirect,
   createSoJob,
+  createSfJob,
   createPosWorkOrder,
   findOne,
   findAll,
@@ -639,4 +855,6 @@ export default {
   deleteOne,
   CalcCost,
   CalcCostWo,
+  findBywo,
+
 };
