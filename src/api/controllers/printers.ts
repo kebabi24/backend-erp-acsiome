@@ -43,7 +43,50 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_domain } = req.headers;
+  console.log(req.body);
+  try {
+    const printerServiceInstance = Container.get(PrinterService);
+    const printers = await printerServiceInstance.findByPrinters({ ...req.body });
+    return res.status(200).json({ message: 'fetched succesfully', data: printers });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const affectPrinters = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const user_code = req.body.user_code;
+    const printers = req.body.printers;
+    console.log(typeof req.body.printers);
+    const printerServiceInstance = Container.get(PrinterService);
+    for (let p of printers) {
+      const printer = await printerServiceInstance.affectPrinter({
+        usrd_code: user_code,
+        printer_code: p.printer_code,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+    }
+    return res.status(200).json({ message: 'create succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findAll,
+  affectPrinters,
+  findBy,
 };

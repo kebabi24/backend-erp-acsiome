@@ -194,14 +194,13 @@ declare global {
     export type TransportcostModel = S.Model;
     export type CostlistModel = S.Model;
     export type CostlistDetailModel = S.Model;
-    
-    // PROMOTION 
+    export type UserPrinterModel = S.Model;
+
+    // PROMOTION
     export type populationArticleModel = S.Model;
     export type promotionModel = S.Model;
     export type advantageModel = S.Model;
 
     export type AccountUnplanifedModel = S.Model;
-    
-
   }
 }

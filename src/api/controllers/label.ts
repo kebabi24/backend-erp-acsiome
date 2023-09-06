@@ -84,7 +84,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .text('N° Lot:' + req.body.lb_lot, 20, 253)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('GROUPE:' + 'LBL001', 20, 278);
+      .text('GROUPE:' + req.body.lb_nbr, 20, 278);
 
     // Define the third rectangle and its text lines
     doc
@@ -92,7 +92,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:', 20, 320)
+      .text('BARCODE:' + req.body.lb_ref, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -100,7 +100,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: labelId, // Barcode data
+        text: req.body.lb_ref, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -126,7 +126,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     );
 
     const filePath = './output12.pdf';
-    const printerName = 'Xprinter XP-TT426B';
+    const printerName = req.body.lb_printer;
 
     printer
       .print(filePath, { printer: printerName })
@@ -192,13 +192,13 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PRODUIT : ', 20, 90)
+      .text('PRODUIT : ' + req.body.lb_desc, 20, 90)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('QTE :', 20, 115)
+      .text('QTE :' + req.body.lb_qty, 20, 115)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('N° LOT :', 20, 140);
+      .text('N° LOT :' + req.body.lb_lot, 20, 140);
 
     // Define the second rectangle and its text lines
     doc
@@ -209,10 +209,10 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .text('PAR :', 20, 180)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('DATE DE RECEPTION :', 20, 203)
+      .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 203)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PAL N° :', 20, 228);
+      .text('PAL N° :' + req.body.lb_nbr, 20, 228);
 
     // Define the third rectangle and its text lines
     doc
@@ -220,7 +220,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:', 20, 320)
+      .text('BARCODE:' + req.body.lb_ref, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -228,7 +228,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: 'barcode1', // Barcode data
+        text: req.body.lb_ref, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -253,17 +253,17 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       },
     );
 
-    // const filePath = './output.pdf';
-    // const printerName = 'Xprinter XP-TT426B';
+    const filePath = './output.pdf';
+    const printerName = req.body.lb_printer;
 
-    // printer
-    //   .print(filePath, { printer: printerName })
-    //   .then(() => {
-    //     console.log('Printing completed.');
-    //   })
-    //   .catch(error => {
-    //     console.error('Error while printing:', error);
-    //   });
+    printer
+      .print(filePath, { printer: printerName })
+      .then(() => {
+        console.log('Printing completed.');
+      })
+      .catch(error => {
+        console.error('Error while printing:', error);
+      });
     return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
@@ -317,13 +317,13 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PRODUIT : ', 20, 90)
+      .text('PRODUIT : ' + req.body.lb_desc, 20, 90)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('QTE :', 20, 115)
+      .text('QTE :' + req.body.lb_qty, 20, 115)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('N° LOT :', 20, 140);
+      .text('N° LOT :' + req.body.lb_lot, 20, 140);
 
     // Define the second rectangle and its text lines
     doc
@@ -334,10 +334,10 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       .text('PAR :', 20, 180)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('DATE DE RECEPTION :', 20, 203)
+      .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 203)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PAL N° :', 20, 228);
+      .text('PAL N° :' + req.body.lb_nbr, 20, 228);
 
     // Define the third rectangle and its text lines
     doc
@@ -345,7 +345,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:', 20, 320)
+      .text('BARCODE:' + req.body.lb_ref, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -353,7 +353,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: 'barcode1', // Barcode data
+        text: req.body.lb_ref, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -379,7 +379,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     );
 
     const filePath = './output.pdf';
-    const printerName = 'Xprinter XP-TT426B';
+    const printerName = req.body.lb_printer;
 
     printer
       .print(filePath, { printer: printerName })
