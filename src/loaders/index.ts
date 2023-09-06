@@ -81,6 +81,7 @@ export default async ({ expressApp }) => {
       { name: 'bankDetailModel', model: require('../models/bank-detail').default },
       { name: 'accountReceivableDetailModel', model: require('../models/account-receivable-detail').default },
       { name: 'accountShiperModel', model: require('../models/account-shiper').default },
+      { name: 'accountUnplanifedModel', model: require('../models/account-unplanifed').default },
       { name: 'voucherOrderModel', model: require('../models/voucher-order').default },
       { name: 'voucherOrderDetailModel', model: require('../models/voucher-order-detail').default },
       { name: 'accountPayableModel', model: require('../models/account-payable').default },
@@ -765,6 +766,15 @@ export default async ({ expressApp }) => {
     targetKey: 'cm_addr',
   });
 
+  require('../models/provider').default.hasOne(require('../models/account-unplanifed').default, {
+    foreignKey: 'au_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/account-unplanifed').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'au_vend',
+    targetKey: 'vd_addr',
+  });
+
   require('../models/provider').default.hasOne(require('../models/voucher-order').default, {
     foreignKey: 'vh_vend',
     sourceKey: 'vd_addr',
@@ -988,24 +998,24 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
 
-  // .sync({ alter: true })
-  // .then(() => {
-  //   console.log('database updated');
-  // })
-  // .catch(err => {
-  //   console.log(err);
-  // });
+  //    .sync({ alter: true })
+  //    .then(() => {
+  //      console.log('database updated');
+  //    })
+  //    .catch(err => {
+  //      console.log(err);
+  //    });
 
-  await sequelizeConnection
-    .sync({ alter: true })
-    .then(() => {
-      console.log('database updated');
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  //  await sequelizeConnection
+  //    .sync({ alter: true })
+  //    .then(() => {
+  //      console.log('database updated');
+  //    })
+  //    .catch(err => {
+  //      console.log(err);
+  //    });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

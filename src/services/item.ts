@@ -59,6 +59,17 @@ export default class ItemService {
     }
   }
 
+  public async findAll(): Promise<any> {
+    try {
+      const items = await this.itemModel.findAll({ attributes: ['id']});
+      this.logger.silly('findAll items mstr');
+      return items;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async findOnedesc(query: any): Promise<any> {
     try {
       const item = await this.itemModel.findOne({

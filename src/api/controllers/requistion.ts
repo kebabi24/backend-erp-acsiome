@@ -1,8 +1,9 @@
 import RequisitionService from "../../services/requisition"
 import RequisitionDetailService from "../../services/requisition-detail"
-
+import SequenceService from "../../services/sequence"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
+import { Op } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -173,7 +174,51 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
+const findAllApp = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        let result=[]
+        const sequenceServiceInstance = Container.get(SequenceService)
+        const requisitionServiceInstance = Container.get(RequisitionService)
+        const requisitionDetailServiceInstance = Container.get(
+            RequisitionDetailService
+        )
+        const sequences = await sequenceServiceInstance.find({
+            seq_domain:user_domain, seq_type: "RQ",
+            [Op.or]: [
+                { seq_appr1: user_code },
+                { seq_appr2: user_code },
+                { seq_appr3 : user_code}
+              ],
+            
+           
+        
+        })
+        let list = []
+        for (let seq of sequences) {
+            list.push(seq.seq_seq)
+        }
+        console.log(user_code)
+console.log(list)
+        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
+        for(const req of requisitions){
+            const details = await requisitionDetailServiceInstance.find({
+                rqd_domain: user_domain,
+                rqd_nbr: req.rqm_nbr,
+            })
+            result.push({id: req.id ,req, details})
+        }
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -235,6 +280,7 @@ export default {
     findBy,
     findOne,
     findAll,
+    findAllApp,
     update,
     updatedet,
     findByAll,

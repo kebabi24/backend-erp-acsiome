@@ -1,4 +1,5 @@
 import { Service, Inject } from "typedi"
+import { Op, Sequelize } from 'sequelize';
 import argon2 from 'argon2'
 var Crypto = require('crypto');
 @Service()
@@ -229,8 +230,8 @@ export default class UserMobileService {
     public async getService(query: any): Promise<any> {
         try {
             
-                const service = await this.serviceModel.findOne({ where: query})
-                return service.dataValues;
+            const service = await this.serviceModel.findOne({ where: query})
+            return service;
              
         } catch (e) {
             console.log('Error from service-getService')
@@ -730,10 +731,23 @@ export default class UserMobileService {
             });
             const products = await this.itemModel.findAll(
                 
-                { where: {pt_part : productsCodes},
+                { 
+                    where: {
+                        pt_part : productsCodes,
+                        // $or:[ 
+                        //     {pt_salable : true},
+                        //     {pt_inventoryable : true},
+                        //     {pt_consignable : true},
+                        //     {pt_returnable : true},
+                        //     {pt_orderable : true},
+                        //     {pt_loadable : true},
+                        //     {pt_promotion : true}      
+                        // ]
+                    },
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
-                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking','pt_rollup']
+                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking','pt_rollup',
+                    'pt_salable','pt_inventoryable','pt_consignable','pt_returnable','pt_orderable','pt_loadable','pt_promotion']
                     },
                 ) 
                 
@@ -918,6 +932,8 @@ export default class UserMobileService {
             throw e
         }
     }
+
+     
 // ******************** GET ALL INVOICE     **************************
     public async getAllInvoice(query: any): Promise<any> {
         try {
@@ -1202,8 +1218,129 @@ export default class UserMobileService {
             throw e
         }
     }
+
+
+     
+
+    // ******************** GET SERVICES **************************
+    public async getServices(startDate: any , endDate : any): Promise<any> {
+        try {
+            
+                const services = await this.serviceModel.findAll({ where:
+                     Sequelize.and(
+                    // {del_comp  :{[Op.not]: "null"}},
+                    { service_period_activate_date: { [Op.gte]: new Date(startDate) } },
+                    { service_period_activate_date: { [Op.lte]: new Date(endDate) } },
+                  ),})
+                return services;
+             
+        } catch (e) {
+            console.log('Error from getServices')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** GET SERVICES **************************
+     public async getInvoices(startDate: any , endDate : any , attributes : any): Promise<any> {
+        try {
+            const invoices = await this.invoiceModel.findAll({ where:
+                Sequelize.and(
+                    { period_active_date: { [Op.gte]: new Date(startDate) } },
+                    { period_active_date: { [Op.lte]: new Date(endDate) } },
+                    ),
+                
+                attributes :attributes
+                 })
+                return invoices;
+             
+        } catch (e) {
+            console.log('Error from getInvoices')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET CUSTOMERS **************************
+    public async getCustomerBy(query: any): Promise<any> {
+        try {
+            
+            const customer = await this.customerMobileModel.findOne({
+                where: query,  
+            })  
+
+            return customer;
+        } catch (e) {
+            console.log('Error from service-getCustomerBy')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET INVOICE LINE WITH SELECTED FIELDS query   **************************
+    public async getInvoiceLineByWithSelectedFields(query: any , attributes : any): Promise<any> {
+        try {
+            const invoice_line = await this.invoiceLineModel.findAll({
+                query,
+                attributes :attributes
+            })
+            return invoice_line
+        } catch (e) {
+            console.log('Error from service- getInvoiceLine')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    public async getPaymentsByDates(startDate: any , endDate : any , attributes : any): Promise<any> {
+        try {
+            const payments = await this.paymentModel.findAll({ where:
+                Sequelize.and(
+                    { the_date: { [Op.gte]: new Date(startDate) } },
+                    { the_date: { [Op.lte]: new Date(endDate) } },
+                    ),
+                
+                  attributes :attributes
+                 })
+                return payments;
+             
+        } catch (e) {
+            console.log('Error from getPaymentsByDates')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    // ******************** GET PRODUCT PAGES DETAILS  **************************
+    public async getProductType(product_code: any): Promise<any> {
+        try {
+            
+            const products = await this.itemModel.findOne(
+                
+                { 
+                    where: {
+                        pt_part : product_code,
+                        
+                    },
+                    attributes: ['pt_part_type']
+                    },
+                ) 
+                
+            return products;
+        } catch (e) {
+            console.log('Error from getProductType - service ')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+    
+    
+
    
 }
+
+
 
 function encrypt_string(plain_text, encryptionMethod, secret, iv) {
     var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);

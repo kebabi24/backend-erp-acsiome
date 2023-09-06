@@ -93,6 +93,7 @@ const InvoiceOrderTemp = sequelize.define(
 		ith_pst: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ith_fst_id: Sequelize.STRING,
 		ith_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
+		ith_tot_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_tax_amt:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_trl1_amt: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_trl1_cd: Sequelize.STRING,
@@ -210,7 +211,12 @@ const InvoiceOrderTemp = sequelize.define(
 		ith_fsdef_cc: Sequelize.STRING,
 		ith_manual_fr_terms: {type: Sequelize.BOOLEAN, defaultValue : false  },
 		ith_req_time: Sequelize.STRING,
+		
+		ith_disc_glb:  {type: Sequelize.DECIMAL, defaultValue : 0  },
+		ith_transport: {type: Sequelize.DECIMAL, defaultValue : 0  },
+		ith_rt_gara:  {type: Sequelize.DECIMAL, defaultValue : 0  },
 		ith_domain: Sequelize.STRING,
+
 		oid_ith_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 		...base,
 			},

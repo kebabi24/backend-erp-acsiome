@@ -36,7 +36,16 @@ export default class sequenceService {
       throw e;
     }
   }
-
+  public async findSpec(query: any): Promise<any> {
+    try {
+      const sequences = await this.sequenceModel.findAll(query);
+      this.logger.silly('find All sequences mstr');
+      return sequences;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async update(data: any, query: any): Promise<any> {
     try {
       const sequence = await this.sequenceModel.update(data, { where: query });
