@@ -33,16 +33,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
     );
-    // const label = await labelServiceInstance.create({
-    //   ...req.body,
-    //   lb_ref: labelId,
-    //   lb_cab: labelId,
-    //   lb_domain: user_domain,
-    //   created_by: user_code,
-    //   created_ip_adr: req.headers.origin,
-    //   last_modified_by: user_code,
-    //   last_modified_ip_adr: req.headers.origin,
-    // });
+    const label = await labelServiceInstance.create({
+      ...req.body,
+      lb_ref: labelId,
+      lb_cab: labelId,
+      lb_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
 
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -100,7 +100,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: 'PL-4', // Barcode data
+        text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -136,7 +136,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .catch(error => {
         console.error('Error while printing:', error);
       });
-    return res.status(201).json({ message: 'created succesfully', data: true });
+    return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);

@@ -299,6 +299,7 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
           ...it,
           wo_domain: user_domain,
           wo_nbr: nof,
+          wo_type : "BR",
           wo_status: "R",
           created_by: user_code,
           created_ip_adr: req.headers.origin,
@@ -837,7 +838,130 @@ sf[sfid].prod_qty = sf[sfid].ord_qty +  ord.total_qty * p.ps_qty_per
     return next(e);
   }
 };
+const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const {site,date,date1} = req.body;
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const wos = await workOrderServiceInstance.find({ wo_rel_date : { [Op.between]: [date, date1]} , wo_site: site, wo_type : "BR",wo_domain: user_domain});
+    console.log("wos",wos.length)
+    let result = []
+    let i = 1
+    let obj
+    for(let wo of wos) {
+      const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
+      const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+      console.log(rctwo.length)
+    for (let tr of rctwo) {
 
+      console.log(tr.item.pt_part)
+    } 
+      if(rctwo.length > isswo.length) {
+
+        for (var j=0;j< rctwo.length; j++) {
+          if(j < isswo.length) {
+             obj = {
+              id:i,
+              date: (j==0) ? wo.wo_rel_date : "",
+              equipe: (j==0) ?  wo.wo__chr01 : "",
+              gamme: (j==0) ? wo.wo_routing : "",
+              nbr: (j==0) ?  wo.wo_nbr: "",
+              rctpart: rctwo[j].item.pt_desc1,
+              rctcolor: rctwo[j].item.pt_break_cat,
+              rctqty : rctwo[j].tr_qty_loc,
+              rctserial : rctwo[j].tr_serial,
+              rctpal : rctwo[j].tr_ref,
+              isspart: isswo[j].item.pt_desc1,
+              isscolor: isswo[j].item.pt_break_cat,
+              issorigin: isswo[j].item.pt_origin,
+              issqty : -isswo[j].tr_qty_loc,
+              issserial : isswo[j].tr_serial,
+              isspal : isswo[j].tr_ref,
+            }
+          } else {
+             obj = {
+              id:i,
+              date: (j==0) ? wo.wo_rel_date : "",
+              equipe: (j==0) ?  wo.wo__chr01 : "",
+              gamme: (j==0) ? wo.wo_routing : "",
+              nbr: (j==0) ?  wo.wo_nbr: "",
+              rctpart: rctwo[j].item.pt_desc1,
+              rctcolor: rctwo[j].item.pt_break_cat,
+              rctqty : rctwo[j].tr_qty_loc,
+              rctserial : rctwo[j].tr_serial,
+              rctpal : rctwo[j].tr_ref,
+              isspart: "",
+              isscolor: "",
+              issorigin: "",
+              issqty : "",
+              issserial : "",
+              isspal : "",
+            }
+          }
+          result.push(obj)
+          i = i + 1
+        }
+
+      } else {
+        for (var j = 0;j < isswo.length; j++) {
+         
+          if(j < rctwo.length) {
+             obj = {
+              id:i,
+              date: (j==0) ? wo.wo_rel_date : "",
+              equipe: (j==0) ?  wo.wo__chr01 : "",
+              gamme: (j==0) ? wo.wo_routing : "",
+              nbr: (j==0) ?  wo.wo_nbr: "",
+              rctpart: rctwo[j].item.pt_desc1,
+              rctcolor: rctwo[j].item.pt_break_cat,
+              rctqty : rctwo[j].tr_qty_loc,
+              rctserial : rctwo[j].tr_serial,
+              rctpal : rctwo[j].tr_ref,
+              isspart: isswo[j].item.pt_desc1,
+              isscolor: isswo[j].item.pt_break_cat,
+              issorigin: isswo[j].item.pt_origin,
+              issqty : -isswo[j].tr_qty_loc,
+              issserial : isswo[j].tr_serial,
+              isspal : isswo[j].tr_ref,
+            }
+          } else {
+             obj = {
+              id:i,
+              date: (j==0) ? wo.wo_rel_date : "",
+              equipe: (j==0) ?  wo.wo__chr01 : "",
+              gamme: (j==0) ? wo.wo_routing : "",
+              nbr: (j==0) ?  wo.wo_nbr: "",
+              rctpart: "",
+              rctcolor: "",
+              rctqty : "",
+              rctserial : "",
+              rctpal : "",
+              isspart: isswo[j].item.pt_desc1,
+              isscolor: isswo[j].item.pt_break_cat,
+              issorigin: isswo[j].item.pt_origin,
+              issqty : -isswo[j].tr_qty_loc,
+              issserial : isswo[j].tr_serial,
+              isspal : isswo[j].tr_ref,
+            }
+          }
+          result.push(obj)
+          i = i + 1
+        }
+
+      }
+
+    }
+    
+    console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 
 
@@ -856,5 +980,6 @@ export default {
   CalcCost,
   CalcCostWo,
   findBywo,
+  findByRPBR,
 
 };
