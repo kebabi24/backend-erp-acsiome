@@ -60,7 +60,9 @@ export default class UserService {
     }
   }
   public async updated(data: any, query: any): Promise<any> {
-    const usrd_pwd = await argon2.hash(data.usrd_pwd);
+  // console.log("data",data.usrd_pwd)
+    if(data.usrd_pwd != undefined && data.usrd_pwd != null ) {
+   const usrd_pwd = await argon2.hash(data.usrd_pwd);
 
     try {
       const user = await this.userModel.update(
@@ -75,6 +77,22 @@ export default class UserService {
       this.logger.error(e);
       throw e;
     }
+  }
+  else {
+    try {
+      const user = await this.userModel.update(
+        { ...data },
+        {
+          where: query,
+        },
+      );
+      this.logger.silly('update one tool mstr');
+      return user;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   }
   public async delete(query: any): Promise<any> {
     try {

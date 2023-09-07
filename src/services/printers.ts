@@ -41,16 +41,16 @@ export default class printerService {
     }
   }
 
-  public async find(query: any): Promise<any> {
-    try {
-      const users = await this.userModel.findAll({ where: query });
-      this.logger.silly('find All users mstr');
-      return users;
-    } catch (e) {
-      this.logger.error(e);
-      throw e;
-    }
-  }
+  // public async find(query: any): Promise<any> {
+  //   try {
+  //     const users = await this.userModel.findAll({ where: query });
+  //     this.logger.silly('find All users mstr');
+  //     return users;
+  //   } catch (e) {
+  //     this.logger.error(e);
+  //     throw e;
+  //   }
+  // }
 
   public async affectPrinter(data: any): Promise<any> {
     try {
