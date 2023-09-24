@@ -202,11 +202,12 @@ const findByTimeproject = async (req: Request, res: Response, next: NextFunction
         const empTimeServiceInstance = Container.get(EmployeTimeService)
         const affectEmployeServiceInstance = Container.get(AffectEmployeService)
         const employe = await employeServiceInstance.find({emp_shift:req.body.emp_shift,emp_domain:user_domain})
+        console.log("empl",employe)
         let result=[]
         let i = 1
         if(req.body.site !=null && req.body.site != "") { 
             for(let emp of employe) {
-            
+            console.log("herrrrrrrrrrrrrrrrrrrre", emp.emp_addr)
                 const affectemp = await affectEmployeServiceInstance.findOne({pme_domain:user_domain,pme_employe:emp.emp_addr, pme_site: req.body.site,
                     pme_start_date: {
                         [Op.lte]: req.body.date,
@@ -216,6 +217,7 @@ const findByTimeproject = async (req: Request, res: Response, next: NextFunction
                     },
 
                 })
+                console.log("affect",affectemp)
                 if (affectemp) {
                 const empTime = await empTimeServiceInstance.findOne({empt_domain:user_domain,empt_code:emp.emp_addr, empt_date: req.body.date})
                 // const stat  = (empTime != null) ? empTime.empt_stat : null
@@ -295,6 +297,7 @@ const findByJob = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const empJobServiceInstance = Container.get(EmployeJobService);
     const employeJob = await empJobServiceInstance.find({ ...req.body, empj_domain: user_domain });
+    console.log(employeJob)
     return res.status(200).json({ message: 'fetched succesfully', data: employeJob });
   } catch (e) {
     logger.error('🔥 error: %o', e);

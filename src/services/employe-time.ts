@@ -5,6 +5,8 @@ export default class EmployeTimeService {
     constructor(
         @Inject("employeTimeModel")
         private employeTimeModel: Models.EmployeTimeModel,
+        @Inject('employeModel')
+        private employeModel: Models.EmployeModel,
         @Inject("logger") private logger
     ) {}
 
@@ -35,7 +37,7 @@ export default class EmployeTimeService {
     public async find(query: any): Promise<any> {
         try {
             const employes = await this.employeTimeModel.findAll({
-                where: query,
+                where: query, include: this.employeModel
                 
             })
             this.logger.silly("find All employes mstr")
