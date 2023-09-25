@@ -322,6 +322,167 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const imputProject = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const date = new Date();
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    console.log(req.body);
+    const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
+    const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
+    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
+    const payMethServiceInstance = Container.get(PayMethService);
+    const payMethDetailServiceInstance = Container.get(PayMethDetailService);
+    const generalLedgerServiceInstance = Container.get(GeneralLedgerService);
+    const accountReceivableServiceInstance = Container.get(AccountReceivableService);
+    const { invoiceOrder, invoiceOrderDetail, gldetail } = req.body;
+
+    const ih = await invoiceOrderServiceInstance.create({
+      ...invoiceOrder,
+      ih_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    for (let entry of invoiceOrderDetail) {
+      entry = {
+        ...entry,
+        idh_domain: user_domain,
+        idh_inv_nbr: ih.ih_inv_nbr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await invoiceOrderDetailServiceInstance.create(entry);
+    }
+
+    const PayMeth = await payMethServiceInstance.findOne({
+      ct_domain: user_domain,
+      ct_code: invoiceOrder.ih_cr_terms,
+    });
+
+    if (PayMeth) {
+      const details = await payMethDetailServiceInstance.find({
+        ctd_domain: user_domain,
+        ctd_code: PayMeth.ct_code,
+      });
+
+      for (let det of details) {
+        const effdate = new Date(invoiceOrder.ih_inv_date);
+        effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
+
+        await accountReceivableServiceInstance.create({
+          ar_domain: user_domain,
+          ar_nbr: ih.ih_inv_nbr,
+          ar_effdate: invoiceOrder.ih_inv_date,
+          ar_due_date: effdate,
+          ar_date: new Date(),
+          ar_type: 'I',
+          ar_cust: invoiceOrder.ih_cust,
+          ar_bill: invoiceOrder.ih_bill,
+          ar_rmks: invoiceOrder.ih_rmks,
+          ar_cr_terms: invoiceOrder.ih_cr_terms,
+          ar_open: true,
+          ar_applied: 0,
+          ar_base_applied: 0,
+          ar_curr: invoiceOrder.ih_curr,
+          ar_ex_rate: invoiceOrder.ih_ex_rate,
+          ar_ex_rate2: invoiceOrder.ih_ex_rate2,
+          ar_amt:
+            ((Number(invoiceOrder.ih_tot_amt)) * Number(det.ctd_pct)) / 100,
+          ar_base_amt:
+            ((((Number(invoiceOrder.ih_tot_amt)) *
+              Number(invoiceOrder.ar_ex_rate2)) /
+              Number(invoiceOrder.ar_ex_rate)) *
+              Number(det.ctd_pct)) / 100,
+          created_by: user_code,
+          last_modified_by: user_code,
+        });
+      }
+    } else {
+      await accountReceivableServiceInstance.create({
+        ar_domain: user_domain,
+        ar_nbr: ih.ih_inv_nbr,
+        ar_effdate: invoiceOrder.ih_inv_date,
+        ar_due_date: invoiceOrder.ih_due_date,
+        ar_date: new Date(),
+        ar_type: 'I',
+        ar_cust: invoiceOrder.ih_cust,
+        ar_bill: invoiceOrder.ih_bill,
+        ar_rmks: invoiceOrder.ih_rmks,
+        ar_cr_terms: invoiceOrder.ih_cr_terms,
+        ar_open: true,
+        ar_applied: 0,
+        ar_base_applied: 0,
+        ar_curr: invoiceOrder.ih_curr,
+        ar_ex_rate: invoiceOrder.ih_ex_rate,
+        ar_ex_rate2: invoiceOrder.ih_ex_rate2,
+        ar_amt: Number(invoiceOrder.ih_tot_amt),
+        ar_base_amt:
+          ((Number(invoiceOrder.ih_tot_amt)) *
+            Number(invoiceOrder.ar_ex_rate2)) /
+          Number(invoiceOrder.ar_ex_rate),
+        created_by: user_code,
+        last_modified_by: user_code,
+      });
+    }
+
+    /***************GL ************
+    const gl = await generalLedgerServiceInstance.findLastId({ glt_date: date, glt_domain: user_domain });
+    if (gl) {
+      var seq = gl.glt_ref.substring(10, 18);
+      var d = Number(seq) + 1;
+
+      var seqchar = ('000000' + d).slice(-6);
+
+      var ref = 'SO' + moment().format('YYYYMMDD') + seqchar;
+    } else {
+      var ref = 'SO' + moment().format('YYYYMMDD') + '000001';
+      // return year +  month + day;
+    }
+    const effdate = new Date(invoiceOrder.ih_inv_date);
+    for (let entry of gldetail) {
+      console.log(entry);
+      await generalLedgerServiceInstance.create({
+        ...entry,
+        glt_ref: ref,
+        glt_domain: user_domain,
+        glt_addr: invoiceOrder.ih_bill,
+        glt_curr: invoiceOrder.ih_curr,
+        glt_tr_type: 'SO',
+        //glt_dy_code: invoiceOrder.ap_dy_code,
+        glt_ex_rate: invoiceOrder.ih_ex_rate,
+        glt_ex_rate2: invoiceOrder.ih_ex_rate2,
+        glt_doc: invoiceOrder.ih_inv_nbr,
+        glt_effdate: invoiceOrder.ih_inv_date,
+        glt_year: effdate.getFullYear(),
+
+        //glt_curr_amt: (Number(entry.glt_amt)) * Number(invoiceOrder.ap_ex_rate2) /  Number(invoiceOrder.ap_ex_rate)   ,
+        glt_date: date,
+        created_by: user_code,
+        last_modified_by: user_code,
+      });
+    }
+    **************GL *************/
+    const ith = await invoiceOrderTempServiceInstance.findOne({ ith_inv_nbr: ih.ih_inv_nbr, ith_domain: user_domain });
+    if (ith)
+      await invoiceOrderTempServiceInstance.update(
+        { ith_invoiced: true, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { id: ith.id },
+      );
+
+    return res.status(201).json({ message: 'created succesfully', data: ih });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
@@ -468,6 +629,7 @@ export default {
   create,
   createIV,
   imput,
+  imputProject,
   findBy,
   findByAll,
   findOne,

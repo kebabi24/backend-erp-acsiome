@@ -464,20 +464,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         /****print label**** */
       }
     }
-    const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend, ad_domain: user_domain });
-    //console.log("\n\n req body : ", req.body)
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend, ad_domain: user_domain });
+    // //console.log("\n\n req body : ", req.body)
 
-    const { detail, pr, prhnbr } = req.body;
-    const pdfData = {
-      pr: pr,
-      detail: detail,
-      prhnbr: prhnbr,
-      adr: addr,
-    };
+    // const { detail, pr, prhnbr } = req.body;
+    // const pdfData = {
+    //   pr: pr,
+    //   detail: detail,
+    //   prhnbr: prhnbr,
+    //   adr: addr,
+    // };
 
     //Console.log("\n\n pdf data", pdfData)
-    const pdf = await generatePdf(pdfData, 'prh');
+//    const pdf = await generatePdf(pdfData, 'prh');
     // const devise = await purchaseReceiveServiceInstance.create(req.body)
     return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
   } catch (e) {
@@ -779,20 +779,20 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
       //   /****print label**** */
       // }
     }
-    const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend, ad_domain: user_domain });
-    //console.log("\n\n req body : ", req.body)
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_addr: req.body.pr.prh_vend, ad_domain: user_domain });
+    // //console.log("\n\n req body : ", req.body)
 
-    const { detail, pr, prhnbr } = req.body;
-    const pdfData = {
-      pr: pr,
-      detail: detail,
-      prhnbr: prhnbr,
-      adr: addr,
-    };
+    // const { detail, pr, prhnbr } = req.body;
+    // const pdfData = {
+    //   pr: pr,
+    //   detail: detail,
+    //   prhnbr: prhnbr,
+    //   adr: addr,
+    // };
 
-    //Console.log("\n\n pdf data", pdfData)
-    const pdf = await generatePdf(pdfData, 'prh');
+    // //Console.log("\n\n pdf data", pdfData)
+    // const pdf = await generatePdf(pdfData, 'prh');
     // const devise = await purchaseReceiveServiceInstance.create(req.body)
     return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
   } catch (e) {
