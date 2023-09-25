@@ -199,6 +199,7 @@ declare global {
     export type populationArticleModel = S.Model;
     export type promotionModel = S.Model;
     export type advantageModel = S.Model;
+    export type populationClientPromoModel = S.Model;
 
     export type AccountUnplanifedModel = S.Model;
     
