@@ -6,11 +6,13 @@ import SaleOrderDetailService from '../../services/saleorder-detail';
 import DealService from '../../services/deal';
 import itemService from '../../services/item';
 import CustomerService from '../../services/customer';
+import PsService from '../../services/ps';
 import AffectEmployeService from '../../services/affect-employe';
 import TaskDetailService from '../../services/task-detail';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
+import toolDetailService from '../../services/tool-detail';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -77,89 +79,86 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         console.log(tk);
         await projectTaskDetailServiceInstance.create({ ...tk, pmt_code: Project.pm_code, pmt_inst: entry.pmd_task });
       }
-
-
     }
-       /*so*/
-       let cr_terms : String
-       const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
-       cr_terms = customer.cm_cr_terms
- 
- if(Project.pm_deal != null) {
-       const deal = await dealServiceInstance.findOne({deal_code: Project.pm_deal});
- 
- cr_terms = deal.deal_pay_meth
- }
- 
- let SaleOrder ={
- so_category : "SO",
- so_cust : Project.pm_cust,
- so_ord_date : Project.pm_ord_date,
- so_due_date : Project.pm_ord_date,
- so_po : Project.pm_code,
- so_amt : Project.pm_amt,
- so_cr_terms : cr_terms,
- so_curr : customer.cm_curr,
- so_taxable : customer.address.ad_taxable,
- so_taxc : customer.address.ad_taxc,
- so_ex_rate : 1,
- so_ex_rate2 : 1,
- }
-       let sodataset=[]
-      let type: String
- for (let data of ProjectDetails) {
-   const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
-       if (pt.pt_phantom) {
-         type = "M";
-       } else {
-         type = null;
-       }
+    /*so*/
+    let cr_terms: String;
+    const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
+    cr_terms = customer.cm_cr_terms;
+
+    if (Project.pm_deal != null) {
+      const deal = await dealServiceInstance.findOne({ deal_code: Project.pm_deal });
+
+      cr_terms = deal.deal_pay_meth;
+    }
+
+    let SaleOrder = {
+      so_category: 'SO',
+      so_cust: Project.pm_cust,
+      so_ord_date: Project.pm_ord_date,
+      so_due_date: Project.pm_ord_date,
+      so_po: Project.pm_code,
+      so_amt: Project.pm_amt,
+      so_cr_terms: cr_terms,
+      so_curr: customer.cm_curr,
+      so_taxable: customer.address.ad_taxable,
+      so_taxc: customer.address.ad_taxc,
+      so_ex_rate: 1,
+      so_ex_rate2: 1,
+    };
+    let sodataset = [];
+    let type: String;
+    for (let data of ProjectDetails) {
+      const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
+      if (pt.pt_phantom) {
+        type = 'M';
+      } else {
+        type = null;
+      }
       sodataset.push({
-         sod_line: data.pmd_line,
-         sod_part: pt.pt_part,
-         sod_um: pt.pt_um,
-         sod__chr01: data.pmd_task,
-         sod__chr02: data.pmd_bom_code,
-         sod_qty_ord: data.pmd_qty,
-         sod_qty_ret: data.int01,
-         sod_qty_cons: 0,
-         sod_desc: pt.pt_desc1,
-         sod_site: pt.pt_site,
-         sod_loc: pt.pt_loc,
-         sod_um_conv: 1,
-         sod_type: type,
-         sod_price: pt.pt_price,
-         sod_disc_pct: 0,
-         sod_tax_code: pt.pt_taxc,
-         sod_taxc: pt.taxe.tx2_tax_pct,
-         sod_taxable: pt.pt_taxable,
-       });
-    
-   }
- 
-   const so = await saleOrderServiceInstance.create({
-     ...SaleOrder,
-     so_domain: user_domain,
-     created_by: user_code,
-     created_ip_adr: req.headers.origin,
-     last_modified_by: user_code,
-     last_modified_ip_adr: req.headers.origin,
-   });
-   for (let entry of sodataset) {
-     entry = {
-       ...entry,
-       sod_domain: user_domain,
-       sod_nbr: so.so_nbr,
-       created_by: user_code,
-       created_ip_adr: req.headers.origin,
-       last_modified_by: user_code,
-       last_modified_ip_adr: req.headers.origin,
-     };
-     await saleOrderDetailServiceInstance.create(entry);
-   }
- 
- /*so*/
- 
+        sod_line: data.pmd_line,
+        sod_part: pt.pt_part,
+        sod_um: pt.pt_um,
+        sod__chr01: data.pmd_task,
+        sod__chr02: data.pmd_bom_code,
+        sod_qty_ord: data.pmd_qty,
+        sod_qty_ret: data.int01,
+        sod_qty_cons: 0,
+        sod_desc: pt.pt_desc1,
+        sod_site: pt.pt_site,
+        sod_loc: pt.pt_loc,
+        sod_um_conv: 1,
+        sod_type: type,
+        sod_price: pt.pt_price,
+        sod_disc_pct: 0,
+        sod_tax_code: pt.pt_taxc,
+        sod_taxc: pt.taxe.tx2_tax_pct,
+        sod_taxable: pt.pt_taxable,
+      });
+    }
+
+    const so = await saleOrderServiceInstance.create({
+      ...SaleOrder,
+      so_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    for (let entry of sodataset) {
+      entry = {
+        ...entry,
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await saleOrderDetailServiceInstance.create(entry);
+    }
+
+    /*so*/
+
     return res.status(201).json({ message: 'created succesfully', data: pj });
   } catch (e) {
     //#
@@ -192,8 +191,6 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         message: 'fetched succesfully',
         data: { project, details },
       });
-
-
     } else {
       return res.status(200).json({
         message: 'not FOund',
@@ -209,20 +206,70 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 const findByTask = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   console.log(req.body);
+  let details2: any;
+  let details3: any;
   logger.debug('Calling find by  all project endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   try {
     const projectTaskDetailServiceInstance = Container.get(ProjectTaskDetailService);
-    console.log('req body', req.body);
+    const taskDetailServiceInstance = Container.get(TaskDetailService);
+    const toolDetailServiceInstance = Container.get(toolDetailService);
     const details = await projectTaskDetailServiceInstance.find({
       ...req.body,
       pmt_domain: user_domain,
     });
-    console.log(details);
+    for (let i of details) {
+      console.log(i);
+      const details = await toolDetailServiceInstance.find({
+        tod_code: i.pmt_tool,
+      });
+      details2 = details;
+    }
+
+    for (let i of details) {
+      console.log(i);
+      const details = await taskDetailServiceInstance.find({
+        tkd_code: i.pmt_inst,
+      });
+      details3 = details;
+    }
+
     return res.status(200).json({
       message: 'fetched succesfully',
-      data: { details },
+      data: { details, details2, details3 },
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findByPs = async (req: Request, res: Response, next: NextFunction) => {
+  let ps: any[] = [];
+  const logger = Container.get('logger');
+
+  logger.debug('Calling find by  all project endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const projectDetailServiceInstance = Container.get(ProjectDetailService);
+    const psServiceInstance = Container.get(PsService);
+
+    const details = await projectDetailServiceInstance.find({
+      ...req.body,
+      pmd_domain: user_domain,
+    });
+    for (let item of details) {
+      ps = await psServiceInstance.find({
+        ps_parent: item.pmd_bom_code,
+        ps_domain: user_domain,
+      });
+    }
+
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data: ps,
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -545,10 +592,114 @@ const getAssetDownTypes = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+const testDocxRevue = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling testDocx endpoint');
+
+  try {
+    let dataset = req.body.data.dataset;
+    let dataset2 = req.body.data.dataset2;
+    let dataset3 = req.body.data.dataset3;
+    let dataset4 = req.body.data.dataset4;
+    const PizZip = require('pizzip');
+    const Docxtemplater = require('docxtemplater');
+
+    const fs = require('fs');
+    const path = require('path');
+
+    // Load the docx file as binary content
+    const content = fs.readFileSync(path.resolve(__dirname, 'revue01.docx'), 'binary');
+
+    const zip = new PizZip(content);
+
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true,
+    });
+
+    // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
+    doc.render({
+      pm_code: req.body.data.pme.pm_code,
+      pm_type: req.body.data.pme.pm_type,
+      pm_date: req.body.data.pme.pm_ord_date,
+      pm_cust: req.body.data.pme.pm_cust,
+      pm_site: req.body.data.pme.pm_site,
+      dataset: dataset,
+      dataset2: dataset2,
+      dataset3: dataset3,
+      dataset4: dataset4,
+    });
+
+    const buf = doc.getZip().generate({
+      type: 'nodebuffer',
+      // compression: DEFLATE adds a compression step.
+      // For a 50MB output document, expect 500ms additional CPU time
+      compression: 'DEFLATE',
+    });
+
+    // buf is a nodejs Buffer, you can either write it to a
+    // file or res.send it with express for example.
+    fs.writeFileSync(path.resolve(__dirname, 'revueoutput.docx'), buf);
+    return res.status(200).json({ message: 'fetched succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const testDocxSuivi = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling testDocx endpoint');
+
+  try {
+    console.log(req.body);
+    const PizZip = require('pizzip');
+    const Docxtemplater = require('docxtemplater');
+
+    const fs = require('fs');
+    const path = require('path');
+
+    // Load the docx file as binary content
+    const content = fs.readFileSync(path.resolve(__dirname, 'suivi01.docx'), 'binary');
+
+    const zip = new PizZip(content);
+
+    const doc = new Docxtemplater(zip, {
+      paragraphLoop: true,
+      linebreaks: true,
+    });
+
+    // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
+    doc.render({
+      pm_code: req.body.data.pme.pm_code,
+      pm_type: req.body.data.pme.pm_type,
+      pm_date: req.body.data.pme.pm_ord_date,
+      pm_cust: req.body.data.pme.pm_cust,
+      pm_site: req.body.data.pme.pm_site,
+    });
+
+    const buf = doc.getZip().generate({
+      type: 'nodebuffer',
+      // compression: DEFLATE adds a compression step.
+      // For a 50MB output document, expect 500ms additional CPU time
+      compression: 'DEFLATE',
+    });
+
+    // buf is a nodejs Buffer, you can either write it to a
+    // file or res.send it with express for example.
+    fs.writeFileSync(path.resolve(__dirname, 'suivioutput.docx'), buf);
+    return res.status(200).json({ message: 'fetched succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findBy,
   findByTask,
+  findByPs,
   findOne,
   findAll,
   findAllBy,
@@ -562,4 +713,6 @@ export default {
   findInstructionsOfProject,
   createAssetDown,
   getAssetDownTypes,
+  testDocxRevue,
+  testDocxSuivi,
 };
