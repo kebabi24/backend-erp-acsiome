@@ -154,6 +154,45 @@ const getPopulationArticleByCode = async (req: Request, res: Response, next: Nex
     }
 }
 
+const getPopulationCustomerByCode = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getPopulationByCode endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+        const { code } = req.params;
+        console.log("hellloooo")
+        const populations = await promotionService.getPopulationCustomerByCode(code)
+   
+        return res
+            .status(200)
+            .json({ message: "population search results", data: populations  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
+  const createPopulationCustomer = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling get param categories endpoint")
+    try {
+        const promotionService = Container.get(PromotionService)
+        const populationData = req.body
+        
+        
+
+        const population = await promotionService.createPopulationCustomer(populationData)
+
+      
+        return res
+            .status(200)
+            .json({ message: "population created ", data: population  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+
 
 
 export default {
@@ -164,5 +203,7 @@ export default {
     findAdvantages,
     getPromoByCode,
     getAdvantageByCode,
-    getPopulationArticleByCode
+    getPopulationArticleByCode,
+    getPopulationCustomerByCode,
+    createPopulationCustomer,
 }

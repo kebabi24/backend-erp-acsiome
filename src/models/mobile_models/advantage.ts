@@ -21,7 +21,8 @@ const Advantage = sequelize.define(
         adv_type: {type: Sequelize.STRING}, 
         amount: {type: Sequelize.DOUBLE}, 
 
-        product_list : {type : Sequelize.STRING}
+        product_list : {type : Sequelize.STRING},
+        externe : {type : Sequelize.BOOLEAN},
     },
     {
         tableName: "aa_advantage",

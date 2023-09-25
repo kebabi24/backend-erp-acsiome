@@ -245,6 +245,7 @@ export default async ({ expressApp }) => {
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
+      { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
