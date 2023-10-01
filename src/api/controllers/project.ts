@@ -11,6 +11,7 @@ import TaskDetailService from '../../services/task-detail';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
+import LocationService from '../../services/location';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -28,6 +29,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const customerServiceInstance = Container.get(CustomerService);
     const dealServiceInstance = Container.get(DealService);
     const itemServiceInstance = Container.get(itemService);
+    const locationServiceInstance = Container.get(LocationService);
     const { Project, ProjectDetails, docs_codes } = req.body;
     const pj = await projectServiceInstance.create({
       ...Project,
@@ -37,6 +39,20 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    /*creation location*/
+    const loc = await locationServiceInstance.create({
+      loc_loc : Project.pm_code,
+      loc_site: Project.pm_site,
+      loc_project : Project.pm_code,
+      loc_status : "CONFORME",
+      loc_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+  
+    /*creation location*/
     /* creation specification documents*/
 
     const project_code = Project.pm_code;
