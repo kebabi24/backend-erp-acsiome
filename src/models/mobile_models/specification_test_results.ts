@@ -19,10 +19,10 @@ const SpecificationTestResults = sequelize.define(
             autoIncrement: true,
             unique: true
         },
-        ip_part: {type: Sequelize.STRING},
-        ip_routing:{ type:Sequelize.STRING},
+        ip_part: {type: Sequelize.STRING}, // article
+        ip_routing:{ type:Sequelize.STRING}, // 
         ip_op:{type:Sequelize.INTEGER},
-        ip_nbr:{ type:Sequelize.STRING},
+        ip_nbr:{ type:Sequelize.STRING},  // code_doc
         
         ip_user1:{ type:Sequelize.STRING},
         ip_user2:{ type:Sequelize.STRING},

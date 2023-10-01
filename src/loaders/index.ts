@@ -245,6 +245,7 @@ export default async ({ expressApp }) => {
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
+      { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1008,14 +1009,14 @@ export default async ({ expressApp }) => {
   //      console.log(err);
   //    });
 
-  //  await sequelizeConnection
-  //    .sync({ alter: true })
-  //    .then(() => {
-  //      console.log('database updated');
-  //    })
-  //    .catch(err => {
-  //      console.log(err);
-  //    });
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

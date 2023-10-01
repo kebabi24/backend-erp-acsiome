@@ -12,6 +12,7 @@ export default class PromotionService {
           @Inject("populationArticleModel") private populationArticleModel: Models.populationArticleModel,
           @Inject("promotionModel") private promotionModel: Models.promotionModel,
           @Inject("advantageModel") private advantageModel: Models.advantageModel,
+          @Inject("populationClientPromoModel") private populationClientPromoModel: Models.populationClientPromoModel,
         
         @Inject("logger") private logger
     ) {}
@@ -149,6 +150,21 @@ export default class PromotionService {
         }
     }
 
+    public async getPopsCustomersByCodes(codes: any): Promise<any> {
+        try {
+           
+
+            const pops = await this.populationClientPromoModel.findAll({where : {
+                population_code : codes
+            } })
+            this.logger.silly("pops found")
+            return pops
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
     public async getAdvantagesByCodes(codes: any): Promise<any> {
         try {
            
@@ -163,6 +179,33 @@ export default class PromotionService {
             throw e
         }
     }
+
+    public async getPopulationCustomerByCode(code : any): Promise<any> {
+        try {
+         
+          const population = await this.populationClientPromoModel.findOne({
+                where:{ population_code : code}
+             })
+    
+            
+            this.logger.silly("found population ")
+            return population
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+      }
+
+      public async createPopulationCustomer(data:any): Promise<any> {
+        try {
+            const population = await this.populationClientPromoModel.bulkCreate(data)
+            this.logger.silly("population created ")
+            return population
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+      }
 
 
     

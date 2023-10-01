@@ -221,12 +221,15 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       let adv_codes = [], pop_a_codes = [] , pop_c_codes = []
       
       promos.forEach(promo => {
+        console.log(promo)
         adv_codes.push(promo.adv_code)
         pop_a_codes.push(promo.pop_a_code)
-        pop_c_codes.push(promo.pop_c_codes)
+        pop_c_codes.push(promo.pop_c_code)
       });
+
       const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes)
       const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes)
+      const populationsCustomer= await promoServiceInstanse.getPopsCustomersByCodes(pop_c_codes)
 
       
       if(role['controller_role']!=null && role['controller_role'].length != 0){
@@ -353,7 +356,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           domain:domain,
           promos : promos , 
           advantages : advantages , 
-          populationsArticle : populationsArticle
+          populationsArticle : populationsArticle,
+          population:populationsCustomer
         });
       }
       // service created by mobile user
@@ -409,6 +413,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           promos : promos , 
           advantages : advantages , 
           populationsArticle : populationsArticle,
+          population:populationsCustomer
         });
       }
     }
@@ -1057,29 +1062,11 @@ const testHash = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find one  user endpoint');
   try {
 
-    const algorithm = 'aes-192-cbc';
-    const word = 'test';
-    // const secretKey = '123456asdf'
-    // const secretKey = crypto.randomBytes(32);
+    
     
 
-
-    // const iv = crypto.randomBytes(16);
-    // const cipher = crypto.createCipheriv("aes-256-cbc", secretKey, iv);
-    // let encryptedText = cipher.update(word, "utf-8", "hex");
-    // encryptedText += cipher.final("hex");
-
-    // crypto.scrypt(word, secretKey ,16 , (err, key)=>{
-     
-    // })
-
-    // const salt = bcrypt.genSaltSync(10);
-    // const hash = bcrypt.hashSync('test', salt);
-
-    var encryptionKey2 = CryptoJS.lib.WordArray.random(256 / 8).toString();
-    // var secretKey = '123456asdf';
     var secretKey = "b4cb72173ee45d8c7d188e8f77eb16c2";
-    let encryptedValue=CryptoJS.AES.encrypt('test', secretKey).toString()
+    let encryptedValue=CryptoJS.AES.encrypt('123456', secretKey).toString()
     console.log("encrypt  "+encryptedValue);
 
     return res.status(200).json({data: encryptedValue });
