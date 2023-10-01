@@ -64,6 +64,7 @@ const createC = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create sequence endpoint');
   try {
     const empAvailabilityServiceInstance = Container.get(EmployeAvailabilityService);
+    const empTimeServiceInstance = Container.get(EmployeTimeService)
     const { emp, empDetail } = req.body;
     console.log(emp);
     const empdet = await empAvailabilityServiceInstance.delete({ empd_addr: emp, empd_domain: user_domain });
@@ -77,6 +78,14 @@ const createC = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
       };
       await empAvailabilityServiceInstance.create(entry);
+        for(var d = new Date(entry.empd_fdate); d <= new Date(entry.empd_ldate); d.setDate(d.getDate() + 1)) {
+         let  ent = {empt_domain:user_domain, empt_code: emp,empt_type:entry.empd_type,empt_date: d, 
+              created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
+         
+          await empTimeServiceInstance.create(ent)
+
+        }
+
     }
     return res.status(201).json({ message: 'created succesfully', data: empDetail });
   } catch (e) {
