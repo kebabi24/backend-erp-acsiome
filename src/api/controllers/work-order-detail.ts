@@ -1,7 +1,7 @@
 import WorkOrderDetailService from '../../services/work-order-detail';
 import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
-
+import AllocationDetailService from '../../services/allocation-detail';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
@@ -18,7 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
-
+    const allocationDetailServiceInstance = Container.get(AllocationDetailService)
     const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot , wo_domain: user_domain});
 
     if (wo)
@@ -59,6 +59,23 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
+
+
+      /*create lad_det*/
+      let lad = {
+        lad_code: req.body.lpnbr,
+        lad_nbr: item.wod_lot,
+        lad_addr: wo.wo_routing,
+        lad_carrier: item.wod_part,
+        lad_qty_ord: item.wod_qty_req,
+        lad_qty_chg:0,
+        lad_lot: item.wod_serial,
+        lad_ref: item.wod_ref
+
+      }
+      const allocation = await allocationDetailServiceInstance.create({...lad, lad_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    
+      /*create lad_det*/
     }
     //  const workOrderDetail = await workOrderDetailServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     return res.status(201).json({ message: 'created succesfully', data: req.body });
