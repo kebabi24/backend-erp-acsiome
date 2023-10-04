@@ -177,7 +177,7 @@ const findByOneStatus = async (req: Request, res: Response, next: NextFunction) 
     const inventoryStatusDetailServiceInstance = Container.get(InventoryStatusDetailService);
     const locationDetails = await locationDetailServiceInstance.findOne({ ...req.body,ld_domain:user_domain });
 
-    console.log(locationDetails);
+   // console.log(locationDetails);
     if (locationDetails) {
       const trstatus = await inventoryStatusDetailServiceInstance.findOne({
         isd_domain:user_domain,
@@ -202,7 +202,7 @@ const findByOneStatus = async (req: Request, res: Response, next: NextFunction) 
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+ // console.log(req.body);
   logger.debug('Calling find by  all locationDetail endpoint');
   const { user_code } = req.headers;
     const { user_domain } = req.headers;
@@ -251,7 +251,7 @@ const findByFifoLot = async (req: Request, res: Response, next: NextFunction) =>
       raw: true,
     
     });
-    console.log("here",locationDetails)
+  //  console.log("here",locationDetails)
     const result = [];
     var rest = Number(req.body.qty);
     var qty = locationDetails.qty;
@@ -288,7 +288,7 @@ const findByFifoLot = async (req: Request, res: Response, next: NextFunction) =>
       }
     }
 
-    console.log(result)
+    //console.log(result)
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -341,7 +341,7 @@ const findByFifo = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
-    console.log(result)
+    //console.log(result)
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -372,15 +372,15 @@ const findOtherStatus = async (req: Request, res: Response, next: NextFunction) 
   const logger = Container.get('logger');
   const Sequelize = require('sequelize');
   const Op = Sequelize.Op;
-  console.log(req.body.status);
+  //console.log(req.body.status);
   logger.debug('Calling find by  all details endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   
   try {
-    console.log('here', req.body);
+  //  console.log('here', req.body);
     const { detail } = req.body.obj;
-    console.log(detail);
+  //  console.log(detail);
     const locationDetailServiceInstance = Container.get(LocationDetailService);
 
     const locationdetails = await locationDetailServiceInstance.find({
@@ -389,7 +389,7 @@ const findOtherStatus = async (req: Request, res: Response, next: NextFunction) 
         [Op.ne]: req.body.status,
       },
     });
-    console.log(req.body.obj);
+   // console.log(req.body.obj);
     return res.status(202).json({
       message: 'sec',
       data: locationdetails,
