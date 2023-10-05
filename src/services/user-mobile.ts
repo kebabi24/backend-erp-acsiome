@@ -733,16 +733,16 @@ export default class UserMobileService {
                 
                 { 
                     where: {
-                        pt_part : productsCodes,
-                        // $or:[ 
-                        //     {pt_salable : true},
-                        //     {pt_inventoryable : true},
-                        //     {pt_consignable : true},
-                        //     {pt_returnable : true},
-                        //     {pt_orderable : true},
-                        //     {pt_loadable : true},
-                        //     {pt_promotion : true}      
-                        // ]
+                         pt_part : productsCodes,
+                        //  [Op.or]:[ 
+                        //      {pt_salable :  true},
+                        //      {pt_inventoryable : true},
+                        //      {pt_consignable : true},
+                        //      {pt_returnable : true},
+                        //      {pt_orderable : true},
+                        //      {pt_loadable : true},
+                        //      {pt_promotion : true}      
+                        //  ]
                     },
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
@@ -758,6 +758,40 @@ export default class UserMobileService {
                    
                 
                 }
+            return products;
+        } catch (e) {
+            console.log('Error from getProducts - service ')
+            this.logger.error(e)
+            throw e
+        }
+    }
+
+     // ******************** GET PRODUCT PAGES DETAILS  **************************
+     public async getProductsOfPromo(): Promise<any> {
+        try {
+            
+            const products = await this.itemModel.findAll(
+                
+                { 
+                    where: {
+                         [Op.or]:[ 
+                             {pt_salable :  true},
+                             {pt_inventoryable : true},
+                             {pt_consignable : true},
+                             {pt_returnable : true},
+                             {pt_orderable : true},
+                             {pt_loadable : true},
+                             {pt_promotion : true}      
+                         ]
+                    },
+                    attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
+                    'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
+                    'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking','pt_rollup',
+                    'pt_salable','pt_inventoryable','pt_consignable','pt_returnable','pt_orderable','pt_loadable','pt_promotion']
+                    },
+                ) 
+                
+                
             return products;
         } catch (e) {
             console.log('Error from getProducts - service ')
