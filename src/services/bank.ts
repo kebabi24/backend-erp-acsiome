@@ -3,7 +3,7 @@ import { Service, Inject } from 'typedi';
 @Service()
 export default class banksSercice {
   constructor(
-    @Inject('bankModel') private bankModel: Models.bankModel,
+    @Inject('bankModel') private bankModel: Models.BankModel,
     @Inject('addressModel') private addressModel: Models.AddressModel,
     @Inject('logger') private logger,
   ) {}

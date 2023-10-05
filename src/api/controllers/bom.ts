@@ -66,7 +66,9 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const bomServiceInstance = Container.get(BomService)
+        console.log(req.body,user_domain)
         const bom = await bomServiceInstance.findOne({...req.body,bom_domain:user_domain})
+        console.log(bom)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: bom })

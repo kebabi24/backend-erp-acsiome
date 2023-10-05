@@ -98,7 +98,7 @@ import repertory from './routes/repertory';
 
 import unloadRequest from './routes/unload-request';
 
-import customerOrder from './routes/customer-orders';
+import AllocationDetail from './routes/allocation-detail';
 
 import employeSalary from './routes/employe-salary';
 import transportcost from './routes/transportcost';
@@ -207,7 +207,7 @@ export default () => {
   unloadRequest(app);
   employeSalary(app);
 
-  customerOrder(app);
+  AllocationDetail(app);
   transportcost(app);
   costlist(app);
   promotion(app);

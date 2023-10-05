@@ -235,7 +235,7 @@ export default async ({ expressApp }) => {
 
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
-      { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
+      { name: 'allocationDetailModel', model: require('../models/allocation-detail').default },
       { name: 'TransportcostModel', model: require('../models/transportcost').default },
       { name: 'CostlistModel', model: require('../models/costlist').default },
       { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
@@ -999,24 +999,16 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // await sequelizeConnection.sync();
+  //  await sequelizeConnection.sync();
 
-  //    .sync({ alter: true })
-  //    .then(() => {
-  //      console.log('database updated');
-  //    })
-  //    .catch(err => {
-  //      console.log(err);
-  //    });
-
-  //  await sequelizeConnection
-  //    .sync({ alter: true })
-  //    .then(() => {
-  //      console.log('database updated');
-  //    })
-  //    .catch(err => {
-  //      console.log(err);
-  //    });
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

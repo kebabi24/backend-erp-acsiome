@@ -93,7 +93,16 @@ export default class locationDetailService {
       throw e;
     }
   }
-
+  public async findfifolot(query: any): Promise<any> {
+    try {
+      const locationDetails = await this.locationDetailModel.findAll(query);
+      this.logger.silly('find All locationDetails mstr');
+      return locationDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findSpecial(query: any): Promise<any> {
     try {
       const locationDetails = await this.locationDetailModel.findAll({ ...query });
