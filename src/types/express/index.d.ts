@@ -203,5 +203,7 @@ declare global {
     export type populationClientPromoModel = S.Model;
 
     export type AccountUnplanifedModel = S.Model;
+    export type PatientModel = S.Model;
+    export type PatientDetailModel = S.Model;
   }
 }
