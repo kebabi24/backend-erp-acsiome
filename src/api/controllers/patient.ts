@@ -73,6 +73,9 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const patientServiceInstance = Container.get(PatientService);
     const patients = await patientServiceInstance.find({ pat_domain: user_domain });
+    for (let pat of patients) {
+      pat.int01 = new Date().getFullYear() -  new Date(pat.pat_birth_date).getFullYear()
+    }
     return res.status(200).json({ message: 'fetched succesfully', data: patients });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -110,12 +113,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const { Patient, patientDetail } = req.body;
     const patient = await patientServiceInstance.update({ ...Patient, last_modified_by: user_code }, { id });
 
-    await patientDetailServiceInstance.delete({ patd_code: patient.pat_code,patd_domain: user_domain });
+    console.log(Patient.pat_code)
+    await patientDetailServiceInstance.delete({ patd_code: Patient.pat_code,patd_domain: user_domain });
     for (let entry of patientDetail) {
       entry = {
         ...entry,
         patd_domain: user_domain,
-        patd_code: patient.pat_code,
+        patd_code: Patient.pat_code,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,

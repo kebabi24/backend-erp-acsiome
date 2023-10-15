@@ -44,6 +44,7 @@ const Patient = sequelize.define(
     pat_contact_adress: Sequelize.STRING,
     pat_contact_tel: Sequelize.STRING,
     pat_parent_liaison: Sequelize.STRING,
+    pat_ass: Sequelize.STRING,
     pat_domain: Sequelize.STRING,
 
     ...base,

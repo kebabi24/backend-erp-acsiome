@@ -205,5 +205,6 @@ declare global {
     export type AccountUnplanifedModel = S.Model;
     export type PatientModel = S.Model;
     export type PatientDetailModel = S.Model;
+    export type AssociationModel = S.Model;
   }
 }

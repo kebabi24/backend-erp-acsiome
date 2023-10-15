@@ -248,6 +248,7 @@ export default async ({ expressApp }) => {
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
       { name: 'patientModel', model: require('../models/patient').default },
       { name: 'patientDetailModel', model: require('../models/patient-detail').default },
+      { name: 'associationModel', model: require('../models/association').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1013,14 +1014,14 @@ export default async ({ expressApp }) => {
   // sync models
   //  await sequelizeConnection.sync();
 
-  await sequelizeConnection
-    .sync({ alter: true })
-    .then(() => {
-      console.log('database updated');
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
