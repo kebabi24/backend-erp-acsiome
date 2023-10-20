@@ -9,7 +9,9 @@ export default (app: Router) => {
     route.post("/sumbitVisitResultsData", controller.submitVisitResultData)
     route.post("/createCancelReasons", controller.createCancelationReasons)
     route.post("/createPaymentMethods", controller.createPaymentMethods)
+    route.post("/createPriceList", controller.createPriceList)
     route.get("/getVisitList", controller.getVisitList)
+    route.get('/getPriceList/:code', controller.getPriceList);
     route.get("/paymentMethods", controller.getPaymentMethods)
     route.get("/cancelationReasons", controller.getCanelationReasons)
     
