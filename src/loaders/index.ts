@@ -246,6 +246,9 @@ export default async ({ expressApp }) => {
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
+      { name: 'patientModel', model: require('../models/patient').default },
+      { name: 'patientDetailModel', model: require('../models/patient-detail').default },
+      { name: 'associationModel', model: require('../models/association').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -995,6 +998,16 @@ export default async ({ expressApp }) => {
   require('../models/costlist').default.belongsTo(require('../models/transportcost').default, {
     foreignKey: 'ltrc_trc_code',
     targetKey: 'trc_code',
+  });
+
+
+  require('../models/patient').default.hasOne(require('../models/patient-detail').default, {
+    foreignKey: 'patd_code',
+    sourceKey: 'pat_code',
+  });
+  require('../models/patient-detail').default.belongsTo(require('../models/patient').default, {
+    foreignKey: 'patd_code',
+    targetKey: 'pat_code',
   });
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');

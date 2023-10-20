@@ -105,6 +105,9 @@ import transportcost from './routes/transportcost';
 import costlist from './routes/costlist';
 import promotion from './routes/promotion';
 import accountUnplanifed from './routes/account-unplanifed';
+import patient from './routes/patient';
+import association from './routes/association';
+
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -212,6 +215,7 @@ export default () => {
   costlist(app);
   promotion(app);
   accountUnplanifed(app);
-
+  patient(app);
+  association(app);
   return app;
 };

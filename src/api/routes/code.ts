@@ -15,6 +15,7 @@ export default (app: Router) => {
     route.get("/conge", controller.findConge)
     route.get("/module", controller.findModule)
     route.get("/trans", controller.findTrans)
+    route.get("/pathotype", controller.findpathotype)
     route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
