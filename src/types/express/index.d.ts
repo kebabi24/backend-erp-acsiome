@@ -206,5 +206,8 @@ declare global {
     export type PatientModel = S.Model;
     export type PatientDetailModel = S.Model;
     export type AssociationModel = S.Model;
+    export type DoctorModel = S.Model;
+    export type LocationDeclaredModel = S.Model;
+    
   }
 }

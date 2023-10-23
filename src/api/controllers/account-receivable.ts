@@ -4,7 +4,8 @@ import BankDetailService from "../../services/bank-detail"
 import CustomerService from "../../services/customer"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-
+import GeneralLedgerService from "../../services/general-ledger"
+import moment from 'moment';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -60,7 +61,7 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-
+    const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
         const accountReceivableServiceInstance = Container.get(AccountReceivableService)
@@ -71,8 +72,9 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
             BankDetailService
         )
         const customerServiceInstance = Container.get(CustomerService)
+        const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
         
-        const { accountReceivable, accountReceivableDetail } = req.body
+        const { accountReceivable, accountReceivableDetail , gldetail} = req.body
         console.log(accountReceivable)
        
         const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountReceivable.ar_bank, bkd_domain :user_domain, bkd_module: "AR", bkd_pay_method: accountReceivable.ar_cr_terms})
@@ -98,6 +100,46 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
             const arInv = await accountReceivableServiceInstance.update ({ar_applied: Number(arI.ar_applied) + Number(entry.ard_amt), ar_base_applied: Number(arI.ar_base_applied) + (Number(entry.ard_amt) * Number(entry.ard_ex_rate2) / Number(entry.ard_ex_rate)), ar_open : bool},{id:arI.id})
             }
         }
+         /***************GL *************/
+         if(gldetail.length > 0) {
+            const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
+            if(gl) {
+              var seq =  gl.glt_ref.substring(10, 18)
+           var d = Number(seq) + 1
+           
+           var seqchar = ("000000" + d).slice(-6);
+           
+           var ref = "AR" + moment().format('YYYYMMDD') + seqchar ;
+           } else {
+    
+               
+               var ref = "AR"  + moment().format('YYYYMMDD') + "000001" ;
+              // return year +  month + day;
+             
+    
+           }
+           const effdate = new Date(accountReceivable.ar_effdate)
+           for (let entry of gldetail) {
+           console.log(entry)
+            await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
+                glt_domain: user_domain,
+                glt_addr: accountReceivable.ar_bill,
+                glt_curr: accountReceivable.ar_curr,
+                glt_tr_type: "AR",
+                // glt_dy_code: accountReceivable.ar_dy_code,
+                glt_ex_rate: accountReceivable.ar_ex_rate,
+                glt_ex_rate2: accountReceivable.ar_ex_rate2,
+                glt_doc: accountReceivable.ar_check,
+                glt_effdate: accountReceivable.ar_effdate,
+                glt_entity: accountReceivable.ar_entity,
+                glt_year: effdate.getFullYear(),
+                //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ar_ex_rate2) /  Number(accountPayable.ar_ex_rate)   ,
+                glt_date: date, created_by: user_code, last_modified_by: user_code})
+           
+           }
+      }
+      /***************GL *************/
+     
         return res
             .status(201)
             .json({ message: "created succesfully", data: ar })
@@ -111,7 +153,8 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
 const createUP = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+    const{user_domain} = req.headers
+    const  date = new Date();
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -122,8 +165,8 @@ const{user_domain} = req.headers
         const bankDetailServiceInstance = Container.get(
             BankDetailService
         )
-        
-        const { accountReceivable, accountReceivableDetail } = req.body
+        const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
+        const { accountReceivable, accountReceivableDetail,gldetail } = req.body
         console.log(accountReceivable)
        
         const arf = await accountReceivableServiceInstance.findOne({id: accountReceivable.id})
@@ -147,6 +190,45 @@ const{user_domain} = req.headers
 
             }
         }
+        /***************GL *************/
+        if(gldetail.length > 0) {
+            const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
+            if(gl) {
+              var seq =  gl.glt_ref.substring(10, 18)
+           var d = Number(seq) + 1
+           
+           var seqchar = ("000000" + d).slice(-6);
+           
+           var ref = "AR" + moment().format('YYYYMMDD') + seqchar ;
+           } else {
+    
+               
+               var ref = "AR"  + moment().format('YYYYMMDD') + "000001" ;
+              // return year +  month + day;
+             
+    
+           }
+           const effdate = new Date(accountReceivable.ar_effdate)
+           for (let entry of gldetail) {
+           console.log(entry)
+            await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
+                glt_domain: user_domain,
+                glt_addr: accountReceivable.ar_bill,
+                glt_curr: accountReceivable.ar_curr,
+                glt_tr_type: "AR",
+                // glt_dy_code: accountReceivable.ar_dy_code,
+                glt_ex_rate: accountReceivable.ar_ex_rate,
+                glt_ex_rate2: accountReceivable.ar_ex_rate2,
+                glt_doc: accountReceivable.ar_check,
+                glt_effdate: accountReceivable.ar_effdate,
+                glt_entity: accountReceivable.ar_entity,
+                glt_year: effdate.getFullYear(),
+                //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ar_ex_rate2) /  Number(accountPayable.ar_ex_rate)   ,
+                glt_date: date, created_by: user_code, last_modified_by: user_code})
+           
+           }
+      }
+      /***************GL *************/
         return res
             .status(201)
             .json({ message: "created succesfully", data: ar })

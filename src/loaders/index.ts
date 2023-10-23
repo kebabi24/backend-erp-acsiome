@@ -249,6 +249,8 @@ export default async ({ expressApp }) => {
       { name: 'patientModel', model: require('../models/patient').default },
       { name: 'patientDetailModel', model: require('../models/patient-detail').default },
       { name: 'associationModel', model: require('../models/association').default },
+      { name: 'doctorModel', model: require('../models/doctor').default },
+      { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1010,9 +1012,17 @@ export default async ({ expressApp }) => {
     targetKey: 'pat_code',
   });
 
+  require('../models/item').default.hasOne(require('../models/location-declared').default, {
+    foreignKey: 'ldd_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/location-declared').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'ldd_part',
+    targetKey: 'pt_part',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+    // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })
