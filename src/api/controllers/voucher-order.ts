@@ -12,7 +12,7 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
 import moment from 'moment';
-
+import LocationDeclaredService from "../../services/location-declared"
 
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -33,7 +33,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const accountPayableDetailServiceInstance = Container.get(AccountPayableDetailService)
         const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService)
         const providerServiceInstance = Container.get(ProviderService)
-        const { voucherOrder, vh_inv_nbr, voucherOrderDetail, apDetail } = req.body
+        const locationDeclaredServiceInstance = Container.get(LocationDeclaredService)
+        const { voucherOrder, vh_inv_nbr, voucherOrderDetail, apDetail, declared} = req.body
 
 console.log(vh_inv_nbr)
 
@@ -45,8 +46,43 @@ console.log(vh_inv_nbr)
 
             const sh = await purchaseReceiveServiceInstance.findOne({prh_domain: user_domain,prh_receiver: entry.vdh_ship, prh_part:entry.vdh_part, prh_nbr: entry.vdh_nbr,prh_line: entry.vdh_sad_line })
             if(sh) await purchaseReceiveServiceInstance.update({prh_invoiced : true, prh_inv_nbr:vh.vh_inv_nbr,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: sh.id})
-        }
-        
+/*declared ldd*/
+                    if(declared) {
+                        const ld = await locationDeclaredServiceInstance.findOne({
+                            ldd_part: entry.vdh_part,
+                            ldd_site: entry.vdh_site,
+                            ldd_loc: entry.vdh_loc,
+                            ldd_domain:user_domain
+                          });
+                          if (ld)
+                            await locationDeclaredServiceInstance.update(
+                              {
+                                ldd_qty_oh: Number(ld.ldd_qty_oh) + Number(entry.vdh_qty_inv) ,
+                                last_modified_by: user_code,
+                                last_modified_ip_adr: req.headers.origin,
+                              },
+                              { id: ld.id },
+                            );
+                          else {
+                            // const status = await statusServiceInstance.findOne({
+                            //   is_domain:user_domain,
+                            //   is_status: item.tr_status,
+                            // });
+                    
+                            await locationDeclaredServiceInstance.create({
+                              ldd_part: entry.vdh_part,
+                              ldd_date: new Date(),
+                              ldd_site: entry.vdh_site,
+                              ldd_loc: entry.vdh_loc,
+                            //   ldd_status: entry.tr_status,
+                              ldd_qty_oh: Number(entry.vdh_qty_inv) ,
+                              ldd_domain:user_domain
+                            });
+                          }
+                                    
+                    }
+/*declared ldd*/        
+                }
         await accountPayableServiceInstance.create({
          ap_domain: user_domain,   
          ap_nbr : vh_inv_nbr,
@@ -70,6 +106,7 @@ console.log(vh_inv_nbr)
         })
 
          /***************GL *************/
+         if (apDetail.length > 0  ) {
          const gl = await generalLedgerServiceInstance.findLastId({glt_domain: user_domain,glt_date: date})
          if(gl) {
            var seq =  gl.glt_ref.substring(10, 18)
@@ -120,7 +157,7 @@ console.log(vh_inv_nbr)
                 glt_date: date, created_by: user_code, last_modified_by: user_code})
            i = i + 1
            }
-
+         }   
 
           
 

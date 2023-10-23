@@ -147,41 +147,43 @@ const{user_domain} = req.headers
         }
 
           /***************GL *************/
-          const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
-          if(gl) {
-            var seq =  gl.glt_ref.substring(10, 18)
-         var d = Number(seq) + 1
-         
-         var seqchar = ("000000" + d).slice(-6);
-         
-         var ref = "AP" + moment().format('YYYYMMDD') + seqchar ;
-         } else {
-  
-             
-             var ref = "AP"  + moment().format('YYYYMMDD') + "000001" ;
-            // return year +  month + day;
-           
-  
-         }
-         const effdate = new Date(accountPayable.ap_effdate)
-         for (let entry of gldetail) {
-         console.log(entry)
-          await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
-            glt_domain: user_domain,
-              glt_addr: accountPayable.ap_vend,
-              glt_curr: accountPayable.ap_curr,
-              glt_tr_type: "AP",
-              glt_dy_code: accountPayable.ap_dy_code,
-              glt_ex_rate: accountPayable.ap_ex_rate,
-              glt_ex_rate2: accountPayable.ap_ex_rate2,
-              glt_doc: accountPayable.ap_check,
-              glt_entity: accountPayable.ap_entity,
-              glt_effdate: accountPayable.ap_effdate,
-              glt_year: effdate.getFullYear(),
-              //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
-              glt_date: date, created_by: user_code, last_modified_by: user_code})
-         
-         }
+            if(gldetail.length > 0) {
+                const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
+                if(gl) {
+                    var seq =  gl.glt_ref.substring(10, 18)
+                var d = Number(seq) + 1
+                
+                var seqchar = ("000000" + d).slice(-6);
+                
+                var ref = "AP" + moment().format('YYYYMMDD') + seqchar ;
+                } else {
+        
+                    
+                    var ref = "AP"  + moment().format('YYYYMMDD') + "000001" ;
+                    // return year +  month + day;
+                
+        
+                }
+                const effdate = new Date(accountPayable.ap_effdate)
+                for (let entry of gldetail) {
+                console.log(entry)
+                await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
+                    glt_domain: user_domain,
+                    glt_addr: accountPayable.ap_vend,
+                    glt_curr: accountPayable.ap_curr,
+                    glt_tr_type: "AP",
+                    glt_dy_code: accountPayable.ap_dy_code,
+                    glt_ex_rate: accountPayable.ap_ex_rate,
+                    glt_ex_rate2: accountPayable.ap_ex_rate2,
+                    glt_doc: accountPayable.ap_check,
+                    glt_entity: accountPayable.ap_entity,
+                    glt_effdate: accountPayable.ap_effdate,
+                    glt_year: effdate.getFullYear(),
+                    //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+                    glt_date: date, created_by: user_code, last_modified_by: user_code})
+                
+                }
+            }    
           /***************GL *************/
       
         return res
@@ -233,7 +235,8 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
 
             }
         }
-                  /***************GL *************/
+            /***************GL *************/
+            if(gldetail.length > 0) {
                   const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
                   if(gl) {
                     var seq =  gl.glt_ref.substring(10, 18)
@@ -269,7 +272,8 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
                       glt_date: date, created_by: user_code, last_modified_by: user_code})
                  
                  }
-                  /***************GL *************/
+            }
+            /***************GL *************/
               
         return res
             .status(201)

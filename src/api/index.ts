@@ -107,7 +107,8 @@ import promotion from './routes/promotion';
 import accountUnplanifed from './routes/account-unplanifed';
 import patient from './routes/patient';
 import association from './routes/association';
-
+import doctor from './routes/doctor';
+import locationDeclared from './routes/location-declared';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -217,5 +218,7 @@ export default () => {
   accountUnplanifed(app);
   patient(app);
   association(app);
+  doctor(app);
+  locationDeclared(app);
   return app;
 };
