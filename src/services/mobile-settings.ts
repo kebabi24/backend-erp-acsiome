@@ -7,6 +7,7 @@ export default class MobileSettingsService {
         @Inject("visitresultModel") private visitresultModel: Models.visitresultModel,
         @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
         @Inject("paymentMethodModel") private paymentMethodModel: Models.paymentModel,
+        @Inject("priceListModel") private priceListModel: Models.PricelistModel,
         @Inject("logger") private logger
     ) {}
 
@@ -43,12 +44,16 @@ export default class MobileSettingsService {
     }
     
 
-    // ******************** GET VISITLIST  **************************
-    public async deleteVisitResultsById(query: any): Promise<any> {
+    // ******************** GET PRICE LIST   **************************
+    public async findOnePriceList(query: any): Promise<any> {
         try {
-            const visitResults = await this.visitresultModel.destroy({ where: query })
-            this.logger.silly("deleted the visit results")
-            return visitResults
+            console.log(query)
+            const priceList = await this.priceListModel.findAll({
+                where:query
+               })
+               console.log(priceList)
+            this.logger.silly("found one price list")
+            return priceList
         } catch (e) {
             this.logger.error(e)
             throw e
@@ -127,8 +132,42 @@ export default class MobileSettingsService {
         }
     }
 
+     // ******************** GET PRICE LIST  **************************
+    //  public async getPriceList(): Promise<any> {
+    //     try {
+    //         const visitresultData = await this.priceListModel.findAll(
+    //             where: query 
+    //         )
+            
+    //         const visititresult = []
+    //         visitresultData.forEach(element => {
+    //             visititresult.push(element.dataValues)
+    //         });
+            
+    //         // console.log(visititresult)
+    //         return visititresult
+    //     } catch (e) {
+    //         console.log('Error from service-getVisitlist')
+    //         this.logger.error(e)
+    //         throw e
+    //     }
+    // }
+
     
 
+     // ****************** CREATE PAYMENT METHODS ************
+     public async createPriceList(data: any): Promise<any> {
+        try {
+          
+            const priceList = await this.priceListModel.bulkCreate(data)
+           
+            this.logger.silly("price list", priceList)
+            return priceList
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     
     
 
