@@ -211,7 +211,7 @@ export default async ({ expressApp }) => {
         model: require('../models/mobile_models/specification_test_results').default,
       },
       {
-        name: 'ItemSpecificationDetailsModel',
+        name: 'itemSpecificationDetailsModel',
         model: require('../models/mobile_models/item_specification_details').default,
       },
       {
@@ -251,6 +251,13 @@ export default async ({ expressApp }) => {
       { name: 'associationModel', model: require('../models/association').default },
       { name: 'doctorModel', model: require('../models/doctor').default },
       { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
+     
+      { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
+      { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
+      
+      { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
+      { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
+    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1022,7 +1029,7 @@ export default async ({ expressApp }) => {
   });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-    // await sequelizeConnection.sync();
+ // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })
