@@ -15,6 +15,7 @@ export default (app: Router) => {
   route.post('/findone', controller.findByOne);
   route.post('/findoneref', controller.findByOneRef);
   route.post('/findfifo', controller.findByFifo);
+  route.post('/findfifolot', controller.findByFifoLot);
   route.post('/findother', controller.findOtherStatus);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);

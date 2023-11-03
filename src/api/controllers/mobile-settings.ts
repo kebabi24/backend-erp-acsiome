@@ -185,6 +185,56 @@ const createPaymentMethods = async (req: Request, res: Response, next: NextFunct
 
 }
 
+//****************** GET PRICE LIST  ************************
+const getPriceList = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling get visit list  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{    
+        const {code} =  req.params
+            const priceList = await mobileSettingsServiceInstanse.findOnePriceList({pricelist_code : code})
+    
+                return res
+                    .status(202)
+                    .json({
+                        data:priceList
+                    })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+const createPriceList = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling createPaymentMethods  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{
+        const {data} =  req.body
+        
+        const priceList = await mobileSettingsServiceInstanse.createPriceList(data)
+        return res.status(200)
+            .json({
+                message: "Data inserted !",
+                priceList:priceList
+             })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+
+
 
 
 
@@ -197,5 +247,7 @@ export default {
     getPaymentMethods,
     getCanelationReasons,
     createCancelationReasons,
-    createPaymentMethods
+    createPaymentMethods,
+    getPriceList,
+    createPriceList
 }

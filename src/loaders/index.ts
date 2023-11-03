@@ -211,7 +211,7 @@ export default async ({ expressApp }) => {
         model: require('../models/mobile_models/specification_test_results').default,
       },
       {
-        name: 'ItemSpecificationDetailsModel',
+        name: 'itemSpecificationDetailsModel',
         model: require('../models/mobile_models/item_specification_details').default,
       },
       {
@@ -235,7 +235,7 @@ export default async ({ expressApp }) => {
 
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
-      { name: 'customerOrdersModel', model: require('../models/customer-orders').default },
+      { name: 'allocationDetailModel', model: require('../models/allocation-detail').default },
       { name: 'TransportcostModel', model: require('../models/transportcost').default },
       { name: 'CostlistModel', model: require('../models/costlist').default },
       { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
@@ -246,6 +246,18 @@ export default async ({ expressApp }) => {
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
+      { name: 'patientModel', model: require('../models/patient').default },
+      { name: 'patientDetailModel', model: require('../models/patient-detail').default },
+      { name: 'associationModel', model: require('../models/association').default },
+      { name: 'doctorModel', model: require('../models/doctor').default },
+      { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
+     
+      { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
+      { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
+      
+      { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
+      { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
+    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -997,17 +1009,27 @@ export default async ({ expressApp }) => {
     targetKey: 'trc_code',
   });
 
+
+  require('../models/patient').default.hasOne(require('../models/patient-detail').default, {
+    foreignKey: 'patd_code',
+    sourceKey: 'pat_code',
+  });
+  require('../models/patient-detail').default.belongsTo(require('../models/patient').default, {
+    foreignKey: 'patd_code',
+    targetKey: 'pat_code',
+  });
+
+  require('../models/item').default.hasOne(require('../models/location-declared').default, {
+    foreignKey: 'ldd_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/location-declared').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'ldd_part',
+    targetKey: 'pt_part',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // await sequelizeConnection.sync();
-
-  //    .sync({ alter: true })
-  //    .then(() => {
-  //      console.log('database updated');
-  //    })
-  //    .catch(err => {
-  //      console.log(err);
-  //    });
+ // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

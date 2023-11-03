@@ -88,6 +88,7 @@ const CustomerMobile = sequelize.define(
       },
     },
     pricelist_code: Sequelize.STRING,
+    payment_method_code:Sequelize.STRING,
 
     // ...base,
   },

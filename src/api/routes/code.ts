@@ -15,9 +15,12 @@ export default (app: Router) => {
     route.get("/conge", controller.findConge)
     route.get("/module", controller.findModule)
     route.get("/trans", controller.findTrans)
+    route.get("/pathotype", controller.findpathotype)
     route.post("/", controller.create)
+    route.post("/addcodes", controller.createCodes)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
+    route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
 }

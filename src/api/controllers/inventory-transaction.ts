@@ -1978,14 +1978,14 @@ const findByInv = async (req: Request, res: Response, next: NextFunction) => {
 const findByRct = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
+  //console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
   const { user_domain } = req.headers;
   if (req.body.site != '*') {
     try {
       const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
       const itemServiceInstance = Container.get(itemService);
 
-      console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
+    //  console.log(req.body, 'hhhhhhhhhhhhhhheeeeeeeeereeeeeeeeeeeee');
       const tr = await inventoryTransactionServiceInstance.findbetw({
         where: {
           tr_domain:user_domain,
@@ -1997,7 +1997,7 @@ const findByRct = async (req: Request, res: Response, next: NextFunction) => {
       //console.log(tr)
       for (let t of tr) {
         const item = await itemServiceInstance.findOne({ pt_part: t.tr_part, pt_domain:user_domain });
-        console.log(item.pt_buyer)
+       // console.log(item.pt_buyer)
         t.tr_desc = item.pt_desc1,
         t.tr_um = item.pt_um,
         t.tr_addr = item.pt_vend,
@@ -2085,7 +2085,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
     for (let items of parts) {
       const codes = await codeServiceInstance.findOne({ code_domain:user_domain,code_fldname: 'pt_part_type', code_value: items.pt_part_type });
       if (codes == null) {
-        console.log(items.pt_part, 'part');
+       // console.log(items.pt_part, 'part');
       }
       const trrcycmax = await inventoryTransactionServiceInstance.max({
         tr_domain:user_domain,
@@ -2173,7 +2173,7 @@ const consoReport = async (req: Request, res: Response, next: NextFunction) => {
         code_value: boitems.pt_part_type,
       });
       if (codes == null) {
-        console.log(boitems.pt_part, 'part');
+       // console.log(boitems.pt_part, 'part');
       }
       const trrcycmax = await inventoryTransactionServiceInstance.max({
         tr_domain:user_domain,

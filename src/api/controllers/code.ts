@@ -24,6 +24,36 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const createCodes = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling Create code endpoint');
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+console.log(req.body.detail)
+    const codes = req.body.detail
+    for (let code of codes) {
+   if (code.new == true) {
+      const cd = await codeServiceInstance.create({
+      code_fldname: "doc_spec",
+      code_value: code.code_value,
+      code_cmmt: code.code_cmmt,
+      code_domain:user_domain
+     , created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+  }
+  }
+    return res.status(201).json({ message: 'created succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -220,6 +250,26 @@ const findTrans = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findpathotype = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findsome({ code_domain:user_domain,code_fldname: 'patho_type' });
+    // console.log(codes)
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_cmmt });
+    }
+    //console.log(data);
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
@@ -228,6 +278,21 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.find({ ...req.body ,code_domain:user_domain});
+    //console.log(req.body);
+    return res.status(200).json({ message: 'fetched succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByOne = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findOne({ ...req.body ,code_domain:user_domain});
     //console.log(req.body);
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
@@ -270,6 +335,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 };
 export default {
   create,
+  createCodes,
   findOne,
   findAll,
   findCheck,
@@ -279,7 +345,9 @@ export default {
   findConge,
   findModule,
   findTrans,
+  findpathotype,
   findBy,
+  findByOne,
   update,
   deleteOne,
   findTriggerType

@@ -98,7 +98,7 @@ import repertory from './routes/repertory';
 
 import unloadRequest from './routes/unload-request';
 
-import customerOrder from './routes/customer-orders';
+import AllocationDetail from './routes/allocation-detail';
 
 import employeSalary from './routes/employe-salary';
 import transportcost from './routes/transportcost';
@@ -106,6 +106,10 @@ import costlist from './routes/costlist';
 import promotion from './routes/promotion';
 import accountUnplanifed from './routes/account-unplanifed';
 import sendMail from './routes/send-mail';
+import patient from './routes/patient';
+import association from './routes/association';
+import doctor from './routes/doctor';
+import locationDeclared from './routes/location-declared';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -208,12 +212,16 @@ export default () => {
   unloadRequest(app);
   employeSalary(app);
 
-  customerOrder(app);
+  AllocationDetail(app);
   transportcost(app);
   costlist(app);
   promotion(app);
   accountUnplanifed(app);
   sendMail(app);
 
+  patient(app);
+  association(app);
+  doctor(app);
+  locationDeclared(app);
   return app;
 };

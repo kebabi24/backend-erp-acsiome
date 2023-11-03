@@ -17,12 +17,9 @@ const createStandardSpecification = async (req: Request, res: Response, next: Ne
 
     const standardSpecificationHeader = req.body.standardSpecificationHeader;
     const standardSpecificationDetails = req.body.standardSpecificationDetails;
-    console.log(standardSpecificationHeader.mp_expire);
+   
     let date2 = new Date(standardSpecificationHeader.mp_expire);
-    console.log(date2);
-
-    // let date1 = new Date(standardSpecificationHeader.mp_expire)
-    // standardSpecificationHeader.mp_expire = date1
+    
 
     const standarSpecificationHeader = await specificationService.createStandartSpecificationHeader({
       ...standardSpecificationHeader,
@@ -55,7 +52,7 @@ const findOneSpecificationByCode = async (req: Request, res: Response, next: Nex
   try {
     const specificationService = Container.get(QualityControlService);
     const { specification_code } = req.params;
-    const specification = await specificationService.findSpecificationByCode(specification_code);
+     const specification = await specificationService.findSpecificationByCode(specification_code);
     return res.status(200).json({ message: 'found one specification', data: { specification } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -233,6 +230,93 @@ const getLaunchDocumentsByProject = async (req: Request, res: Response, next: Ne
   }
 };
 
+
+const findOneSpecificationTestResults = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling findOneSpecificationTestResults endpoint');
+  try {
+    console.log("hello")
+    const qualityContorlService = Container.get(QualityControlService);
+    const { query } = req.body;
+    console.log(query)
+     const specs = await qualityContorlService.getSpecificationTestResult(query);
+    return res.status(200).json({ message: 'found results', data: { specs } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findOneSpecification = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const { query } = req.body;
+    const specification = await specificationService.findSpecification(query);
+    return res.status(200).json({ message: 'found one specification', data: { specification } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findQualityInspectionRouting = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const { query } = req.body;
+    const routing = await specificationService.findQualityInspectionRouting(query);
+    return res.status(200).json({ message: 'found one routing', data: routing });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+ const findItemSpecificationDetails = async (req: Request, res: Response, next: NextFunction) => {
+  console.log("heyyy")
+   const logger = Container.get('logger');
+   logger.debug('Calling findItemSpecificationDetails endpoint');
+   try {
+     const specificationService = Container.get(QualityControlService);
+     const { query } = req.body;
+     const itemSpecDetails = await specificationService.findItemSpecificationDetails(query);
+     return res.status(200).json({ message: 'found findItemSpecificationDetails', data: itemSpecDetails });
+   } catch (e) {
+     logger.error('🔥 error: %o', e);
+     return next(e);
+   }
+ };
+
+ const createIpAndIpds  = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  logger.debug('Calling Create productPage endpoint with body: %o', req.body);
+  try {
+    const specificationService = Container.get(QualityControlService);
+    // console.log(req.body)
+
+    const {ipData ,ipdsData} = req.body;
+    const{user_domain} = req.headers
+
+    
+    const ip = await specificationService.createIp({...ipData ,ip_domain : user_domain});
+    
+     ipdsData.forEach(ipd => {
+       ipd.ipd_domain = user_domain
+     });
+    const ipds = await specificationService.createIpds(ipdsData);
+
+
+    return res.status(201).json({ message: 'created succesfully', data: { ip , ipds } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
@@ -245,4 +329,9 @@ export default {
   addIdentificationData,
   getDocumentTriggers,
   getLaunchDocumentsByProject,
+  findOneSpecificationTestResults,
+  findOneSpecification,
+  findQualityInspectionRouting,
+  findItemSpecificationDetails,
+  createIpAndIpds,
 };

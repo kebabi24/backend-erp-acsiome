@@ -200,7 +200,6 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users =[];
       var profiles = [];
-      console.log(user_mobile_code)
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });
@@ -221,11 +220,13 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       let adv_codes = [], pop_a_codes = [] , pop_c_codes = []
       
       promos.forEach(promo => {
-        console.log(promo)
         adv_codes.push(promo.adv_code)
         pop_a_codes.push(promo.pop_a_code)
         pop_c_codes.push(promo.pop_c_code)
       });
+
+      const products_promo = await userMobileServiceInstanse.getProductsOfPromo();
+      console.log(products_promo)
 
       const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes)
       const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes)
@@ -255,6 +256,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         profile_code: userMobile.profile_code,
       });
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
+      console.log(productPagesDetails)
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({user_mobile_code: user_mobile_code, status: 40});
       const loadRequestsLines = await userMobileServiceInstanse.getLoadRequestLines(loadRequest);
@@ -346,7 +348,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
-          products: products,
+          // products: products,
+         products: [...products,...products_promo],
           loadRequest: loadRequest,
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
@@ -402,7 +405,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoiceLine : invoiceLine,
           productPages: productPages,
           productPagesDetails: productPagesDetails,
-          products: products,
+          // products: products,
+           products: [...products,...products_promo],
           loadRequest: loadRequest,
           loadRequestsLines: loadRequestsLines,
           loadRequestsDetails: loadRequestsDetails,
@@ -429,10 +433,10 @@ const getDataBack = async function(socket) {
   // logger.debug("Calling user mobile login endpoint")
 
   // itineraries_customers
-  var nb_visits 
-  var nb_invoice
-  var nb_products_sold
-  var nb_clients_created
+  var nb_visits ;
+  var nb_invoice;
+  var nb_products_sold;
+  var nb_clients_created;
 
  
 
@@ -451,7 +455,7 @@ const getDataBack = async function(socket) {
     console.log(Object.keys(data))
 
     var {nb_clients_itin,nb_products_loaded,sum_invoice} = data
-
+    nb_clients_itin = 5 , nb_products_loaded = 8 ,sum_invoice = 8
     //  USER MOBILE  
     if(data.userMobile){
       console.log("UPDATING USER MOBILE")
@@ -630,7 +634,6 @@ const getDataBack = async function(socket) {
       console.log("LOAD REQUESTS STATUS 50 UPDATE END")
       console.log("LOAD REQUESTS STATUS -10 UPDATE")
       if(loadRequestM10.length >0){
-        console.log(loadRequestM10)
         for(const load of loadRequestM10){
           const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, -10)
         }
@@ -723,6 +726,7 @@ const getDataBack = async function(socket) {
         service.nb_clients_created = nb_clients_created 
         service.nb_products_loaded= nb_products_loaded
         service.sum_invoice = sum_invoice 
+        console.log(service)
         const createdService = await userMobileServiceInstanse.createService(service)
         console.log("CREATING SERVICE END")
     }
