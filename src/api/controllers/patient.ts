@@ -1,5 +1,6 @@
 import PatientService from '../../services/patient';
 import PatientDetailService from '../../services/patient-detail';
+import PatientDetailTreatmentService from '../../services/patient-detail-treatment';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
@@ -13,8 +14,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const patientServiceInstance = Container.get(PatientService);
     const patientDetailServiceInstance = Container.get(PatientDetailService);
-  
-    const { Patient, patientDetail  } = req.body;
+    const patientDetailTreatmentServiceInstance = Container.get(PatientDetailTreatmentService);
+    const { Patient, patientDetail, patientDetailTreatment  } = req.body;
   //  console.log(patientDetail);
     const patient = await patientServiceInstance.create({
       ...Patient,
@@ -32,6 +33,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
       };
       await patientDetailServiceInstance.create(entry);
+    }
+    
+    for (let entry of patientDetailTreatment) {
+      entry = {
+        ...entry,
+        patdt_domain: user_domain,
+        patdt_code: Patient.pat_code,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+      };
+      await patientDetailTreatmentServiceInstance.create(entry);
     }
     return res.status(201).json({ message: 'created succesfully', data: patient });
   } catch (e) {
