@@ -7,7 +7,10 @@ export default class QualityControl {
   constructor(
     @Inject('specificationModel') private specificationModel: Models.specificationModel,
     @Inject('specificationDetailsModel') private specificationDetailsModel: Models.specificationDetailsModel,
+    @Inject('SpecificationTestResultsModel') private specificationTestResultsModel: Models.SpecificationTestResultsModel,
     @Inject('specificationTestHistoryModel')  private specificationTestHistoryModel: Models.SpecificationTestHistoryModel,
+    @Inject('qualityInspectionRoutingDetailsModel')  private qualityInspectionRoutingDetailsModel: Models.QualityInspectionRoutingDetailsModel,
+    @Inject('itemSpecificationDetailsModel')  private itemSpecificationDetailsModel: Models.itemSpecificationDetailsModel,
     @Inject('pjdDetailsModel') private pjdDetailsModel: Models.PjdDetailsModel,
     @Inject('codeModel') private codeModel: Models.CodeModel,
    
@@ -141,5 +144,75 @@ export default class QualityControl {
     }
   }
 
+
+   public async getSpecificationTestResult(query : any): Promise<any> {
+     try {
+       const specs = await this.specificationTestResultsModel.findAll({
+         where : query
+       });
+       this.logger.silly('find specs ');
+       return specs;
+     } catch (e) {
+       this.logger.error(e);
+       throw e;
+     }
+   }
+
+
+   public async findSpecification(query: any): Promise<any> {
+    try {
+      const specification = await this.specificationModel.findOne({ where: query });
+      this.logger.silly('find one specification');
+      return specification;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findQualityInspectionRouting(query: any): Promise<any> {
+    try {
+      const qualityInspection = await this.qualityInspectionRoutingDetailsModel.findOne({ where: query });
+      this.logger.silly('find one qualityInspection');
+      return qualityInspection;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findItemSpecificationDetails(query: any): Promise<any> {
+    try {
+      const itemSpecDetails = await this.itemSpecificationDetailsModel.findAll({ where: query });
+      this.logger.silly('find one itemSpecDetails');
+      return itemSpecDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
+  public async createIp(data: any): Promise<any> {
+    try {
+      const ip = await this.specificationTestResultsModel.create({ ...data });
+      this.logger.silly('ip created ', ip);
+      return ip;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async createIpds(data: any): Promise<any> {
+    try {
+      const ipds = await this.itemSpecificationDetailsModel.bulkCreate(data);
+      this.logger.silly('ipds created ', ipds);
+      return ipds;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
 }

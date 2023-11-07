@@ -17,4 +17,11 @@ export default (app: Router) => {
   route.post('/getspecmpd', controller.getSpecificationsDetails);
   route.post('/addSensibilisationData', controller.addSensibilisationData);
   route.post('/addIdentificationData', controller.addIdentificationData);
+  
+  route.post('/getSpecTestResults', controller.findOneSpecificationTestResults);
+  route.post('/findItemSpecificationDetails', controller.findItemSpecificationDetails);
+  route.post('/getSpecification', controller.findOneSpecification);
+  route.post('/findInspectionRouting', controller.findQualityInspectionRouting);
+
+  route.post('/createIpAndIpds', controller.createIpAndIpds);
 };

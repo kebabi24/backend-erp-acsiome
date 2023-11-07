@@ -11,7 +11,7 @@ const sequelize = Container.get("sequelize")
 //  ipd_det
 
 const ItemSpecificationDetails = sequelize.define(
-    "ItemSpecificationDetails",
+    "itemSpecificationDetails",
     {   
         id:{
             type: Sequelize.INTEGER,

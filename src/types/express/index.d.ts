@@ -172,10 +172,10 @@ declare global {
     export type specificationModel = S.Model;
     export type specificationDetailsModel = S.Model;
     export type SpecificationTestResultsModel = S.Model;
-    export type ItemSpecificationDetailsModel = S.Model;
+    export type itemSpecificationDetailsModel = S.Model;
     export type SpecificationTestHistoryModel = S.Model;
     export type QualityTestBillDetails = S.Model;
-    export type QualityInspectionRoutingDetails = S.Model;
+    export type QualityInspectionRoutingDetailsModel = S.Model;
     export type EmployeScoreModel = S.Model;
     export type EmployeTimeModel = S.Model;
     export type EmployeSalaryModel = S.Model;
@@ -208,6 +208,14 @@ declare global {
     export type AssociationModel = S.Model;
     export type DoctorModel = S.Model;
     export type LocationDeclaredModel = S.Model;
-    
+
+
+    export type QuotaModel = S.Model;
+    export type QuotaLineModel = S.Model;
+    export type SalesOrderModel = S.Model;
+    export type SalesOrderLineModel = S.Model;
+
+
+   
   }
 }
