@@ -251,6 +251,7 @@ export default async ({ expressApp }) => {
       { name: 'associationModel', model: require('../models/association').default },
       { name: 'doctorModel', model: require('../models/doctor').default },
       { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
+      { name: 'patientDetailTreatmentModel', model: require('../models/patient-detail-treatment').default },
      
       { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
       { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
@@ -1027,8 +1028,17 @@ export default async ({ expressApp }) => {
     foreignKey: 'ldd_part',
     targetKey: 'pt_part',
   });
+  require('../models/patient').default.hasOne(require('../models/patient-detail-treatment').default, {
+    foreignKey: 'patdt_code',
+    sourceKey: 'pat_code',
+  });
+  require('../models/patient-detail-treatment').default.belongsTo(require('../models/patient').default, {
+    foreignKey: 'patdt_code',
+    targetKey: 'pat_code',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
+    await sequelizeConnection.sync();
  // await sequelizeConnection.sync();
 
   // await sequelizeConnection

@@ -105,6 +105,7 @@ import transportcost from './routes/transportcost';
 import costlist from './routes/costlist';
 import promotion from './routes/promotion';
 import accountUnplanifed from './routes/account-unplanifed';
+import sendMail from './routes/send-mail';
 import patient from './routes/patient';
 import association from './routes/association';
 import doctor from './routes/doctor';
@@ -216,6 +217,8 @@ export default () => {
   costlist(app);
   promotion(app);
   accountUnplanifed(app);
+  sendMail(app);
+
   patient(app);
   association(app);
   doctor(app);
