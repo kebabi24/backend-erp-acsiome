@@ -1101,7 +1101,8 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
     payments.forEach(async payment => {
       const service = await userMobileServiceInstance.getService({service_code : payment.dataValues.service_code})
-      payment.dataValues.nb_visits = service.sum_nb_visits
+      // payment.dataValues.nb_visits = service.sum_nb_visits
+      payment.dataValues.nb_visits = 0
     });
     const filtered_payments = _.mapValues(_.groupBy(payments, 'customer_code'));
 
@@ -1234,12 +1235,19 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
     services.forEach(service => {
       
-      sum_nb_visits += service.nb_visits
-      sum_nb_clients += service.nb_clients_itin
-      sum_invoice_amount += service.sum_invoice
-      sum_nb_invoices += service.nb_invoice
-      sum_nb_products_sold += service.nb_products_sold
-      sum_nb_clients_created += service.nb_clients_created
+      // sum_nb_visits += service.nb_visits
+      // sum_nb_clients += service.nb_clients_itin
+      // sum_invoice_amount += service.sum_invoice
+      // sum_nb_invoices += service.nb_invoice
+      // sum_nb_products_sold += service.nb_products_sold
+      // sum_nb_clients_created += service.nb_clients_created
+
+      sum_nb_visits += 1
+      sum_nb_clients += 1
+      sum_invoice_amount +=1
+      sum_nb_invoices += 1
+      sum_nb_products_sold += 1
+      sum_nb_clients_created += 1
 
     });
 
@@ -1270,9 +1278,11 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
       distribution_rate_data.push({
         role_code : service.role_code,
-        nb_products_sold : service.nb_products_sold, 
+        nb_products_sold : 0, 
+        // nb_products_sold : service.nb_products_sold, 
         nb_products : items.length,
-         nb_products_loaded : service.nb_products_loaded
+        // nb_products_loaded : service.nb_products_loaded
+        nb_products_loaded : 0
       })
 
      //****************** 4 */ later  
@@ -1280,6 +1290,7 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
      //*****************  5 below 
      //****************** 6 */
+     service.nb_visits  = 1
      ca_itin_data.push({
        role_code : service.role_code,
        ca_iti : parseFloat(((sum_invoice_amount / service.nb_visits)).toFixed(2))

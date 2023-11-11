@@ -14,7 +14,7 @@ const WorkCenter = sequelize.define(
             unique: true
 
         },
-        wc_wkctr: Sequelize.STRING,
+    wc_wkctr: Sequelize.STRING,
 	wc_desc: Sequelize.STRING,
 	wc_dept: Sequelize.STRING,
 	wc__qad01: {type: Sequelize.DECIMAL, defaultValue : 0 },
