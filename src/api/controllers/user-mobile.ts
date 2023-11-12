@@ -211,6 +211,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods()
       const messages = await userMobileServiceInstanse.getMessages(role.role_code)
+      const barCodesInfo = await userMobileServiceInstanse.findAllBarCodes()
       var role_controller = {};
       var profile_controller = {};
 
@@ -360,7 +361,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           promos : promos , 
           advantages : advantages , 
           populationsArticle : populationsArticle,
-          population:populationsCustomer
+          population:populationsCustomer,
+          barCodesInfo:barCodesInfo
         });
       }
       // service created by mobile user
@@ -417,7 +419,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           promos : promos , 
           advantages : advantages , 
           populationsArticle : populationsArticle,
-          population:populationsCustomer
+          population:populationsCustomer,
+          barCodesInfo:barCodesInfo
         });
       }
     }

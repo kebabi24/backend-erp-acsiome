@@ -44,6 +44,9 @@ export default class UserMobileService {
         @Inject("inventoryLineModel") private inventoryLineModel: Models.InventoryLineModel,
         @Inject("messagesModel") private messagesModel: Models.messagesModel,
         @Inject("domainModel") private domainModel: Models.DomainModel,
+        @Inject("barecodeInfosModel") private barecodeInfosModel: Models.barecodeInfosModel,
+
+        
         @Inject("logger") private logger
     ) {}
 
@@ -1368,6 +1371,17 @@ export default class UserMobileService {
         }
     }
 
+
+    public async findAllBarCodes(): Promise<any> {
+        try {
+            const barCodes = await this.barecodeInfosModel.findAll({ })
+            this.logger.silly("find All barCodes ")
+            return barCodes
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     
     
 
