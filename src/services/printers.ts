@@ -19,9 +19,9 @@ export default class printerService {
     }
   }
 
-  public async find(query: any): Promise<any> {
+  public async findPrinter(query: any): Promise<any> {
     try {
-      const printers = await this.printerModel.findAll({ where: query });
+      const printers = await this.printerModel.findOne({ where: query });
       this.logger.silly('find All users mstr');
       return printers;
     } catch (e) {

@@ -58,13 +58,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('CLIENT : ' + 'KAMEL', 20, 90)
+      .text('CLIENT : ' + req.body.lb_cust, 20, 90)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('ADRESSE :' + 'REGAHAIA', 20, 115)
+      .text('ADRESSE :' + req.body.lb_addr, 20, 115)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('TEL :' + '0778988767', 20, 140);
+      .text('TEL :' + req.body.lb_tel, 20, 140);
 
     // Define the second rectangle and its text lines
     doc
@@ -92,7 +92,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:' + req.body.lb_ref, 20, 320)
+      .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -100,7 +100,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: req.body.lb_ref, // Barcode data
+        text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -120,6 +120,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
+        console.log("create file")
         doc.pipe(fs.createWriteStream('output12.pdf'));
         doc.end();
       },
@@ -220,7 +221,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:' + req.body.lb_ref, 20, 320)
+      .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -228,7 +229,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: req.body.lb_ref, // Barcode data
+        text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,
@@ -345,7 +346,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       .stroke()
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:' + req.body.lb_ref, 20, 320)
+      .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('FABRIQUE EN ALGERIE', 75, 405);
@@ -353,7 +354,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: req.body.lb_ref, // Barcode data
+        text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
         includetext: true, // Include the barcode text
         height: 10,

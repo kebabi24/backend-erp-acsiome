@@ -214,6 +214,8 @@ declare global {
     export type QuotaLineModel = S.Model;
     export type SalesOrderModel = S.Model;
     export type SalesOrderLineModel = S.Model;
+    export type AudiometryModel = S.Model;
+    export type AudiogramModel = S.Model;
 
 
    

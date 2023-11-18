@@ -42,7 +42,21 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findByPrinter = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_domain } = req.headers;
+  console.log(req.body);
+  try {
+    const printerServiceInstance = Container.get(PrinterService);
+    const printers = await printerServiceInstance.findPrinter({ ...req.body });
+    console.log(printers)
+    return res.status(200).json({ message: 'fetched succesfully', data: printers });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all user endpoint');
@@ -51,6 +65,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const printerServiceInstance = Container.get(PrinterService);
     const printers = await printerServiceInstance.findByPrinters({ ...req.body });
+    console.log(printers)
     return res.status(200).json({ message: 'fetched succesfully', data: printers });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -89,4 +104,5 @@ export default {
   findAll,
   affectPrinters,
   findBy,
+  findByPrinter
 };
