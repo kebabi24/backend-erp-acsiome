@@ -60,6 +60,21 @@ const findOneSpecificationByCode = async (req: Request, res: Response, next: Nex
   }
 };
 
+const findSpecificationsBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const  {query}  = req.body;
+    console.log(query)
+    const specifications = await specificationService.findSpecificationsBy(query);
+    return res.status(200).json({ message: 'found  specifications', data: { specifications } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const getSpecificationsCodes = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling getSpecificationsCodes endpoint');
@@ -276,12 +291,12 @@ const findQualityInspectionRouting = async (req: Request, res: Response, next: N
 };
 
  const findItemSpecificationDetails = async (req: Request, res: Response, next: NextFunction) => {
-  console.log("heyyy")
    const logger = Container.get('logger');
    logger.debug('Calling findItemSpecificationDetails endpoint');
    try {
      const specificationService = Container.get(QualityControlService);
      const { query } = req.body;
+     console.log(query)
      const itemSpecDetails = await specificationService.findItemSpecificationDetails(query);
      return res.status(200).json({ message: 'found findItemSpecificationDetails', data: itemSpecDetails });
    } catch (e) {
@@ -317,6 +332,20 @@ const findQualityInspectionRouting = async (req: Request, res: Response, next: N
   }
 };
 
+const findQualityInspectionRoutesBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const specificationService = Container.get(QualityControlService);
+    const { query } = req.body;
+    const routes= await specificationService.findQualityInspectionRoutesBy(query);
+    return res.status(200).json({ message: 'found all routes', data: routes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
@@ -334,4 +363,6 @@ export default {
   findQualityInspectionRouting,
   findItemSpecificationDetails,
   createIpAndIpds,
+  findSpecificationsBy,
+  findQualityInspectionRoutesBy,
 };

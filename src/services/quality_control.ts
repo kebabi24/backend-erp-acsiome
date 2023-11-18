@@ -65,6 +65,19 @@ export default class QualityControl {
         }
     }
 
+    public async findSpecificationsBy(query: any): Promise<any> {
+      try {
+          const specifications = await this.specificationModel.findAll({
+               where: query ,
+              })
+          this.logger.silly("find specification details")
+          return specifications
+      } catch (e) {
+          this.logger.error(e)
+          throw e
+      }
+  }
+
   public async getSpecifications(): Promise<any> {
     try {
       const specifications = await this.specificationModel.findAll({
@@ -174,6 +187,17 @@ export default class QualityControl {
     try {
       const qualityInspection = await this.qualityInspectionRoutingDetailsModel.findOne({ where: query });
       this.logger.silly('find one qualityInspection');
+      return qualityInspection;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findQualityInspectionRoutesBy(query: any): Promise<any> {
+    try {
+      const qualityInspection = await this.qualityInspectionRoutingDetailsModel.findAll({ where: query });
+      this.logger.silly('find all quality inspection routes');
       return qualityInspection;
     } catch (e) {
       this.logger.error(e);
