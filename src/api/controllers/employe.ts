@@ -162,6 +162,20 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByOne = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeServiceInstance = Container.get(EmployeService);
+    const employe = await employeServiceInstance.findOne({ ...req.body, emp_domain: user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByTime = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
@@ -427,4 +441,5 @@ export default {
   update,
   deleteOne,
   findAvailable,
+  findByOne
 };

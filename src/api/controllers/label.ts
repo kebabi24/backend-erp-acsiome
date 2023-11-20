@@ -75,7 +75,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .text('PRODUIT :' + req.body.lb_desc, 20, 180)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('MICRONAGE/ LAIZE :' + 'INT', 20, 203)
+      .text('MICRONAGE/ LAIZE :' + '', 20, 203)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('QTE :' + req.body.lb_qty, 20, 228)
@@ -84,7 +84,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .text('N° Lot:' + req.body.lb_lot, 20, 253)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('GROUPE:' + req.body.lb_nbr, 20, 278);
+      .text('GROUPE:' + req.body.lb_grp, 20, 278);
 
     // Define the third rectangle and its text lines
     doc
