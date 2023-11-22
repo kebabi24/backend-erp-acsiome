@@ -42,7 +42,21 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findByPrinter = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_domain } = req.headers;
+  console.log(req.body);
+  try {
+    const printerServiceInstance = Container.get(PrinterService);
+    const printers = await printerServiceInstance.findPrinter({ ...req.body });
+    console.log(printers)
+    return res.status(200).json({ message: 'fetched succesfully', data: printers });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all user endpoint');
@@ -51,7 +65,20 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const printerServiceInstance = Container.get(PrinterService);
     const printers = await printerServiceInstance.findByPrinters({ ...req.body });
-    return res.status(200).json({ message: 'fetched succesfully', data: printers });
+
+let result=[]    
+    console.log(printers)
+ for(let printer of printers) {
+  const pr = await printerServiceInstance.findPrinter({printer_code: printer.printer_code})
+ let obj = {
+  id: printer.id,
+  usrd_code : printer.usrd_code,
+  printer_code: printer.printer_code,
+  printer_path:  pr.printer_path,
+ }
+result.push(obj)
+ }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -89,4 +116,5 @@ export default {
   findAll,
   affectPrinters,
   findBy,
+  findByPrinter
 };

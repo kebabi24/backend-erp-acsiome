@@ -10,4 +10,5 @@ export default (app: Router) => {
   route.post('/affectPrinters', controller.affectPrinters);
   route.get('/', controller.findAll);
   route.post('/find', controller.findBy);
+  route.post('/findPrinter', controller.findByPrinter);
 };

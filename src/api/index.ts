@@ -110,6 +110,7 @@ import patient from './routes/patient';
 import association from './routes/association';
 import doctor from './routes/doctor';
 import locationDeclared from './routes/location-declared';
+import audiometry from './routes/audiometry';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -223,5 +224,6 @@ export default () => {
   association(app);
   doctor(app);
   locationDeclared(app);
+  audiometry(app);
   return app;
 };

@@ -83,7 +83,9 @@ const Label = sequelize.define(
     lb_tel: Sequelize.STRING,
     lb_rmks: Sequelize.STRING,
     lb_ld_status: Sequelize.STRING,
+    lb_grp: Sequelize.STRING,
     lb_domain: Sequelize.STRING,
+  
 
     ...base,
   },

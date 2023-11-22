@@ -130,6 +130,14 @@ export default async ({ expressApp }) => {
       { name: 'employeJobModel', model: require('../models/employe-job').default },
       { name: 'dealModel', model: require('../models/deal').default },
       { name: 'employeSalaryModel', model: require('../models/employe-salary').default },
+      { name: 'patientModel', model: require('../models/patient').default },
+      { name: 'patientDetailModel', model: require('../models/patient-detail').default },
+      { name: 'associationModel', model: require('../models/association').default },
+      { name: 'doctorModel', model: require('../models/doctor').default },
+      { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
+      { name: 'patientDetailTreatmentModel', model: require('../models/patient-detail-treatment').default },
+      { name: 'audiometryModel', model: require('../models/audiometry').default },
+      { name: 'audiogramModel', model: require('../models/audiogram').default },
       // mobile models
       // MOBILE DATABASE MODELS
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
@@ -246,12 +254,6 @@ export default async ({ expressApp }) => {
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
-      { name: 'patientModel', model: require('../models/patient').default },
-      { name: 'patientDetailModel', model: require('../models/patient-detail').default },
-      { name: 'associationModel', model: require('../models/association').default },
-      { name: 'doctorModel', model: require('../models/doctor').default },
-      { name: 'locationDeclaredModel', model: require('../models/location-declared').default },
-      { name: 'patientDetailTreatmentModel', model: require('../models/patient-detail-treatment').default },
      
       { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
       { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
@@ -1038,6 +1040,26 @@ export default async ({ expressApp }) => {
     foreignKey: 'patdt_code',
     targetKey: 'pat_code',
   });
+
+  require('../models/patient').default.hasOne(require('../models/audiometry').default, {
+    foreignKey: 'aud_pat_code',
+    sourceKey: 'pat_code',
+  });
+  require('../models/audiometry').default.belongsTo(require('../models/patient').default, {
+    foreignKey: 'aud_pat_code',
+    targetKey: 'pat_code',
+  });
+
+  require('../models/audiometry').default.hasOne(require('../models/audiogram').default, {
+    foreignKey: 'audd_code',
+    sourceKey: 'aud_code',
+  });
+  require('../models/audiogram').default.belongsTo(
+    require('../models/audiometry').default,
+    { foreignKey: 'audd_code',
+     targetKey: 'aud_code' },
+  );
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
