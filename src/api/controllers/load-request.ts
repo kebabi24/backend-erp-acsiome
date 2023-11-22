@@ -315,7 +315,7 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
         // LOAD REQUESTS DETAILS
         let loadRequestsDetails =[]
         if(loadRequestsCodes.length >0){
-        const loadRequestsDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(loadRequestsCodes)
+         loadRequestsDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(loadRequestsCodes)
         }
         
         return res
@@ -543,7 +543,7 @@ export default {
     findLoadRequestsBetweenDates,
     findAllLoadRequestLinesDetails,
     getLoadRequestCreationData,
-    createLoadRequestAndLines
+    createLoadRequestAndLines,
 }
 
 // validation 0-10   

@@ -258,6 +258,8 @@ export default async ({ expressApp }) => {
       
       { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
+
+      { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
     
     ],
   });
@@ -1038,8 +1040,8 @@ export default async ({ expressApp }) => {
   });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //  await sequelizeConnection.sync();
- // await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
 
   // await sequelizeConnection
   //   .sync({ alter: true })

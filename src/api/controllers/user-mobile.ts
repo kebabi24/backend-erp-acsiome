@@ -1104,8 +1104,9 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
     payments.forEach(async payment => {
       const service = await userMobileServiceInstance.getService({service_code : payment.dataValues.service_code})
-      // payment.dataValues.nb_visits = service.sum_nb_visits
-      payment.dataValues.nb_visits = 0
+      if(service != null){
+        payment.dataValues.nb_visits = service.nb_visits
+      }
     });
     const filtered_payments = _.mapValues(_.groupBy(payments, 'customer_code'));
 
@@ -1281,11 +1282,11 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
 
       distribution_rate_data.push({
         role_code : service.role_code,
-        nb_products_sold : 0, 
-        // nb_products_sold : service.nb_products_sold, 
+        // nb_products_sold : 0, 
+         nb_products_sold : service.nb_products_sold, 
         nb_products : items.length,
-        // nb_products_loaded : service.nb_products_loaded
-        nb_products_loaded : 0
+         nb_products_loaded : service.nb_products_loaded
+        // nb_products_loaded : 0
       })
 
      //****************** 4 */ later  

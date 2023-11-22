@@ -203,19 +203,20 @@ declare global {
     export type populationClientPromoModel = S.Model;
 
     export type AccountUnplanifedModel = S.Model;
-    export type PatientModel = S.Model;
-    export type PatientDetailModel = S.Model;
     export type AssociationModel = S.Model;
-    export type DoctorModel = S.Model;
     export type LocationDeclaredModel = S.Model;
-
-
+    
+    
     export type QuotaModel = S.Model;
     export type QuotaLineModel = S.Model;
     export type SalesOrderModel = S.Model;
     export type SalesOrderLineModel = S.Model;
-
-
+    
+    export type PatientModel = S.Model;
+    export type PatientDetailModel = S.Model;
+    export type DoctorModel = S.Model;
+    export type calendarTimingModel = S.Model;
+    
    
   }
 }

@@ -3,8 +3,8 @@ import { Service, Inject, Container } from 'typedi';
 @Service()
 export default class patientService {
   constructor(
-    @Inject('patientModel')
-    private patientModel: Models.PatientModel,
+    @Inject('patientModel') private patientModel: Models.PatientModel,
+    @Inject('calendarTimingModel') private calendarTimingModel: Models.calendarTimingModel,
     @Inject('logger') private logger,
   ) {}
 
@@ -78,6 +78,19 @@ export default class patientService {
       }
       this.logger.silly('update one emp mstr');
       return emp;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findCalendarTiming(query: any): Promise<any> {
+    try {
+      const timing = await this.calendarTimingModel.findAll({
+        where: query,
+      });
+      this.logger.silly('find All timing ');
+      return timing;
     } catch (e) {
       this.logger.error(e);
       throw e;
