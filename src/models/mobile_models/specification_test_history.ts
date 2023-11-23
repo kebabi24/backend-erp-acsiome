@@ -32,6 +32,7 @@ const SpecificationTestHistory = sequelize.define(
         mph_pass:{ type:Sequelize.BOOLEAN}, // yes or no (result)
         mph_testmthd:{ type:Sequelize.STRING},
         mph_attribute:{ type:Sequelize.STRING}, // educator
+        mph_cmt :  {type:Sequelize.STRING},
         
         mph_user1:{ type:Sequelize.STRING},
         mph_user2:{ type:Sequelize.STRING},

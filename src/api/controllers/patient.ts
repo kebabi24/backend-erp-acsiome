@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
 import { Op } from 'sequelize';
+import _ from 'lodash';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -226,6 +227,34 @@ const findOneByPhone = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const findFreeSessions = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  
+  
+  try {
+    const patientServiceInstance = Container.get(PatientService);
+    const sessions = await patientServiceInstance.findCalendarTiming({status : "free" });
+
+    const grouped_sessions = _.mapValues(_.groupBy(sessions, 'date'));
+    const general_data = [];
+        for (const [key, value] of Object.entries(grouped_sessions)) {
+          
+          general_data.push({
+            "date" : key,
+            "nb_sessions" :value.length, 
+            "sessions" : value
+          })
+    
+    } 
+   
+    return res.status(200).json({ message: 'fetched succesfully', data: general_data });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 
 export default {
   create,
@@ -235,5 +264,7 @@ export default {
   update,
   deleteOne,
   findOneByPhone,
-  createPatient
+  createPatient,
+  findFreeSessions,
+
 };

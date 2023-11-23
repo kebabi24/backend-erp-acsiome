@@ -7,6 +7,7 @@ export default (app: Router) => {
     app.use("/patients", route)
 
     route.get("/", controller.findAll)
+    route.get("/freeSessions", controller.findFreeSessions)
     route.post("/find", controller.findBy)
     route.post("/", controller.create)
     route.post("/createPatient", controller.createPatient)
