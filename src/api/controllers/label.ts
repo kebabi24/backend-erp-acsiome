@@ -49,53 +49,57 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const image = doc.openImage('./edel.jpg');
 
     // Draw the barcode image on the PDF document
-    doc.image(image, 50, 0, {
-      fit: [180, 150], // Adjust the size of the barcode image as needed
-    });
+    //doc.image(image, 50, 0, {
+    //  fit: [180, 150], // Adjust the size of the barcode image as needed
+   // });
 
     doc
-      .rect(10, 80, 265, 80)
-      .stroke()
+      //.rect(10, 80, 265, 80)
+      //.stroke()
+      //.font('Helvetica-Bold')
+      //.fontSize(12)
+      .text('FOURNISSEUR : ' + req.body.lb_cust, 20, 200)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('CLIENT : ' + req.body.lb_cust, 20, 90)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('ADRESSE :' + req.body.lb_addr, 20, 115)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('TEL :' + req.body.lb_tel, 20, 140);
+      .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 220)
+      //.text('ADRESSE :' + req.body.lb_addr, 20, 115)
+      //.font('Helvetica-Bold')
+      //.fontSize(12)
+      //.text('TEL :' + req.body.lb_tel, 20, 140);
 
     // Define the second rectangle and its text lines
     doc
-      .rect(10, 170, 265, 130)
-      .stroke()
+      //.rect(10, 170, 265, 130)
+      //.stroke()
+      //.font('Helvetica-Bold')
+      //.fontSize(12)
+      .text('PRODUIT :' + req.body.lb_desc, 20, 240)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('PRODUIT :' + req.body.lb_desc, 20, 180)
+        .text('Code :' + '', 20, 260)
+        .font('Helvetica-Bold')
+        .fontSize(12)
+      //.text('MICRONAGE/ LAIZE :' + '', 20, 223)
+      //.font('Helvetica-Bold')
+      //.fontSize(12)
+      .text('QTE :' + req.body.lb_qty + ' KG', 20, 280)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('MICRONAGE/ LAIZE :' + '', 20, 203)
+      .text('N° Lot:' + req.body.lb_lot, 20, 300)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('QTE :' + req.body.lb_qty, 20, 228)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('N° Lot:' + req.body.lb_lot, 20, 253)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('GROUPE:' + req.body.lb_grp, 20, 278);
-
+      .text('QUALITE:' + '', 20, 320);
+      
     // Define the third rectangle and its text lines
     doc
-      .rect(10, 310, 265, 70)
-      .stroke()
+      //.rect(10, 310, 265, 70)
+      //.stroke()
+      //.font('Helvetica-Bold')
+      //.fontSize(12)
+      .text('BARCODE:' + labelId, 20, 340)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('BARCODE:' + labelId, 20, 320)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('FABRIQUE EN ALGERIE', 75, 405);
+      //.text('FABRIQUE EN ALGERIE', 75, 405);
 
     bwipjs.toBuffer(
       {
@@ -116,7 +120,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const image = doc.openImage(png);
 
         // Draw the barcode image on the PDF document
-        doc.image(image, 50, 335, {
+        doc.image(image, 50, 365, {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
@@ -127,8 +131,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     );
 
     const filePath = './output12.pdf';
-    const printerName = req.body.lb_printer;
-
+    const printerName = '\\\\10.10.130.99\\printer99';
+    console.log(printerName)
     printer
       .print(filePath, { printer: printerName })
       .then(() => {
@@ -308,7 +312,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
 
-    // Draw the barcode image on the PDF document
+    //Draw the barcode image on the PDF document
     doc.image(image, 50, 0, {
       fit: [180, 150], // Adjust the size of the barcode image as needed
     });
