@@ -26,4 +26,5 @@ export default (app: Router) => {
   route.post('/findInspectionRoutesBy', controller.findQualityInspectionRoutesBy);
 
   route.post('/createIpAndIpds', controller.createIpAndIpds);
+  route.post('/createQroAndQps', controller.createQroAndQps);
 };
