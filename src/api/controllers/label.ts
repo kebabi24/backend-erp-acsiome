@@ -124,15 +124,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
+        const filename = labelId + '.pdf';
         console.log("create file")
+        doc.pipe(fs.createWriteStream(filename));
         doc.pipe(fs.createWriteStream('output12.pdf'));
         doc.end();
       },
     );
-
+    
     const filePath = './output12.pdf';
-    const printerName = '\\\\10.10.130.99\\printer99';
-    console.log(printerName)
+    
+    const printerName = req.body.lb_printer ;
     printer
       .print(filePath, { printer: printerName })
       .then(() => {
