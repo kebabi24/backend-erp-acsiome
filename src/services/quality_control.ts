@@ -9,8 +9,9 @@ export default class QualityControl {
     @Inject('specificationDetailsModel') private specificationDetailsModel: Models.specificationDetailsModel,
     @Inject('SpecificationTestResultsModel') private specificationTestResultsModel: Models.SpecificationTestResultsModel,
     @Inject('specificationTestHistoryModel')  private specificationTestHistoryModel: Models.SpecificationTestHistoryModel,
-    @Inject('qualityInspectionRoutingDetailsModel')  private qualityInspectionRoutingDetailsModel: Models.QualityInspectionRoutingDetailsModel,
     @Inject('itemSpecificationDetailsModel')  private itemSpecificationDetailsModel: Models.itemSpecificationDetailsModel,
+    @Inject('qualityInspectionRoutingDetailsModel')  private qualityInspectionRoutingDetailsModel: Models.QualityInspectionRoutingDetailsModel,
+    @Inject('qualityTestBillDetailsModel')  private qualityTestBillDetailsModel: Models.QualityTestBillDetails, // qps
     @Inject('pjdDetailsModel') private pjdDetailsModel: Models.PjdDetailsModel,
     @Inject('codeModel') private codeModel: Models.CodeModel,
    
@@ -39,6 +40,8 @@ export default class QualityControl {
       throw e;
     }
   }
+
+  
 
   public async findSpecificationByCode(data: any): Promise<any> {
     try {
@@ -233,6 +236,29 @@ export default class QualityControl {
       const ipds = await this.itemSpecificationDetailsModel.bulkCreate(data);
       this.logger.silly('ipds created ', ipds);
       return ipds;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async createQro(data: any): Promise<any> {
+    try {
+      const qro = await this.qualityInspectionRoutingDetailsModel.create({ ...data });
+      this.logger.silly('qro created ', qro);
+      return qro;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  
+  public async createQps(data: any): Promise<any> {
+    try {
+      const qps = await this.qualityTestBillDetailsModel.bulkCreate(data);
+      this.logger.silly('qps created ', qps);
+      return qps;
     } catch (e) {
       this.logger.error(e);
       throw e;

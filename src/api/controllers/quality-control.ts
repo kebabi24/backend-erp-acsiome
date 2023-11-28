@@ -346,6 +346,34 @@ const findQualityInspectionRoutesBy = async (req: Request, res: Response, next: 
   }
 };
 
+const createQroAndQps  = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  logger.debug('Calling Create productPage endpoint with body: %o', req.body);
+  try {
+    const specificationService = Container.get(QualityControlService);
+    
+
+    const {qroData ,qpsData} = req.body;
+    const{user_domain} = req.headers
+
+    
+    const qro = await specificationService.createQro({...qroData ,qro_domain : user_domain});
+    
+    qpsData.forEach(qps => {
+      qps.qps_domain = user_domain
+      delete qps.id
+     });
+    const qpss = await specificationService.createQps(qpsData);
+
+
+    return res.status(201).json({ message: 'created succesfully', data: { qro , qpss } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
@@ -365,4 +393,5 @@ export default {
   createIpAndIpds,
   findSpecificationsBy,
   findQualityInspectionRoutesBy,
+  createQroAndQps,
 };
