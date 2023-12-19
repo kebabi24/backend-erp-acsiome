@@ -100,7 +100,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const toolServiceInstance = Container.get(ToolService)
-        const tools = await toolServiceInstance.find({tod_domain: user_domain})
+        const tools = await toolServiceInstance.find({to_domain: user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: tools })

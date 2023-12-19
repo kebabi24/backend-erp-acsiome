@@ -73,7 +73,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all user endpoint');
-  try {
+  try {             
     const userMobileServiceInstance = Container.get(UserMobileService);
     const users = await userMobileServiceInstance.find({ ...req.body });
     return res.status(200).json({ message: 'fetched succesfully', data: users });
