@@ -47,6 +47,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
+    const time = new Date().toLocaleTimeString()
 
     // Draw the barcode image on the PDF document
     doc.image(image, 50, 0, {
@@ -95,8 +96,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('FABRIQUE EN ALGERIE', 75, 405);
-
+      .text('FABRIQUE EN ALGERIE', 75, 405)
+      .text('Time:' + time, 180, 320);
+     
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
@@ -182,6 +184,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
+    const time = new Date().toLocaleTimeString()
 
     // Draw the barcode image on the PDF document
     doc.image(image, 50, 0, {
@@ -224,7 +227,9 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('FABRIQUE EN ALGERIE', 75, 405);
+      .text('FABRIQUE EN ALGERIE', 75, 405)
+      .text('Time:' + time, 80, 320);
+     
 
     bwipjs.toBuffer(
       {
@@ -421,6 +426,67 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findByAll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    const label = await labelServiceInstance.find({
+      ...req.body,
+      lb_domain: user_domain,
+    });
+  //  console.log(label)
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data:  label ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const addAllocation = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  //console.log(req.body);
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    
+    for(let obj of req.body.detail) {
+    const labels = await labelServiceInstance.update({
+      lb__chr01: req.body.wodlot,
+      lb__log01: true,
+      lb_actif : true,
+      last_modified_by: user_code, last_modified_ip_adr: req.headers.origin 
+    },{
+      lb_part: obj.wod_part,
+      lb_addr: obj.adresse,
+      lb_actif: false,
+      lb_domain: user_domain,
+    });
+
+
+   }
+  //  console.log(label)
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data:  req.body.wodlot ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  job endpoint');
@@ -502,7 +568,9 @@ export default {
   create,
   createProd,
   createPAL,
+  addAllocation,
   findBy,
+  findByAll,
   findOne,
   findAll,
   update,

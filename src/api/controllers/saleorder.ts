@@ -20,6 +20,8 @@ import ItemService from '../../services/item';
 import LocationDetail from '../../models/location-detail';
 import workOrderService from '../../services/work-order';
 import { isNull } from 'lodash';
+import WorkRouting from '../../models/workrouting';
+import workroutingService from '../../services/workrouting';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -827,7 +829,7 @@ const findAllSoJob = async (req: Request, res: Response, next: NextFunction) => 
     const itemServiceInstance = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(locationDetailService)
     const workOrderServiceInstance = Container.get(workOrderService)
-    
+    const workRoutingServiceInstance = Container.get(workroutingService)
 const orders = await saleOrderDetailServiceInstance.findgrp({
   where: {
     sod_domain: user_domain,
@@ -851,7 +853,7 @@ for (let ord of orders) {
     let qtyonstok = 0
     let qtyonprod = 0
     const items = await itemServiceInstance.findOne({ pt_part: ord.sod_part });
- 
+    const gamme = await workRoutingServiceInstance.findOne({ ro_routing: items.pt_routing });
     const ld = await locationDetailServiceInstance.findSpecial({
       where: {
         ld_domain:user_domain,
@@ -882,6 +884,7 @@ for (let ord of orders) {
     desc1: items.pt_desc1,
     nomo: items.pt_bom_code,
     gamme: items.pt_routing,
+    bo_chg: gamme.ro_batch,
     qtyoh: qtyonstok,
     sfty_qty: items.pt_sfty_stk,
     qtylanch: qtyonprod,

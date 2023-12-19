@@ -9,9 +9,11 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.post('/prod', controller.createProd);
   route.post('/prodpal', controller.createPAL);
+  route.post('/allocation', controller.addAllocation);
   route.get('/', controller.findAll);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
+  route.post('/findby', controller.findByAll);
   route.put('/:id', controller.update);
   route.post('/upd', controller.updated);
 };

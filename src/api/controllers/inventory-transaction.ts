@@ -7,7 +7,7 @@ import workOrderService from '../../services/work-order';
 import statusService from '../../services/inventory-status';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import { round } from 'lodash';
+import { round, toNumber } from 'lodash';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
 import workOrderDetailService from '../../services/work-order-detail';
@@ -26,6 +26,7 @@ import PosOrderDetail from '../../services/pos-order-detail-product';
 import LocationDetailService from '../../services/location-details';
 import AccountUnplanifedService from '../../services/account-unplanifed';
 import ProviderService from '../../services/provider';
+import { DECIMAL } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -169,12 +170,20 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
     const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
     const providerServiceInstance = Container.get(ProviderService);
 
-    let tot = 0
+    let tot = 0.00  
     for (const data of detail) {
-      tot = tot + (Number(data.tr_qty_loc) * Number(data.tr_price))
+      console.log(Number(data.tr_qty_loc) , Number(data.tr_price))
+       tot = tot + Number(data.tr_qty_loc) * Number(data.tr_price)
+     // tot = +10 * +100.020
+      console.log(tot)
     }
     if (it.tr_addr != null) {
-    const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
+    if(aufind) {
+    const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
+    } else {
+      const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    }
     const vd = await providerServiceInstance.findOne({vd_addr: it.tr_addr,vd_domain : user_domain,})
     if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(tot)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})  
     }
@@ -372,19 +381,19 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr ,ad_domain:user_domain});
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr ,ad_domain:user_domain});
 
-    const pdfData = {
-      detail: detail,
-      it: it,
-      nlot: nlot,
-      adr: addr,
-    };
+    // const pdfData = {
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    //   adr: addr,
+    // };
 
-    console.log('\n\n pdfData : ', pdfData);
-    const pdf = await generatePdf(pdfData, 'it-unp');
-    return res.status(200).json({ message: 'deleted succesfully', data: true, pdf: pdf.content });
+    // console.log('\n\n pdfData : ', pdfData);
+    // const pdf = await generatePdf(pdfData, 'it-unp');
+    return res.status(200).json({ message: 'deleted succesfully', data: true /*, pdf: pdf.content*/ });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
