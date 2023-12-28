@@ -12,22 +12,23 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
+  let filenamepdf = '';
 
   // doc.rect(0, 0, doc.page.width, doc.page.height).fill('black');
 
   // // Set the text color
   // doc.fillColor('white');
   logger.debug('Calling Create label endpoint');
-  console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
+  //console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
 
     const pageWidth = 284; // Width of the page in points
-    const pageHeight = 426; // Height of the page in points
+    const pageHeight = 284; // Height of the page in points
     var labelId = null;
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
-    console.log(seq);
+    
     labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
@@ -47,60 +48,62 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
+    const time = new Date().toLocaleTimeString()
 
     // Draw the barcode image on the PDF document
     //doc.image(image, 50, 0, {
     //  fit: [180, 150], // Adjust the size of the barcode image as needed
-   // });
+    //});
 
     doc
-      //.rect(10, 80, 265, 80)
-      //.stroke()
-      //.font('Helvetica-Bold')
-      //.fontSize(12)
-      .text('FOURNISSEUR : ' + req.body.lb_cust, 20, 200)
+    //  .rect(10, 80, 265, 80)
+    //  .stroke()
+    //  .font('Helvetica-Bold')
+    //  .fontSize(12)
+      .text('FOURNISSEUR : ' + req.body.lb_cust, 20, 18)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 220)
-      //.text('ADRESSE :' + req.body.lb_addr, 20, 115)
-      //.font('Helvetica-Bold')
-      //.fontSize(12)
-      //.text('TEL :' + req.body.lb_tel, 20, 140);
+      .text('DATE: ' + req.body.lb_date, 20, 58)
+    //.text('ADRESSE :' + req.body.lb_addr, 20, 115)
+    //  .font('Helvetica-Bold')
+    //  .fontSize(12)
+    //  .text('TEL :' + req.body.lb_tel, 20, 140);
 
     // Define the second rectangle and its text lines
     doc
-      //.rect(10, 170, 265, 130)
-      //.stroke()
-      //.font('Helvetica-Bold')
-      //.fontSize(12)
-      .text('PRODUIT :' + req.body.lb_desc, 20, 240)
+    //  .rect(10, 170, 265, 130)
+    //  .stroke()
+    //  .font('Helvetica-Bold')
+    //  .fontSize(12)
+      .text('PRODUIT :' + req.body.lb_desc, 20, 78)
       .font('Helvetica-Bold')
       .fontSize(12)
-        .text('Code :' + '', 20, 260)
-        .font('Helvetica-Bold')
-        .fontSize(12)
+      .text('CODE :' + '', 20, 118)
+      .font('Helvetica-Bold')
+      .fontSize(12)
       //.text('MICRONAGE/ LAIZE :' + '', 20, 223)
-      //.font('Helvetica-Bold')
-      //.fontSize(12)
-      .text('QTE :' + req.body.lb_qty + ' KG', 20, 280)
+    //  .font('Helvetica-Bold')
+    //  .fontSize(12)
+      .text('QTE :' + req.body.lb_qty + 'KG', 20, 138)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('N° Lot:' + req.body.lb_lot, 20, 300)
+      .text('N° Lot:' + req.body.lb_lot, 20, 158)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('QUALITE:' + '', 20, 320);
-      
+      .text('QUALITE:' , 20, 178);
+
     // Define the third rectangle and its text lines
     doc
       //.rect(10, 310, 265, 70)
       //.stroke()
-      //.font('Helvetica-Bold')
+     //.font('Helvetica-Bold')
       //.fontSize(12)
-      .text('BARCODE:' + labelId, 20, 340)
+      .text('BIGBAG N°:'  + req.body.lb__dec01, 20, 198)
       .font('Helvetica-Bold')
       .fontSize(12)
-      //.text('FABRIQUE EN ALGERIE', 75, 405);
-
+      //.text('FABRIQUE EN ALGERIE', 75, 405)
+      .text('HEURE:' + time, 180, 58);
+     
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
@@ -120,29 +123,45 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const image = doc.openImage(png);
 
         // Draw the barcode image on the PDF document
-        doc.image(image, 50, 365, {
+        doc.image(image, 50, 223, {
           fit: [5400, 40], // Adjust the size of the barcode image as needed
         });
         // Save the PDF document
-        const filename = labelId + '.pdf';
+        filenamepdf = './barcode/' + labelId + '.pdf';
         console.log("create file")
-        doc.pipe(fs.createWriteStream(filename));
-        doc.pipe(fs.createWriteStream('output12.pdf'));
+        doc.pipe(fs.createWriteStream(filenamepdf));
+        doc.pipe(fs.createWriteStream('./output12.pdf'));
         doc.end();
+          const filePath = './output12.pdf';
+    const printerName = req.body.lb_printer;
+  
+  fs.readFile(filePath,(err) =>{console.log(filePath,err);
+  if (err){ console.log('readfile completed');
+                  printer
+                  .print(filePath, { printer: printerName })
+                  .then(() => {
+                                console.log('Printing filepath completed.');
+                              })
+                  .catch(error => {
+                                console.error('Error while printing:', error);
+                              });
+                } else{console.log('readfile error');
+                printer
+                .print(filenamepdf, { printer: printerName })
+                .then(() => {
+                              console.log('Printing filenamepdf completed.');
+                            })
+                .catch(error => {
+                              console.error('Error while printing:', error);
+                            });}})
+     
       },
     );
+
+  
     
-    const filePath = './output12.pdf';
+   
     
-    const printerName = req.body.lb_printer ;
-    printer
-      .print(filePath, { printer: printerName })
-      .then(() => {
-        console.log('Printing completed.');
-      })
-      .catch(error => {
-        console.error('Error while printing:', error);
-      });
     return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
@@ -188,6 +207,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
+    const time = new Date().toLocaleTimeString()
 
     // Draw the barcode image on the PDF document
     doc.image(image, 50, 0, {
@@ -230,7 +250,9 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       .text('BARCODE:' + labelId, 20, 320)
       .font('Helvetica-Bold')
       .fontSize(12)
-      .text('FABRIQUE EN ALGERIE', 75, 405);
+      .text('FABRIQUE EN ALGERIE', 75, 405)
+      .text('Time:' + time, 80, 320);
+     
 
     bwipjs.toBuffer(
       {
@@ -314,7 +336,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
 
-    //Draw the barcode image on the PDF document
+    // Draw the barcode image on the PDF document
     doc.image(image, 50, 0, {
       fit: [180, 150], // Adjust the size of the barcode image as needed
     });
@@ -427,6 +449,67 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findByAll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  console.log(req.body);
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    const label = await labelServiceInstance.find({
+      ...req.body,
+      lb_domain: user_domain,
+    });
+  //  console.log(label)
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data:  label ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const addAllocation = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  //console.log(req.body);
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    
+    for(let obj of req.body.detail) {
+    const labels = await labelServiceInstance.update({
+      lb__chr01: req.body.wodlot,
+      lb__log01: true,
+      lb_actif : true,
+      last_modified_by: user_code, last_modified_ip_adr: req.headers.origin 
+    },{
+      lb_part: obj.wod_part,
+      lb_addr: obj.adresse,
+      lb_actif: false,
+      lb_domain: user_domain,
+    });
+
+
+   }
+  //  console.log(label)
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data:  req.body.wodlot ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  job endpoint');
@@ -508,7 +591,9 @@ export default {
   create,
   createProd,
   createPAL,
+  addAllocation,
   findBy,
+  findByAll,
   findOne,
   findAll,
   update,
