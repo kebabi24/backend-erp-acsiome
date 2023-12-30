@@ -1203,27 +1203,6 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STD-CG',
       });
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_domain:user_domain,
-        tr_qty_chg: Number(item.tr_qty_loc),
-        tr_loc_begin: Number(qtyoh),
-        tr_type: 'RCT-WO',
-        tr_date: new Date(),
-        tr_mtl_std: sct.sct_mtl_tl,
-        tr_lbr_std: sct.sct_lbr_tl,
-        tr_bdn_std: sct.sct_bdn_tl,
-        tr_ovh_std: sct.sct_ovh_tl,
-        tr_sub_std: sct.sct_sub_tl,
-        tr_prod_line: pt.pt_prod_line,
-        tr_price : Number(sct.sct_cst_tot),
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
       const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
 
       if (wo)
@@ -1233,8 +1212,32 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
-          { id: wo.id },
-        );
+          { id: wo.id })
+          await inventoryTransactionServiceInstance.create({
+            ...item,
+            ...it,
+            tr_domain:user_domain,
+            tr_qty_chg: Number(item.tr_qty_loc),
+            tr_loc_begin: Number(qtyoh),
+            tr_type: 'RCT-WO',
+            tr_date: new Date(),
+            tr_mtl_std: sct.sct_mtl_tl,
+            tr_lbr_std: sct.sct_lbr_tl,
+            tr_bdn_std: sct.sct_bdn_tl,
+            tr_ovh_std: sct.sct_ovh_tl,
+            tr_sub_std: sct.sct_sub_tl,
+            tr_prod_line: pt.pt_prod_line,
+            tr_price : Number(sct.sct_cst_tot),
+            tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
+            tr_addr:wo.wo_routing,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        
+      
+      
     }
     return res.status(200).json({ message: 'Added succesfully', data: true });
   } catch (e) {
@@ -2406,6 +2409,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(itemService);
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
+    const workOrderServiceInstance = Container.get(workOrderService);
 
     for (const item of detail) {
       const sct = await costSimulationServiceInstance.findOne({
@@ -2434,28 +2438,32 @@ console.log("sct",sct)
           },
           { id: ld.id },
         );
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_domain: user_domain,
-        tr_gl_date: it.tr_effdate,
-        tr_qty_loc: -1 * Number(item.tr_qty_loc),
-        tr_qty_chg: -1 * Number(item.tr_qty_loc),
-        tr_loc_begin: Number(ld.ld_qty_oh),
-        tr_type: 'ISS-WO',
-        tr_date: new Date(),
-        tr_price: sct.sct_mtl_tl,
-        tr_mtl_std: sct.sct_mtl_tl,
-        tr_lbr_std: sct.sct_lbr_tl,
-        tr_bdn_std: sct.sct_bdn_tl,
-        tr_ovh_std: sct.sct_ovh_tl,
-        tr_sub_std: sct.sct_sub_tl,
-        tr_prod_line: pt.pt_prod_line,
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
+        const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+
+      if (wo)
+        await inventoryTransactionServiceInstance.create({
+         ...item,
+         ...it,
+         tr_domain: user_domain,
+         tr_addr:wo.wo_routing,
+         tr_gl_date: it.tr_effdate,
+         tr_qty_loc: -1 * Number(item.tr_qty_loc),
+         tr_qty_chg: -1 * Number(item.tr_qty_loc),
+         tr_loc_begin: Number(ld.ld_qty_oh),
+         tr_type: 'ISS-WO',
+         tr_date: new Date(),
+         tr_price: sct.sct_mtl_tl,
+         tr_mtl_std: sct.sct_mtl_tl,
+         tr_lbr_std: sct.sct_lbr_tl,
+         tr_bdn_std: sct.sct_bdn_tl,
+         tr_ovh_std: sct.sct_ovh_tl,
+         tr_sub_std: sct.sct_sub_tl,
+         tr_prod_line: pt.pt_prod_line,
+         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+         created_by: user_code,
+         created_ip_adr: req.headers.origin,
+         last_modified_by: user_code,
+         last_modified_ip_adr: req.headers.origin,
       });
   if( !isNaN(item.wodid)) {
         const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
