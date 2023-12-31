@@ -35,7 +35,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const printerServiceInstance = Container.get(PrinterService);
-    const printers = await printerServiceInstance.find({});
+    const printers = await printerServiceInstance.findByPrinters({});
     return res.status(200).json({ message: 'fetched succesfully', data: printers });
   } catch (e) {
     logger.error('🔥 error: %o', e);

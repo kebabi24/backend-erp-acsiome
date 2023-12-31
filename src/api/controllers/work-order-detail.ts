@@ -137,6 +137,71 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+
+
+const ReleaseWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+ 
+  // console.log(id);
+  logger.debug('Calling Create workOrderDetail endpoint');
+  try {
+    const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const woroutingServiceInstance = Container.get(WoroutingService);
+   
+    await workOrderServiceInstance.update(
+      {
+        wo_status: 'R',
+        wo__dte01: req.body._wod.wod__qadt01,
+        wo_rel_date: req.body._wod.wod__qadt01,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      },
+      { id: req.body._wod.wod_lot },
+    );
+  const wrs = await woroutingServiceInstance.find({ wr_domain: user_domain,wr_lot: req.body._wod.wod_lot });
+  for (const wr of wrs) {
+   // console.log(wr);
+    await woroutingServiceInstance.update(
+      {
+        wr_status: 'R',
+        wr__dte01: req.body._wod.wod__qadt01,
+        wr_rel_date: req.body._wod.wod__qadt01,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      },
+      { id: wr.id },
+    );
+  }
+
+    for (const item of req.body.detail) {
+      // console.log(item.wod_um);
+       await workOrderDetailServiceInstance.create({
+         ...item,
+         ...req.body._wod,
+         wod_domain: user_domain,
+        //  wod__chr01: req.body.lpnbr,
+         created_by: user_code,
+         created_ip_adr: req.headers.origin,
+         last_modified_by: user_code,
+         last_modified_ip_adr: req.headers.origin,
+       });
+      //   const pss = ps.forEach(element => {
+      //     return element.ps_parent;
+      //   });
+      //   console.log(pss);
+    }
+
+    //  const workOrderDetail = await workOrderDetailServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    return res.status(201).json({ message: 'created succesfully', data: req.body });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  workOrderDetail endpoint');
@@ -227,6 +292,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   create,
   createWodPos,
+  ReleaseWo,
   findOne,
   findAll,
   findBy,

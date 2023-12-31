@@ -117,6 +117,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
           wo_bom_code: item.nomo,
           wo_site: site,
           wo_routing:item.gamme,
+          wo_bo_chg : item.bo_chg,
           wo_qty_ord: item.prod_qty,
           wo_ord_date: new Date(),
           wo_rel_date: item.rel_date,
