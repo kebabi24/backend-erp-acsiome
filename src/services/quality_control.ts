@@ -265,4 +265,15 @@ export default class QualityControl {
     }
   }
 
+  public async findAllQros(): Promise<any> {
+    try {
+      const qros = await this.qualityInspectionRoutingDetailsModel.findAll({});
+      this.logger.silly('qros found ', qros);
+      return qros;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
 }

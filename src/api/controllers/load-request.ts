@@ -1,5 +1,6 @@
 import LoadRequestService from "../../services/load-request"
 import TokenSerieService from "../../services/token-serie"
+import UserMobileService from "../../services/user-mobile"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 
@@ -509,6 +510,28 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
     }
 }
 
+const getLoadRequestInfo = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  code endpoint")
+    try {
+        const loadRequestService = Container.get(LoadRequestService)
+        const userMobileService = Container.get(UserMobileService)
+        const load_request_code = req.params.load_request_code
+        const loadRequest = await loadRequestService.findLoadRequest({load_request_code : load_request_code})
+        let  userMobile = null
+        if(loadRequest != null){
+            userMobile = await userMobileService.findOne({user_mobile_code : loadRequest.user_mobile_code})
+        }
+        
+        return res
+            .status(200)
+            .json({ message: "found all roles of upper role", data: {loadRequest,userMobile}  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 
 
 function formatDateFromMobileToBackAddTimezone(timeString){
@@ -544,6 +567,7 @@ export default {
     findAllLoadRequestLinesDetails,
     getLoadRequestCreationData,
     createLoadRequestAndLines,
+    getLoadRequestInfo,
 }
 
 // validation 0-10   

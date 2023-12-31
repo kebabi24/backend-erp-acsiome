@@ -14,6 +14,8 @@ export default (app: Router) => {
   route.get('/findLaunchSpeicifications/:project_code', controller.getLaunchDocumentsByProject);
   route.get('/findSpecifications', controller.getSpecificationsCodes);
   route.get('/docTriggers', controller.getDocumentTriggers);
+  route.get('/getAllGammes', controller.getAllQros);
+
   route.post('/getspecmpd', controller.getSpecificationsDetails);
   route.post('/addSensibilisationData', controller.addSensibilisationData);
   route.post('/addIdentificationData', controller.addIdentificationData);
