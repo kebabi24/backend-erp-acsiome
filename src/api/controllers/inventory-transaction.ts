@@ -269,7 +269,10 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           ld__log01: status.is_nettable,
-          ld_domain:user_domain
+          ld_domain:user_domain,
+          ld_grade: item.tr_grade,
+          ld__chr01:item.tr_batch,
+          
         });
       }
       let qtyoh = 0;
@@ -388,6 +391,8 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -483,6 +488,8 @@ console.log(user_domain)
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_batch:ld.ld__chr01,
+        tr_grade:ld.ld_grade,
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -532,6 +539,8 @@ console.log(user_domain)
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
           ld_domain: user_domain,
+          ld_grade:ld.ld_grade,
+          ld_batch:ld.ld_batch
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -556,6 +565,8 @@ console.log(user_domain)
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -641,6 +652,8 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -687,6 +700,8 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -1206,6 +1221,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
         ld_ref: item.tr_ref,
+        
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -1235,6 +1251,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           ld_expire: item.tr_expire,
           ld_ref: item.tr_ref,
           ld__log01: status.is_nettable,
+          ld_grade:item.tr_grade
         });
       }
       let qtyoh = 0;
@@ -1365,6 +1382,8 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
         dec01:Number(item.tr_effdate.substring(0,4)),
         dec02:Number(item.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
@@ -1577,6 +1596,8 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           tr_part: remain.ld_part,
           tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
+        tr_grade:remain.tr_grade,
+        tr_batch:remain.tr_batch,
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
@@ -1645,6 +1666,8 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_lot: remain.ld_lot,
               ld_site: remain.ld_site,
               ld_loc: remain.ld_loc,
+              ld_grade:remain.tr_grade,
+              ld__chr01:remain.tr_batch,
               ld_qty_oh: qty,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
@@ -1730,6 +1753,8 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
         dec01:Number(remain.tr_effdate.substring(0,4)),
         dec02:Number(remain.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
+        tr_batch:remain.tr_batch,
+        tr_grade:remain.tr_grade,
           tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
           tr_um: pt.pt_um,
           tr_um_conv: 1,
@@ -1794,6 +1819,8 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_site: remain.ld_site,
               ld_loc: remain.ld_loc,
               ld_qty_oh: qty,
+              ld_grade:remain.tr_grade,
+              ld__chr01:remain.tr_batch,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -2544,6 +2571,8 @@ console.log("sct",sct)
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
+        tr_batch:ld.ld__chr01,
+        tr_grade:ld.ld_grade,
          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
          created_by: user_code,
          created_ip_adr: req.headers.origin,
@@ -2655,6 +2684,8 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
+        tr_batch:obj.ld__chr01,
+        tr_grade:obj.ld_grade,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -2701,6 +2732,8 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
         dec01:Number(it.tr_effdate.substring(0,4)),
         dec02:Number(it.tr_effdate.substring(5,7)),
         tr_program:new Date().toLocaleTimeString(),
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
