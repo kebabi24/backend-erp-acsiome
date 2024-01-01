@@ -374,6 +374,21 @@ const createQroAndQps  = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+
+const getAllQros = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const qualityControlService = Container.get(QualityControlService);
+
+    const qros= await qualityControlService.findAllQros();
+    return res.status(200).json({ message: 'found all qros', data: qros });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
@@ -394,4 +409,5 @@ export default {
   findSpecificationsBy,
   findQualityInspectionRoutesBy,
   createQroAndQps,
+  getAllQros,
 };
