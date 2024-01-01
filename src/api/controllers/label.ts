@@ -18,7 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   // // Set the text color
   // doc.fillColor('white');
   logger.debug('Calling Create label endpoint');
-  console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
+//  console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
@@ -418,7 +418,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     });
     return res.status(200).json({
       message: 'fetched succesfully',
-      data: { label },
+      data: { label} ,
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);
