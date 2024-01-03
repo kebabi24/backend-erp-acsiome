@@ -19,7 +19,7 @@ import item from './item';
 import saleOrder from '../../models/saleorder';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import LocationDetailService from '../../services/location-details';
-
+import LabelService from '../../services/label';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -31,6 +31,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
+   
 
     for (const item of detail) {
       let wolot = 0;
@@ -853,16 +854,22 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
     let i = 1
     let obj
     for(let wo of wos) {
+    
       const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
       const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
       console.log(rctwo.length)
     for (let tr of rctwo) {
-
+      ;
       console.log(tr.item.pt_part)
     } 
+    
+    
       if(rctwo.length > isswo.length) {
 
         for (var j=0;j< rctwo.length; j++) {
+          const labelServiceInstance = Container.get(LabelService);
+          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+          console.log(isswo[j].tr_ref)
           if(j < isswo.length) {
              obj = {
               id:i,
@@ -877,7 +884,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: isswo[j].item.pt_origin,
+              issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -908,7 +915,9 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
 
       } else {
         for (var j = 0;j < isswo.length; j++) {
-         
+          const labelServiceInstance = Container.get(LabelService);
+          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+          console.log(isswo[j].tr_ref)
           if(j < rctwo.length) {
              obj = {
               id:i,
@@ -923,7 +932,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: isswo[j].item.pt_origin,
+              issorigin:orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -942,7 +951,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : "",
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: isswo[j].item.pt_origin,
+              issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
