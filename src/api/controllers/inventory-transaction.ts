@@ -1984,9 +1984,10 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
       tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+      
     });
     // console.log(tr)
-
+    
     return res.status(201).json({ message: 'created succesfully', data: tr });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
