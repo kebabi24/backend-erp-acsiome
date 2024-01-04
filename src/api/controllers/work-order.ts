@@ -888,6 +888,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime: isswo[j].tr_program,
             }
           } else {
              obj = {
@@ -907,6 +908,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : "",
               issserial : "",
               isspal : "",
+              isstime:""
             }
           }
           result.push(obj)
@@ -936,6 +938,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime: isswo[j].tr_program,
             }
           } else {
              obj = {
@@ -955,6 +958,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime:""
             }
           }
           result.push(obj)
