@@ -2573,7 +2573,6 @@ console.log("sct",sct)
         tr__chr03:pt.pt_group,
         dec01:Number(new Date(it.tr_effdate).getFullYear()),
         dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
-        tr_program:new Date().toLocaleTimeString(),
         tr_batch:ld.ld__chr01,
         tr_grade:ld.ld_grade,
          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
