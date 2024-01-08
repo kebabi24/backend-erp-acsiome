@@ -262,6 +262,7 @@ export default async ({ expressApp }) => {
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
 
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
+      { name: 'itemModelModel', model: require('../models/item-model').default },
     
     ],
   });
@@ -1060,9 +1061,27 @@ export default async ({ expressApp }) => {
      targetKey: 'aud_code' },
   );
 
+
+  require('../models/site').default.hasOne(require('../models/item-model').default, {
+    foreignKey: 'mod_site',
+    sourceKey: 'si_site',
+  });
+  require('../models/item-model').default.belongsTo(require('../models/site').default, {
+    foreignKey: 'mod_site',
+    targetKey: 'si_site',
+  });
+
+  require('../models/location').default.hasOne(require('../models/item-model').default, {
+    foreignKey: 'mod_loc',
+    sourceKey: 'loc_loc',
+  });
+  require('../models/item-model').default.belongsTo(require('../models/location').default, {
+    foreignKey: 'mod_loc',
+    targetKey: 'loc_loc',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+ //await sequelizeConnection.sync();
   // await sequelizeConnection.sync();
 
   //  await sequelizeConnection

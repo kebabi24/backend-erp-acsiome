@@ -218,7 +218,7 @@ declare global {
     export type PatientDetailModel = S.Model;
     export type DoctorModel = S.Model;
     export type calendarTimingModel = S.Model;
-    
+    export type ItemModelModel = S.Model;
    
   }
 }
