@@ -197,7 +197,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
-      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_ref:item.tr_ref, ld_domain:user_domain });
+      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
       const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
