@@ -1010,22 +1010,39 @@ const findByRecapBR = async (req: Request, res: Response, next: NextFunction) =>
       group: ['tr__chr01','tr__chr02', 'tr_site', 'tr_effdate','dec01','dec02','tr_user1'],
       raw: true,})
       
-   
+      
      for (let wrct of rctwo)
      {
       let sommeISSWO = 0  
-      let sommeperte = 0  
+      let sommeperte = 0 
       let sommereprise = 0 
       let dif = 0
       let taux = 0
+      
+      const daterct = await inventoryTransactionServiceInstance.findSpecial({where:{tr_domain: user_domain, tr_effdate:wrct.tr_effdate,tr_addr:ro.ro_routing, tr_type: "RCT-WO"},
+      attributes: [
+      'tr__chr01',
+      'tr__chr02',
+      'tr_site',
+      'tr_effdate',
+      'dec01',
+      'dec02',
+      'tr_user1',
+      [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+      
+    ],
+    group: ['tr__chr01','tr__chr02', 'tr_site', 'tr_effdate','dec01','dec02','tr_user1'],
+    raw: true,})
+        
      const isswo = await inventoryTransactionServiceInstance.find({tr_domain: user_domain, tr_effdate: wrct.tr_effdate, tr_type: "ISS-WO",tr_addr:ro.ro_routing,tr__chr01:wrct.tr__chr01,tr__chr02:wrct.tr__chr02})
      const RCTUNP01 = await inventoryTransactionServiceInstance.find({tr_domain: user_domain,tr_effdate:wrct.tr_effdate, tr_addr: ro.ro_routing, tr_type: "RCT-UNP",tr__chr01:'PERTE' })
      const RCTUNP02 = await inventoryTransactionServiceInstance.find({tr_domain: user_domain,tr_effdate:wrct.tr_effdate, tr_addr: ro.ro_routing, tr_type: "RCT-UNP",tr__chr01:wrct.tr__chr01,tr__chr02:wrct.tr__chr02 })
-    
+     
      for (let tr of isswo){sommeISSWO = sommeISSWO - tr.tr_qty_loc}
-     for (let unp01 of RCTUNP01){sommeperte = sommeperte + Number(unp01.tr_qty_loc)}
+     for (let unp01 of RCTUNP01){sommeperte = Number(Number(sommeperte + Number(unp01.tr_qty_loc)).toFixed(2))}
+     sommeperte = Number(Number(sommeperte / daterct.length).toFixed(2))
      for (let unp02 of RCTUNP02){sommereprise = sommereprise + Number(unp02.tr_qty_loc)} 
-     dif = wrct.qty - sommeISSWO + sommeperte + sommereprise
+     dif = Number(Number(wrct.qty - sommeISSWO + sommeperte + sommereprise).toFixed(2))
      taux = Number(Number(Number(sommeperte) * 100 / Number(wrct.qty)).toFixed(2)) 
      
       obj = {
@@ -1058,7 +1075,7 @@ const findByRecapBR = async (req: Request, res: Response, next: NextFunction) =>
 
     }
     
-    console.log(result)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);

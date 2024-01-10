@@ -1,4 +1,5 @@
 import ItemService from '../../services/item';
+import WorkRoutingService from "../../services/workrouting"
 import LocationDetailService from '../../services/location-details';
 import FraisService from "../../services/frais"
 import FraisDetailService from "../../services/frais-detail"
@@ -137,15 +138,17 @@ const findProd = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   const Sequelize = require('sequelize');
   const Op = Sequelize.Op;
-  console.log(req.body.pmcode);
-
+  
   try {
+    
+  
     const itemServiceInstance = Container.get(ItemService);
-
+     
     const codes = await itemServiceInstance.find({
       ...{
         pt_domain: user_domain,
         pt_pm_code: 'M',
+        
         ...req.body
       },
     });
