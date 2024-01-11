@@ -888,6 +888,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime: isswo[j].tr_program,
             }
           } else {
              obj = {
@@ -907,6 +908,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : "",
               issserial : "",
               isspal : "",
+              isstime:""
             }
           }
           result.push(obj)
@@ -936,6 +938,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime: isswo[j].tr_program,
             }
           } else {
              obj = {
@@ -955,6 +958,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
+              isstime:""
             }
           }
           result.push(obj)
@@ -972,6 +976,96 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByRecapBR = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const {site,date,date1} = req.body;
+    const workRoutingServiceInstance = Container.get(WorkroutingService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const ros = await workRoutingServiceInstance.find({ ro_wkctr : "BROYAGE",ro_domain: user_domain});
+    
+    let result = []
+    let i = 0
+    
+    let obj
+    for(let ro of ros) {
+      
+      
+      
+      const rctwo = await inventoryTransactionServiceInstance.findSpecial({
+        where:{tr_domain: user_domain, tr_effdate: { [Op.between]: [date, date1]},tr_addr:ro.ro_routing, tr_type: "RCT-WO"},
+        attributes: [
+        'tr__chr01',
+        'tr__chr02',
+        'tr_site',
+        'tr_effdate',
+        'dec01',
+        'dec02',
+        'tr_user1',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'qty'],
+        
+      ],
+      group: ['tr__chr01','tr__chr02', 'tr_site', 'tr_effdate','dec01','dec02','tr_user1'],
+      raw: true,})
+      
+   
+     for (let wrct of rctwo)
+     {
+      let sommeISSWO = 0  
+      let sommeperte = 0  
+      let sommereprise = 0 
+      let dif = 0
+      let taux = 0
+     const isswo = await inventoryTransactionServiceInstance.find({tr_domain: user_domain, tr_effdate: wrct.tr_effdate, tr_type: "ISS-WO",tr_addr:ro.ro_routing,tr__chr01:wrct.tr__chr01,tr__chr02:wrct.tr__chr02})
+     const RCTUNP01 = await inventoryTransactionServiceInstance.find({tr_domain: user_domain,tr_effdate:wrct.tr_effdate, tr_addr: ro.ro_routing, tr_type: "RCT-UNP",tr__chr01:'PERTE' })
+     const RCTUNP02 = await inventoryTransactionServiceInstance.find({tr_domain: user_domain,tr_effdate:wrct.tr_effdate, tr_addr: ro.ro_routing, tr_type: "RCT-UNP",tr__chr01:wrct.tr__chr01,tr__chr02:wrct.tr__chr02 })
+    
+     for (let tr of isswo){sommeISSWO = sommeISSWO - tr.tr_qty_loc}
+     for (let unp01 of RCTUNP01){sommeperte = sommeperte + Number(unp01.tr_qty_loc)}
+     for (let unp02 of RCTUNP02){sommereprise = sommereprise + Number(unp02.tr_qty_loc)} 
+     dif = wrct.qty - sommeISSWO + sommeperte + sommereprise
+     taux = Number(Number(Number(sommeperte) * 100 / Number(wrct.qty)).toFixed(2)) 
+     
+      obj = {
+        id:i,
+        annee:wrct.dec01,
+        mois:wrct.dec02,
+        date: wrct.tr_effdate,
+        equipe:wrct.tr_user1,
+        gamme:ro.ro_routing,
+        rctpart: wrct.tr__chr01,
+        rctcolor: wrct.tr__chr02,
+        rctqty : wrct.qty,
+        rctserial : wrct.tr_serial,
+        rctpal : wrct.tr_ref,
+        issqty : sommeISSWO,
+        dechet: sommeperte,
+        reprise: sommereprise,
+        diff:dif,
+        taux_perte:taux,
+      }
+      
+      result.push(obj)
+      i = i + 1
+    }
+   
+    
+    
+    
+
+
+    }
+    
+    console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 
 
 
@@ -991,5 +1085,6 @@ export default {
   CalcCostWo,
   findBywo,
   findByRPBR,
+  findByRecapBR
 
 };

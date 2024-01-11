@@ -189,7 +189,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
-    console.log(role)
+    
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
@@ -436,7 +436,7 @@ const getDataBack = async function(socket) {
   // logger.debug("Calling user mobile login endpoint")
 
   // itineraries_customers
-  var nb_visits ;
+  var nb_visits ;0
   var nb_invoice;
   var nb_products_sold;
   var nb_clients_created;
