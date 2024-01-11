@@ -520,6 +520,7 @@ const getDataBack = async function(socket) {
       const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
       nb_invoice = filtered_invoices.length;
       const invoices = data.invoices;
+      console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
       const invoicesLines = data.invoicesLines;
       const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = [];
