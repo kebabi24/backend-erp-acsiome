@@ -201,16 +201,18 @@ const findAllApp = async (req: Request, res: Response, next: NextFunction) => {
         for (let seq of sequences) {
             list.push(seq.seq_seq)
         }
-        console.log(user_code)
-console.log(list)
+      //  console.log(user_code)
+      //  console.log(list)
         const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
         for(const req of requisitions){
+            console.log(req)
             const details = await requisitionDetailServiceInstance.find({
                 rqd_domain: user_domain,
                 rqd_nbr: req.rqm_nbr,
             })
             result.push({id: req.id ,req, details})
         }
+      //  console.log(result)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: result })
