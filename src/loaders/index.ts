@@ -254,16 +254,15 @@ export default async ({ expressApp }) => {
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
-     
+
       { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
       { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
-      
+
       { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
 
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
       { name: 'itemModelModel', model: require('../models/item-model').default },
-    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -365,14 +364,14 @@ export default async ({ expressApp }) => {
   );
 
   // 03 / 12 / 2022 NEW RELATIONS
-  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
-    foreignKey: 'service_code',
-    sourceKey: 'service_code',
-  });
-  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
-    foreignKey: 'service_code',
-    targetKey: 'service_code',
-  });
+  // require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
+  //   foreignKey: 'service_code',
+  //   sourceKey: 'service_code',
+  // });
+  // require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
+  //   foreignKey: 'service_code',
+  //   targetKey: 'service_code',
+  // });
 
   require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/role').default, {
     foreignKey: 'role_code',
@@ -1015,7 +1014,6 @@ export default async ({ expressApp }) => {
     targetKey: 'trc_code',
   });
 
-
   require('../models/patient').default.hasOne(require('../models/patient-detail').default, {
     foreignKey: 'patd_code',
     sourceKey: 'pat_code',
@@ -1055,12 +1053,10 @@ export default async ({ expressApp }) => {
     foreignKey: 'audd_code',
     sourceKey: 'aud_code',
   });
-  require('../models/audiogram').default.belongsTo(
-    require('../models/audiometry').default,
-    { foreignKey: 'audd_code',
-     targetKey: 'aud_code' },
-  );
-
+  require('../models/audiogram').default.belongsTo(require('../models/audiometry').default, {
+    foreignKey: 'audd_code',
+    targetKey: 'aud_code',
+  });
 
   require('../models/site').default.hasOne(require('../models/item-model').default, {
     foreignKey: 'mod_site',
@@ -1081,7 +1077,7 @@ export default async ({ expressApp }) => {
   });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
- //await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
   // await sequelizeConnection.sync();
 
   //  await sequelizeConnection
