@@ -426,7 +426,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     });
     return res.status(200).json({
       message: 'fetched succesfully',
-      data: { label },
+      data: { label} ,
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);

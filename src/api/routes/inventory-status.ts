@@ -15,4 +15,5 @@ export default (app: Router) => {
     route.put("/:id", controller.update)
     route.post("/findDetails", controller.findAllDetails)
     
+    
 }

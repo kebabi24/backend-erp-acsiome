@@ -197,7 +197,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
-      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site, ld_ref:item.tr_ref, ld_domain:user_domain });
+      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
       const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
@@ -211,11 +211,15 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         qty += Number(elem.ld_qty_oh);
       });
       console.log(qty, sct_mtl_tl);
-      const new_price = round(
+      let stk= (qty + Number(item.tr_qty_loc) * Number(item.tr_um_conv));
+      let new_price: any;
+      if (stk != 0){ new_price = round(
         (qty * Number(sct_mtl_tl) + Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price)) /
           (qty + Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
         2,
-      );
+      );}
+      else { new_price = 0}
+      
       await costSimulationServiceInstance.update(
         {
           sct_mtl_tl: new_price,
@@ -265,7 +269,10 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           ld_expire: item.tr_expire,
           ld__log01: status.is_nettable,
-          ld_domain:user_domain
+          ld_domain:user_domain,
+          ld_grade: item.tr_grade,
+          ld__chr01:item.tr_batch,
+          
         });
       }
       let qtyoh = 0;
@@ -288,7 +295,14 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         tr_bdn_std: sct.sct_bdn_tl,
         tr_ovh_std: sct.sct_ovh_tl,
         tr_sub_std: sct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -372,7 +386,16 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         tr_bdn_std: sct.sct_bdn_tl,
         tr_ovh_std: sct.sct_ovh_tl,
         tr_sub_std: sct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -460,7 +483,16 @@ console.log(user_domain)
         tr_bdn_std: sct.sct_bdn_tl,
         tr_ovh_std: sct.sct_ovh_tl,
         tr_sub_std: sct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_batch:ld.ld__chr01,
+        tr_grade:ld.ld_grade,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -507,6 +539,8 @@ console.log(user_domain)
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
           ld_domain: user_domain,
+          ld_grade:ld.ld_grade,
+          ld_batch:ld.ld_batch
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -526,7 +560,16 @@ console.log(user_domain)
         tr_bdn_std: sctrct.sct_bdn_tl,
         tr_ovh_std: sctrct.sct_ovh_tl,
         tr_sub_std: sctrct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -604,7 +647,16 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       tr_bdn_std: sct.sct_bdn_tl,
       tr_ovh_std: sct.sct_ovh_tl,
       tr_sub_std: sct.sct_sub_tl,
-      tr_prod_line: pt.pt_prod_line,
+      tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -643,7 +695,16 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
       tr_bdn_std: sct.sct_bdn_tl,
       tr_ovh_std: sct.sct_ovh_tl,
       tr_sub_std: sct.sct_sub_tl,
-      tr_prod_line: pt.pt_prod_line,
+      tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -1160,6 +1221,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
         ld_ref: item.tr_ref,
+        
       });
       if (ld)
         await locationDetailServiceInstance.update(
@@ -1189,6 +1251,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           ld_expire: item.tr_expire,
           ld_ref: item.tr_ref,
           ld__log01: status.is_nettable,
+          ld_grade:item.tr_grade
         });
       }
       let qtyoh = 0;
@@ -1203,27 +1266,6 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STD-CG',
       });
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_domain:user_domain,
-        tr_qty_chg: Number(item.tr_qty_loc),
-        tr_loc_begin: Number(qtyoh),
-        tr_type: 'RCT-WO',
-        tr_date: new Date(),
-        tr_mtl_std: sct.sct_mtl_tl,
-        tr_lbr_std: sct.sct_lbr_tl,
-        tr_bdn_std: sct.sct_bdn_tl,
-        tr_ovh_std: sct.sct_ovh_tl,
-        tr_sub_std: sct.sct_sub_tl,
-        tr_prod_line: pt.pt_prod_line,
-        tr_price : Number(sct.sct_cst_tot),
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
       const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
 
       if (wo)
@@ -1233,8 +1275,40 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
-          { id: wo.id },
-        );
+          { id: wo.id })
+          await inventoryTransactionServiceInstance.create({
+            ...item,
+            ...it,
+            tr_domain:user_domain,
+            tr_qty_chg: Number(item.tr_qty_loc),
+            tr_loc_begin: Number(qtyoh),
+            tr_type: 'RCT-WO',
+            tr_date: new Date(),
+            tr_mtl_std: sct.sct_mtl_tl,
+            tr_lbr_std: sct.sct_lbr_tl,
+            tr_bdn_std: sct.sct_bdn_tl,
+            tr_ovh_std: sct.sct_ovh_tl,
+            tr_sub_std: sct.sct_sub_tl,
+            tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+            tr_price : Number(sct.sct_cst_tot),
+            tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
+            tr_addr:wo.wo_routing,
+            tr_user1:wo.wo_user1,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        
+      
+      
     }
     return res.status(200).json({ message: 'Added succesfully', data: true });
   } catch (e) {
@@ -1304,7 +1378,16 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
           tr_bdn_std: sct.sct_bdn_tl,
           tr_ovh_std: sct.sct_ovh_tl,
           tr_sub_std: sct.sct_sub_tl,
-          tr_prod_line: pt.pt_prod_line,
+          tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
+        dec01:Number(new Date(item.tr_effdate).getFullYear()),
+        dec02:Number(new Date(item.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
           tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
@@ -1393,7 +1476,11 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
 //         await inventoryTransactionServiceInstance.create({
 //           tr_line: remain.tr_line,
 //           tr_part: remain.tr_part,
-//           tr_prod_line: pt.pt_prod_line,
+//           tr_desc:pt.pt_desc1,
+        // tr_prod_line: pt.pt_prod_line,
+        // tr__chr01:pt.pt_draw,
+        // tr__chr02:pt.pt_break_cat,
+        // tr__chr03:pt.pt_group,
 //           tr_qty_loc: -Number(remain.tr_qty_loc),
 //           tr_um: pt.pt_um,
 //           tr_um_conv: remain.tr_um_conv,
@@ -1508,7 +1595,16 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           tr_line: 0,
           tr_domain:user_domain,
           tr_part: remain.ld_part,
-          tr_prod_line: pt.pt_prod_line,
+          tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr_grade:remain.tr_grade,
+        tr_batch:remain.tr_batch,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(remain.tr_effdate).getFullYear()),
+        dec02:Number(new Date(remain.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
           tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
           tr_um: pt.pt_um,
           tr_um_conv: 1,
@@ -1571,6 +1667,8 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_lot: remain.ld_lot,
               ld_site: remain.ld_site,
               ld_loc: remain.ld_loc,
+              ld_grade:remain.tr_grade,
+              ld__chr01:remain.tr_batch,
               ld_qty_oh: qty,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
@@ -1648,7 +1746,16 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
           tr_domain:user_domain,
           // tr_line: remain.tr_line,
           tr_part: remain.ld_part,
-          tr_prod_line: pt.pt_prod_line,
+          tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(remain.tr_effdate).getFullYear()),
+        dec02:Number(new Date(remain.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        tr_batch:remain.tr_batch,
+        tr_grade:remain.tr_grade,
           tr_qty_loc: Number(remain.tag_cnt_qty) - Number(ld.ld_qty_oh),
           tr_um: pt.pt_um,
           tr_um_conv: 1,
@@ -1713,6 +1820,8 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_site: remain.ld_site,
               ld_loc: remain.ld_loc,
               ld_qty_oh: qty,
+              ld_grade:remain.tr_grade,
+              ld__chr01:remain.tr_batch,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -1875,9 +1984,10 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
       tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
+      
     });
     // console.log(tr)
-
+    
     return res.status(201).json({ message: 'created succesfully', data: tr });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
@@ -1926,7 +2036,7 @@ const findTrType = async (req: Request, res: Response, next: NextFunction) => {
         um: items.pt_um,
         tr_part: tr.tr_part,
         tr_site: tr.tr_site,
-        tr_effdate: effdate.getUTCFullYear() + '-' + (effdate.getUTCMonth() + 1) + '-' + effdate.getUTCDate(),
+        tr_effdate: effdate.getFullYear() + '-' + (effdate.getMonth() + 1) + '-' + effdate.getUTCDate(),
         tr_type: tr.tr_type,
         tr_serial: tr.tr_serial,
         tr_expire: tr.tr_serial,
@@ -2406,6 +2516,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const itemServiceInstance = Container.get(itemService);
     const workOrderDetailServiceInstance = Container.get(workOrderDetailService);
+    const workOrderServiceInstance = Container.get(workOrderService);
 
     for (const item of detail) {
       const sct = await costSimulationServiceInstance.findOne({
@@ -2434,28 +2545,41 @@ console.log("sct",sct)
           },
           { id: ld.id },
         );
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_domain: user_domain,
-        tr_gl_date: it.tr_effdate,
-        tr_qty_loc: -1 * Number(item.tr_qty_loc),
-        tr_qty_chg: -1 * Number(item.tr_qty_loc),
-        tr_loc_begin: Number(ld.ld_qty_oh),
-        tr_type: 'ISS-WO',
-        tr_date: new Date(),
-        tr_price: sct.sct_mtl_tl,
-        tr_mtl_std: sct.sct_mtl_tl,
-        tr_lbr_std: sct.sct_lbr_tl,
-        tr_bdn_std: sct.sct_bdn_tl,
-        tr_ovh_std: sct.sct_ovh_tl,
-        tr_sub_std: sct.sct_sub_tl,
+        const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+
+      if (wo)
+        await inventoryTransactionServiceInstance.create({
+         ...item,
+         ...it,
+         tr_domain: user_domain,
+         tr_addr:wo.wo_routing,
+         tr_user1:wo.wo_user1,
+         tr_gl_date: it.tr_effdate,
+         tr_qty_loc: -1 * Number(item.tr_qty_loc),
+         tr_qty_chg: -1 * Number(item.tr_qty_loc),
+         tr_loc_begin: Number(ld.ld_qty_oh),
+         tr_type: 'ISS-WO',
+         tr_date: new Date(),
+         tr_price: sct.sct_mtl_tl,
+         tr_mtl_std: sct.sct_mtl_tl,
+         tr_lbr_std: sct.sct_lbr_tl,
+         tr_bdn_std: sct.sct_bdn_tl,
+         tr_ovh_std: sct.sct_ovh_tl,
+         tr_sub_std: sct.sct_sub_tl,
+         tr_desc:pt.pt_desc1,
         tr_prod_line: pt.pt_prod_line,
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_batch:ld.ld__chr01,
+        tr_grade:ld.ld_grade,
+         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+         created_by: user_code,
+         created_ip_adr: req.headers.origin,
+         last_modified_by: user_code,
+         last_modified_ip_adr: req.headers.origin,
       });
   if( !isNaN(item.wodid)) {
         const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
@@ -2554,7 +2678,16 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
       tr_bdn_std: sct.sct_bdn_tl,
       tr_ovh_std: sct.sct_ovh_tl,
       tr_sub_std: sct.sct_sub_tl,
-      tr_prod_line: pt.pt_prod_line,
+      tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        tr_batch:obj.ld__chr01,
+        tr_grade:obj.ld_grade,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -2593,7 +2726,16 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
       tr_bdn_std: sct.sct_bdn_tl,
       tr_ovh_std: sct.sct_ovh_tl,
       tr_sub_std: sct.sct_sub_tl,
-      tr_prod_line: pt.pt_prod_line,
+      tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        tr_grade:obj.ld_grade,
+        tr_batch:obj.ld__chr01,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,

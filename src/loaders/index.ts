@@ -254,15 +254,15 @@ export default async ({ expressApp }) => {
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
-     
+
       { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
       { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
-      
+
       { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
 
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
-    
+      { name: 'itemModelModel', model: require('../models/item-model').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1014,7 +1014,6 @@ export default async ({ expressApp }) => {
     targetKey: 'trc_code',
   });
 
-
   require('../models/patient').default.hasOne(require('../models/patient-detail').default, {
     foreignKey: 'patd_code',
     sourceKey: 'pat_code',
@@ -1054,12 +1053,28 @@ export default async ({ expressApp }) => {
     foreignKey: 'audd_code',
     sourceKey: 'aud_code',
   });
-  require('../models/audiogram').default.belongsTo(
-    require('../models/audiometry').default,
-    { foreignKey: 'audd_code',
-     targetKey: 'aud_code' },
-  );
+  require('../models/audiogram').default.belongsTo(require('../models/audiometry').default, {
+    foreignKey: 'audd_code',
+    targetKey: 'aud_code',
+  });
 
+  require('../models/site').default.hasOne(require('../models/item-model').default, {
+    foreignKey: 'mod_site',
+    sourceKey: 'si_site',
+  });
+  require('../models/item-model').default.belongsTo(require('../models/site').default, {
+    foreignKey: 'mod_site',
+    targetKey: 'si_site',
+  });
+
+  require('../models/location').default.hasOne(require('../models/item-model').default, {
+    foreignKey: 'mod_loc',
+    sourceKey: 'loc_loc',
+  });
+  require('../models/item-model').default.belongsTo(require('../models/location').default, {
+    foreignKey: 'mod_loc',
+    targetKey: 'loc_loc',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
