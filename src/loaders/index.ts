@@ -364,14 +364,14 @@ export default async ({ expressApp }) => {
   );
 
   // 03 / 12 / 2022 NEW RELATIONS
-  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
-    foreignKey: 'service_code',
-    sourceKey: 'service_code',
-  });
-  require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
-    foreignKey: 'service_code',
-    targetKey: 'service_code',
-  });
+  // require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/inventory').default, {
+  //   foreignKey: 'service_code',
+  //   sourceKey: 'service_code',
+  // });
+  // require('../models/mobile_models/inventory').default.belongsTo(require('../models/mobile_models/service').default, {
+  //   foreignKey: 'service_code',
+  //   targetKey: 'service_code',
+  // });
 
   require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/role').default, {
     foreignKey: 'role_code',

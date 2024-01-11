@@ -189,7 +189,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
-    console.log(role);
+
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
@@ -441,6 +441,7 @@ const getDataBack = async function(socket) {
 
   // itineraries_customers
   var nb_visits;
+  0;
   var nb_invoice;
   var nb_products_sold;
   var nb_clients_created;
@@ -665,6 +666,27 @@ const getDataBack = async function(socket) {
     }
     console.log('CREATING UNLOAD REQUESTS AND THEIR DETAILS END ');
 
+    // INVENTORY & INVENTORY LINE
+    if (data.inventaires) {
+      console.log('INVENTORIES CREATION');
+      const inventories = data.inventaires;
+      inventories.forEach(inventory => {
+        console.log(inventory);
+        inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.the_date);
+      });
+      const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
+      console.log('INVENTORIES CREATION END');
+      if (inventoriesCreated) {
+        console.log('INVENTORIES LINES CREATION');
+        const inventoriesLines = data.inventairesLines;
+        inventoriesLines.forEach(line => {
+          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+        });
+        const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
+        console.log('INVENTORIES LINES CREATION END');
+      }
+    }
+
     // SERVICE
     // CREATED FROM BACKEDN
     const { service, service_creation } = data;
@@ -706,27 +728,6 @@ const getDataBack = async function(socket) {
       console.log(service);
       const createdService = await userMobileServiceInstanse.createService(service);
       console.log('CREATING SERVICE END');
-    }
-
-    // INVENTORY & INVENTORY LINE
-    if (data.inventaires) {
-      console.log('INVENTORIES CREATION');
-      const inventories = data.inventaires;
-      inventories.forEach(inventory => {
-        console.log(inventory);
-        inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.the_date);
-      });
-      const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
-      console.log('INVENTORIES CREATION END');
-      if (inventoriesCreated) {
-        console.log('INVENTORIES LINES CREATION');
-        const inventoriesLines = data.inventairesLines;
-        inventoriesLines.forEach(line => {
-          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
-        });
-        const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
-        console.log('INVENTORIES LINES CREATION END');
-      }
     }
 
     socket.emit('dataUpdated');
