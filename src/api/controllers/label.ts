@@ -29,21 +29,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     var labelId = null;
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
 
-    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
-    await sequenceServiceInstance.update(
-      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-      { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
-    );
-    const label = await labelServiceInstance.create({
-      ...req.body,
-      lb_ref: labelId,
-      lb_cab: labelId,
-      lb_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
+    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`;
+    
 
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -149,6 +136,51 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       });
     }, 2000);
     // return res.status(201).json({ message: 'created succesfully', data: label });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const createlAB = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+
+  // doc.rect(0, 0, doc.page.width, doc.page.height).fill('black');
+
+  // // Set the text color
+  // doc.fillColor('white');
+  logger.debug('Calling Create label endpoint');
+  //console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+
+    const pageWidth = 284; // Width of the page in points
+    const pageHeight = 284; // Height of the page in points
+    var labelId = null;
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
+
+    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+    );
+    const label = await labelServiceInstance.create({
+      ...req.body,
+      lb_ref: labelId,
+      lb_cab: labelId,
+      lb_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+        
+    return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
@@ -584,4 +616,5 @@ export default {
   findAll,
   update,
   updated,
+  createlAB
 };
