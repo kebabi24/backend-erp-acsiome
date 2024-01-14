@@ -6,14 +6,16 @@ const route = Router();
 export default (app: Router) => {
   app.use('/banks', route);
 
-  route.get('/', controller.findAll);
+ 
   route.post('/', controller.create);
+  route.get("/findtransfert",controller.findTransfertBy)
   route.get('/:id', controller.findOne);
   route.post('/ar', controller.findAR);
   route.post('/ap', controller.findAP);
 
   route.put('/:id', controller.update);
   route.post('/find', controller.findBy);
+  route.post('/findbyall', controller.findByAll);
   route.put('/P:id', controller.updatedet);
   route.post('/findDetails', controller.findAllDetails);
   route.post('/findBk', controller.findBkByUser);
@@ -22,4 +24,10 @@ export default (app: Router) => {
   route.post('/createFRequest', controller.createFRequest);
   route.post('/findbankgrp', controller.findBkhGrp);
   route.post('/addbkhtransfert', controller.bkhTr);
+  route.post('/addbkhpayment', controller.bkhP);
+  route.post('/addbkhtransfertc', controller.bkhTrC);
+  route.post('/findbkh', controller.findBKHBy);
+  
+  route.get('/', controller.findAll);
+  
 };

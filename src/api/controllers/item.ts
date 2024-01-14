@@ -1,4 +1,5 @@
 import ItemService from '../../services/item';
+import WorkRoutingService from "../../services/workrouting"
 import LocationDetailService from '../../services/location-details';
 import FraisService from "../../services/frais"
 import FraisDetailService from "../../services/frais-detail"
@@ -90,8 +91,10 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const itemServiceInstance = Container.get(ItemService);
+    console.log(req.body)
+    console.log(user_domain)
     const items = await itemServiceInstance.findOne({ ...req.body,pt_domain:user_domain });
-   // console.log("ohohoh",items)
+   console.log("ohohoh",items)
     return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -137,15 +140,17 @@ const findProd = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   const Sequelize = require('sequelize');
   const Op = Sequelize.Op;
-  console.log(req.body.pmcode);
-
+  
   try {
+    
+  
     const itemServiceInstance = Container.get(ItemService);
-
+     
     const codes = await itemServiceInstance.find({
       ...{
         pt_domain: user_domain,
         pt_pm_code: 'M',
+        
         ...req.body
       },
     });

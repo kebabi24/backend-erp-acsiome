@@ -408,10 +408,12 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
+    console.log(req.body)
     const bank = await bankServiceInstance.findOne({
       ...req.body,
       bk_domain: user_domain,
     });
+    console.log(bank)
     if (bank) {
       const details = await bankDetailServiceInstance.find({
         bkd_bank: bank.bk_code,
@@ -428,6 +430,32 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         data: { bank, details: null },
       });
     }
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findByAll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+    const bankServiceInstance = Container.get(BankService);
+   
+    console.log(req.body)
+    const bank = await bankServiceInstance.find({
+      ...req.body,
+      bk_domain: user_domain,
+    });
+    console.log(bank)
+    
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bank ,
+      });
+   
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -654,9 +682,177 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const bkhP = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService);
+    
+    console.log(req.body);
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
+    const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank,
+      bkh_type: 'P',
+      bkh_balance: banks.bk_balance,
+      bk_2000: req.body.amt_tr,
+      bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
+       
+      },
+      {id: banks.id},
+    );
+    // console.log(bk)
+    return res.status(201).json({ message: 'created succesfully', data: bk });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService);
+    
+    console.log(req.body);
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
+    const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank,
+      chr02: req.body.bank_dest,
+      bkh_type: 'ISS',
+      bkh_balance: banks.bk_balance,
+      bk_2000: - Number(req.body.amt_tr),
+      bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+   
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) - Number(req.body.amt_tr),
+       
+      },
+      {id: banks.id},
+    );
+    const bankdets = await bankServiceInstance.findOne({ bk_code: req.body.bank_dest,  bk_domain: user_domain });
+    
+    const bkd = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank_dest,
+      chr02: req.body.bank,
+      bkh_type: 'RCT',
+      bkh_balance: bankdets.bk_balance,
+      bk_2000:  Number(req.body.amt_tr),
+      bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
+      },
+      {id: bankdets.id},
+    );
+    // console.log(bk)
+    return res.status(201).json({ message: 'created succesfully', data: bk });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findBKHBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+   // console.log(req.body)
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.find({
+      ...req.body,
+      bkh_domain: user_domain,
+    });
+    
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findTransfertBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find all bank endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.find({
+     
+      bkh_type: ['ISS','RCT'],
+      bkh_domain: user_domain,
+      
+    });
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: bkhs });
+    
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBy,
+  findByAll,
   findAR,
   findBkByUser,
   findAP,
@@ -670,4 +866,8 @@ export default {
   createFRequest,
   findBkhGrp,
   bkhTr,
+  bkhP,
+  bkhTrC,
+  findBKHBy,
+  findTransfertBy
 };

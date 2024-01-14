@@ -52,6 +52,19 @@ export default class ServiceMobileService {
     }
   }
 
+  public async findServices(query: any): Promise<any> {
+    try {
+      // const service = await this.serviceMobileModel.findAll({ where: query })
+      const service = await this.serviceMobileModel.findAll({
+        where: query
+      });
+      this.logger.silly('find All service mobile mstr');
+      return service;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async update(data: any, query: any): Promise<any> {
     try {
       const service = await this.serviceMobileModel.update(data, { where: query });
