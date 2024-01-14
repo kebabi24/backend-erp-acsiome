@@ -91,8 +91,10 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const itemServiceInstance = Container.get(ItemService);
+    console.log(req.body)
+    console.log(user_domain)
     const items = await itemServiceInstance.findOne({ ...req.body,pt_domain:user_domain });
-   // console.log("ohohoh",items)
+   console.log("ohohoh",items)
     return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);

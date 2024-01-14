@@ -41,7 +41,7 @@ export default class banksSercice {
 
   public async find(query: any): Promise<any> {
     try {
-      const banks = await this.bkhModel.findAll({ where: query, include: this.addressModel });
+      const banks = await this.bkhModel.findAll({ where: query });
       this.logger.silly('find All banks ');
       return banks;
     } catch (e) {

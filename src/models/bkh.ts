@@ -22,6 +22,9 @@ const Bkh = sequelize.define(
       type: Sequelize.DATE,
     },
     bkh_balance: Sequelize.DECIMAL,
+    bkh_addr: Sequelize.STRING,
+    bkh_bank: Sequelize.STRING,
+    
     bkh_type: Sequelize.STRING,
 
     bk_2000: Sequelize.DECIMAL,

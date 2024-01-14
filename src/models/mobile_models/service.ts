@@ -30,6 +30,7 @@ const Service = sequelize.define(
         key: 'role_code',
       },
     },
+    user_mobile_code : Sequelize.STRING,
     service_site: {
       type: Sequelize.STRING,
     },

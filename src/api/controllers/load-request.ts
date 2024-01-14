@@ -359,6 +359,10 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
             const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(line.load_request_code,line.product_code, line.qt_effected)
         }
         
+        if(load_request_details.length>0){
+            let load_request_code = load_request_details[0].load_request_code
+            const deletedDetails = await loadRequestService.deleteLoadRequestDetail({load_request_code})
+        }
         
         const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(
            load_request_details
