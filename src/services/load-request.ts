@@ -406,7 +406,7 @@ export default class LoadRequestService {
                     }else{
                     // does not exist in load request lines    
                         products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_validated: 0, qt_stored : sum})       
-                        unselectedProducts.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_validated: 0, qt_stored : sum , qt_effected:0 ,lots:[],details:[]})       
+                        unselectedProducts.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_validated: 0, qt_stored : sum , qt_effected:0 ,lots:[],details:[], wasAdded : false})       
                         //qt_request: 0  
 
                     }
