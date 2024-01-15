@@ -578,17 +578,17 @@ console.log(user_domain)
       });
     }
 
-    const pdfData = {
-      double: true,
-      detail: detail,
-      it: it,
-      nlot: nlot,
-    };
+    // const pdfData = {
+    //   double: true,
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    // };
 
-    const pdf = await generatePdf(pdfData, 'it-tr');
+    // const pdf = await generatePdf(pdfData, 'it-tr');
 
     //pdf
-    return res.status(200).json({ message: 'deleted succesfully', data: true, pdf: pdf.content });
+    return res.status(200).json({ message: 'deleted succesfully', data: true, /*pdf: pdf.content*/ });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

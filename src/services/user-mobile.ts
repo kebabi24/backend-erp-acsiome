@@ -911,6 +911,16 @@ export default class UserMobileService {
             throw e
         }
     }
+    public async getPaymentsByGroup(query:any): Promise<any> {
+        try {
+            const payment = await this.paymentModel.findAll( query);
+            return payment
+        } catch (e) {
+            console.log('Error from service- getPayments')
+            this.logger.error(e)
+            throw e
+        }
+    }
     // ******************** GET CANCELATION REASONS   **************************
     public async getCancelationReasons(): Promise<any> {
         try {
