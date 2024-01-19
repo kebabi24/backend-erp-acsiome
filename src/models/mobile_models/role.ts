@@ -27,13 +27,14 @@ const Role = sequelize.define(
     user_mobile_code: {
       type: Sequelize.STRING,
       primaryKey: true,
-      unique: true, 
+      unique: true,
       references: {
-          model: "aa_userMobile",
-          key: "user_mobile_code",
+        model: 'aa_userMobile',
+        key: 'user_mobile_code',
       },
     },
-    controller_role: {  // person who verifie loads
+    controller_role: {
+      // person who verifie loads
       type: Sequelize.STRING,
       allowNull: true,
       references: {
@@ -53,9 +54,9 @@ const Role = sequelize.define(
     role_loc: { type: Sequelize.STRING },
     role_site: { type: Sequelize.STRING },
     role_loc_from: { type: Sequelize.STRING },
-    printer_adress:{type: Sequelize.STRING },
-    device_id : {type: Sequelize.STRING},
-    role_domain : {type: Sequelize.STRING},
+    printer_adress: { type: Sequelize.STRING },
+    device_id: { type: Sequelize.STRING },
+    role_domain: { type: Sequelize.STRING },
     // role_loc_from , string   , stock details - ld_det , stock info  - loc_mstr
     // ...base,
   },

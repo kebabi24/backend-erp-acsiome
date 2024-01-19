@@ -15,6 +15,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const itn = await ItineraryServiceInstance.create({
       ...itinerary,
+      itinerary_day: Number(itinerary.itinerary_day),
       domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -35,6 +36,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
+  console.log('hedi hiya 2');
   try {
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const { id } = req.params;
