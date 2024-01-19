@@ -7,6 +7,7 @@ export default (app: Router) => {
   app.use('/labels', route);
 
   route.post('/', controller.create);
+  route.post('/createlab', controller.createlAB);
   route.post('/prod', controller.createProd);
   route.post('/prodpal', controller.createPAL);
   route.post('/allocation', controller.addAllocation);

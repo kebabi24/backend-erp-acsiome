@@ -482,6 +482,7 @@ export default class LoadRequestService {
               qt_effected: 0,
               lots: [],
               details: [],
+              wasAdded : false,
             });
             //qt_request: 0
           }
