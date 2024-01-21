@@ -349,12 +349,13 @@ const deleteCategoryTypeById = async (req: Request, res: Response, next: NextFun
 
 const getDataForCustomerCreate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  console.log('hhhhhhhhhhhhhhhhhhhhhhh');
   logger.debug('Calling find all categories types endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
 
     const clusters = await customerMobileServiceInstance.findAllClusters({});
+    console.log('hert');
     const categories = await customerMobileServiceInstance.findAllCategories({});
     const sales_channels = await customerMobileServiceInstance.findAllSalesChannels();
 
@@ -387,6 +388,7 @@ const getDataForCustomerCreate = async (req: Request, res: Response, next: NextF
       category.dataValues.categoryTypes = categoryTypes;
     }
 
+    console.log('clusters');
     return res.status(201).json({ message: 'create data found ', data: { categories, clusters, sales_channels } });
   } catch (e) {
     logger.error('🔥 error from getDataForCustomerCreate ');
@@ -418,10 +420,11 @@ const createSalesChannels = async (req: Request, res: Response, next: NextFuncti
 const findOneCustomer = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
+  console.log('hedi hiya 5');
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const { id } = req.params;
-    console.log(id);
+    console.log('iddd', id);
     const itn = await customerMobileServiceInstance.findOne({ customer_code: id });
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
@@ -456,6 +459,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const getCustomersOfItinerary = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
+  console.log('hedi hiya 3');
   try {
     const customerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const { itinerary_code } = req.body;

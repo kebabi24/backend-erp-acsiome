@@ -94,6 +94,7 @@ export default class customersMobileSercice {
   public async findAllClusters(query: any): Promise<any> {
     try {
       const clusters = await this.clusterModel.findAll({});
+      console.log('here we are again', clusters);
       this.logger.silly('clusters', clusters);
       return clusters;
     } catch (e) {
