@@ -457,8 +457,8 @@ const getDataBack = async function(socket) {
     console.log('Data keys :\n ');
     console.log(Object.keys(data));
 
-    var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
-    (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
+    // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
+    // (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
     //  USER MOBILE
     if (data.userMobile) {
       console.log('UPDATING USER MOBILE');
@@ -701,12 +701,14 @@ const getDataBack = async function(socket) {
           service_kmarr: service.service_kmarr,
           service_closing_date: formatDateFromMobileToBackAddTimezone(service.service_closing_date),
           nb_visits: nb_visits,
-          nb_clients_itin: nb_clients_itin,
+          nb_clients_itin: service.nb_clients_itin,
           nb_invoice: nb_invoice,
-          nb_products_sold: nb_products_sold,
-          nb_clients_created: nb_clients_created,
-          nb_products_loaded: nb_products_loaded,
-          sum_invoice: sum_invoice,
+          nb_products_sold: service.nb_products_sold,
+          nb_clients_created: service.nb_clients_created,
+          nb_products_loaded: service.nb_products_loaded,
+          sum_invoice: service.sum_invoice,
+          // user_mobile_code: service.user_mobile_code,
+
         },
         { service_code: service.service_code },
       );
@@ -719,13 +721,14 @@ const getDataBack = async function(socket) {
       service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
       service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
       service.service_open = false;
-      service.nb_visits = nb_visits;
-      service.nb_clients_itin = nb_clients_itin;
-      service.nb_invoice = nb_invoice;
-      service.nb_products_sold = nb_products_sold;
-      service.nb_clients_created = nb_clients_created;
-      service.nb_products_loaded = nb_products_loaded;
-      service.sum_invoice = sum_invoice;
+      // service.nb_visits = service.nb_visits;
+      // service.nb_clients_itin = service.nb_clients_itin;
+      // service.nb_invoice = service.nb_invoice;
+      // service.nb_products_sold = service.nb_products_sold;
+      // service.nb_clients_created = service.nb_clients_created;
+      // service.nb_products_loaded = service.nb_products_loaded;
+      // service.sum_invoice = service.sum_invoice;
+      // service.user_mobile_code= service.user_mobile_code,
       console.log(service);
       const createdService = await userMobileServiceInstanse.createService(service);
       console.log('CREATING SERVICE END');
