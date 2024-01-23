@@ -1,8 +1,10 @@
 import LoadRequestService from '../../services/load-request';
 import TokenSerieService from '../../services/token-serie';
 import UserMobileService from '../../services/user-mobile';
+import ItemService from '../../services/item';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import { DATE, Op, Sequelize } from 'sequelize';
 
 const findAllRoles = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -592,6 +594,56 @@ function formatDateOnlyFromMobileToBack(timeString) {
   return str;
 }
 
+
+const findAllLoadRequestLinesDifference = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const itemService = Container.get(ItemService);
+    const{user_domain} = req.headers
+  
+    const loadRequestLines = await loadRequestService.findAllDif({   date_creation: { [Op.between]: [req.body.date, req.body.date1]}, qt_validated: { [Op.ne]: Sequelize.col("qt_effected") },});
+   let result = []
+    for (let loadrequestline of loadRequestLines) {
+      const item = await itemService.findOne({pt_part:loadrequestline.product_code,pt_domain: user_domain})
+      const loadrequest = await loadRequestService.findLoadRequest({load_request_code:loadrequestline.load_request_code})
+      let obj = {
+        id : loadrequestline.id,
+          date_creation: loadrequestline.date_creation,
+          
+          line:loadrequestline.line,
+
+          product_code: loadrequestline.product_code,
+          product_desc: item.pt_desc1,
+          load_request_code: loadrequestline.load_request_code,
+
+          qt_request:loadrequestline.qt_request,
+          qt_validated:loadrequestline.qt_validated,
+          qt_effected:loadrequestline.qt_effected,
+          
+          role_code:loadrequest.role_code,
+
+          user_mobile_code:loadrequest.user_mobile_code,
+          role_loc:loadrequest.role_loc,
+          role_site:loadrequest.role_site,
+          role_loc_from :loadrequest.role_loc_from
+
+      }
+   result.push(obj)
+    }
+   
+    console.log('********');
+    //console.log(result);
+    return res
+      .status(200)
+      .json({ message: 'found all load request lines', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -614,6 +666,7 @@ export default {
   createLoadRequestAndLines,
   getLoadRequestInfo,
   getLoadRequestDataV3,
+  findAllLoadRequestLinesDifference,
 };
 
 // validation 0-10

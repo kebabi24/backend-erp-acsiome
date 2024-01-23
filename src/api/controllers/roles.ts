@@ -22,7 +22,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     for (let entry of itinerary) {
-      entry = { itinerary_code: entry, role_code: new_role.role_code };
+      entry = { itinerary_code: entry.itinerary_code, role_code: new_role.role_code };
       await RoleItineraryServiceInstance.create(entry);
     }
     return res.status(201).json({ message: 'created succesfully', data: new_role });
@@ -54,6 +54,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const RoleServiceInstance = Container.get(RoleService);
     const roles = await RoleServiceInstance.find({});
+   // console.log(roles)
     return res.status(200).json({ message: 'fetched succesfully', data: roles });
   } catch (e) {
     logger.error('🔥 error: %o', e);

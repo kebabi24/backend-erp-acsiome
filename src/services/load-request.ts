@@ -929,4 +929,22 @@ export default class LoadRequestService {
       throw e;
     }
   }
+
+
+  public async findAllDif(query: any): Promise<any> {
+    try {
+      //console.log(query);
+      //const locationDetails = await this.locationDetailModel.findAll({ where: query, include: this.itemModel });
+
+      const loadRequestsLine = await this.loadRequestLineModel.findAll({
+        where: query,
+      
+      });
+      this.logger.silly('find All locationDetails mstr');
+      return loadRequestsLine;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }
