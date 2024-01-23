@@ -181,6 +181,28 @@ const findLotsOfProduct = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+const findLotsOfProduct2 = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling findLotsOfProduct endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+
+    const ld_loc = req.body.ld_loc;
+    const ld_site = req.body.ld_site;
+
+    // console.log(ld_loc)
+    // console.log(ld_site)
+    // console.log(product_code)
+
+    const lots = await loadRequestService.getLotsOfProduct2(ld_loc, ld_site);
+
+    return res.status(200).json({ message: 'data ready', data: lots });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const updateLoadRequestStauts10 = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling updateLoadRequestStauts10 controller endpoint');
@@ -580,6 +602,7 @@ export default {
   findAllLoadRequestLines,
   getLoadRequestDataV2,
   findLotsOfProduct,
+  findLotsOfProduct2,
   createLoadRequestDetails,
   createLoadRequestDetailsChangeStatus,
   findAllLoadRequeusts20,

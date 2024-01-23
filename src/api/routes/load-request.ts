@@ -23,6 +23,7 @@ export default (app: Router) => {
   route.post('/updateLoadRequest/', controller.updateLoadRequestStauts10);
   route.post('/updateLoadRequest40/', controller.updateLoadRequests4O);
   route.post('/findLostProduct/', controller.findLotsOfProduct);
+  route.post('/findLostProduct2/', controller.findLotsOfProduct2);
   route.post('/createLoadRequestDetails/', controller.createLoadRequestDetails);
   route.post('/createLoadRequestDetailsStatus/', controller.createLoadRequestDetailsChangeStatus);
   route.post('/createLoadRequestAndLines/', controller.createLoadRequestAndLines);

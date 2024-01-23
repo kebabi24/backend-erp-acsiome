@@ -65,7 +65,22 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const getItineraryOfRoles = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  itn endpoint');
+  console.log('hedi hiya 3');
+  try {
+    const roleItineraryServiceInstance = Container.get(RoleItineraryService);
+    const { role_code } = req.body;
+    console.log(role_code);
+    const itn = await roleItineraryServiceInstance.find({ role_code: role_code });
+    console.log(itn);
+    return res.status(200).json({ message: 'fetched succesfully', data: itn });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -106,4 +121,5 @@ export default {
   findBy,
   update,
   deleteOne,
+  getItineraryOfRoles,
 };
