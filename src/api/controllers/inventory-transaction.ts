@@ -488,8 +488,8 @@ console.log(user_domain)
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
-        tr_batch:ld.ld__chr01,
-        tr_grade:ld.ld_grade,
+        tr_batch: (ld) ? ld.ld__chr01: null,
+        tr_grade:(ld) ? ld.ld_grade: null,
         dec01:Number(new Date(it.tr_effdate).getFullYear()),
         dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
         tr_program:new Date().toLocaleTimeString(),
@@ -539,8 +539,8 @@ console.log(user_domain)
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
           ld_domain: user_domain,
-          ld_grade:ld.ld_grade,
-          ld_batch:ld.ld_batch
+          ld_grade:(ld) ? ld.ld_grade : null,
+          ld_batch: (ld) ? ld.ld_batch : null
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -565,8 +565,8 @@ console.log(user_domain)
         tr__chr01:pt.pt_draw,
         tr__chr02:pt.pt_break_cat,
         tr__chr03:pt.pt_group,
-        tr_grade:ld.ld_grade,
-        tr_batch:ld.ld__chr01,
+        tr_grade:(ld) ? ld.ld_grade : null,
+        tr_batch: (ld) ? ld.ld__chr01 : null,
         dec01:Number(new Date(it.tr_effdate).getFullYear()),
         dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
         tr_program:new Date().toLocaleTimeString(),
