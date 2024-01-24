@@ -272,7 +272,9 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           ld_domain:user_domain,
           ld_grade: item.tr_grade,
           ld__chr01:item.tr_batch,
-          
+          chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
         });
       }
       let qtyoh = 0;
@@ -540,7 +542,10 @@ console.log(user_domain)
           last_modified_ip_adr: req.headers.origin,
           ld_domain: user_domain,
           ld_grade:ld.ld_grade,
-          ld_batch:ld.ld_batch
+          ld_batch:ld.ld_batch,
+          chr01:ld.chr01,
+          chr02:ld.chr02,
+          chr03:ld.chr03
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -1251,7 +1256,10 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           ld_expire: item.tr_expire,
           ld_ref: item.tr_ref,
           ld__log01: status.is_nettable,
-          ld_grade:item.tr_grade
+          ld_grade:item.tr_grade,
+          chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group
         });
       }
       let qtyoh = 0;
@@ -1670,6 +1678,9 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_grade:remain.tr_grade,
               ld__chr01:remain.tr_batch,
               ld_qty_oh: qty,
+              chr01:pt.pt_draw,
+              chr02:pt.pt_break_cat,
+              chr03:pt.pt_group,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -1822,6 +1833,9 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               ld_qty_oh: qty,
               ld_grade:remain.tr_grade,
               ld__chr01:remain.tr_batch,
+              chr01:pt.pt_draw,
+              chr02:pt.pt_break_cat,
+              chr03:pt.pt_group,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
