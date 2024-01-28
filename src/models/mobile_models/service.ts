@@ -52,7 +52,9 @@ const Service = sequelize.define(
     nb_products_sold : Sequelize.INTEGER,
     nb_products_loaded : Sequelize.INTEGER,
     nb_clients_created : Sequelize.INTEGER,
-    sum_invoice : Sequelize.INTEGER,
+    sum_invoice : Sequelize.FLOAT,
+    sum_paiement : Sequelize.FLOAT,
+
     // ...base,
   },
   {
