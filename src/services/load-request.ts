@@ -288,6 +288,28 @@ export default class LoadRequestService {
     }
   }
 
+  public async getLotsOfProduct2(ld_loc: any, ld_site: any): Promise<any> {
+    try {
+      const lots = await this.locationDetailModel.findAll({
+        where: {
+          ld_loc: ld_loc,
+          // ld_part: product_code,
+          ld_site: ld_site,
+        },
+        attributes: ['id', 'ld_lot', 'ld_qty_oh', 'ld_expire', 'ld_site', 'ld_loc'],
+      });
+      this.logger.silly('find all lots');
+      lots.forEach(lot => {
+        lot.dataValues['qty_selected'] = 0;
+      });
+
+      return lots;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async getLoadRequestData(
     user_mobile_code: any,
     load_request_code: any,
@@ -482,7 +504,7 @@ export default class LoadRequestService {
               qt_effected: 0,
               lots: [],
               details: [],
-              wasAdded : false,
+              wasAdded: false,
             });
             //qt_request: 0
           }
@@ -561,32 +583,37 @@ export default class LoadRequestService {
 
           // PRODUCT EXIST
           if (index != -1) {
+            console.log('hereeeeeeeeeeeeeeeeeee');
             const load_request_line = loadRequesLines[index].dataValues;
             // CHECK IF IT EXIST IN LOAD REQUEST DETAILS
-            const details = await this.findAllLoadRequestDetailsForLots(
-              load_request_line.load_request_code,
-              load_request_line.product_code,
-            );
+            // const details = await this.findAllLoadRequestDetailsForLots(
+            //   load_request_line.load_request_code,
+            //   load_request_line.product_code,
+            // );
+            const details = await this.locationDetailModel.findAll({
+              where: { ld_part: load_request_line.product_code, ld_loc: load_request.role_loc_from, ld_site: site },
+            });
+            console.log(details);
             let lots = [];
             let qt_eff = 0;
             for (const element of details) {
               // const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
-              const qnt = await this.getProductQuantityPerLot(
-                load_request.role_loc_from,
-                site,
-                element.product_code,
-                element.dataValues.lot,
-              );
-              console.log(qnt);
+              // const qnt = await this.getProductQuantityPerLot(
+              //   load_request.role_loc_from,
+              //   site,
+              //   element.product_code,
+              //   element.dataValues.lot,
+              // );
+              // console.log(qnt);
               lots.push({
-                lot_code: element.dataValues.lot,
-                qnt_lot: qnt.dataValues.ld_qty_oh,
-                qt_effected: element.dataValues.qt_effected,
-                qt_preeffected: element.dataValues.qt_effected,
-                ld_status: qnt.dataValues.ld_status,
-                ld_expire: qnt.dataValues.ld_expire,
+                lot_code: element.dataValues.ld_lot,
+                qnt_lot: element.dataValues.ld_qty_oh,
+                qt_effected: 0,
+                qt_preeffected: 0,
+                ld_status: element.dataValues.ld_status,
+                ld_expire: element.dataValues.ld_expire,
               });
-              qt_eff += element.dataValues.qt_effected;
+              qt_eff += 0;
             }
 
             products.push({
@@ -897,6 +924,24 @@ export default class LoadRequestService {
       const loadRequests = await this.loadReuestModel.create(data);
       this.logger.silly('created load request');
       return loadRequests;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
+  public async findAllDif(query: any): Promise<any> {
+    try {
+      //console.log(query);
+      //const locationDetails = await this.locationDetailModel.findAll({ where: query, include: this.itemModel });
+
+      const loadRequestsLine = await this.loadRequestLineModel.findAll({
+        where: query,
+      
+      });
+      this.logger.silly('find All locationDetails mstr');
+      return loadRequestsLine;
     } catch (e) {
       this.logger.error(e);
       throw e;
