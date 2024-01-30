@@ -39,8 +39,8 @@ const UnloadRequestDetails = sequelize.define(
         },
 
         lot : {type:Sequelize.STRING},
-        qt_effected:{type: Sequelize.DOUBLE},
-        pt_price : {type : Sequelize.DOUBLE}
+        qt_effected:{type: Sequelize.FLOAT},
+        pt_price : {type : Sequelize.FLOAT}
 
         // ...base
     },

@@ -34,14 +34,14 @@ const SalesOrder = sequelize.define(
         service_code : { type: Sequelize.STRING}, // from service
         visit_code : { type: Sequelize.STRING}, 
         pricelist_code:{type: Sequelize.STRING}, // from pricelist
-        amount:{type: Sequelize.DOUBLE}, 
+        amount:{type: Sequelize.FLOAT}, 
         payment_term_code:{type: Sequelize.STRING}, 
         devise_code:{type: Sequelize.STRING}, 
         description:{type: Sequelize.STRING}, 
-        discount:{type: Sequelize.DOUBLE}, 
-        taxe_amount : { type: Sequelize.INTEGER}, // double default 0
-        stamp_amount : { type: Sequelize.INTEGER},// double default 0
-        horstax_amount : { type: Sequelize.INTEGER},// double default 0
+        discount:{type: Sequelize.FLOAT}, 
+        taxe_amount : { type: Sequelize.INTEGER}, // FLOAT default 0
+        stamp_amount : { type: Sequelize.INTEGER},// FLOAT default 0
+        horstax_amount : { type: Sequelize.INTEGER},// FLOAT default 0
         canceled : { type: Sequelize.BOOLEAN},
         cancelation_reason_code : { type: Sequelize.STRING}, // from cancelation reason 
         progress_level : { type: Sequelize.INTEGER}, 
@@ -49,8 +49,8 @@ const SalesOrder = sequelize.define(
         sdelivery_note_code : { type: Sequelize.STRING},
         closed : { type: Sequelize.BOOLEAN}, 
 
-        promorate: {type: Sequelize.DOUBLE},
-        promoamt: {type: Sequelize.DOUBLE},
+        promorate: {type: Sequelize.FLOAT},
+        promoamt: {type: Sequelize.FLOAT},
         
 
        

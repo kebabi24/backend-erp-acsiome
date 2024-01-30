@@ -838,7 +838,8 @@ export default class LoadRequestService {
 
       // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
 
-      const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code'] });
+      const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'] });
+      console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
@@ -846,7 +847,7 @@ export default class LoadRequestService {
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
         });
-        pagesProducts.push({ page_code: pageCode.product_page_code, products: products_codes });
+        pagesProducts.push({ page_code: pageCode.product_page_code,description:pageCode.description, products: products_codes });
       }
 
       const pagesProductsWithDetails = [];
@@ -885,7 +886,7 @@ export default class LoadRequestService {
             qt_stored: sum,
           });
         }
-        pagesProductsWithDetails.push({ page_code: page.page_code, products: products });
+        pagesProductsWithDetails.push({ page_code: page.page_code, description:page.description, products: products });
       }
       return pagesProductsWithDetails;
     } catch (e) {
@@ -924,6 +925,24 @@ export default class LoadRequestService {
       const loadRequests = await this.loadReuestModel.create(data);
       this.logger.silly('created load request');
       return loadRequests;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
+  public async findAllDif(query: any): Promise<any> {
+    try {
+      //console.log(query);
+      //const locationDetails = await this.locationDetailModel.findAll({ where: query, include: this.itemModel });
+
+      const loadRequestsLine = await this.loadRequestLineModel.findAll({
+        where: query,
+      
+      });
+      this.logger.silly('find All locationDetails mstr');
+      return loadRequestsLine;
     } catch (e) {
       this.logger.error(e);
       throw e;

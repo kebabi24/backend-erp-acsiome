@@ -27,4 +27,5 @@ export default (app: Router) => {
   route.post('/createLoadRequestDetails/', controller.createLoadRequestDetails);
   route.post('/createLoadRequestDetailsStatus/', controller.createLoadRequestDetailsChangeStatus);
   route.post('/createLoadRequestAndLines/', controller.createLoadRequestAndLines);
+  route.post('/LoadRequestLinesdif/',controller.findAllLoadRequestLinesDifference);
 };

@@ -22,11 +22,8 @@ const Itinerary = sequelize.define(
             primaryKey: true,
             unique: true
         },
-        itinerary_name:{
-            type:Sequelize.STRING,
-            unique:true,
-        },
-
+        itinerary_name: Sequelize.STRING,
+            
         itinerary_type:{type:Sequelize.STRING},
         itinerary_day:{type: Sequelize.INTEGER},
         // day : 0 sunday -> 6 saturday 
