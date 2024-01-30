@@ -229,7 +229,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const products_promo = await userMobileServiceInstanse.getProductsOfPromo();
-      console.log(products_promo);
+     // console.log(products_promo);
 
       const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes);
       const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes);
@@ -261,7 +261,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         profile_code: userMobile.profile_code,
       });
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
-      console.log(productPagesDetails);
+     // console.log(productPagesDetails);
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({
         user_mobile_code: user_mobile_code,
