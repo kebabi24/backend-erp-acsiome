@@ -459,6 +459,58 @@ const getDataBack = async function(socket) {
 
     // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
     // (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
+
+      // SERVICE
+    // CREATED FROM BACKEDN
+    const { service, service_creation,user,visits,payment } = data;
+    console.log(user);
+    console.log(visits);
+    if (service_creation == true) {
+      // created from backend
+      console.log('UPDATING SERVICE');
+      const udpatedService = await userMobileServiceInstanse.updateService(
+        {
+          service_open: false,
+          service_kmdep: service.service_kmdep,
+          service_kmarr: service.service_kmarr,
+          service_closing_date: formatDateFromMobileToBackAddTimezone(service.service_closing_date),
+          nb_visits: service.nb_visits,
+          nb_clients_itin: service.nb_clients_itin,
+          nb_invoice: service.nb_invoice,
+          nb_products_sold: service.nb_products_sold,
+          nb_clients_created: service.nb_clients_created,
+          nb_products_loaded: service.nb_products_loaded,
+          sum_invoice: service.sum_invoice,
+          // user_mobile_code: service.user_mobile_code,
+
+        },
+        { service_code: service.service_code },
+      );
+      console.log('UPDATING SERVICE END');
+    } else {
+      // CREATED FROM MOBILE  // false
+      console.log('CREATING SERVICE');
+      delete service.id;
+      console.log(' service creation date '+service.service_creation_date)
+      console.log(' service  date2 '+service.service_closing_date)
+      console.log(' service  date3 '+service.service_period_activate_date )
+      // service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date);
+      // service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
+      // service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
+      service.service_open = false;
+      // service.nb_visits = service.nb_visits;
+      // service.nb_clients_itin = service.nb_clients_itin;
+      // service.nb_invoice = service.nb_invoice;
+      // service.nb_products_sold = service.nb_products_sold;
+      // service.nb_clients_created = service.nb_clients_created;
+      // service.nb_products_loaded = service.nb_products_loaded;
+      // service.sum_invoice = service.sum_invoice;
+      // service.user_mobile_code= service.user_mobile_code,
+      console.log(service);
+      const createdService = await userMobileServiceInstanse.createService(service);
+      console.log('CREATING SERVICE END');
+    }
+
     //  USER MOBILE
     if (data.userMobile) {
       console.log('UPDATING USER MOBILE');
@@ -688,51 +740,7 @@ const getDataBack = async function(socket) {
       }
     }
 
-    // SERVICE
-    // CREATED FROM BACKEDN
-    const { service, service_creation } = data;
-    if (service_creation == true) {
-      // created from backend
-      console.log('UPDATING SERVICE');
-      const udpatedService = await userMobileServiceInstanse.updateService(
-        {
-          service_open: false,
-          service_kmdep: service.service_kmdep,
-          service_kmarr: service.service_kmarr,
-          service_closing_date: formatDateFromMobileToBackAddTimezone(service.service_closing_date),
-          nb_visits: nb_visits,
-          nb_clients_itin: service.nb_clients_itin,
-          nb_invoice: nb_invoice,
-          nb_products_sold: service.nb_products_sold,
-          nb_clients_created: service.nb_clients_created,
-          nb_products_loaded: service.nb_products_loaded,
-          sum_invoice: service.sum_invoice,
-          // user_mobile_code: service.user_mobile_code,
-
-        },
-        { service_code: service.service_code },
-      );
-      console.log('UPDATING SERVICE END');
-    } else {
-      // CREATED FROM MOBILE  // false
-      console.log('CREATING SERVICE');
-      delete service.id;
-      service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date);
-      service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
-      service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
-      service.service_open = false;
-      // service.nb_visits = service.nb_visits;
-      // service.nb_clients_itin = service.nb_clients_itin;
-      // service.nb_invoice = service.nb_invoice;
-      // service.nb_products_sold = service.nb_products_sold;
-      // service.nb_clients_created = service.nb_clients_created;
-      // service.nb_products_loaded = service.nb_products_loaded;
-      // service.sum_invoice = service.sum_invoice;
-      // service.user_mobile_code= service.user_mobile_code,
-      console.log(service);
-      const createdService = await userMobileServiceInstanse.createService(service);
-      console.log('CREATING SERVICE END');
-    }
+  
 
     socket.emit('dataUpdated');
   });

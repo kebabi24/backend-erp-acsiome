@@ -750,7 +750,8 @@ export default class UserMobileService {
                     attributes: ['id', 'pt_part' ,'pt_desc1','pt_taxable','pt_taxc','pt_group',
                     'pt_rev','pt_status','pt_price','pt_part_type','pt_size','pt_size_um',
                     'pt_net_wt','pt_net_wt_um','pt_article','pt_loadpacking','pt_salepacking','pt_rollup',
-                    'pt_salable','pt_inventoryable','pt_consignable','pt_returnable','pt_orderable','pt_loadable','pt_promotion']
+                    'pt_salable','pt_inventoryable','pt_consignable','pt_returnable','pt_orderable','pt_loadable',
+                    'pt_promotion','pt_desc2']
                     },
                 ) 
                 

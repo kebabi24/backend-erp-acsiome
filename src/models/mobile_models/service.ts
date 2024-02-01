@@ -44,6 +44,7 @@ const Service = sequelize.define(
     service_open: { type: Sequelize.BOOLEAN },
     service_kmdep: { type: Sequelize.STRING },
     service_kmarr: { type: Sequelize.STRING },
+    frais: { type: Sequelize.STRING },
     service_domain: Sequelize.STRING,
 
     nb_visits : Sequelize.INTEGER ,
