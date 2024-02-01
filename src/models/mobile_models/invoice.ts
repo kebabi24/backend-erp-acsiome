@@ -34,15 +34,15 @@ const Invoice = sequelize.define(
         service_code : { type: Sequelize.STRING}, // from service
         visit_code : { type: Sequelize.STRING}, 
         pricelist_code:{type: Sequelize.STRING}, // from pricelist
-        amount:{type: Sequelize.DOUBLE}, 
-        due_amount:{type: Sequelize.DOUBLE}, 
+        amount:{type: Sequelize.FLOAT}, 
+        due_amount:{type: Sequelize.FLOAT}, 
         payment_term_code:{type: Sequelize.STRING}, 
         devise_code:{type: Sequelize.STRING}, 
         description:{type: Sequelize.STRING}, 
-        discount:{type: Sequelize.DOUBLE}, 
-        taxe_amount : { type: Sequelize.INTEGER}, // double default 0
-        stamp_amount : { type: Sequelize.INTEGER},// double default 0
-        horstax_amount : { type: Sequelize.INTEGER},// double default 0
+        discount:{type: Sequelize.FLOAT}, 
+        taxe_amount : { type: Sequelize.FLOAT}, // FLOAT default 0
+        stamp_amount : { type: Sequelize.FLOAT},// FLOAT default 0
+        horstax_amount : { type: Sequelize.FLOAT},// FLOAT default 0
         canceled : { type: Sequelize.BOOLEAN},
         cancelation_reason_code : { type: Sequelize.STRING}, // from cancelation reason 
         progress_level : { type: Sequelize.INTEGER}, 
@@ -50,20 +50,20 @@ const Invoice = sequelize.define(
         sdelivery_note_code : { type: Sequelize.STRING},
         closed : { type: Sequelize.BOOLEAN}, 
 
-        promorate: {type: Sequelize.DOUBLE},
-        promoamt: {type: Sequelize.DOUBLE},
+        promorate: {type: Sequelize.FLOAT},
+        promoamt: {type: Sequelize.FLOAT},
         
 
         // NOT REQUESTED BY RIANE 
         
         // confirm_date:{type: Sequelize.DATEONLY}, 
-        // payment_term_discount : { type: Sequelize.DOUBLE},
-        // payment_term_discount_rate : { type: Sequelize.DOUBLE},
+        // payment_term_discount : { type: Sequelize.FLOAT},
+        // payment_term_discount_rate : { type: Sequelize.FLOAT},
         // tracking_key : { type: Sequelize.STRING}, 
         // payment_code : { type: Sequelize.STRING},  // from payment
         // loyalty_product_code : { type: Sequelize.STRING},  
         // loyalty_program_score : { type: Sequelize.INTEGER},  
-        // final_tax_amount : { type: Sequelize.DOUBLE},  
+        // final_tax_amount : { type: Sequelize.FLOAT},  
         // last_update : { type: Sequelize.DATEONLY}
         
         // ...base

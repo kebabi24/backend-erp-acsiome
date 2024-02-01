@@ -229,7 +229,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const products_promo = await userMobileServiceInstanse.getProductsOfPromo();
-      console.log(products_promo);
+     // console.log(products_promo);
 
       const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes);
       const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes);
@@ -261,7 +261,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         profile_code: userMobile.profile_code,
       });
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
-      console.log(productPagesDetails);
+     // console.log(productPagesDetails);
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({
         user_mobile_code: user_mobile_code,
@@ -1244,26 +1244,28 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
     }
 
     services.forEach(service => {
-      // sum_nb_visits += service.nb_visits
-      // sum_nb_clients += service.nb_clients_itin
-      // sum_invoice_amount += service.sum_invoice
-      // sum_nb_invoices += service.nb_invoice
-      // sum_nb_products_sold += service.nb_products_sold
-      // sum_nb_clients_created += service.nb_clients_created
+      sum_nb_visits += service.nb_visits
+      sum_nb_clients += service.nb_clients_itin
+      sum_invoice_amount += service.sum_invoice
+      sum_nb_invoices += service.nb_invoice
+      sum_nb_products_sold += service.nb_products_sold
+      sum_nb_clients_created += service.nb_clients_created
 
-      sum_nb_visits += 1;
-      sum_nb_clients += 1;
-      sum_invoice_amount += 1;
-      sum_nb_invoices += 1;
-      sum_nb_products_sold += 1;
-      sum_nb_clients_created += 1;
+      // sum_nb_visits += service.nb_visits;
+      // sum_nb_clients += service.nb_clients_itin;
+      // sum_invoice_amount += 1;
+      // sum_nb_invoices += 1;
+      // sum_nb_products_sold += 1;
+      // sum_nb_clients_created += 1;
     });
 
+    console.log(sum_nb_visits, sum_nb_clients)
     services.forEach(service => {
       // **************** 1 VISIT RATE
       // CALCULATE : visit rate of each role
       let visit_rate = parseFloat(((service.nb_visits / service.nb_clients_itin) * 100).toFixed(2));
 
+      console.log(visit_rate)
       // visit rate of roles
       visit_rate_data.push({
         role_code: service.role_code,

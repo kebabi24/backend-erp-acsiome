@@ -44,7 +44,7 @@ const Service = sequelize.define(
     service_open: { type: Sequelize.BOOLEAN },
     service_kmdep: { type: Sequelize.STRING },
     service_kmarr: { type: Sequelize.STRING },
-    frais: { type: Sequelize.STRING },
+    // frais: { type: Sequelize.STRING },
     service_domain: Sequelize.STRING,
 
     nb_visits : Sequelize.INTEGER ,
@@ -53,7 +53,9 @@ const Service = sequelize.define(
     nb_products_sold : Sequelize.INTEGER,
     nb_products_loaded : Sequelize.INTEGER,
     nb_clients_created : Sequelize.INTEGER,
-    sum_invoice : Sequelize.INTEGER,
+    sum_invoice : Sequelize.FLOAT,
+    sum_paiement : Sequelize.FLOAT,
+
     // ...base,
   },
   {
