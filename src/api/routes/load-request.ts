@@ -11,7 +11,7 @@ export default (app: Router) => {
   route.get('/findAllLoadRequests10/:role_code', controller.findAllLoadRequeusts10);
   route.get('/findAllLoadRequests20/:role_code', controller.findAllLoadRequeusts20);
   route.get('/findLoadRequestData/:load_request_code', controller.getLoadRequestData);
-  route.get('/findLoadRequestCreationData', controller.getLoadRequestCreationData);
+  route.get('/findLoadRequestCreationData/:profile_code', controller.getLoadRequestCreationData);
   route.get('/findLoadRequestDataV2/:load_request_code', controller.getLoadRequestDataV2);
   route.get('/findLoadRequestDataV3/:load_request_code', controller.getLoadRequestDataV3);
   route.get('/findLoadRequestLines/:load_request_code', controller.findAllLoadRequestLines);

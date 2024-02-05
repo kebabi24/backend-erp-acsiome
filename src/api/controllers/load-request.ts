@@ -498,6 +498,8 @@ const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next:
 const getLoadRequestCreationData = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling getLoadRequestData endpoint');
+  //console.log("aaaaaaaa",req.body)
+  const profile_code = req.params.profile_code
   try {
     const loadRequestService = Container.get(LoadRequestService);
 
@@ -507,7 +509,7 @@ const getLoadRequestCreationData = async (req: Request, res: Response, next: Nex
     // const user_mobile_code = loadRequest.user_mobile_code
     // const role = await loadRequestService.getRole({user_mobile_code :user_mobile_code })
 
-    const loadRequestData = await loadRequestService.getLoadRequestCreationData();
+    const loadRequestData = await loadRequestService.getLoadRequestCreationData(profile_code);
 
     return (
       res

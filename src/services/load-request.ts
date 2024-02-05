@@ -69,7 +69,7 @@ export default class LoadRequestService {
 
   public async findAllRolesByUpperRoleCode(query: any): Promise<any> {
     try {
-      const roles = await this.roleModel.findAll({ where: query });
+      const roles = await this.roleModel.findAll({ where: query ,order: [['role_code', 'ASC']] });
       this.logger.silly('find all load requeusts');
       return roles;
     } catch (e) {
@@ -831,7 +831,7 @@ export default class LoadRequestService {
     }
   }
 
-  public async getLoadRequestCreationData(): Promise<any> {
+  public async getLoadRequestCreationData(profile_code : any): Promise<any> {
     try {
       // get user mobile and profile & pages codes of the profile
       // const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
@@ -840,7 +840,17 @@ export default class LoadRequestService {
 
       // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
 
-      const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'] });
+      //const profilepages = await /*kkkamel*/
+      const pagesprofile = await this.profileProductPageModel.findAll({
+        where: { profile_code: profile_code },
+        attributes: ['product_page_code'],
+      });
+      let profilepages = []
+      for (let pp of pagesprofile) {
+        profilepages.push(pp.product_page_code)
+      }
+     // console.log("profilepages" ,profilepages)
+      const pages_codes = await this.productPageModel.findAll({ where: {product_page_code : profilepages}, attributes: ['product_page_code','description'],order: [['id', 'ASC']] });
       // console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
@@ -860,11 +870,15 @@ export default class LoadRequestService {
         // FOR EACH PRODUCT
         for (const productd of page.products) {
           // get product data
+
+         // console.log("productd.dataValues.product_code" , productd.dataValues.product_code)
+
           const product = await this.itemModel.findOne({
             where: { pt_part: productd.dataValues.product_code },
             attributes: ['pt_desc1', 'pt_price', 'pt_part'],
           });
 
+          //console.log("product" , product.pt_part)
           // CALCULATE STORED QUANTITY
           const sum = await this.getStoredQuantityOfProductWithoutLocSite(product.pt_part);
 
@@ -900,6 +914,7 @@ export default class LoadRequestService {
   public async getStoredQuantityOfProductWithoutLocSite(product_code: any): Promise<any> {
     try {
       // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+      //console.log( "\tcode : "+ product_code )
       const quantities = await this.locationDetailModel.findAll({
         where: {
           ld_part: product_code,
