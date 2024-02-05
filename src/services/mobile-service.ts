@@ -52,11 +52,29 @@ export default class ServiceMobileService {
     }
   }
 
+  public async findS(query: any): Promise<any> {
+    try {
+      // const service = await this.serviceMobileModel.findAll({ where: query })
+      const service = await this.roleModel.findAll({
+        include: [
+          { model: this.serviceMobileModel, where: { service_period_activate_date: query } },
+          { model: this.userMobileModel, include: [this.profileMobileModel] },
+          { model: this.role_itineraryModel, include: [this.itineraryModel] },
+        ],
+      });
+      this.logger.silly('find All service mobile mstr');
+      return service;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async findServices(query: any): Promise<any> {
     try {
       // const service = await this.serviceMobileModel.findAll({ where: query })
       const service = await this.serviceMobileModel.findAll({
-        where: query
+        where: query,
       });
       this.logger.silly('find All service mobile mstr');
       return service;
