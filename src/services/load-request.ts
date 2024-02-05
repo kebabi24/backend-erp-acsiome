@@ -831,31 +831,15 @@ export default class LoadRequestService {
     }
   }
 
-  public async getLoadRequestCreationData(profile_code : any): Promise<any> {
+  public async getLoadRequestCreationData(): Promise<any> {
     try {
-      // get user mobile and profile & pages codes of the profile
-      // const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
-      // const profile = await this.profileMobileModel.findOne({where:{profile_code :user_mobile.profile_code }})
-      // const pages_codes = await this.profileProductPageModel.findAll({where : {profile_code:profile.profile_code} ,attributes: ['product_page_code']})
-
-      // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
-
-      //const profilepages = await /*kkkamel*/
-      const pagesprofile = await this.profileProductPageModel.findAll({
-        where: { profile_code: profile_code },
-        attributes: ['product_page_code'],
-        order: ['rank','ASC']
-      });
-      let profilepages = []
-      for (let pp of pagesprofile) {
-        profilepages.push(pp.product_page_code)
-      }
-     // console.log("profilepages" ,profilepages)
-      const pages_codes = await this.productPageModel.findAll({ where: {product_page_code : profilepages}, attributes: ['product_page_code','description'],order: [['id', 'ASC']] });
+     const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'],order: [['id', 'ASC']] });
       // console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
+       // const pages_code = await this.productPageModel.findOne({ where: {product_page_code:pageCode.product_page_code}});
+     
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
@@ -870,30 +854,13 @@ export default class LoadRequestService {
 
         // FOR EACH PRODUCT
         for (const productd of page.products) {
-          // get product data
-
-         // console.log("productd.dataValues.product_code" , productd.dataValues.product_code)
 
           const product = await this.itemModel.findOne({
             where: { pt_part: productd.dataValues.product_code },
             attributes: ['pt_desc1', 'pt_price', 'pt_part'],
           });
 
-          //console.log("product" , product.pt_part)
-          // CALCULATE STORED QUANTITY
           const sum = await this.getStoredQuantityOfProductWithoutLocSite(product.pt_part);
-
-          // var index = -1
-          // index = loadRequesLines.findIndex(line=>{
-          //     return line.dataValues.product_code == product.dataValues.pt_part;
-          // })
-
-          // product was requested
-          // if(index != -1){
-          //     const load_request_line = loadRequesLines[index].dataValues
-          //     products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})
-
-          // product was not requested
 
           products.push({
             product_code: productd.dataValues.product_code,
