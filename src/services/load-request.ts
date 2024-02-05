@@ -844,6 +844,7 @@ export default class LoadRequestService {
       const pagesprofile = await this.profileProductPageModel.findAll({
         where: { profile_code: profile_code },
         attributes: ['product_page_code'],
+        order: ['rank','ASC']
       });
       let profilepages = []
       for (let pp of pagesprofile) {
