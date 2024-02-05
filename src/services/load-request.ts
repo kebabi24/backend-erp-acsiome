@@ -178,9 +178,9 @@ export default class LoadRequestService {
 
   public async updateLoadRequestLine(load_request_code: any, product_code: any, qntValidated: any): Promise<any> {
     try {
-      console.log(load_request_code);
-      console.log(product_code);
-      console.log(qntValidated);
+      // console.log(load_request_code);
+      // console.log(product_code);
+      // console.log(qntValidated);
       const qt_validated = qntValidated;
       const loadRequestLine = await this.loadRequestLineModel.update(
         { qt_validated: qt_validated },
@@ -332,11 +332,13 @@ export default class LoadRequestService {
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
+        const pages = await this.productPageModel.findOne({ where: {product_page_code: pageCode.product_page_code }, attributes: ['product_page_code','description'] });
+        // console.log("here",pages.description)
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
         });
-        pagesProducts.push({ page_code: pageCode.product_page_code, products: products_codes });
+        pagesProducts.push({ page_code: pageCode.product_page_code,description :pages.description, products: products_codes });
       }
 
       const pagesProductsWithDetails = [];
@@ -381,7 +383,7 @@ export default class LoadRequestService {
             });
           }
         }
-        pagesProductsWithDetails.push({ page_code: page.page_code, products: products });
+        pagesProductsWithDetails.push({ page_code: page.page_code,description:page.description, products: products });
       }
       return pagesProductsWithDetails;
     } catch (e) {
@@ -839,7 +841,7 @@ export default class LoadRequestService {
       // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
 
       const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'] });
-      console.log(pages_codes)
+      // console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {

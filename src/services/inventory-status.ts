@@ -45,7 +45,18 @@ export default class inventoryStatusService {
       throw e;
     }
   }
-
+  public async findS(query: any): Promise<any> {
+    try {
+      const inventoryStatus = await this.inventoryStatusModel.findAll(
+        query
+      );
+      this.logger.silly('find All inventoryStatus mstr');
+      return inventoryStatus;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async update(data: any, query: any): Promise<any> {
     try {
       const inventoryStatus = await this.inventoryStatusModel.update(data, {
