@@ -1,5 +1,6 @@
 import ItineraryService from '../../services/itinerary';
 import CustomerItineraryService from '../../services/customer-itinerary';
+import ServiceMobileService from '../../services/mobile-service';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
@@ -57,6 +58,25 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const itn = await ItineraryServiceInstance.find({});
     //console.log(itn)
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const getAllServices = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all itn endpoint');
+  try {
+    console.log(req.body);
+    const ItineraryServiceInstance = Container.get(ItineraryService);
+    const ServiceMobileServiceInstance = Container.get(ServiceMobileService);
+    const services = await ServiceMobileServiceInstance.findS(req.body.date);
+    services.forEach(element => {
+      console.log(element);
+    });
+    //console.log(itn)
+    return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -123,6 +143,7 @@ export default {
   create,
   findOne,
   findAll,
+  getAllServices,
   findBy,
   update,
   deleteOne,

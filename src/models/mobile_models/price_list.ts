@@ -21,8 +21,8 @@ const PriceList = sequelize.define(
         pricelist_code : {type: Sequelize.STRING},
         product_code:{ type:Sequelize.STRING},  // filter in sync 
         description:{type:Sequelize.STRING},
-        salesprice :{type: Sequelize.DOUBLE},
-        returnprice :{type: Sequelize.DOUBLE},
+        salesprice :{type: Sequelize.FLOAT},
+        returnprice :{type: Sequelize.FLOAT},
      
         // ...base
     },
