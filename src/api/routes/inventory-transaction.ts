@@ -14,6 +14,7 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/rct-unp', controller.rctUnp);
+  route.post('/rct-unpcab', controller.rctUnpCab);
   route.post('/iss-unp', controller.issUnp);
   route.post('/iss-tr', controller.issTr);
   route.post('/iss-chl', controller.issChl);
@@ -40,5 +41,7 @@ export default (app: Router) => {
   route.post("/findoa", controller.findBySpec);
   route.get('/', controller.findAll);
   route.post('/findcost', controller.findByCost);
-  
+  route.post('/findnbr', controller.findByNbr);
+  route.post('/findgroup', controller.findByGroup);  
+  route.post('/updateprice', controller.updatePrice);
 };
