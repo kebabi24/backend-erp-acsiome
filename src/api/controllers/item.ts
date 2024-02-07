@@ -251,7 +251,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
 
       var coutMA = 0
       var cmpA   = 0
-      if (old_tr.length == 0) {
+      if (old_tr == null ) {
 
         const sct = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_part:item.pt_part, sct_sim:"init"})
          coutMA = sct.sct_mtl_tl
@@ -331,10 +331,28 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
 
           } else {
 
+            /* rct unp*/
+
+            if(tr.tr_type = "RCT-UNP" && tr.tr_qty_loc != 0) {
+
+              let coutM =  Number(tr.tr_price) //+ Number(frpd.totalamt) / Number(tr.tr_qty_loc)
+              let cmpM  = (Number(stkA) + Number(tr.tr_qty_loc) != 0 ) ? ( ( Number(cmpA) * Number(stkA) + Number(coutM) * Number(tr.tr_qty_loc)) / (Number(stkA) + Number(tr.tr_qty_loc) )) : 0
+               await inventoryTransactionServiceInstance.update({tr__dec01 : coutM,tr__dec02:cmpM},{id: tr.id})
+               result.push({id:i,date: tr.tr_effdate, nbr : tr.tr_lot, part: tr.tr_part, desc: item.pt_desc1, qtym : tr.tr_qty_loc, qtys: stkA,coutm: coutM,cmpM: cmpM})
+               cmpA = cmpM
+               stkA = stkA + Number( tr.tr_qty_loc)
+                i = i + 1
+
+             /*rct unp*/   
+            } else {
+
+
+            
               await inventoryTransactionServiceInstance.update({tr__dec01 : cmpA,tr__dec02:cmpA},{id: tr.id})
               result.push({id:i,date: tr.tr_effdate, nbr : tr.tr_lot, part: tr.tr_part,desc: item.pt_desc1, qtym : tr.tr_qty_loc, qtys: stkA,coutm: cmpA,cmpM: cmpA})
               i = i + 1
               stkA = stkA + Number(tr.tr_qty_loc)
+            }
             
           }
 

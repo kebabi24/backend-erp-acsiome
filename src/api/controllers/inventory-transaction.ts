@@ -2923,7 +2923,8 @@ const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
 
       var coutMA = 0
       var cmpA   = 0
-      if (old_tr.length == 0) {
+      console.log(old_tr)
+      if (old_tr == null) {
 
         const sct = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_part:tr.tr_part, sct_sim:"init"})
          coutMA = sct.sct_mtl_tl
