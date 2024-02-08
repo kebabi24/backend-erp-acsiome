@@ -271,13 +271,15 @@ export default async ({ expressApp }) => {
 
   ////////
   require('../models/mobile_models/product_page').default.hasOne(
-    require('../models/mobile_models/profile_product_page').default,
-    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+   require('../models/mobile_models/profile_product_page').default,
+   { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
   require('../models/mobile_models/profile_product_page').default.belongsTo(
     require('../models/mobile_models/product_page').default,
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
+
+  
 
   require('../models/mobile_models/profile').default.hasOne(
     require('../models/mobile_models/profile_product_page').default,
