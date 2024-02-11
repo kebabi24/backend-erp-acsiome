@@ -382,6 +382,15 @@ export default async ({ expressApp }) => {
     targetKey: 'role_code',
   });
 
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/itinerary').default, {
+    foreignKey: 'itinerary_code',
+    sourceKey: 'itinerary_code',
+  });
+  require('../models/mobile_models/itinerary').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'itinerary_code',
+    targetKey: 'itinerary_code',
+  });
+
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/userMobile').default, {
     foreignKey: 'user_mobile_code',
     sourceKey: 'user_mobile_code',
@@ -1078,14 +1087,14 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();
-  //  await sequelizeConnection
-  //    .sync({ alter: true })
-  //    .then(() => {
-  //      console.log('database updated');
-  //    })
-  //    .catch(err => {
-  //      console.log(err);
-  //    });
+  // await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
+  //     console.log(err);
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
