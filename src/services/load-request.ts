@@ -1,6 +1,7 @@
 import { Service, Inject } from 'typedi';
 import ProductPageService from './product-page';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize ,QueryTypes} from 'sequelize';
+import { groupBy } from 'lodash';
 
 @Service()
 export default class LoadRequestService {
@@ -933,4 +934,53 @@ export default class LoadRequestService {
       throw e;
     }
   }
+
+  public async getLoadRequestCreationDataRole(role_code:any): Promise<any> {
+    try {
+      
+
+     const role_codes   = await this.roleModel.findOne({ where: {role_code: role_code}, include : [{model: this.userMobileModel,required: true,attributes: ['profile_code']}]}) 
+ console.log(role_codes)
+     const pages_codes = await this.profileProductPageModel.findAll({ where: {profile_code: role_codes.userMobile.profile_code}, attributes: ['product_page_code'],  order: [['rank', 'ASC']],
+      include: [
+          {
+            model: this.productPageDetailsModel,
+            required: true,
+            order: [['rank', 'ASC']],
+            attributes: ['product_code', ],
+            include : [
+              {
+                model: this.productPageModel,
+                required: true,
+                attributes: ['description']   
+              },
+              {
+                  model: this.itemModel,
+                  required: true,
+                  attributes: ['pt_part', 'pt_desc1', 'pt_price'],
+                  include: [
+                    {
+                      model: this.locationDetailModel,
+                      required: false,
+                      where:{ld_site: role_codes.role_site, ld_loc : role_codes.role_loc },
+                      attributes: ['ld_qty_oh',/* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/], 
+                      // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
+                      // separate: false,
+                    },
+                  ]
+              },
+            ]
+          }
+        ]
+      });
+      
+       
+      return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
 }
+

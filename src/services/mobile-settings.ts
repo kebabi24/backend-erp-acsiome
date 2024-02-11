@@ -51,7 +51,7 @@ export default class MobileSettingsService {
             const priceList = await this.priceListModel.findAll({
                 where:query
                })
-               console.log(priceList)
+              // console.log(priceList)
             this.logger.silly("found one price list")
             return priceList
         } catch (e) {
@@ -59,7 +59,20 @@ export default class MobileSettingsService {
             throw e
         }
     }
-
+    public async findPriceList(query: any): Promise<any> {
+        try {
+            console.log(query)
+            const priceList = await this.priceListModel.findAll({
+                ...query
+               })
+              // console.log(priceList)
+            this.logger.silly("found one price list")
+            return priceList
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     // ******************** UPDATE **************************
     public async updateOneVisitList(data: any, query: any): Promise<any> {
         try {
