@@ -18,6 +18,10 @@ export default (app: Router) => {
   route.post('/findfifolot', controller.findByFifoLot);
   route.post('/findother', controller.findOtherStatus);
   route.put('/:id', controller.update);
+  route.post('/up', controller.updateS);
   route.delete('/:id', controller.deleteOne);
   route.post('/findWeekProduct', controller.findByWeek);
+  route.post('/findinstance', controller.findStatusInstance);
+  
+  
 };

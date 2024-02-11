@@ -13,6 +13,9 @@ export default (app: Router) => {
     route.get("/getVisitList", controller.getVisitList)
     route.get('/getPriceList/:code', controller.getPriceList);
     route.get("/paymentMethods", controller.getPaymentMethods)
-    route.get("/cancelationReasons", controller.getCanelationReasons)
+    route.get("/cancelationReasons", controller.getCanelationReasons);
+    route.get('/getPriceList', controller.getAllPriceList);
+    
+
     
 }

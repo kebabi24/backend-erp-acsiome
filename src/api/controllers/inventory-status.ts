@@ -210,6 +210,26 @@ const{user_domain} = req.headers
     }
 }
 
+const findInstanceStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all inventoryStatus endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
+        const status = await inventoryStatusServiceInstance.find({is_frozen:false,is_domain:user_domain})
+       // console.log("status",status)
+        var datas = [];
+        for (let stat of status) {
+          datas.push({ value: stat.is_status, label: stat.is_desc });
+        }
+        console.log(datas)
+        return res.status(200).json(datas);
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+}
 export default {
     create,
     createIsm,
@@ -219,5 +239,5 @@ export default {
     findAll,
     findAllDetails,
     update,
-    
+    findInstanceStatus,
 }

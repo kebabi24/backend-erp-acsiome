@@ -290,22 +290,22 @@ export default async ({ expressApp }) => {
   ////////
 
   ////////
-  require('../models/mobile_models/product_page').default.hasOne(
+  require('../models/mobile_models/product_page').default.belongsTo(
     require('../models/mobile_models/product_page_details').default,
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
-  require('../models/mobile_models/product_page_details').default.belongsTo(
+  require('../models/mobile_models/product_page_details').default.hasOne(
     require('../models/mobile_models/product_page').default,
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
 
-  require('../models/item').default.hasOne(require('../models/mobile_models/product_page_details').default, {
-    foreignKey: 'product_code',
-    sourceKey: 'pt_part',
-  });
-  require('../models/mobile_models/product_page_details').default.belongsTo(require('../models/item').default, {
-    foreignKey: 'product_code',
-    sourceKey: 'pt_part',
+  // require('../models/item').default.hasOne(require('../models/mobile_models/product_page_details').default, {
+  //   foreignKey: 'product_code',
+  //   sourceKey: 'pt_part',
+  // });
+  require('../models/mobile_models/product_page_details').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
   });
   ////////
 
@@ -345,20 +345,20 @@ export default async ({ expressApp }) => {
     { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
   );
 
-  require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/role_itinerary').default, {
+  require('../models/mobile_models/role').default.hasMany(require('../models/mobile_models/role_itinerary').default, {
     foreignKey: 'role_code',
     sourceKey: 'role_code',
   });
-  require('../models/mobile_models/role_itinerary').default.belongsTo(require('../models/mobile_models/role').default, {
-    foreignKey: 'role_code',
-    targetKey: 'role_code',
-  });
+  // require('../models/mobile_models/role_itinerary').default.belongsTo(require('../models/mobile_models/role').default, {
+  //   foreignKey: 'role_code',
+  //   targetKey: 'role_code',
+  // });
 
-  require('../models/mobile_models/itinerary').default.hasOne(
+  require('../models/mobile_models/itinerary').default.belongsTo(
     require('../models/mobile_models/role_itinerary').default,
     { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' },
   );
-  require('../models/mobile_models/role_itinerary').default.belongsTo(
+  require('../models/mobile_models/role_itinerary').default.hasOne(
     require('../models/mobile_models/itinerary').default,
     { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
   );
@@ -599,13 +599,13 @@ export default async ({ expressApp }) => {
     foreignKey: 'pt_taxc',
     targetKey: 'tx2_tax_code',
   });
-  require('../models/item').default.hasOne(require('../models/location-detail').default, {
+  require('../models/item').default.hasMany(require('../models/location-detail').default, {
     foreignKey: 'ld_part',
     sourceKey: 'pt_part',
   });
-  require('../models/location-detail').default.belongsTo(require('../models/item').default, {
+  require('../models/location-detail').default.hasOne(require('../models/item').default, {
     foreignKey: 'ld_part',
-    targetKey: 'pt_part',
+    //targetKey: 'pt_part',
   });
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
@@ -1084,6 +1084,12 @@ export default async ({ expressApp }) => {
     foreignKey: 'mod_loc',
     targetKey: 'loc_loc',
   });
+
+  require('../models/mobile_models/profile_product_page').default.hasMany(
+    require('../models/mobile_models/product_page_details').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+  );
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();

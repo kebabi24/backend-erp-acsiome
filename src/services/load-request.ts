@@ -1,6 +1,7 @@
 import { Service, Inject } from 'typedi';
 import ProductPageService from './product-page';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize ,QueryTypes} from 'sequelize';
+import { groupBy } from 'lodash';
 
 @Service()
 export default class LoadRequestService {
@@ -69,7 +70,7 @@ export default class LoadRequestService {
 
   public async findAllRolesByUpperRoleCode(query: any): Promise<any> {
     try {
-      const roles = await this.roleModel.findAll({ where: query });
+      const roles = await this.roleModel.findAll({ where: query ,order: [['role_code', 'ASC']] });
       this.logger.silly('find all load requeusts');
       return roles;
     } catch (e) {
@@ -178,9 +179,9 @@ export default class LoadRequestService {
 
   public async updateLoadRequestLine(load_request_code: any, product_code: any, qntValidated: any): Promise<any> {
     try {
-      console.log(load_request_code);
-      console.log(product_code);
-      console.log(qntValidated);
+      // console.log(load_request_code);
+      // console.log(product_code);
+      // console.log(qntValidated);
       const qt_validated = qntValidated;
       const loadRequestLine = await this.loadRequestLineModel.update(
         { qt_validated: qt_validated },
@@ -332,11 +333,13 @@ export default class LoadRequestService {
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
+        const pages = await this.productPageModel.findOne({ where: {product_page_code: pageCode.product_page_code }, attributes: ['product_page_code','description'] });
+        // console.log("here",pages.description)
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
         });
-        pagesProducts.push({ page_code: pageCode.product_page_code, products: products_codes });
+        pagesProducts.push({ page_code: pageCode.product_page_code,description :pages.description, products: products_codes });
       }
 
       const pagesProductsWithDetails = [];
@@ -381,7 +384,7 @@ export default class LoadRequestService {
             });
           }
         }
-        pagesProductsWithDetails.push({ page_code: page.page_code, products: products });
+        pagesProductsWithDetails.push({ page_code: page.page_code,description:page.description, products: products });
       }
       return pagesProductsWithDetails;
     } catch (e) {
@@ -831,18 +834,13 @@ export default class LoadRequestService {
 
   public async getLoadRequestCreationData(): Promise<any> {
     try {
-      // get user mobile and profile & pages codes of the profile
-      // const user_mobile = await this.userMobileModel.findOne({where : {user_mobile_code:user_mobile_code}})
-      // const profile = await this.profileMobileModel.findOne({where:{profile_code :user_mobile.profile_code }})
-      // const pages_codes = await this.profileProductPageModel.findAll({where : {profile_code:profile.profile_code} ,attributes: ['product_page_code']})
-
-      // const loadRequesLines = await this.loadRequestLineModel.findAll({where: {load_request_code :load_request_code }})
-
-      const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'] });
-      console.log(pages_codes)
+     const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'],order: [['id', 'ASC']] });
+      // console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
+       // const pages_code = await this.productPageModel.findOne({ where: {product_page_code:pageCode.product_page_code}});
+     
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
@@ -857,26 +855,13 @@ export default class LoadRequestService {
 
         // FOR EACH PRODUCT
         for (const productd of page.products) {
-          // get product data
+
           const product = await this.itemModel.findOne({
             where: { pt_part: productd.dataValues.product_code },
             attributes: ['pt_desc1', 'pt_price', 'pt_part'],
           });
 
-          // CALCULATE STORED QUANTITY
           const sum = await this.getStoredQuantityOfProductWithoutLocSite(product.pt_part);
-
-          // var index = -1
-          // index = loadRequesLines.findIndex(line=>{
-          //     return line.dataValues.product_code == product.dataValues.pt_part;
-          // })
-
-          // product was requested
-          // if(index != -1){
-          //     const load_request_line = loadRequesLines[index].dataValues
-          //     products.push({product_code:productd.dataValues.product_code, ...product.dataValues, qt_request: load_request_line.qt_request, qt_validated: load_request_line.qt_validated, qt_stored : sum})
-
-          // product was not requested
 
           products.push({
             product_code: productd.dataValues.product_code,
@@ -898,6 +883,7 @@ export default class LoadRequestService {
   public async getStoredQuantityOfProductWithoutLocSite(product_code: any): Promise<any> {
     try {
       // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+      //console.log( "\tcode : "+ product_code )
       const quantities = await this.locationDetailModel.findAll({
         where: {
           ld_part: product_code,
@@ -948,4 +934,53 @@ export default class LoadRequestService {
       throw e;
     }
   }
+
+  public async getLoadRequestCreationDataRole(role_code:any): Promise<any> {
+    try {
+      
+
+     const role_codes   = await this.roleModel.findOne({ where: {role_code: role_code}, include : [{model: this.userMobileModel,required: true,attributes: ['profile_code']}]}) 
+ console.log(role_codes)
+     const pages_codes = await this.profileProductPageModel.findAll({ where: {profile_code: role_codes.userMobile.profile_code}, attributes: ['product_page_code'],  order: [['rank', 'ASC']],
+      include: [
+          {
+            model: this.productPageDetailsModel,
+            required: true,
+            order: [['rank', 'ASC']],
+            attributes: ['product_code', ],
+            include : [
+              {
+                model: this.productPageModel,
+                required: true,
+                attributes: ['description']   
+              },
+              {
+                  model: this.itemModel,
+                  required: true,
+                  attributes: ['pt_part', 'pt_desc1', 'pt_price'],
+                  include: [
+                    {
+                      model: this.locationDetailModel,
+                      required: false,
+                      where:{ld_site: role_codes.role_site, ld_loc : role_codes.role_loc },
+                      attributes: ['ld_qty_oh',/* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/], 
+                      // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
+                      // separate: false,
+                    },
+                  ]
+              },
+            ]
+          }
+        ]
+      });
+      
+       
+      return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
 }
+

@@ -5,7 +5,7 @@ const route = Router()
 
 export default (app: Router) => {
     app.use("/inventory-status", route)
-
+    route.get("/instancestatus", controller.findInstanceStatus)
     route.get("/", controller.findAll)
     route.post("/", controller.create)
     route.post("/ism", controller.createIsm)
@@ -14,6 +14,7 @@ export default (app: Router) => {
     route.post("/findism", controller.findByIsm)
     route.put("/:id", controller.update)
     route.post("/findDetails", controller.findAllDetails)
+    
     
     
 }

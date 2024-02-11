@@ -1,6 +1,6 @@
 import LocationDetailService from '../../services/location-details';
 import InventoryStatusDetailService from '../../services/inventory-status-details';
-
+import InventoryStatusService from '../../services/inventory-status';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
@@ -374,6 +374,27 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateS = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+
+  logger.debug('Calling update one  locationDetail endpoint');
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    let locationDetail;
+for (let ld of req.body.details) {
+     locationDetail = await locationDetailServiceInstance.update(
+      { ld_status: ld.ld_status, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { id : ld.id},
+    );
+}
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetail });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findOtherStatus = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const Sequelize = require('sequelize');
@@ -419,6 +440,44 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findStatusInstance = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+   logger.debug('Calling find by  all details endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const _ = require("lodash")
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const inventoryStatusServiceInstance = Container.get(InventoryStatusService);
+
+    const status = await inventoryStatusServiceInstance.findS({
+      where : {...req.body, is_frozen : true,is_domain:user_domain,}, attributes :['is_status']},);
+      let st = []
+      for(let s of status) {
+
+        st.push(s.is_status)
+      }
+
+      console.log(typeof status)
+      // const st = _.values(status.dataValues)
+       //const st = _.mapValues(status, function(o){return o.is_status});
+      console.log(st)
+    const locationdetails = await locationDetailServiceInstance.find({
+      ...req.body.obj,ld_domain:user_domain,
+      ld_status: st,
+    });
+    //console.log(locationdetails);
+
+    return res.status(202).json({
+      message: 'sec',
+      data: locationdetails,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   createldpos,
@@ -429,10 +488,12 @@ export default {
   findByOneRef,
   findByOneStatus,
   update,
+  updateS,
   deleteOne,
   findByAll,
   findOtherStatus,
   findByFifo,
   findByFifoLot,
   findByWeek,
+  findStatusInstance,
 };

@@ -27,7 +27,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const addressServiceInstance = Container.get(AddressService)
         const address = await addressServiceInstance.findOne({...req.body,ad_domain:user_domain})
-        console.log(address)
+      //  console.log(address)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: address })

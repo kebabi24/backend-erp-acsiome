@@ -664,7 +664,7 @@ export default class UserMobileService {
   public async getProfileProductPages(query: any): Promise<any> {
     try {
       const productPagesCodes = [];
-      const profileProductPages = await this.profileProductPageModel.findAll({ where: query, order: ['rank', 'ASC'] });
+      const profileProductPages = await this.profileProductPageModel.findAll({ where: query });
       profileProductPages.forEach(page => {
         productPagesCodes.push(page.product_page_code);
       });
@@ -751,6 +751,7 @@ export default class UserMobileService {
           'pt_orderable',
           'pt_loadable',
           'pt_promotion',
+          'pt_desc2',
         ],
       });
 
