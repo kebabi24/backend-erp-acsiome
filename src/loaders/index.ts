@@ -271,15 +271,13 @@ export default async ({ expressApp }) => {
 
   ////////
   require('../models/mobile_models/product_page').default.hasOne(
-   require('../models/mobile_models/profile_product_page').default,
-   { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
+    require('../models/mobile_models/profile_product_page').default,
+    { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
   require('../models/mobile_models/profile_product_page').default.belongsTo(
     require('../models/mobile_models/product_page').default,
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
-
-  
 
   require('../models/mobile_models/profile').default.hasOne(
     require('../models/mobile_models/profile_product_page').default,
@@ -382,6 +380,15 @@ export default async ({ expressApp }) => {
   require('../models/mobile_models/role').default.belongsTo(require('../models/mobile_models/service').default, {
     foreignKey: 'role_code',
     targetKey: 'role_code',
+  });
+
+  require('../models/mobile_models/service').default.hasOne(require('../models/mobile_models/itinerary').default, {
+    foreignKey: 'itinerary_code',
+    sourceKey: 'itinerary_code',
+  });
+  require('../models/mobile_models/itinerary').default.belongsTo(require('../models/mobile_models/service').default, {
+    foreignKey: 'itinerary_code',
+    targetKey: 'itinerary_code',
   });
 
   require('../models/mobile_models/role').default.hasOne(require('../models/mobile_models/userMobile').default, {
@@ -1078,18 +1085,14 @@ export default async ({ expressApp }) => {
     targetKey: 'loc_loc',
   });
 
-
-
-
-
   require('../models/mobile_models/profile_product_page').default.hasMany(
     require('../models/mobile_models/product_page_details').default,
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
-  
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
   //  await sequelizeConnection
   //    .sync({ alter: true })
   //    .then(() => {
