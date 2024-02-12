@@ -598,7 +598,7 @@ export default async ({ expressApp }) => {
   });
   require('../models/location-detail').default.hasOne(require('../models/item').default, {
      foreignKey: 'ld_part',
-     //targetKey: 'pt_part',
+     targetKey: 'pt_part',
   });
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
@@ -1089,15 +1089,15 @@ export default async ({ expressApp }) => {
   
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
-   await sequelizeConnection
-     .sync({ alter: true })
-     .then(() => {
-       console.log('database updated');
-     })
-     .catch(err => {
-       console.log(err);
-     });
+  await sequelizeConnection.sync();
+  //  await sequelizeConnection
+  //    .sync({ alter: true })
+  //    .then(() => {
+  //      console.log('database updated');
+  //    })
+  //    .catch(err => {
+  //      console.log(err);
+  //    });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
