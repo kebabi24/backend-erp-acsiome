@@ -234,6 +234,39 @@ const createPriceList = async (req: Request, res: Response, next: NextFunction) 
 
 }
 
+const getAllPriceList = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling get visit list  endpoint")
+
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    
+    try{    
+        const priceList = await mobileSettingsServiceInstanse.findPriceList({
+            ...req.body,
+            attributes: ['pricelist_code', 'description'],
+            group: ['pricelist_code', 'description'],
+            raw: true,
+        })
+        let result = []
+        let i = 1
+        for (let pl of priceList) {
+            result.push({id: i, pricelist_code : pl .pricelist_code, description: pl.description})
+            i++
+        }
+
+            return res
+                .status(202)
+                .json({
+                    data:result
+                })
+        }
+    
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
 
 
 
@@ -249,5 +282,6 @@ export default {
     createCancelationReasons,
     createPaymentMethods,
     getPriceList,
+    getAllPriceList,
     createPriceList
 }

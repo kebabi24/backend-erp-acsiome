@@ -646,6 +646,28 @@ const findAllLoadRequestLinesDifference = async (req: Request, res: Response, ne
   }
 };
 
+const getLoadRequestCreationDataRole = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling getLoadRequestData endpoint');
+  //console.log("aaaaaaaa",req.body)
+  //const profile_code = req.params.profile_code
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+
+     const role_code = req.params.role_code
+     const loadRequestData = await loadRequestService.getLoadRequestCreationDataRole(role_code);
+
+    return (
+      res
+        .status(200)
+        // .json({ message: "data ready", data: loadRequest , loadRequestData:loadRequestData })
+        .json({ message: 'data ready', loadRequestData: loadRequestData })
+    );
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -669,6 +691,7 @@ export default {
   getLoadRequestInfo,
   getLoadRequestDataV3,
   findAllLoadRequestLinesDifference,
+  getLoadRequestCreationDataRole,
 };
 
 // validation 0-10

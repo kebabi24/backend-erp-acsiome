@@ -81,7 +81,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const MobileServiceInstance = Container.get(MobileService);
-    const service = await MobileServiceInstance.findOne({ ...req.body, /*seq_domain: user_domain */});
+    const service = await MobileServiceInstance.findOne({ ...req.body /*seq_domain: user_domain */ });
     return res.status(200).json({ message: 'fetched succesfully', data: service });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -94,10 +94,10 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all service endpoint');
   const { user_domain } = req.headers;
   try {
-    console.log(req.body)
+    console.log(req.body);
     const MobileServiceInstance = Container.get(MobileService);
-    const service = await MobileServiceInstance.findServices({ ...req.body,/* seq_domain: user_domain*/ });
-    console.log(service)
+    const service = await MobileServiceInstance.findServices({ ...req.body /* seq_domain: user_domain*/ });
+    // console.log(service)
     return res.status(200).json({ message: 'fetched succesfully', data: service });
   } catch (e) {
     logger.error('🔥 error: %o', e);

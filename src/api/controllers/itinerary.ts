@@ -72,9 +72,7 @@ const getAllServices = async (req: Request, res: Response, next: NextFunction) =
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const ServiceMobileServiceInstance = Container.get(ServiceMobileService);
     const services = await ServiceMobileServiceInstance.findS(req.body.date);
-    services.forEach(element => {
-      console.log(element);
-    });
+
     //console.log(itn)
     return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
