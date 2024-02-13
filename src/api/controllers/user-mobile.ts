@@ -564,6 +564,11 @@ const getDataBack = async function(socket) {
     if (data.visits) {
       const dataa = data.visits;
       nb_visits = dataa.length;
+      dataa.forEach(element => {
+        console.log('element '+element)
+        element.periode_active_date=formatDateOnlyFromMobileToBack(element.periode_active_date);
+      });
+      // periode_active_date
       const visits = await userMobileServiceInstanse.createVisits(dataa);
     }
 
