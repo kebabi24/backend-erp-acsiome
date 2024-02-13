@@ -494,9 +494,9 @@ const getDataBack = async function(socket) {
       console.log(' service creation date '+service.service_creation_date)
       console.log(' service  date2 '+service.service_closing_date)
       console.log(' service  date3 '+service.service_period_activate_date )
-      // service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date);
-      // service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
-      // service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
+      service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date);
+      service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
+      service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
       service.service_open = false;
       // service.nb_visits = service.nb_visits;
       // service.nb_clients_itin = service.nb_clients_itin;
