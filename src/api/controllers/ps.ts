@@ -18,6 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { detail, it } = req.body;
     const psServiceInstance = Container.get(PsService);
 
+    console.log(detail)
     for (const item of detail) {
       await psServiceInstance.create({
         ...item,
@@ -271,7 +272,7 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
     const ps = await psServiceInstance.find({
       ...req.body,ps_domain:user_domain
     });
-    
+    console.log("ps",ps)
     for (let entry of ps) {
       const sct = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
