@@ -72,11 +72,7 @@ const Taxe = sequelize.define(
         tx2_stx_sub: Sequelize.STRING,
         tx2_register: Sequelize.STRING,
         tx2_usage_tax_point: {type: Sequelize.BOOLEAN, defaultValue : false  },
-
-
-
-
-
+        tx2_default: {type: Sequelize.BOOLEAN, defaultValue : false  },
         tx2_domain: Sequelize.STRING,
         oid_ac_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
         ...base,
