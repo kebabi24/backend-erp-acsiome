@@ -17,6 +17,7 @@ export default class LoadRequestService {
     @Inject('loadRequestLineModel') private loadRequestLineModel: Models.loadRequestLineModel,
     @Inject('loadRequestDetailsModel') private loadRequestDetailsModel: Models.loadRequestDetailsModel,
     @Inject('locationDetailModel') private locationDetailModel: Models.LocationDetailModel,
+    @Inject('priceListModel') private priceListModel: Models.ListPriceModel,
     @Inject('logger') private logger,
   ) {}
 
@@ -1062,9 +1063,19 @@ export default class LoadRequestService {
                     model: this.locationDetailModel,
                     required: false,
                     where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
-                    attributes: ['ld_qty_oh' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/],
+                    attributes: [
+                      'ld_qty_oh',
+                      'ld_lot',
+                      'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/,
+                    ],
                     // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
                     // separate: false,
+                  },
+                  {
+                    model: this.priceListModel,
+                    required: false,
+                    where: { pricelist_code: role_codes.pricelist_code },
+                    attributes: ['salesprice'],
                   },
                 ],
               },
