@@ -961,7 +961,17 @@ export default class UserMobileService {
       throw e;
     }
   }
-
+  // ******************** GET PRICELIST BY   **************************
+  public async getPriceListBY(query: any): Promise<any> {
+    try {
+      const price_list = await this.priceListModel.findAll({  where: query, });
+      return price_list;
+    } catch (e) {
+      console.log('Error from service- getPriceList');
+      this.logger.error(e);
+      throw e;
+    }
+  }
   // ******************** GET INVOICE    **************************
   public async getInvoice(): Promise<any> {
     try {
