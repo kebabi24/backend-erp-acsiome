@@ -1090,6 +1090,10 @@ export default async ({ expressApp }) => {
     { foreignKey: 'product_page_code', sourceKey: 'product_page_code' },
   );
 
+  require('../models/item').default.hasMany(require('../models/mobile_models/price_list').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //await sequelizeConnection.sync();

@@ -36,6 +36,7 @@ const Location = sequelize.define(
         loc_cap_um: Sequelize.STRING,
         loc_phys_addr: Sequelize.STRING,
         loc_xfer_ownership: {type: Sequelize.BOOLEAN, defaultValue : false  },
+        loc_default: {type: Sequelize.BOOLEAN, defaultValue : false  },
         loc_domain: Sequelize.STRING,
         oid_loc_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
 

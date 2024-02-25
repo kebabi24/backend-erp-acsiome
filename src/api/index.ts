@@ -113,6 +113,7 @@ import locationDeclared from './routes/location-declared';
 import audiometry from './routes/audiometry';
 import itemModel from './routes/item-model';
 import message from './routes/message';
+import barecodeInfos from './routes/barecode_infos'
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -229,5 +230,6 @@ export default () => {
   audiometry(app);
   itemModel(app);
   message(app)
+  barecodeInfos(app)
   return app;
 };
