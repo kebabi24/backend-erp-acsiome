@@ -200,13 +200,19 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users = [];
       var profiles = [];
+      var priceList = [];
       const profile = await userMobileServiceInstanse.getProfile({ profile_code: userMobile.profile_code });
       const menus = await userMobileServiceInstanse.getMenus({ profile_code: userMobile.profile_code });
       const parameter = await userMobileServiceInstanse.getParameter({ profile_code: userMobile.profile_code });
       const checklist = await userMobileServiceInstanse.getChecklist();
       const visitList = await userMobileServiceInstanse.getVisitList();
       const cancelationReasons = await userMobileServiceInstanse.getCancelationReasons();
-      const priceList = await userMobileServiceInstanse.getPriceList();
+      if(role.pricelist_code==null||role.pricelist_code==''){
+         priceList = await userMobileServiceInstanse.getPriceList();
+      }else{
+        priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code});
+      }
+      
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods();
@@ -320,6 +326,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
+        if(role.pricelist_code!=null&& role.pricelist_code!=''){
+          customers.forEach(element => {
+            element.pricelist_code=''
+          });
+        }
+
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
@@ -565,7 +577,7 @@ const getDataBack = async function(socket) {
       const dataa = data.visits;
       nb_visits = dataa.length;
       dataa.forEach(element => {
-        console.log('element '+element)
+        // console.log('element '+element)
         element.periode_active_date=formatDateOnlyFromMobileToBack(element.periode_active_date);
       });
       // periode_active_date
