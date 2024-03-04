@@ -1057,7 +1057,7 @@ export default class LoadRequestService {
               {
                 model: this.itemModel,
                 required: true,
-                attributes: ['pt_part', 'pt_desc1', 'pt_price'],
+                attributes: ['pt_part', 'pt_desc1', 'pt_price', 'pt_ord_min'],
                 include: [
                   {
                     model: this.locationDetailModel,
