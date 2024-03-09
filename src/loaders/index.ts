@@ -607,6 +607,16 @@ export default async ({ expressApp }) => {
     foreignKey: 'ld_part',
     targetKey: 'pt_part',
   });
+
+  require('../models/item').default.hasOne(require('../models/mobile_models/load_request_line').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  require('../models/mobile_models/load_request_line').default.hasOne(require('../models/item').default, {
+    foreignKey: 'product_code',
+    targetKey: 'pt_part',
+  });
+
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
     sourceKey: 'pt_part',
@@ -1096,7 +1106,7 @@ export default async ({ expressApp }) => {
   });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+  // await sequelizeConnection.sync();
   // await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

@@ -278,6 +278,7 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const loadRequestLine = await this.loadRequestLineModel.create({
+        date_creation: new Date(),
         load_request_code: load_request_code,
         product_code: product_code,
         qt_request: qntRequested,
@@ -1064,6 +1065,7 @@ export default class LoadRequestService {
                     required: false,
                     where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
                     attributes: [
+                      'id',
                       'ld_qty_oh',
                       'ld_lot',
                       'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/,
@@ -1076,6 +1078,72 @@ export default class LoadRequestService {
                     required: false,
                     where: { pricelist_code: role_codes.pricelist_code },
                     attributes: ['salesprice'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async getLoadRequestWithCode(role_code: any, load_request_code: any): Promise<any> {
+    try {
+      const role_codes = await this.roleModel.findOne({
+        where: { role_code: role_code },
+        include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
+      });
+      console.log(role_codes);
+      const pages_codes = await this.profileProductPageModel.findAll({
+        where: { profile_code: role_codes.userMobile.profile_code },
+        attributes: ['product_page_code'],
+        order: [['rank', 'ASC']],
+        include: [
+          {
+            model: this.productPageDetailsModel,
+            required: true,
+            order: [['rank', 'ASC']],
+            attributes: ['product_code'],
+            include: [
+              {
+                model: this.productPageModel,
+                required: true,
+                attributes: ['description'],
+              },
+              {
+                model: this.itemModel,
+                required: true,
+                attributes: ['pt_part', 'pt_desc1', 'pt_price', 'pt_ord_min'],
+                include: [
+                  {
+                    model: this.locationDetailModel,
+                    required: false,
+                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
+                    attributes: [
+                      'id',
+                      'ld_qty_oh',
+                      'ld_lot',
+                      'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/,
+                    ],
+                    // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
+                    // separate: false,
+                  },
+                  {
+                    model: this.priceListModel,
+                    required: false,
+                    where: { pricelist_code: role_codes.pricelist_code },
+                    attributes: ['salesprice'],
+                  },
+                  {
+                    model: this.loadRequestLineModel,
+                    required: false,
+                    where: { load_request_code: load_request_code },
+                    attributes: ['qt_request', 'pt_price'],
                   },
                 ],
               },
