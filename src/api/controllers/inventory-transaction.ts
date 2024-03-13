@@ -1304,7 +1304,132 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr03:pt.pt_group,
         dec01:Number(new Date(it.tr_effdate).getFullYear()),
         dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
-        tr_program:new Date().toLocaleTimeString(),
+        
+            tr_price : Number(sct.sct_cst_tot),
+            tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
+            tr_addr:wo.wo_routing,
+            tr_user1:wo.wo_user1,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        
+      
+      
+    }
+    return res.status(200).json({ message: 'Added succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail, it } = req.body;
+    console.log(it)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const itemServiceInstance = Container.get(itemService);
+    const statusServiceInstance = Container.get(statusService);
+    const workOrderServiceInstance = Container.get(workOrderService);
+    // console.log(it);
+    for (const data of detail) {
+      const { desc, ...item } = data;
+      const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part , pt_domain:user_domain});
+
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_domain:user_domain,
+        ld_part: it.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: item.tr_site,
+        ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
+        
+      });
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      else {
+        // console.log(item.tr_status);
+        const status = await statusServiceInstance.findOne({
+          is_domain:user_domain,
+          is_status: item.tr_status,
+        });
+
+        await locationDetailServiceInstance.create({
+          ld_domain:user_domain,
+          ld_part: it.tr_part,
+          ld_lot: item.tr_serial,
+          ld_date: new Date(),
+          ld_site: item.tr_site,
+          ld_loc: item.tr_loc,
+          ld_status: item.tr_status,
+          ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+          ld_expire: item.tr_expire,
+          ld_ref: item.tr_ref,
+          ld__log01: status.is_nettable,
+          ld_grade:item.tr_grade,
+          chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group
+        });
+      }
+      let qtyoh = 0;
+      if (ld) {
+        qtyoh = Number(ld.ld_qty_oh);
+      } else {
+        qtyoh = 0;
+      }
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
+        sct_part: it.tr_part,
+        sct_site: item.tr_site,
+        sct_sim: 'STD-CG',
+      });
+      const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+
+      if (wo)
+        await workOrderServiceInstance.update(
+          {
+            wo_qty_rjct: Number(wo.wo_qty_rjct) + Number(item.tr_qty_loc),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: wo.id })
+          await inventoryTransactionServiceInstance.create({
+            ...item,
+            ...it,
+            tr_domain:user_domain,
+            tr_qty_chg: Number(item.tr_qty_loc),
+            tr_loc_begin: Number(qtyoh),
+            tr_type: 'RJCT-WO',
+            tr_date: new Date(),
+            tr_mtl_std: sct.sct_mtl_tl,
+            tr_lbr_std: sct.sct_lbr_tl,
+            tr_bdn_std: sct.sct_bdn_tl,
+            tr_ovh_std: sct.sct_ovh_tl,
+            tr_sub_std: sct.sct_sub_tl,
+            tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        
             tr_price : Number(sct.sct_cst_tot),
             tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
             tr_addr:wo.wo_routing,
@@ -3220,6 +3345,7 @@ export default {
   inventoryByLoc,
   inventoryOfSecurity,
   rctWo,
+  rjctWo,
   issWo,
   issWoD,
   //issSo,
