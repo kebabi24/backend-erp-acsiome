@@ -1,6 +1,6 @@
 import { Service, Inject } from 'typedi';
 import ProductPageService from './product-page';
-import { Op, Sequelize ,QueryTypes} from 'sequelize';
+import { Op, Sequelize, QueryTypes } from 'sequelize';
 import { groupBy } from 'lodash';
 
 @Service()
@@ -17,7 +17,7 @@ export default class LoadRequestService {
     @Inject('loadRequestLineModel') private loadRequestLineModel: Models.loadRequestLineModel,
     @Inject('loadRequestDetailsModel') private loadRequestDetailsModel: Models.loadRequestDetailsModel,
     @Inject('locationDetailModel') private locationDetailModel: Models.LocationDetailModel,
-    @Inject('priceListModel') private priceListModel : Models.ListPriceModel,
+    @Inject('priceListModel') private priceListModel: Models.ListPriceModel,
     @Inject('logger') private logger,
   ) {}
 
@@ -48,6 +48,7 @@ export default class LoadRequestService {
 
   public async createMultipleLoadRequestsLines(data: any): Promise<any> {
     try {
+      console.log(data);
       const loadRequestsLines = await this.loadRequestLineModel.bulkCreate(data);
       this.logger.silly('created load requests lines');
       return loadRequestsLines;
@@ -69,9 +70,33 @@ export default class LoadRequestService {
     }
   }
 
+  public async createMultipleLoadRequestsLines2(data: any): Promise<any> {
+    try {
+      console.log(data);
+      const loadRequestsLines = await this.loadRequestLineModel.create(data);
+      this.logger.silly('created load requests lines');
+      return loadRequestsLines;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async createMultipleLoadRequestsDetails2(data: any): Promise<any> {
+    try {
+      const loadRequestsDetails = await this.loadRequestDetailsModel.create(data);
+      this.logger.silly('created load requests details');
+      console.log(loadRequestsDetails);
+      return loadRequestsDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
   public async findAllRolesByUpperRoleCode(query: any): Promise<any> {
     try {
-      const roles = await this.roleModel.findAll({ where: query ,order: [['role_code', 'ASC']] });
+      const roles = await this.roleModel.findAll({ where: query, order: [['role_code', 'ASC']] });
       this.logger.silly('find all load requeusts');
       return roles;
     } catch (e) {
@@ -204,13 +229,40 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const qt_validated = qntValidated;
+      const lineQt = await this.loadRequestLineModel.findOne({
+        where: { load_request_code: load_request_code, product_code: product_code },
+      });
       const loadRequestLine = await this.loadRequestLineModel.update(
-        { qt_effected: qt_validated },
+        { qt_effected: lineQt.qt_effected + qt_validated },
         { where: { load_request_code: load_request_code, product_code: product_code } },
       );
 
       this.logger.silly('updated load request lines');
       return loadRequestLine;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async updateLoadRequestDetailQtAffected(
+    load_request_code: any,
+    product_code: any,
+    qntValidated: any,
+    lot: any,
+  ): Promise<any> {
+    try {
+      const qt_validated = qntValidated;
+      const detailQt = await this.loadRequestDetailsModel.findOne({
+        where: { load_request_code: load_request_code, product_code: product_code, lot: lot },
+      });
+      const loadRequestDetail = await this.loadRequestDetailsModel.update(
+        { qt_effected: detailQt.qt_effected + qt_validated },
+        { where: { load_request_code: load_request_code, product_code: product_code, lot: lot } },
+      );
+
+      this.logger.silly('updated load request Details');
+      return loadRequestDetail;
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -226,6 +278,7 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const loadRequestLine = await this.loadRequestLineModel.create({
+        date_creation: new Date(),
         load_request_code: load_request_code,
         product_code: product_code,
         qt_request: qntRequested,
@@ -260,6 +313,37 @@ export default class LoadRequestService {
   public async findLoadRequest(query: any): Promise<any> {
     try {
       const loadRequest = await this.loadReuestModel.findOne({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findLoadRequestLine(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findOne({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findLoadRequestMaxLine(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findOne({ where: query, order: [['line', 'DESC']] });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async findLoadRequestDetail(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestDetailsModel.findOne({ where: query });
       this.logger.silly('find one loadRequest');
       return loadRequest;
     } catch (e) {
@@ -334,13 +418,20 @@ export default class LoadRequestService {
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
-        const pages = await this.productPageModel.findOne({ where: {product_page_code: pageCode.product_page_code }, attributes: ['product_page_code','description'] });
+        const pages = await this.productPageModel.findOne({
+          where: { product_page_code: pageCode.product_page_code },
+          attributes: ['product_page_code', 'description'],
+        });
         // console.log("here",pages.description)
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
         });
-        pagesProducts.push({ page_code: pageCode.product_page_code,description :pages.description, products: products_codes });
+        pagesProducts.push({
+          page_code: pageCode.product_page_code,
+          description: pages.description,
+          products: products_codes,
+        });
       }
 
       const pagesProductsWithDetails = [];
@@ -385,7 +476,7 @@ export default class LoadRequestService {
             });
           }
         }
-        pagesProductsWithDetails.push({ page_code: page.page_code,description:page.description, products: products });
+        pagesProductsWithDetails.push({ page_code: page.page_code, description: page.description, products: products });
       }
       return pagesProductsWithDetails;
     } catch (e) {
@@ -835,18 +926,26 @@ export default class LoadRequestService {
 
   public async getLoadRequestCreationData(): Promise<any> {
     try {
-     const pages_codes = await this.productPageModel.findAll({ where: {}, attributes: ['product_page_code','description'],order: [['id', 'ASC']] });
+      const pages_codes = await this.productPageModel.findAll({
+        where: {},
+        attributes: ['product_page_code', 'description'],
+        order: [['id', 'ASC']],
+      });
       // console.log(pages_codes)
       // obj : page code + products_codes []
       const pagesProducts = [];
       for (const pageCode of pages_codes) {
-       // const pages_code = await this.productPageModel.findOne({ where: {product_page_code:pageCode.product_page_code}});
-     
+        // const pages_code = await this.productPageModel.findOne({ where: {product_page_code:pageCode.product_page_code}});
+
         const products_codes = await this.productPageDetailsModel.findAll({
           where: { product_page_code: pageCode.product_page_code },
           attributes: ['product_code'],
         });
-        pagesProducts.push({ page_code: pageCode.product_page_code,description:pageCode.description, products: products_codes });
+        pagesProducts.push({
+          page_code: pageCode.product_page_code,
+          description: pageCode.description,
+          products: products_codes,
+        });
       }
 
       const pagesProductsWithDetails = [];
@@ -856,7 +955,6 @@ export default class LoadRequestService {
 
         // FOR EACH PRODUCT
         for (const productd of page.products) {
-
           const product = await this.itemModel.findOne({
             where: { pt_part: productd.dataValues.product_code },
             attributes: ['pt_desc1', 'pt_price', 'pt_part'],
@@ -872,7 +970,7 @@ export default class LoadRequestService {
             qt_stored: sum,
           });
         }
-        pagesProductsWithDetails.push({ page_code: page.page_code, description:page.description, products: products });
+        pagesProductsWithDetails.push({ page_code: page.page_code, description: page.description, products: products });
       }
       return pagesProductsWithDetails;
     } catch (e) {
@@ -918,7 +1016,6 @@ export default class LoadRequestService {
     }
   }
 
-
   public async findAllDif(query: any): Promise<any> {
     try {
       //console.log(query);
@@ -926,7 +1023,6 @@ export default class LoadRequestService {
 
       const loadRequestsLine = await this.loadRequestLineModel.findAll({
         where: query,
-      
       });
       this.logger.silly('find All locationDetails mstr');
       return loadRequestsLine;
@@ -936,58 +1032,130 @@ export default class LoadRequestService {
     }
   }
 
-  public async getLoadRequestCreationDataRole(role_code:any): Promise<any> {
+  public async getLoadRequestCreationDataRole(role_code: any): Promise<any> {
     try {
-      
-
-     const role_codes   = await this.roleModel.findOne({ where: {role_code: role_code}, include : [{model: this.userMobileModel,required: true,attributes: ['profile_code']}]}) 
- console.log(role_codes)
-     const pages_codes = await this.profileProductPageModel.findAll({ where: {profile_code: role_codes.userMobile.profile_code}, attributes: ['product_page_code'],  order: [['rank', 'ASC']],
-      include: [
+      const role_codes = await this.roleModel.findOne({
+        where: { role_code: role_code },
+        include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
+      });
+      console.log(role_codes);
+      const pages_codes = await this.profileProductPageModel.findAll({
+        where: { profile_code: role_codes.userMobile.profile_code },
+        attributes: ['product_page_code'],
+        order: [['rank', 'ASC']],
+        include: [
           {
             model: this.productPageDetailsModel,
             required: true,
             order: [['rank', 'ASC']],
-            attributes: ['product_code', ],
-            include : [
+            attributes: ['product_code'],
+            include: [
               {
                 model: this.productPageModel,
                 required: true,
-                attributes: ['description']   
+                attributes: ['description'],
               },
               {
-                  model: this.itemModel,
-                  required: true,
-                  attributes: ['pt_part', 'pt_desc1', 'pt_price'],
-                  include: [
-                    {
-                      model: this.locationDetailModel,
-                      required: false,
-                      where:{ld_site: role_codes.role_site, ld_loc : role_codes.role_loc },
-                      attributes: ['ld_qty_oh', 'ld_lot', 'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/], 
-                      // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
-                      // separate: false,
-                    },
-                    {
-                      model:this.priceListModel,
-                      required: false,
-                      where :{ pricelist_code : role_codes.pricelist_code},
-                      attributes: ['salesprice']
-                    }
-                  ]
+                model: this.itemModel,
+                required: true,
+                attributes: ['pt_part', 'pt_desc1', 'pt_price', 'pt_ord_min'],
+                include: [
+                  {
+                    model: this.locationDetailModel,
+                    required: false,
+                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
+                    attributes: [
+                      'id',
+                      'ld_qty_oh',
+                      'ld_lot',
+                      'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/,
+                    ],
+                    // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
+                    // separate: false,
+                  },
+                  {
+                    model: this.priceListModel,
+                    required: false,
+                    where: { pricelist_code: role_codes.pricelist_code },
+                    attributes: ['salesprice'],
+                  },
+                ],
               },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       });
-      
-       
+
       return pages_codes;
     } catch (e) {
       this.logger.error(e);
       throw e;
     }
   }
+  public async getLoadRequestWithCode(role_code: any, load_request_code: any): Promise<any> {
+    try {
+      const role_codes = await this.roleModel.findOne({
+        where: { role_code: role_code },
+        include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
+      });
+      console.log(role_codes);
+      const pages_codes = await this.profileProductPageModel.findAll({
+        where: { profile_code: role_codes.userMobile.profile_code },
+        attributes: ['product_page_code'],
+        order: [['rank', 'ASC']],
+        include: [
+          {
+            model: this.productPageDetailsModel,
+            required: true,
+            order: [['rank', 'ASC']],
+            attributes: ['product_code'],
+            include: [
+              {
+                model: this.productPageModel,
+                required: true,
+                attributes: ['description'],
+              },
+              {
+                model: this.itemModel,
+                required: true,
+                attributes: ['pt_part', 'pt_desc1', 'pt_price', 'pt_ord_min'],
+                include: [
+                  {
+                    model: this.locationDetailModel,
+                    required: false,
+                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
+                    attributes: [
+                      'id',
+                      'ld_qty_oh',
+                      'ld_lot',
+                      'ld_expire' /* [Sequelize.fn('SUM', Sequelize.col('ld_qty_oh')), 'qty']*/,
+                    ],
+                    // group: ['productPageDetails.item.locationDetails.ld_part.ld_part'],
+                    // separate: false,
+                  },
+                  {
+                    model: this.priceListModel,
+                    required: false,
+                    where: { pricelist_code: role_codes.pricelist_code },
+                    attributes: ['salesprice'],
+                  },
+                  {
+                    model: this.loadRequestLineModel,
+                    required: false,
+                    where: { load_request_code: load_request_code },
+                    attributes: ['qt_request', 'pt_price'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
 
+      return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }
-
