@@ -354,7 +354,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.findOne({ ...req.body ,code_domain:user_domain});
-    //console.log(req.body);
+    console.log("hereé",codes);
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
     logger.error('🔥 error: %o', e);
