@@ -27,6 +27,7 @@ export default (app: Router) => {
   route.post('/createLoadRequestDetails/', controller.createLoadRequestDetails);
   route.post('/createLoadRequestDetailsStatus/', controller.createLoadRequestDetailsChangeStatus);
   route.post('/createLoadRequestAndLines/', controller.createLoadRequestAndLines);
-  route.post('/LoadRequestLinesdif/',controller.findAllLoadRequestLinesDifference);
+  route.post('/LoadRequestLinesdif/', controller.findAllLoadRequestLinesDifference);
   route.get('/findLoadRequestCreationDataRole/:role_code', controller.getLoadRequestCreationDataRole);
+  route.post('/getLoadRequestWithCode', controller.getLoadRequestWithCode);
 };
