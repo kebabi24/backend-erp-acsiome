@@ -23,8 +23,8 @@ const LoadRequestLine = sequelize.define(
     product_code: {
       type: Sequelize.STRING,
       references: {
-        model: 'pt_mstr',
-        key: 'pt_part',
+        model: "pt_mstr",
+        key: "pt_part",
       },
     },
 
