@@ -199,7 +199,7 @@ const findLevel = async (req: Request, res: Response, next: NextFunction) => {
     const jobDetailServiceInstance = Container.get(JobDetailService);
     
     const levels = await jobDetailServiceInstance.find({...req.body,jbd_domain:user_domain,  });
-    /
+    
     var data = [];
     for (let code of levels) {
       data.push({ value: code.jbd_level, label: code.jbd_desc });
