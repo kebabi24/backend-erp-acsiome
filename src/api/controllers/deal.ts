@@ -13,7 +13,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const dealServiceInstance = Container.get(DealService);
 
-    /
+    
     const data = req.body.data;
     const filedata = req.file;
     const jsonData = JSON.parse(data);
