@@ -167,7 +167,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
       'SELECT  PUBLIC.jb_mstr.id as "jbid",*  FROM   PUBLIC.jb_mstr,  PUBLIC.jbd_det  where PUBLIC.jb_mstr.jb_domain= ? and PUBLIC.jbd_det.jbd_code = PUBLIC.jb_mstr.jb_code and PUBLIC.jbd_det.jbd_domain = PUBLIC.jb_mstr.jb_domain  ORDER BY PUBLIC.jbd_det.id ASC',
       { replacements: [user_domain], type: QueryTypes.SELECT },
     );
-    console.log(pos);
+
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -176,7 +176,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
 };
 const findByDet = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all job endpoint');
   try {
     //  const jobServiceInstance = Container.get(JobService)
@@ -197,14 +197,14 @@ const findLevel = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const jobDetailServiceInstance = Container.get(JobDetailService);
-    console.log(req.body)
+    
     const levels = await jobDetailServiceInstance.find({...req.body,jbd_domain:user_domain,  });
-    // console.log(codes)
+    /
     var data = [];
     for (let code of levels) {
       data.push({ value: code.jbd_level, label: code.jbd_desc });
     }
-    console.log(data);
+
     return res.status(200).json({ message: 'fetched succesfully', data: data });
   } catch (e) {
     logger.error('🔥 error: %o', e);

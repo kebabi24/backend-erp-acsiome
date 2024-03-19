@@ -9,7 +9,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     logger.debug("Calling Create message endpoint")
     try {
-       // console.log(req.body)
+       // 
         const { Msg, Roles } = req.body;
         const messageServiceInstance = Container.get(MessageService)
         for(let ro of Roles) {

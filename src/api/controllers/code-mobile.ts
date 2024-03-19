@@ -42,7 +42,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const codeMobileServiceInstance = Container.get(CodeMobileService)
         const codesMobile = await codeMobileServiceInstance.find({})
-        console.log(codesMobile)
+      
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: codesMobile })
@@ -59,7 +59,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const codeMobileServiceInstance = Container.get(CodeMobileService)
         const codesMobile = await codeMobileServiceInstance.find({...req.body})
-        console.log(req.body)
+
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: codesMobile })

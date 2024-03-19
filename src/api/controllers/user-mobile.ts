@@ -906,7 +906,7 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+    
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
         where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -980,7 +980,7 @@ const findPaymentBy = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+    
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
         period_active_date: { [Op.between]: [req.body.date, req.body.date1] },
@@ -1008,7 +1008,7 @@ const findVisitBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    // console.log(req.body);
+    // 
     if (req.body.site == '*') {
       var visits = await userMobileServiceInstance.getVisitsBy({
         where: { periode_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -1456,7 +1456,7 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+    
 
     var invoices = await userMobileServiceInstance.getPaymentsByGroup({
       where: req.body,

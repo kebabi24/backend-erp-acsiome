@@ -31,7 +31,6 @@ export default class locationDeclaredService {
   }
   public async find(query: any): Promise<any> {
     try {
-      //console.log(query);
       //const locationDeclareds = await this.locationDeclaredModel.findAll({ where: query, include: this.itemModel });
 
       const locationDeclareds = await this.locationDeclaredModel.findAll({
@@ -47,7 +46,6 @@ export default class locationDeclaredService {
   }
   public async findall(query: any): Promise<any> {
     try {
-      console.log(query);
       const locationDeclareds = await this.locationDeclaredModel.findAll({ where: query, include: this.itemModel });
 
       
@@ -60,7 +58,6 @@ export default class locationDeclaredService {
   }
   public async findByWeek(query: any): Promise<any> {
     try {
-      console.log(query);
       //const locationDeclareds = await this.locationDeclaredModel.findAll({ where: query, include: this.itemModel });
 
       const locationDeclareds = await this.locationDeclaredModel.findAll({

@@ -20,7 +20,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             CostaccountService
         )
         const { costcenter, costsub, costaccount } = req.body
-        console.log(costsub)
+        
         const cc = await costcenterServiceInstance.create({...costcenter, cc_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         for (let entry of costsub) {
             entry = { ...entry, ccd2_domain:user_domain,ccd2_cc: costcenter.cc_ctr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
@@ -46,7 +46,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     try {
-        console.log(req.body)
+      
         const costcenterServiceInstance = Container.get(CostcenterService)
         const cc = await costcenterServiceInstance.find({...req.body,cc_domain:user_domain})
         return res
@@ -64,7 +64,7 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     try {
-        console.log(req.body)
+       
         const costcenterServiceInstance = Container.get(CostcenterService)
         const costsubServiceInstance = Container.get(
             CostsubService
@@ -194,7 +194,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
         const ccs =await sequelize.query('SELECT  PUBLIC.cc_mstr.id as "cid"  , *  FROM   PUBLIC.cc_mstr,  PUBLIC.ccd2_det , PUBLIC.ccd1_det where PUBLIC.ccd2_det.ccd2_cc = PUBLIC.cc_mstr.cc_ctr  and   PUBLIC.ccd1_det.ccd1_cc = PUBLIC.cc_mstr.cc_ctr and PUBLIC.ccd1_det.ccd1_domain= PUBLIC.cc_mstr.cc_domain and PUBLIC.ccd2_det.ccd2_domain = PUBLIC.cc_mstr.cc_domain and PUBLIC.cc_mstr.cc_domain = ? ORDER BY PUBLIC.cc_mstr.id ASC', { replacements: [user_domain], type: QueryTypes.SELECT },);
-       console.log(ccs.sid)
+      
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ccs })

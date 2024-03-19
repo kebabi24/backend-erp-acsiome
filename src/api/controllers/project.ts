@@ -185,7 +185,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all project endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -221,7 +221,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByTask = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   let details2: any;
   let details3: any;
   logger.debug('Calling find by  all project endpoint');
@@ -668,7 +668,7 @@ const testDocxSuivi = async (req: Request, res: Response, next: NextFunction) =>
   logger.debug('Calling testDocx endpoint');
 
   try {
-    console.log(req.body);
+    
     const PizZip = require('pizzip');
     const Docxtemplater = require('docxtemplater');
 

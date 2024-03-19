@@ -30,8 +30,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const saleorderDetailServiceInstance = Container.get(SaleorderDetailService);
     const saleorderServiceInstance = Container.get(SaleorderService);
     const { addReport, empDetail, cnsDetail, nbr } = req.body;
-    console.log('req body', req.body);
-    console.log(nbr);
+    
     const task = await projectTaskDetailServiceInstance.findOne({
       pmt_code: addReport.pmr_pm_code,
       pmt_domain: user_domain,
@@ -60,7 +59,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         sod__chr01: pmd.pmd_task,
       });
     }
-    console.log('empDetail', empDetail);
+    
     for (let entry of empDetail) {
       const pm = await projectServiceInstance.findOne({ pm_code: addReport.pmr_pm_code, pm_domain: user_domain });
 
@@ -107,7 +106,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           },
           order: [['sod_line', 'DESC']],
         });
-        console.log('days_nbr', entry.pmr_separe, entry.days_nbr);
+      
         await saleorderDetailServiceInstance.create({
           sod_nbr: sod.sod_nbr,
           sod_part: sod.sod_part,

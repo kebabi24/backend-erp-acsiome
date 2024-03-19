@@ -859,7 +859,7 @@ const findSumAmt = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
-    console.log(req.body);
+    
     if (req.body.site == '*') {
       var orders = await PosOrderDetailServiceInstance.findspec({
         where: { domain: user_domain, created_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -1094,7 +1094,7 @@ const findBySite = async (req: Request, res: Response, next: NextFunction) => {
   const forcastServiceInstance = Container.get(ForcastService);
   const PosOrderDetailProductServiceInstance = Container.get(PosOrderDetail);
   if (req.body.site != '*') {
-    console.log(req.body);
+    
     try {
       const orders = await PosOrderDetailServiceInstance.findgrp({
         where: {
@@ -1334,7 +1334,7 @@ const findGlobAmt = async (req: Request, res: Response, next: NextFunction) => {
     const PosOrderDetailServiceInstance = Container.get(PosOrderDetail);
     const itemServiceInstance = Container.get(ItemService);
     const codeServiceInstance = Container.get(CodeService);
-    console.log(req.body);
+    
 
     var sansbo = await PosOrderDetailServiceInstance.findspec({
       where: {

@@ -102,12 +102,12 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
     // verify connection configuration
     transporter.verify(function(error, success) {
       if (error) {
-        console.log(error);
+      
       } else {
         console.log('Server is ready to take our messages');
       }
     });
-    // console.log(transporter);
+   
     // send mail with defined transport object
     let info = await transporter.sendMail({
       from: 'contact@abracadabra-algeria.com', // sender address
@@ -122,11 +122,11 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
         cart_number +
         '<b>', // html body
     });
-    // console.log('Message sent: %s', info.messageId);
+    
     // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 
     // Preview only available when sending through an Ethereal account
-    // console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+   
 
     const customerr = await customerServiceInstance.update(
       {
@@ -147,7 +147,7 @@ const setLoyCm = async (req: Request, res: Response, next: NextFunction) => {
     // const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
     // const addLine = await crmServiceInstance.createAgendaLine(customer_number, param, paramDetails, sequence);
 
-    // console.log(addLine);
+  
 
     return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
@@ -243,7 +243,7 @@ const getSolde = async (req: Request, res: Response, next: NextFunction) => {
         cm_balance: cm.cm_balance + solde,
         cm_ship_balance: cm.cm_ship_balance + solde_ship,
       };
-      console.log(result_head);
+      
 
       results_head.push(result_head);
     }
@@ -358,7 +358,7 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
           if(detail.method === ""){
             createAgendaEvents = true
             makeTest = false
-            console.log("createAgendaEvents is true")
+         
           }
         }
 
@@ -384,7 +384,7 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
       const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
       const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone, param, paramDetails, sequence);
 
-      console.log(addLine)
+
       
     }
 
@@ -402,9 +402,9 @@ const findCustomer = async (req: Request, res: Response, next: NextFunction) => 
     const customerServiceInstance = Container.get(CustomerService);
 
     const { phone } = req.params;
-    console.log(req.params);
+  
     const customer = await customerServiceInstance.findCustomer(phone);
-    console.log(customer);
+    
     return res.status(200).json({ message: 'fetched succesfully', data: customer });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -420,7 +420,7 @@ const findOder = async (req: Request, res: Response, next: NextFunction) => {
 
     const { order_code } = req.params;
     const order = await customerServiceInstance.findOrder(order_code);
-    console.log(order);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: order });
   } catch (e) {
     logger.error('🔥 error: %o', e);

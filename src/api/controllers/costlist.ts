@@ -34,7 +34,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all tool endpoint")
     const{user_domain} = req.headers
     try {
@@ -43,7 +43,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         const ltrc = await CostlistServiceInstance.find({
             ...req.body,ltrc_domain:user_domain
         })
-        console.log("hhhhhhhhhhhhhhhh")
+       
      
             return res.status(200).json({
                 message: "fetched succesfully",
@@ -56,7 +56,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 }
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+  
     logger.debug("Calling find by  all tool endpoint")
     const{user_domain} = req.headers
     try {
@@ -150,8 +150,8 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         const CostlistServiceInstance = Container.get(CostlistService)
         const CostlistDetailServiceInstance = Container.get(CostlistDetailService)
         const { id } = req.params
-        console.log(id)
-        console.log(req.body)
+       
+       
         const {costlist, details} = req.body
         const ltrc = await CostlistServiceInstance.update(
             { ...costlist , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},

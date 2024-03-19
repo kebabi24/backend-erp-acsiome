@@ -38,7 +38,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const RoleServiceInstance = Container.get(RoleService);
     const { id } = req.body;
-    console.log(req.body);
+    
     const role = await RoleServiceInstance.findOne({ role_code: id });
     console.log('hello');
     return res.status(200).json({ message: 'fetched succesfully', data: role });
@@ -135,7 +135,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const RoleItineraryServiceInstance = Container.get(RoleItineraryService);
 
     const { id } = req.params;
-    console.log(req.body);
+    
     const roleup = await RoleServiceInstance.updated(
       { ...role, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },

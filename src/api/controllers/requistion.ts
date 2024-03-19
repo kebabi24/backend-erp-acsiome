@@ -34,7 +34,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     logger.debug("Calling find by  all requisition endpoint")
@@ -69,7 +69,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     logger.debug("Calling find by  all requisition endpoint")
@@ -94,7 +94,7 @@ const findNotByAll = async (req: Request, res: Response, next: NextFunction) => 
     const{user_domain} = req.headers
     const Sequelize = require('sequelize');
         const Op = Sequelize.Op;
-    console.log(req.body)
+    
     logger.debug("Calling find by  all requisition endpoint")
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
@@ -230,7 +230,7 @@ const{user_domain} = req.headers
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
         const { id } = req.params
-        console.log(req.body)
+        
         const requisition = await requisitionServiceInstance.update(
             { ...req.body, last_modified_by: user_code },
             { id }

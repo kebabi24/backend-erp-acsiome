@@ -26,7 +26,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all tool endpoint")
     const{user_domain} = req.headers
     try {
@@ -48,7 +48,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 }
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all tool endpoint")
     const{user_domain} = req.headers
     try {
@@ -118,7 +118,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
        
         const { id } = req.params
         console.log(id)
-        console.log(req.body)
+        
         const trc = await transportcostServiceInstance.update(
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }

@@ -886,7 +886,7 @@ export default class UserMobileService {
       });
       return locationDetail;
     } catch (e) {
-      console.log('Error from getLocationDetail - service ');
+   
       this.logger.error(e);
       throw e;
     }
@@ -899,7 +899,7 @@ export default class UserMobileService {
       const paymentMethods = await this.paymentMethodModel.findAll();
       return paymentMethods;
     } catch (e) {
-      console.log('Error from service- getPaymentMethods');
+
       this.logger.error(e);
       throw e;
     }
@@ -923,7 +923,7 @@ export default class UserMobileService {
       const payment = await this.paymentModel.findAll({ where: query });
       return payment;
     } catch (e) {
-      console.log('Error from service- getPayments');
+
       this.logger.error(e);
       throw e;
     }
@@ -933,7 +933,7 @@ export default class UserMobileService {
       const payment = await this.paymentModel.findAll(query);
       return payment;
     } catch (e) {
-      console.log('Error from service- getPayments');
+    
       this.logger.error(e);
       throw e;
     }
@@ -956,7 +956,7 @@ export default class UserMobileService {
       const price_list = await this.priceListModel.findAll();
       return price_list;
     } catch (e) {
-      console.log('Error from service- getPriceList');
+     
       this.logger.error(e);
       throw e;
     }
@@ -967,7 +967,7 @@ export default class UserMobileService {
       const price_list = await this.priceListModel.findAll({  where: query, });
       return price_list;
     } catch (e) {
-      console.log('Error from service- getPriceList');
+
       this.logger.error(e);
       throw e;
     }
@@ -978,7 +978,7 @@ export default class UserMobileService {
       const invoice = await this.invoiceModel.findAll({ where: { closed: false } });
       return invoice;
     } catch (e) {
-      console.log('Error from service- getInvoice');
+   
       this.logger.error(e);
       throw e;
     }
@@ -990,7 +990,7 @@ export default class UserMobileService {
       const invoice_line = await this.invoiceLineModel.findAll();
       return invoice_line;
     } catch (e) {
-      console.log('Error from service- getInvoiceLine');
+
       this.logger.error(e);
       throw e;
     }
@@ -1001,7 +1001,7 @@ export default class UserMobileService {
       const invoice_line = await this.invoiceLineModel.findAll(query);
       return invoice_line;
     } catch (e) {
-      console.log('Error from service- getInvoiceLine');
+   
       this.logger.error(e);
       throw e;
     }
@@ -1112,7 +1112,7 @@ export default class UserMobileService {
   public async createInvoices(data: any): Promise<any> {
     try {
       data.forEach(element => {
-        // console.log(element)
+     
         if (element.id) delete element.id;
         // element.due_amount = element.dueamout
         //    element.period_active_day = element.periode_active_date
@@ -1127,7 +1127,7 @@ export default class UserMobileService {
       const invoices = await this.invoiceModel.bulkCreate(data);
       return invoices;
     } catch (e) {
-      console.log('Error from service- createInvoices');
+ 
       this.logger.error(e);
       throw e;
     }
@@ -1186,7 +1186,7 @@ export default class UserMobileService {
       const inventoriesLines = await this.inventoryLineModel.bulkCreate(data);
       return inventoriesLines;
     } catch (e) {
-      console.log('Error from service- createInventoriesLines');
+      ('Error from service- createInventoriesLines');
       this.logger.error(e);
       throw e;
     }
@@ -1201,7 +1201,7 @@ export default class UserMobileService {
       const payments = await this.paymentModel.bulkCreate(data);
       return payments;
     } catch (e) {
-      console.log('Error from service- createPayments');
+     
       this.logger.error(e);
       throw e;
     }
@@ -1236,7 +1236,7 @@ export default class UserMobileService {
       }
       return locationCreated;
     } catch (e) {
-      console.log('Error from service- updateCreateLocationDetails');
+     
       this.logger.error(e);
       throw e;
     }
@@ -1363,7 +1363,7 @@ export default class UserMobileService {
       });
       return payments;
     } catch (e) {
-      console.log('Error from getPaymentsByDates');
+    
       this.logger.error(e);
       throw e;
     }
@@ -1381,7 +1381,7 @@ export default class UserMobileService {
 
       return products;
     } catch (e) {
-      console.log('Error from getProductType - service ');
+    
       this.logger.error(e);
       throw e;
     }

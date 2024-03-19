@@ -16,7 +16,7 @@ import jwt from "jsonwebtoken"
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
-    //console.log("hnhnhn",req.body)
+   
     try {
         
         const userServiceInstance = Container.get(UserService)
@@ -52,7 +52,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
-    console.log(req.body)
+   
     try {
         
         const userServiceInstance = Container.get(UserService)
@@ -149,9 +149,9 @@ const getCustomerPhone = async (req: Request, res: Response, next: NextFunction)
 const verifypwd = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
-    console.log(req.body)
+
     try {
-        console.log(req.body)
+       
         const userServiceInstance = Container.get(UserService)
         const { userName, password } = req.body
         

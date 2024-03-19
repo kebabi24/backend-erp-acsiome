@@ -29,7 +29,7 @@ const{user_domain} = req.headers
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all vendorProposal endpoint');
   const{user_domain} = req.headers
   try {
@@ -52,7 +52,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all vendorProposal endpoint');
   const{user_domain} = req.headers
   try {
@@ -137,7 +137,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const vendorProposalServiceInstance = Container.get(VendorProposalService);
     const { id } = req.params;
-    console.log(req.body);
+    
     const vendorProposal = await vendorProposalServiceInstance.update({ ...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id });
     return res.status(200).json({ message: 'fetched succesfully', data: vendorProposal });
   } catch (e) {

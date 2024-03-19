@@ -115,9 +115,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       ].prh_rcvd += value.prh_rcvd;
       return res;
     }, {});
-    console.log('here');
+    console.log('here CREATE');
     console.log(result);
-    console.log('here');
+    console.log('here CREATE END');
 
     var i = 1;
     for (const arr of result) {
@@ -246,16 +246,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       lds.map(elem => {
         qty += Number(elem.ld_qty_oh);
       });
+      console.log('calcul mnt')
+      
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
-          (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
-            Number(remain.prh_pur_cost) *
-            Number(req.body.pr.prh_ex_rate2)) /
-            Number(req.body.pr.prh_ex_rate)) /
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
+          (Number(remain.prh_rcvd) * Number(remain.prh_pur_cost) * Number(req.body.pr.prh_ex_rate2)) / Number(req.body.pr.prh_ex_rate)) /
           (qty + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
         2,
       );
+      console.log(new_price)
       await costSimulationServiceInstance.update(
         {
           sct_mtl_tl: new_price,
@@ -347,7 +346,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
         /****print label**** */
         const imagePath = './logo.png';
-        console.log(req.body);
+        
         // Set the options for the image
         const imageOptions = {
           fit: [150, 150], // Size of the image
@@ -698,9 +697,9 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
         qty += Number(elem.ld_qty_oh);
       });
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
           (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
+           
             Number(remain.prh_pur_cost) *
             Number(req.body.pr.prh_ex_rate2)) /
             Number(req.body.pr.prh_ex_rate)) /
@@ -1029,9 +1028,9 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
         qty += Number(elem.ld_qty_oh);
       });
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
           (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
+           
             Number(remain.prh_pur_cost) *
             Number(req.body.pr.prh_ex_rate2)) /
             Number(req.body.pr.prh_ex_rate)) /
@@ -1253,8 +1252,9 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
       lds.map(elem => {
         qty += Number(elem.ld_qty_oh);
       });
+      console.log(po.pod_price,po.pod_qty_rcvd)
       const new_price = round(
-        qty * Number(sct_mtl_tl) + Number(po.pod_qty_rcvd) * Number(po.pod_price) * (qty + Number(po.pod_qty_rcvd)),
+        qty * Number(sct_mtl_tl.sct_cst_tot) + Number(po.pod_qty_rcvd) * Number(po.pod_price) * (qty + Number(po.pod_qty_rcvd)),
       );
       await costSimulationServiceInstance.update(
         {

@@ -114,8 +114,8 @@ const getExRate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const exchangeRateServiceInstance = Container.get(ExchangeRateService);
     const { exr_curr1, exr_curr2, date } = req.body;
-    // console.log(req.body)
-    //console.log(date);
+
+    
     const exchangeRates = await exchangeRateServiceInstance.findOne({
       exr_domain:user_domain,
       exr_curr1,
@@ -127,7 +127,7 @@ const getExRate = async (req: Request, res: Response, next: NextFunction) => {
         [Op.gte]: date,
       },
     });
-    //console.log('aa', exchangeRates);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: exchangeRates });
   } catch (e) {
     logger.error('🔥 error: %o', e);

@@ -16,7 +16,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     logger.debug("Calling Create sequence endpoint")
     try {
-        console.log(req.body)
+        
         const invoiceOrderServiceInstance = Container.get(InvoiceOrderService)
 
         const invoiceOrderDetailServiceInstance = Container.get(
@@ -74,7 +74,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
 
     logger.debug("Calling Create sequence endpoint")
     try {
-        console.log(req.body)
+        
         const invoiceOrderServiceInstance = Container.get(InvoiceOrderService)
         const saleOrderServiceInstance = Container.get(SaleOrderService)
 
@@ -126,7 +126,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
 }
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     const{user_domain} = req.headers
 
     logger.debug("Calling find by  all invoiceOrder endpoint")
@@ -188,7 +188,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all requisition endpoint")
     const{user_domain} = req.headers
 
@@ -244,7 +244,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const invoiceOrderServiceInstance = Container.get(InvoiceOrderService)
         const { id } = req.params
-        console.log(req.body)
+        
         const invoiceOrder = await invoiceOrderServiceInstance.update(
             { ...req.body , last_modified_by: user_code},
             { id }

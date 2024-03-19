@@ -61,7 +61,7 @@ export default class ProductPageService {
         try {
             const profile_code = profileCode.profileCode
             const pagesCodes = pagesCodesList.pagesCodes
-            console.log(profile_code)
+           
             const deleteOldPages = await this.profileProductPageModel.destroy({ where: { profile_code: profile_code } })
             // const productPageDetails = await this.productPageDetailsModel.create({ product_page_code,product_code  })
             // this.logger.silly("productPageDetails created ", productPageDetails)
@@ -100,7 +100,7 @@ export default class ProductPageService {
             const profile_code = profileCode.profileCode
             const pagesCodes = pagesCodesList.pagesCodes
 
-            console.log(profile_code)
+       
             const deleteOldPages = await this.profileProductPageModel.destroy({ where: { profile_code: profile_code } })
 
             const addProfilePages = []

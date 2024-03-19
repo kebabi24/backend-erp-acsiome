@@ -19,7 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const token_code = roleTknSerie.token_serie_code;
     const tokenSerie = await TokenSerieServiceInstance.findOne({ token_code });
     console.log(tokenSerie);
-    console.log(req.body);
+    
     const service = await MobileServiceInstance.create({
       service_code: tokenSerie.service_prefix + '-' + tokenSerie.service_next_number,
       service_period_activate_date: req.body.service_creation_date,
@@ -94,7 +94,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all service endpoint');
   const { user_domain } = req.headers;
   try {
-    console.log(req.body);
+    
     const MobileServiceInstance = Container.get(MobileService);
     const service = await MobileServiceInstance.findServices({ ...req.body /* seq_domain: user_domain*/ });
     // console.log(service)

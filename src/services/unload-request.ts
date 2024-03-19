@@ -47,7 +47,7 @@ export default class UnloadRequestService {
         try {
             const loadRequestsDetails = await this.unloadRequestDetailsModel.bulkCreate(data )
             this.logger.silly("created unload requests details")
-            console.log(loadRequestsDetails)
+            
             return loadRequestsDetails
         } catch (e) {
             this.logger.error(e)

@@ -72,7 +72,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const audiometryServiceInstance = Container.get(AudiometryService);
     const audiometrys = await audiometryServiceInstance.findall({aud_domain:user_domain});
-   // console.log(audiometrys)
+
     return res.status(200).json({ message: 'fetched succesfully', data: audiometrys });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -112,7 +112,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
- // console.log(req.body);
+ 
   logger.debug('Calling find by  all audiometry endpoint');
   const { user_code } = req.headers;
     const { user_domain } = req.headers;

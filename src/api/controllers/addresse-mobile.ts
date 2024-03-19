@@ -10,7 +10,7 @@ const{user_domain} = req.headers
     logger.debug("Calling Create address endpoint with body: %o", req.body)
     try {
         const addresseMobileServiceInstance = Container.get(AddresseMobileService)
-        console.log(req.body)
+      
         const address = await addresseMobileServiceInstance.create({...req.body,created_by: user_code, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)

@@ -173,7 +173,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
       
       const pricelistServiceInstance = Container.get(PricelistService);
       const { part, promo,cust,classe, date,qty,um,curr,type } = req.body;
-      console.log(req.body)
+      
       console.log(date)
       const pricelist = await pricelistServiceInstance.min({
         pi_part_code: { [Op.or] : [part,promo]},
@@ -213,7 +213,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
       
       const pricelistServiceInstance = Container.get(PricelistService);
       const { part, promo,cust,classe, date,qty,um,curr,typer } = req.body;
-      console.log(req.body)
+      
       console.log(date)
       const pricelist = await pricelistServiceInstance.max({
         pi_part_code: { [Op.or] : [part,promo]},

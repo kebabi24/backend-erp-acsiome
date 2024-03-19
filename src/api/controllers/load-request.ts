@@ -170,9 +170,7 @@ const findLotsOfProduct = async (req: Request, res: Response, next: NextFunction
     const ld_loc = req.body.ld_loc;
     const ld_site = req.body.ld_site;
     const product_code = req.body.product_code;
-    // console.log(ld_loc)
-    // console.log(ld_site)
-    // console.log(product_code)
+   
 
     const lots = await loadRequestService.getLotsOfProduct(ld_loc, ld_site, product_code);
 
@@ -192,9 +190,7 @@ const findLotsOfProduct2 = async (req: Request, res: Response, next: NextFunctio
     const ld_loc = req.body.ld_loc;
     const ld_site = req.body.ld_site;
 
-    // console.log(ld_loc)
-    // console.log(ld_site)
-    // console.log(product_code)
+
 
     const lots = await loadRequestService.getLotsOfProduct2(ld_loc, ld_site);
 
@@ -213,11 +209,10 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
 
     const load_request_code = req.body.load_request_code;
     const load_request_data = req.body.load_request_data;
-    // console.log('how are you', load_request_data);
+
     for (const page of load_request_data) {
       for (const product of page.productPageDetails) {
-        console.log('\n');
-        // console.log(product);
+      
         const isExist = await loadRequestService.findLoadRequestLine({
           load_request_code: load_request_code,
           product_code: product.product_code,
@@ -305,7 +300,7 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
   logger.debug('Calling find one  code endpoint');
   try {
     const loadRequestService = Container.get(LoadRequestService);
-    console.log(req.body);
+    
     let loadRequests = [];
     const loadRequests50 = [];
 
@@ -333,7 +328,7 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
     // LOAD REQUEST LINES
     if (loadRequestsLines0) {
       loadRequestsLines0.forEach(loadRequestLine => {
-        console.log(loadRequestLine);
+   
         delete loadRequestLine.line_code;
         loadRequestLine.date_creation = formatDateOnlyFromMobileToBack(loadRequestLine.date_creation);
         // const formatted_date = loadRequestLine.date_creation+'.63682+01'
@@ -419,13 +414,13 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
 
     const load_request_details = req.body.load_request_details;
     const load_request_lines = req.body.load_request_lines;
-    console.log(load_request_lines);
+   
     for (const line of load_request_lines) {
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
         product_code: line.product_code,
       });
-      console.log('elem', elem);
+      
       if (elem !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
           line.load_request_code,
@@ -433,11 +428,11 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
           line.qt_effected,
         );
       } else {
-        console.log('creatioon', line);
+       
         const maxLine = await loadRequestService.findLoadRequestMaxLine({
           load_request_code: line.load_request_code,
         });
-        console.log('maaaaaaaaaaaaaaaax', maxLine);
+        
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -454,7 +449,7 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         product_code: detail.product_code,
         lot: detail.lot,
       });
-      console.log('elemDet', elemDet);
+  
       if (elemDet !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
@@ -535,9 +530,7 @@ const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next:
     const loadRequestLines = await loadRequestService.findAllLoadRequestLines(load_request_code);
     const loadRequestDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load_request_code);
 
-    console.log(loadRequestLines);
-    console.log('********');
-    console.log(loadRequestDetails);
+
     return res
       .status(200)
       .json({ message: 'found all load request lines', data: { loadRequestLines, loadRequestDetails } });
@@ -550,7 +543,7 @@ const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next:
 const getLoadRequestCreationData = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling getLoadRequestData endpoint');
-  //console.log("aaaaaaaa",req.body)
+
   //const profile_code = req.params.profile_code
   try {
     const loadRequestService = Container.get(LoadRequestService);
@@ -584,7 +577,7 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
 
     const { loadRequest, lines } = req.body;
     const role_code = loadRequest.role_code;
-    console.log('roooooooole', role_code);
+    
     const role = await loadRequestService.getRole({ role_code: role_code });
 
     const token = await tokenSerieService.findOne({ token_code: role.token_serie_code });
@@ -691,8 +684,8 @@ const findAllLoadRequestLinesDifference = async (req: Request, res: Response, ne
       result.push(obj);
     }
 
-    console.log('********');
-    //console.log(result);
+
+
     return res.status(200).json({ message: 'found all load request lines', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -703,7 +696,7 @@ const findAllLoadRequestLinesDifference = async (req: Request, res: Response, ne
 const getLoadRequestCreationDataRole = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling getLoadRequestData endpoint');
-  //console.log("aaaaaaaa",req.body)
+
   //const profile_code = req.params.profile_code
   try {
     const loadRequestService = Container.get(LoadRequestService);
@@ -725,7 +718,7 @@ const getLoadRequestCreationDataRole = async (req: Request, res: Response, next:
 const getLoadRequestWithCode = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling getLoadRequestData endpoint');
-  //console.log("aaaaaaaa",req.body)
+
   //const profile_code = req.params.profile_code
   try {
     const loadRequestService = Container.get(LoadRequestService);

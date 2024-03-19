@@ -33,7 +33,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
        }
        const effdate = new Date(generalLedger.glt_effdate)
        for (let entry of Detail) {
-       console.log(entry)
+
         await generalLedgerServiceInstance.create({...generalLedger,glt_domain:user_domain,glt_ref: ref,...entry,
             glt_curr_amt: (Number(entry.glt_amt)) * Number(generalLedger.glt_ex_rate2) /  Number(generalLedger.glt_ex_rate)   ,
             
@@ -76,8 +76,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const generalLedgerServiceInstance = Container.get(GeneralLedger)
         const gls = await generalLedgerServiceInstance.find({glt_domain:user_domain})
-  
-       //console.log(gls)
+
         var data = []
         for (let gl of gls){
             const effdate = new Date(gl.glt_effdate)   
@@ -85,7 +84,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
             gl.glt_effdate = new Date(effdate.getFullYear(), effdate.getMonth() , effdate.getDay())
         }
             
-        console.log(data)
+    
         
         return res
             .status(200)
@@ -123,7 +122,7 @@ const{user_domain} = req.headers
         const generalLedgerServiceInstance = Container.get(GeneralLedger)
         const {id} = req.params
         const { generalLedger,Detail } = req.body
-        console.log(generalLedger)
+
         await generalLedgerServiceInstance.delete({glt_ref: id})
         for (let entry of Detail) {
             entry = { ...entry, ...generalLedger, cglt_domain:user_domain,reated_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
@@ -167,7 +166,7 @@ const findNewId = async (req: Request, res: Response, next: NextFunction) => {
         const gl = await generalLedgerServiceInstance.findLastId({glt_date: date,glt_domain:user_domain})
          if(gl) {
              d = gl.glt_ref + 1
-           // console.log(gl.glt_ref + 1, "here")
+       
 
         } else {
 
@@ -177,7 +176,7 @@ const findNewId = async (req: Request, res: Response, next: NextFunction) => {
             var year = date.getFullYear();
             var d = "JL" + moment().format('YYYYMMDD') + "000001" ;
            // return year +  month + day;
-      //      console.log(d)
+
 
 
         }

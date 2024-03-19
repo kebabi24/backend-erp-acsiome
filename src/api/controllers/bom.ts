@@ -66,9 +66,9 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const bomServiceInstance = Container.get(BomService)
-        console.log(req.body,user_domain)
+       
         const bom = await bomServiceInstance.findOne({...req.body,bom_domain:user_domain})
-        console.log(bom)
+        
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: bom })
@@ -134,7 +134,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
     const { user_domain } = req.headers;
-  //  console.log(req.body)
+
     try {
         const bomServiceInstance = Container.get(BomService)
         const psServiceInstance = Container.get(PsService) 
@@ -149,7 +149,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1
     for (let bom of boms) {
 
-       // console.log(ro.ro_routing)
+   
         let mtl_tl = 0
         let mtl_ll = 0
         let lbr_ll = 0
@@ -158,13 +158,13 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
         const pss = await psServiceInstance.find({  ps_parent:bom.bom_parent ,ps_domain: user_domain})
 
         for(let ps of pss ) {
-console.log("comp",ps.ps_comp)
+
              const sct = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:ps.ps_comp, sct_sim:req.body.type})
              
               const items = await itemServiceInstance.findOne({ pt_part: ps.ps_comp, pt_bom_code: { [Op.ne]: null },pt_domain:user_domain }); 
-              console.log("items",items)
+      
               if (items) {
-                  console.log(items.pt_part)
+              
                   mtl_ll = mtl_ll + (Number(sct.sct_mtl_tl) + Number(sct.sct_mtl_ll))* Number(ps.ps_qty_per)
                   lbr_ll = lbr_ll + (Number(sct.sct_lbr_tl) + Number(sct.sct_lbr_ll))* Number(ps.ps_qty_per)
                   bdn_ll = bdn_ll + (Number(sct.sct_bdn_tl) + Number(sct.sct_bdn_ll))* Number(ps.ps_qty_per)
@@ -181,7 +181,7 @@ console.log("comp",ps.ps_comp)
         var old_mtl_tl = 0
         var old_mtl_ll = 0 
       for (let item of items) {
-          console.log(item.pt_part,item.pt_bom_code )
+      
           const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
           if (scts!= null) {  old_mtl_tl  = scts.sct_mtl_tl 
             old_mtl_ll = scts.sct_mtl_ll} 
@@ -192,7 +192,7 @@ console.log("comp",ps.ps_comp)
           i = i + 1
       }
     }
-      //  console.log("herehere",result)
+   
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: result })
@@ -209,13 +209,13 @@ const UpdateBomCost = async (req: Request, res: Response, next: NextFunction) =>
     const { user_domain } = req.headers;
     const { user_code } = req.headers;
     const { Detail } = req.body;
-   // console.log(req.body)
+
    
     try {
            const costSimulationServiceInstance = Container.get(costSimulationService)
         
            for (let entry of Detail) {
-            console.log(entry)
+   
             const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: entry.site,sct_part:entry.part, sct_sim:entry.sim})
             if (scts) {
                 const sct = await costSimulationServiceInstance.update({
@@ -241,7 +241,7 @@ const UpdateBomCost = async (req: Request, res: Response, next: NextFunction) =>
             }
         
            }
-      //  console.log("herehere",result)
+   
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: "true" })
