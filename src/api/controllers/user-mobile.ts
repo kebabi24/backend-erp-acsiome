@@ -12,6 +12,7 @@ import CryptoJS from '../../utils/CryptoJS';
 import PromotionService from '../../services/promotion';
 import _ from 'lodash';
 import siteService from '../../services/site';
+import _, { isNull } from 'lodash';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -209,12 +210,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const checklist = await userMobileServiceInstanse.getChecklist();
       const visitList = await userMobileServiceInstanse.getVisitList();
       const cancelationReasons = await userMobileServiceInstanse.getCancelationReasons();
-      if(role.pricelist_code==null||role.pricelist_code==''){
-         priceList = await userMobileServiceInstanse.getPriceList();
-      }else{
-        priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code});
+      if (role.pricelist_code == null || role.pricelist_code == '') {
+        priceList = await userMobileServiceInstanse.getPriceList();
+      } else {
+        priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code });
       }
-      
+
       const invoice = await userMobileServiceInstanse.getInvoice();
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods();
@@ -237,7 +238,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       const products_promo = await userMobileServiceInstanse.getProductsOfPromo();
-     // console.log(products_promo);
+      // console.log(products_promo);
 
       const advantages = await promoServiceInstanse.getAdvantagesByCodes(adv_codes);
       const populationsArticle = await promoServiceInstanse.getPopsArticleByCodes(pop_a_codes);
@@ -269,7 +270,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         profile_code: userMobile.profile_code,
       });
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
-     // console.log(productPagesDetails);
+      // console.log(productPagesDetails);
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({
         user_mobile_code: user_mobile_code,
@@ -328,9 +329,9 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
-        if(role.pricelist_code!=null&& role.pricelist_code!=''){
+        if (role.pricelist_code != null && role.pricelist_code != '') {
           customers.forEach(element => {
-            element.pricelist_code=''
+            element.pricelist_code = '';
           });
         }
 
@@ -476,9 +477,9 @@ const getDataBack = async function(socket) {
     // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
     // (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
 
-      // SERVICE
+    // SERVICE
     // CREATED FROM BACKEDN
-    const { service, service_creation,user,visits,payment } = data;
+    const { service, service_creation, user, visits, payment } = data;
     console.log(user);
     console.log(visits);
     if (service_creation == true) {
@@ -498,7 +499,6 @@ const getDataBack = async function(socket) {
           nb_products_loaded: service.nb_products_loaded,
           sum_invoice: service.sum_invoice,
           // user_mobile_code: service.user_mobile_code,
-
         },
         { service_code: service.service_code },
       );
@@ -507,9 +507,9 @@ const getDataBack = async function(socket) {
       // CREATED FROM MOBILE  // false
       console.log('CREATING SERVICE');
       delete service.id;
-      console.log(' service creation date '+service.service_creation_date)
-      console.log(' service  date2 '+service.service_closing_date)
-      console.log(' service  date3 '+service.service_period_activate_date )
+      console.log(' service creation date ' + service.service_creation_date);
+      console.log(' service  date2 ' + service.service_closing_date);
+      console.log(' service  date3 ' + service.service_period_activate_date);
       service.service_creation_date = formatDateFromMobileToBackAddTimezone(service.service_creation_date);
       service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
       service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
@@ -582,7 +582,7 @@ const getDataBack = async function(socket) {
       nb_visits = dataa.length;
       dataa.forEach(element => {
         // console.log('element '+element)
-        element.periode_active_date=formatDateOnlyFromMobileToBack(element.periode_active_date);
+        element.periode_active_date = formatDateOnlyFromMobileToBack(element.periode_active_date);
       });
       // periode_active_date
       const visits = await userMobileServiceInstanse.createVisits(dataa);
@@ -645,7 +645,7 @@ const getDataBack = async function(socket) {
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
       dataa.forEach(ld => {
-        ld.ld_expire = formatDateOnlyFromMobileToBack(ld.ld_expire);
+        ld.ld_expire = isNull(ld.ld_expire) ? null : formatDateOnlyFromMobileToBack(ld.ld_expire);
       });
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
@@ -760,8 +760,6 @@ const getDataBack = async function(socket) {
         console.log('INVENTORIES LINES CREATION END');
       }
     }
-
-  
 
     socket.emit('dataUpdated');
   });
@@ -1265,12 +1263,12 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
     }
 
     services.forEach(service => {
-      sum_nb_visits += service.nb_visits
-      sum_nb_clients += service.nb_clients_itin
-      sum_invoice_amount += service.sum_invoice
-      sum_nb_invoices += service.nb_invoice
-      sum_nb_products_sold += service.nb_products_sold
-      sum_nb_clients_created += service.nb_clients_created
+      sum_nb_visits += service.nb_visits;
+      sum_nb_clients += service.nb_clients_itin;
+      sum_invoice_amount += service.sum_invoice;
+      sum_nb_invoices += service.nb_invoice;
+      sum_nb_products_sold += service.nb_products_sold;
+      sum_nb_clients_created += service.nb_clients_created;
 
       // sum_nb_visits += service.nb_visits;
       // sum_nb_clients += service.nb_clients_itin;
@@ -1280,13 +1278,13 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
       // sum_nb_clients_created += 1;
     });
 
-    console.log(sum_nb_visits, sum_nb_clients)
+    console.log(sum_nb_visits, sum_nb_clients);
     services.forEach(service => {
       // **************** 1 VISIT RATE
       // CALCULATE : visit rate of each role
       let visit_rate = parseFloat(((service.nb_visits / service.nb_clients_itin) * 100).toFixed(2));
 
-      console.log(visit_rate)
+      console.log(visit_rate);
       // visit rate of roles
       visit_rate_data.push({
         role_code: service.role_code,
@@ -1464,16 +1462,15 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
     const userMobileServiceInstance = Container.get(UserMobileService);
 
     console.log(req.body);
-    
-      var invoices = await userMobileServiceInstance.getPaymentsByGroup({
-       
-        where :req.body,
-          attributes: ['service_code', [Sequelize.fn('sum', Sequelize.col('amount')), 'amt']],
-                                       
-          group: ['service_code'],
-          raw: true,
-        });
-   
+
+    var invoices = await userMobileServiceInstance.getPaymentsByGroup({
+      where: req.body,
+      attributes: ['service_code', [Sequelize.fn('sum', Sequelize.col('amount')), 'amt']],
+
+      group: ['service_code'],
+      raw: true,
+    });
+
     console.log('invoices', invoices);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
