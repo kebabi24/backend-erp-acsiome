@@ -1042,14 +1042,17 @@ export default class LoadRequestService {
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],
-        order: [['rank', 'ASC']],
+        order: [
+          ['rank', 'ASC'],
+          [this.productPageDetailsModel,'rank', 'ASC']
+        ],
         include: [
           {
             model: this.productPageDetailsModel,
             required: true,
-            order: [['rank', 'ASC']],
+            // order: [['rank', 'ASC']],
             attributes: ['product_code'],
-            include: [
+             include: [
               {
                 model: this.productPageModel,
                 required: true,
@@ -1084,6 +1087,8 @@ export default class LoadRequestService {
             ],
           },
         ],
+       
+            
       });
 
       return pages_codes;
@@ -1102,12 +1107,15 @@ export default class LoadRequestService {
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],
-        order: [['rank', 'ASC']],
+        order: [
+          ['rank', 'ASC'],
+          [this.productPageDetailsModel,'rank', 'ASC']
+        ],
         include: [
           {
             model: this.productPageDetailsModel,
             required: true,
-            order: [['rank', 'ASC']],
+            // order: [['rank', 'ASC']],
             attributes: ['product_code'],
             include: [
               {
