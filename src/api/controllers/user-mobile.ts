@@ -11,6 +11,7 @@ import { Op, Sequelize } from 'sequelize';
 import CryptoJS from '../../utils/CryptoJS';
 import PromotionService from '../../services/promotion';
 import _ from 'lodash';
+import siteService from '../../services/site';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -183,19 +184,20 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
   const promoServiceInstanse = Container.get(PromotionService);
+  const siteServiceInstance= Container.get(siteService)
 
   try {
     // const role_code = req.body.role_code;
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
-
+    
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
     } else {
       // these data is the same for both response cases
-
+      const site= await siteServiceInstance.findOne({si_site:role.role_site})
       const user_mobile_code = role.user_mobile_code;
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users = [];
@@ -380,6 +382,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
+          site:site
         });
       }
       // service created by mobile user
@@ -437,6 +440,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
+          site:site
         });
       }
     }
