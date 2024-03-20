@@ -46,7 +46,7 @@ const Site = sequelize.define(
         si_domain:  Sequelize.STRING,
         si_type: Sequelize.STRING,
         oid_si_mstr: {type: Sequelize.DECIMAL, defaultValue : 0  },
-
+        si_logo:Sequelize.STRING,
         ...base,
     },
     {
