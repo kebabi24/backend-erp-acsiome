@@ -613,8 +613,8 @@ export default async ({ expressApp }) => {
     sourceKey: 'pt_part',
   });
   require('../models/mobile_models/load_request_line').default.hasOne(require('../models/item').default, {
-    foreignKey: 'product_code',
-    targetKey: 'pt_part',
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
   });
 
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
