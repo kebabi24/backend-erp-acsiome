@@ -18,6 +18,7 @@ export default (app: Router) => {
   route.get('/findLoadRequest20Details/:load_request_code', controller.findAllLoadRequest20Details);
   route.get('/findLoadRequestLinesDetails/:load_request_code', controller.findAllLoadRequestLinesDetails);
   route.get('/getLoadRequestInfo/:load_request_code', controller.getLoadRequestInfo);
+  route.get('/getLoadRequestLineInfo/:load_request_code', controller.getLoadRequestLineInfo);
   route.post('/findLoadRequestsDates/', controller.findLoadRequestsBetweenDates);
   route.post('/findLoadRequests40/', controller.findAllLoadRequeusts40);
   route.post('/updateLoadRequest/', controller.updateLoadRequestStauts10);

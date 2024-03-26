@@ -320,6 +320,27 @@ export default class LoadRequestService {
       throw e;
     }
   }
+  public async findLoadRequestLines(query: any): Promise<any> {
+    let load_request_code = query.load_request_code;
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({
+        where: { load_request_code: load_request_code },
+        include: [
+          {
+            model: this.itemModel,
+            required: false,
+
+            attributes: ['pt_desc1'],
+          },
+        ],
+      });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findLoadRequestLine(query: any): Promise<any> {
     try {
       const loadRequest = await this.loadRequestLineModel.findOne({ where: query });
