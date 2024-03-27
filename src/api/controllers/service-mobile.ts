@@ -21,8 +21,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     console.log(tokenSerie);
     console.log(req.body);
     const service = await MobileServiceInstance.create({
-      service_code: tokenSerie.service_prefix + '-' + tokenSerie.service_next_number,
-      service_period_activate_date: req.body.service_creation_date,
+      service_code: tokenSerie.service_prefix + '-' +  tokenSerie.service_next_number.toString().padStart(tokenSerie.token_digitcount, '0'),
+      service_creation_date: new Date(),       
       ...req.body,
       service_open: true,
       service_domain: user_domain,

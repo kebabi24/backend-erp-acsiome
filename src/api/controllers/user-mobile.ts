@@ -886,8 +886,9 @@ function formatDateFromBackToMobile(date) {
     String(date.getMinutes()).padStart(2, '0') +
     ':' +
     String(date.getSeconds()).padStart(2, '0');
-
+    console.log(str)
   return str;
+  
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
