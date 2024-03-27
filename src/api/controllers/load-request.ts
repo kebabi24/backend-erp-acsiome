@@ -590,7 +590,7 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
     const token = await tokenSerieService.findOne({ token_code: role.token_serie_code });
     let code =
       token.load_request_prefix +
-      /*'-' +*/ token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
+      /*'-' +*/ '-' + token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
     const updatedToken = await tokenSerieService.update(
       { load_request_next_number: token.load_request_next_number + 1 },
       { token_code: role.token_serie_code },

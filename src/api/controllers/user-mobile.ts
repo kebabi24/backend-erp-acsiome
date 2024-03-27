@@ -929,6 +929,7 @@ function formatDateFromBackToMobile(date) {
   }
  
   return str;
+  
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {

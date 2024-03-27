@@ -21,8 +21,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     console.log(tokenSerie);
     console.log(req.body);
     const service = await MobileServiceInstance.create({
-      service_code: tokenSerie.service_prefix + '-' + tokenSerie.service_next_number,
-      service_period_activate_date: req.body.service_creation_date,
+      service_code: tokenSerie.service_prefix + '-' +  tokenSerie.service_next_number.toString().padStart(tokenSerie.token_digitcount, '0'),
+      service_creation_date: new Date(),       
       ...req.body,
       service_open: true,
       service_domain: user_domain,
@@ -122,6 +122,26 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
+}
+const closeService = async (req: Request, res: Response, next: NextFunction) => {
+  console.log("enter")
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  service endpoint');
+  try {
+    const MobileServiceInstance = Container.get(MobileService);
+    const { service_code } = req.params;
+    
+    const service = await MobileServiceInstance.update(
+      { service_closing_date:new Date(),service_open:false, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { service_code:service_code},
+    );
+    return res.status(200).json({ message: 'fetched succesfully', data: service_code });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
 };
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
@@ -145,4 +165,5 @@ export default {
   findByAll,
   update,
   deleteOne,
+  closeService,
 };
