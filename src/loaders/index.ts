@@ -360,7 +360,7 @@ export default async ({ expressApp }) => {
   );
   require('../models/mobile_models/role_itinerary').default.hasOne(
     require('../models/mobile_models/itinerary').default,
-    { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
+    { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' },
   );
 
   // 03 / 12 / 2022 NEW RELATIONS
