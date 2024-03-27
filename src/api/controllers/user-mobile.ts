@@ -900,8 +900,11 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 };
 
 function formatDateOnlyFromBackToMobile(timeString) {
+  let str=''
+  if(timeString!=null){
   let dateComponents = timeString.split('-');
   const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  }
   return str;
 }
 
