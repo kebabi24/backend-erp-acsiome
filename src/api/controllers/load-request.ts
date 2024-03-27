@@ -635,6 +635,26 @@ const getLoadRequestInfo = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+const getLoadRequestLineInfo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const loadRequestLineService = Container.get(LoadRequestService);
+    const userMobileService = Container.get(UserMobileService);
+    const load_request_code = req.params.load_request_code;
+    const loadRequest = await loadRequestService.findLoadRequestLines({ load_request_code: load_request_code });
+    // let userMobile = null;
+    // if (loadRequest != null) {
+    //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
+    // }
+
+    return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
   let elements = timeString.split(' ');
@@ -766,6 +786,7 @@ export default {
   getLoadRequestCreationData,
   createLoadRequestAndLines,
   getLoadRequestInfo,
+  getLoadRequestLineInfo,
   getLoadRequestDataV3,
   findAllLoadRequestLinesDifference,
   getLoadRequestCreationDataRole,
