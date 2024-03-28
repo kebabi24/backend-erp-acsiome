@@ -319,13 +319,47 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
       // service created on backend
       if (parameter[index].hold === true) {
-        const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
+        let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code });
         // UPDATE SERVICE DATES
-        if (service) {
-          service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
-          service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
-          service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
-        }
+        let service ={
+          // id: ,
+          service_code: service1.service_code,
+          role_code: service1.role_code,
+          user_mobile_code: service1.user_mobile_code,
+          service_site: service1.service_site,
+          itinerary_code: service1.itinerary_code,
+          service_open: service1.service_open,
+          service_kmdep: service1.service_kmdep,
+          service_kmarr: service1.service_kmarr,
+          service_domain: service1.service_domain,
+          nb_visits: service1.nb_visits,
+          nb_clients_itin: service1.nb_clients_itin,
+          nb_invoice: service1.nb_invoice,
+          nb_products_sold: service1.nb_products_sold,
+          nb_products_loaded: service1.nb_products_loaded,
+          nb_clients_created: service1.nb_clients_created,
+          sum_invoice: service1.sum_invoice,
+          sum_paiement: service1.sum_paiement,
+          service_period_activate_date:formatDateOnlyFromBackToMobile(service1.service_period_activate_date) ,
+          service_creation_date: formatDateFromBackToMobile(service1.service_creation_date),
+          service_closing_date:formatDateFromBackToMobile(service1.service_closing_date)
+         }
+
+        // console.log(' service periode activate date '+service.service_period_activate_date)
+        // console.log(' service periode activate date2 '+formatDateOnlyFromBackToMobile(service.service_period_activate_date))
+        // console.log(' service_creation_date2 '+formatDateFromBackToMobile(service.service_creation_date))
+        // console.log(' service_creation_date1 '+service.service_creation_date)
+        // service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
+        // service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
+        // service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
+        // console.log(' service periode activate date3 '+service.service_period_activate_date)
+        // console.log(' service_creation_date3 '+service.service_creation_date)
+
+        // if (service) {
+        //   service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
+        //   service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
+        //   service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
+        // }
 
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
@@ -866,28 +900,36 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 };
 
 function formatDateOnlyFromBackToMobile(timeString) {
+  let str=''
+  if(timeString!=null){
   let dateComponents = timeString.split('-');
   const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  }
   return str;
 }
 
 function formatDateFromBackToMobile(date) {
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const str =
-    d +
-    '-' +
-    m +
-    '-' +
-    date.getFullYear() +
-    ' ' +
-    date.getHours() +
-    ':' +
-    String(date.getMinutes()).padStart(2, '0') +
-    ':' +
-    String(date.getSeconds()).padStart(2, '0');
-
+  let str=''
+  if(date!=null){
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    str =
+      d +
+      '-' +
+      m +
+      '-' +
+      date.getFullYear() +
+      ' ' +
+      date.getHours() +
+      ':' +
+      String(date.getMinutes()).padStart(2, '0') +
+      ':' +
+      String(date.getSeconds()).padStart(2, '0');
+  
+  }
+ 
   return str;
+  
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
