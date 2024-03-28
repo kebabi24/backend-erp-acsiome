@@ -330,7 +330,7 @@ export default class LoadRequestService {
             model: this.itemModel,
             required: false,
 
-            attributes: ['pt_desc1'],
+            attributes: ['pt_desc1', 'pt_desc2'],
           },
         ],
       });
