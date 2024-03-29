@@ -884,6 +884,7 @@ export default class UserMobileService {
         },
         attributes: ['id', 'ld_loc', 'ld_site', 'ld_part', 'ld_qty_oh', 'ld_lot', 'ld_expire'],
       });
+      console.log(locationDetail);
       return locationDetail;
     } catch (e) {
       console.log('Error from getLocationDetail - service ');
@@ -964,7 +965,7 @@ export default class UserMobileService {
   // ******************** GET PRICELIST BY   **************************
   public async getPriceListBY(query: any): Promise<any> {
     try {
-      const price_list = await this.priceListModel.findAll({  where: query, });
+      const price_list = await this.priceListModel.findAll({ where: query });
       return price_list;
     } catch (e) {
       console.log('Error from service- getPriceList');
@@ -1224,7 +1225,7 @@ export default class UserMobileService {
 
         if (exist) {
           // UPDATE
-
+          console.log(element);
           const location = await this.locationDetailModel.update(element, {
             where: { ld_site: element.ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
           });

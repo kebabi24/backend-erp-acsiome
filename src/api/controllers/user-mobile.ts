@@ -185,20 +185,20 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
   const promoServiceInstanse = Container.get(PromotionService);
-  const siteServiceInstance= Container.get(siteService)
+  const siteServiceInstance = Container.get(siteService);
 
   try {
     // const role_code = req.body.role_code;
     const device_id = req.body.device_id;
     // const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
     const role = await userMobileServiceInstanse.getRole({ device_id: device_id });
-    
+
     // if the role id doesn't exist
     if (!role) {
       return res.status(404).json({ message: 'No role exist with such an id ' });
     } else {
       // these data is the same for both response cases
-      const site= await siteServiceInstance.findOne({si_site:role.role_site})
+      const site = await siteServiceInstance.findOne({ si_site: role.role_site });
       const user_mobile_code = role.user_mobile_code;
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users = [];
@@ -321,7 +321,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (parameter[index].hold === true) {
         let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code });
         // UPDATE SERVICE DATES
-        let service ={
+        let service = {
           // id: ,
           service_code: service1.service_code,
           role_code: service1.role_code,
@@ -340,10 +340,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           nb_clients_created: service1.nb_clients_created,
           sum_invoice: service1.sum_invoice,
           sum_paiement: service1.sum_paiement,
-          service_period_activate_date:formatDateOnlyFromBackToMobile(service1.service_period_activate_date) ,
+          service_period_activate_date: formatDateOnlyFromBackToMobile(service1.service_period_activate_date),
           service_creation_date: formatDateFromBackToMobile(service1.service_creation_date),
-          service_closing_date:formatDateFromBackToMobile(service1.service_closing_date)
-         }
+          service_closing_date: formatDateFromBackToMobile(service1.service_closing_date),
+        };
 
         // console.log(' service periode activate date '+service.service_period_activate_date)
         // console.log(' service periode activate date2 '+formatDateOnlyFromBackToMobile(service.service_period_activate_date))
@@ -417,7 +417,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
-          site:site
+          site: site,
         });
       }
       // service created by mobile user
@@ -475,7 +475,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
-          site:site
+          site: site,
         });
       }
     }
@@ -678,9 +678,16 @@ const getDataBack = async function(socket) {
     // LOCATION DETAILS
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
+      console.log('data', dataa);
       dataa.forEach(ld => {
-        ld.ld_expire = isNull(ld.ld_expire) ? null : formatDateOnlyFromMobileToBack(ld.ld_expire);
+        console.log('ld', ld);
+        if (isNull(ld.ld_expire)) {
+          console.log('something here');
+        } else {
+          formatDateOnlyFromMobileToBack(ld.ld_expire);
+        }
       });
+      console.log('dataaaa', dataa);
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
 
@@ -900,17 +907,17 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 };
 
 function formatDateOnlyFromBackToMobile(timeString) {
-  let str=''
-  if(timeString!=null){
-  let dateComponents = timeString.split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  let str = '';
+  if (timeString != null) {
+    let dateComponents = timeString.split('-');
+    const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
   }
   return str;
 }
 
 function formatDateFromBackToMobile(date) {
-  let str=''
-  if(date!=null){
+  let str = '';
+  if (date != null) {
     const d = String(date.getDate()).padStart(2, '0');
     const m = String(date.getMonth() + 1).padStart(2, '0');
     str =
@@ -925,11 +932,9 @@ function formatDateFromBackToMobile(date) {
       String(date.getMinutes()).padStart(2, '0') +
       ':' +
       String(date.getSeconds()).padStart(2, '0');
-  
   }
- 
+
   return str;
-  
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
