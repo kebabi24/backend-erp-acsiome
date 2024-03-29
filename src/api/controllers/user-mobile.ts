@@ -307,6 +307,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (locationDetail.length > 0) {
         locationDetail.forEach(ld => {
           ld.dataValues.ld_expire = formatDateOnlyFromBackToMobile(ld.ld_expire);
+          console.log('ld expire after '+ld.dataValues.ld_expire )
         });
       }
       // INVOICE
@@ -795,7 +796,11 @@ const getDataBack = async function(socket) {
         console.log('INVENTORIES LINES CREATION');
         const inventoriesLines = data.inventairesLines;
         inventoriesLines.forEach(line => {
-          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          if(line.expiring_date!=null && line.expiring_date!='')
+          {line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          }else{
+            line.expiring_date = null
+          }
         });
         const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
         console.log('INVENTORIES LINES CREATION END');
@@ -908,9 +913,10 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 
 function formatDateOnlyFromBackToMobile(timeString) {
   let str = '';
+  console.log(' timeString '+timeString)
   if (timeString != null) {
     let dateComponents = timeString.split('-');
-    const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+    str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
   }
   return str;
 }
@@ -938,15 +944,21 @@ function formatDateFromBackToMobile(date) {
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
+  let str = '';
+  if (timeString != null) {
   let elements = timeString.split(' ');
   let dateComponents = elements[0].split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0] + ' ' + elements[1] + '.63682+01';
+   str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0] + ' ' + elements[1] + '.63682+01';
+  }
   return str;
 }
 
 function formatDateOnlyFromMobileToBack(timeString) {
+  let str = '';
+  if (timeString != null) {
   let dateComponents = timeString.split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+   str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  }
   return str;
 }
 
