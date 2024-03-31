@@ -795,7 +795,11 @@ const getDataBack = async function(socket) {
         console.log('INVENTORIES LINES CREATION');
         const inventoriesLines = data.inventairesLines;
         inventoriesLines.forEach(line => {
-          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          if (isNull(line.expiring_date)) {
+            console.log('say something');
+          } else {
+            line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          }
         });
         const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
         console.log('INVENTORIES LINES CREATION END');

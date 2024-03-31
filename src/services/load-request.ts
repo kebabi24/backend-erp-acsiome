@@ -804,6 +804,8 @@ export default class LoadRequestService {
 
   public async updateLoadRequestStatusToX(load_request_codes: any, x: any): Promise<any> {
     try {
+      console.log('xxxxxxxxxxxxxxxxx', x);
+      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
       const loadRequest = await this.loadReuestModel.update(
         { status: x },
         { where: { load_request_code: load_request_codes } },
@@ -1065,7 +1067,7 @@ export default class LoadRequestService {
         attributes: ['product_page_code'],
         order: [
           ['rank', 'ASC'],
-          [this.productPageDetailsModel,'rank', 'ASC']
+          [this.productPageDetailsModel, 'rank', 'ASC'],
         ],
         include: [
           {
@@ -1073,7 +1075,7 @@ export default class LoadRequestService {
             required: true,
             // order: [['rank', 'ASC']],
             attributes: ['product_code'],
-             include: [
+            include: [
               {
                 model: this.productPageModel,
                 required: true,
@@ -1108,8 +1110,6 @@ export default class LoadRequestService {
             ],
           },
         ],
-       
-            
       });
 
       return pages_codes;
@@ -1130,7 +1130,7 @@ export default class LoadRequestService {
         attributes: ['product_page_code'],
         order: [
           ['rank', 'ASC'],
-          [this.productPageDetailsModel,'rank', 'ASC']
+          [this.productPageDetailsModel, 'rank', 'ASC'],
         ],
         include: [
           {

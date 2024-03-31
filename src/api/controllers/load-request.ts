@@ -216,7 +216,7 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
     // console.log('how are you', load_request_data);
     for (const page of load_request_data) {
       for (const product of page.productPageDetails) {
-        console.log('\n');
+        console.log();
         // console.log(product);
         const isExist = await loadRequestService.findLoadRequestLine({
           load_request_code: load_request_code,
@@ -262,7 +262,7 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
       }
     }
 
-    // const updatedLoadRequest = await loadRequestService.updateLoadRequestStatusTo10(load_request_code);
+    const updatedLoadRequest = await loadRequestService.updateLoadRequestStatusTo10(load_request_code);
 
     return res.status(200).json({ message: 'data ready', data: 'here' });
   } catch (e) {
@@ -503,6 +503,7 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     // CREATE NEW LOAD REQUEST DETAILS
     const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details);
     // UPDATE LOAD REQUEST STATUS TO 20
+    console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
     return res.status(201).json({ message: 'created succesfully', data: loadRequestsDetails });
@@ -590,7 +591,8 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
     const token = await tokenSerieService.findOne({ token_code: role.token_serie_code });
     let code =
       token.load_request_prefix +
-      /*'-' +*/ '-' + token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
+      /*'-' +*/ '-' +
+      token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
     const updatedToken = await tokenSerieService.update(
       { load_request_next_number: token.load_request_next_number + 1 },
       { token_code: role.token_serie_code },
