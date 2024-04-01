@@ -213,7 +213,7 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
 
     const load_request_code = req.body.load_request_code;
     const load_request_data = req.body.load_request_data;
-    // console.log('how are you', load_request_data);
+    console.log('how are you', load_request_data);
     for (const page of load_request_data) {
       for (const product of page.productPageDetails) {
         console.log();

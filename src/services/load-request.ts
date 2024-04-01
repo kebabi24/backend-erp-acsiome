@@ -210,7 +210,7 @@ export default class LoadRequestService {
       // console.log(qntValidated);
       const qt_validated = qntValidated;
       const loadRequestLine = await this.loadRequestLineModel.update(
-        { qt_validated: qt_validated },
+        { qt_validated: qt_validated, qt_effected: qt_validated },
         { where: { load_request_code: load_request_code, product_code: product_code } },
       );
 
@@ -714,18 +714,17 @@ export default class LoadRequestService {
             let qt_eff = 0;
             for (const element of details) {
               // const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
-              // const qnt = await this.getProductQuantityPerLot(
-              //   load_request.role_loc_from,
-              //   site,
-              //   element.product_code,
-              //   element.dataValues.lot,
-              // );
-              // console.log(qnt);
+              const qnt = await this.getProductQuantityPerLot2(
+                load_request_code,
+                element.dataValues.ld_lot,
+                element.dataValues.ld_part,
+              );
+              console.log('qnt', qnt);
               lots.push({
                 lot_code: element.dataValues.ld_lot,
                 qnt_lot: element.dataValues.ld_qty_oh,
                 qt_effected: 0,
-                qt_preeffected: 0,
+                qt_preeffected: qnt === null ? 0 : qnt.dataValues.qt_effected,
                 ld_status: element.dataValues.ld_status,
                 ld_expire: element.dataValues.ld_expire,
               });
@@ -919,6 +918,26 @@ export default class LoadRequestService {
           ld_lot: lot,
         },
         attributes: ['ld_qty_oh', 'ld_status', 'ld_expire'],
+      });
+
+      this.logger.silly('quantity sum calculated');
+      return quanity;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async getProductQuantityPerLot2(load_request_code: any, lot: any, product_code: any): Promise<any> {
+    try {
+      // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+      const quanity = await this.loadRequestDetailsModel.findOne({
+        where: {
+          load_request_code: load_request_code,
+          lot: lot,
+          product_code: product_code,
+        },
+        attributes: ['qt_effected'],
       });
 
       this.logger.silly('quantity sum calculated');
