@@ -210,7 +210,7 @@ export default class LoadRequestService {
       // console.log(qntValidated);
       const qt_validated = qntValidated;
       const loadRequestLine = await this.loadRequestLineModel.update(
-        { qt_validated: qt_validated, qt_effected: qt_validated },
+        { qt_validated: qt_validated, /*qt_effected: qt_validated */},
         { where: { load_request_code: load_request_code, product_code: product_code } },
       );
 
@@ -281,7 +281,7 @@ export default class LoadRequestService {
         date_creation: new Date(),
         load_request_code: load_request_code,
         product_code: product_code,
-        qt_request: qntRequested,
+        qt_request: 0, //qntRequested,
         qt_validated: qntValidated,
         qt_effected: 0,
         pt_price: productPrice,
@@ -1143,7 +1143,7 @@ export default class LoadRequestService {
         where: { role_code: role_code },
         include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
       });
-      console.log(role_codes);
+      // console.log(role_codes);
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],
@@ -1171,7 +1171,7 @@ export default class LoadRequestService {
                   {
                     model: this.locationDetailModel,
                     required: false,
-                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
+                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc, ld_qty_oh :{ [Op.gt] :0} },
                     attributes: [
                       'id',
                       'ld_qty_oh',
@@ -1191,7 +1191,7 @@ export default class LoadRequestService {
                     model: this.loadRequestLineModel,
                     required: false,
                     where: { load_request_code: load_request_code },
-                    attributes: ['qt_request', 'pt_price'],
+                    attributes: ['qt_request', 'pt_price',[Sequelize.literal('qt_request') , 'qt_validated']],
                   },
                 ],
               },

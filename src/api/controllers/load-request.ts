@@ -213,31 +213,37 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
 
     const load_request_code = req.body.load_request_code;
     const load_request_data = req.body.load_request_data;
-    console.log('how are you', load_request_data);
+   // console.log('how are you', load_request_data);
     for (const page of load_request_data) {
       for (const product of page.productPageDetails) {
-        console.log();
+      //  console.log(product);
         // console.log(product);
         const isExist = await loadRequestService.findLoadRequestLine({
           load_request_code: load_request_code,
           product_code: product.product_code,
         });
+        console.log("isExist",isExist, product.item.pt_part)
         if (isExist) {
+          console.log("hozhoz", product.item.loadRequestLines[0].qt_validated)
           const updatedLoadRequestLine = await loadRequestService.updateLoadRequestLine(
             load_request_code,
             product.product_code,
-            product.item.loadRequestLine.qt_request,
+           // product.item.loadRequestLine.qt_request,
+           product.item.loadRequestLines[0].qt_validated,
           );
         } else {
-          if (product.item.loadRequestLine.qt_request > 0) {
+          console.log("dkhalet")
+          if( product.item.loadRequestLines[0] != null) {
+          if (product.item.loadRequestLines[0].qt_request == 0 && product.item.loadRequestLines[0].qt_validated > 0) {
             const createdLoadRequestLine = await loadRequestService.createLoadRequestLine(
               load_request_code,
               product.product_code,
-              product.item.loadRequestLine.qt_request,
-              product.item.loadRequestLine.qt_request,
+              product.item.loadRequestLines[0].qt_request,
+              product.item.loadRequestLines[0].qt_validated,
               product.item.pt_price,
             );
           }
+        }
         }
         // if (product.item.loadRequestLine.qt_request === 0 && product.item.loadRequestLine.qt_request === 0) {
         //   continue;
