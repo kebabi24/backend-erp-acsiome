@@ -422,16 +422,20 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
 
   try {
     const loadRequestService = Container.get(LoadRequestService);
-
+//console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
+    const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
-    console.log(load_request_lines);
+     console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
+      console.log("line",line)
+      if(line.qt_effected > 0) {
+        console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
         product_code: line.product_code,
       });
-      console.log('elem', elem);
+      //  console.log('elem', elem);
       if (elem !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
           line.load_request_code,
@@ -439,11 +443,11 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
           line.qt_effected,
         );
       } else {
-        console.log('creatioon', line);
+     //   console.log('creatioon', line);
         const maxLine = await loadRequestService.findLoadRequestMaxLine({
           load_request_code: line.load_request_code,
         });
-        console.log('maaaaaaaaaaaaaaaax', maxLine);
+       // console.log('maaaaaaaaaaaaaaaax', maxLine);
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -454,13 +458,15 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         });
       }
     }
+    }
     for (const detail of load_request_details) {
+      if(detail.qt_effected > 0) {
       const elemDet = await loadRequestService.findLoadRequestDetail({
         load_request_code: detail.load_request_code,
         product_code: detail.product_code,
         lot: detail.lot,
       });
-      console.log('elemDet', elemDet);
+     // console.log('elemDet', elemDet);
       if (elemDet !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
@@ -472,7 +478,77 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails2(detail);
       }
     }
+    }
+    const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
+    return res.status(201).json({ message: 'created succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const createLoadRequestDetailsScan = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+//console.log("req.body",req.body)
+    const load_request_details = req.body.load_request_details;
+    const load_request_code = load_request_details[0].load_request_code
+    const load_request_lines = req.body.load_request_lines;
+     console.log("loadline",load_request_details);
+    for (const line of load_request_lines) {
+      console.log("line",line)
+      if(line.qt_effected > 0) {
+        console.log("yawhnahnawelamakch")
+      const elem = await loadRequestService.findLoadRequestLine({
+        load_request_code: line.load_request_code,
+        product_code: line.product_code,
+      });
+      //  console.log('elem', elem);
+      if (elem !== null) {
+        const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
+          line.load_request_code,
+          line.product_code,
+          line.qt_effected,
+        );
+      } else {
+     //   console.log('creatioon', line);
+        const maxLine = await loadRequestService.findLoadRequestMaxLine({
+          load_request_code: line.load_request_code,
+        });
+       // console.log('maaaaaaaaaaaaaaaax', maxLine);
+        const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
+          ...line,
+          date_creation: maxLine.date_creation,
+          line: maxLine.line + 1,
+          date_charge: new Date(),
+          qt_request: 0,
+          qt_validated: 0,
+        });
+      }
+    }
+    }
+    for (const detail of load_request_details) {
+      if(detail.qt_effected > 0) {
+      const elemDet = await loadRequestService.findLoadRequestDetail({
+        load_request_code: detail.load_request_code,
+        product_code: detail.product_code,
+        lot: detail.lot,
+      });
+     // console.log('elemDet', elemDet);
+      if (elemDet !== null) {
+        const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
+          elemDet.load_request_code,
+          elemDet.product_code,
+          detail.qt_effected,
+          elemDet.lot,
+        );
+      } else {
+        const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails2(detail);
+      }
+    }
+    }
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -509,7 +585,7 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     // CREATE NEW LOAD REQUEST DETAILS
     const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details);
     // UPDATE LOAD REQUEST STATUS TO 20
-    console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
+    // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
     return res.status(201).json({ message: 'created succesfully', data: loadRequestsDetails });
@@ -785,6 +861,7 @@ export default {
   findLotsOfProduct,
   findLotsOfProduct2,
   createLoadRequestDetails,
+  createLoadRequestDetailsScan,
   createLoadRequestDetailsChangeStatus,
   findAllLoadRequeusts20,
   findAllLoadRequest20Details,

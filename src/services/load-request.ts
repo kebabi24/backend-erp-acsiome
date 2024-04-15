@@ -229,6 +229,7 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const qt_validated = qntValidated;
+      console.log("hounahounahouna",load_request_code,product_code,qntValidated)
       const lineQt = await this.loadRequestLineModel.findOne({
         where: { load_request_code: load_request_code, product_code: product_code },
       });

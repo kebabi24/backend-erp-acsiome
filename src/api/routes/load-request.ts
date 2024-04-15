@@ -26,6 +26,7 @@ export default (app: Router) => {
   route.post('/findLostProduct/', controller.findLotsOfProduct);
   route.post('/findLostProduct2/', controller.findLotsOfProduct2);
   route.post('/createLoadRequestDetails/', controller.createLoadRequestDetails);
+  route.post('/createLoadRequestDetailsScan/', controller.createLoadRequestDetailsScan);
   route.post('/createLoadRequestDetailsStatus/', controller.createLoadRequestDetailsChangeStatus);
   route.post('/createLoadRequestAndLines/', controller.createLoadRequestAndLines);
   route.post('/LoadRequestLinesdif/', controller.findAllLoadRequestLinesDifference);
