@@ -1114,7 +1114,7 @@ export default async ({ expressApp }) => {
   //     console.log('database updated');
   //   })
   //   .catch(err => {
-  //     
+      
   //   });
 
   Logger.info('✌️ SYNC ALL MODELS');

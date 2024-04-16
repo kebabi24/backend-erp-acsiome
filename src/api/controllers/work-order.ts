@@ -352,6 +352,7 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
       let rev : any;
       let batch : any;
       let grade : any;
+      
       const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: it.wo_part });
       for(let carac of parts){
         draw = carac.pt_draw,

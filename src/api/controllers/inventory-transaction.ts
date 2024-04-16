@@ -1272,14 +1272,24 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STD-CG',
       });
-      const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
       
+      const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+        let routing : any;
+        let emp: any;
+        let stat: any;
+        // for  (let ofs of wo){routing = ofs.wo_routing, emp = ofs.wo_user1}
+        routing = wo.wo_routing
+        emp = wo.wo_user1
+        console.log(wo.wo_qty_comp, '>', wo.wo_qty_ord)
+        if (Number(Number(wo.wo_qty_comp) + Number(item.tr_qty_loc)) >= Number(wo.wo_qty_ord)){stat = 'C'} else {stat = 'R'}
+        console.log(stat)
       if (wo)
+       
         await workOrderServiceInstance.update(
           {
             wo_qty_comp: Number(wo.wo_qty_comp) + Number(item.tr_qty_loc),
             wo_qty_chg: Number(wo.wo_qty_ord) -  Number(wo.wo_qty_comp) - Number(item.tr_qty_loc),
-             
+            wo_status:stat, 
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1307,8 +1317,8 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         
             tr_price : Number(sct.sct_cst_tot),
             tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
-            // tr_addr:routing,
-            // tr_user1:emp,
+            tr_addr:routing,
+            tr_user1:emp,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -1400,6 +1410,11 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_sim: 'STD-CG',
       });
       const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+      let routing : any;
+      let emp: any;
+      // for  (let ofs of wo){routing = ofs.wo_routing, emp = ofs.wo_user1}
+      routing = wo.wo_routing
+      emp = wo.wo_user1
      
       if (wo)
         await workOrderServiceInstance.update(
@@ -1433,8 +1448,8 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
         
             tr_price : Number(sct.sct_cst_tot),
             tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(sct.sct_cst_tot),
-            // tr_addr:routing,
-            // tr_user1:emp,
+            tr_addr:routing,
+            tr_user1:emp,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -2687,7 +2702,10 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
         let routing : any;
         let emp: any;
-        for  (let ofs of wo){routing = ofs.wo_routing, emp = ofs.wo_user1}
+        // for  (let ofs of wo){routing = ofs.wo_routing, emp = ofs.wo_user1}
+        routing = wo.wo_routing
+        emp = wo.wo_user1
+        
       if (wo)
         await inventoryTransactionServiceInstance.create({
          ...item,
