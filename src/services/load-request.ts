@@ -273,8 +273,8 @@ export default class LoadRequestService {
   public async createLoadRequestLine(
     load_request_code: any,
     product_code: any,
-    qntValidated: any,
     qntRequested: any,
+    qntValidated: any,
     productPrice: any,
   ): Promise<any> {
     try {
