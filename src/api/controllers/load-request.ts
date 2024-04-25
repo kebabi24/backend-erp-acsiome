@@ -222,9 +222,9 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
           load_request_code: load_request_code,
           product_code: product.product_code,
         });
-        console.log("isExist",isExist, product.item.pt_part)
+        // console.log("isExist",isExist, product.item.pt_part)
         if (isExist) {
-          console.log("hozhoz", product.item.loadRequestLines[0].qt_validated)
+         // console.log("hozhoz", product.item.loadRequestLines[0].qt_validated)
           const updatedLoadRequestLine = await loadRequestService.updateLoadRequestLine(
             load_request_code,
             product.product_code,
@@ -232,7 +232,7 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
            product.item.loadRequestLines[0].qt_validated,
           );
         } else {
-          console.log("dkhalet")
+          // console.log("dkhalet")
           if( product.item.loadRequestLines[0] != null) {
           if (product.item.loadRequestLines[0].qt_request == 0 && product.item.loadRequestLines[0].qt_validated > 0) {
             const createdLoadRequestLine = await loadRequestService.createLoadRequestLine(
