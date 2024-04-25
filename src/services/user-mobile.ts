@@ -884,7 +884,7 @@ export default class UserMobileService {
         },
         attributes: ['id', 'ld_loc', 'ld_site', 'ld_part', 'ld_qty_oh', 'ld_lot', 'ld_expire'],
       });
-      console.log(locationDetail);
+      // if(locationDetail.ld_expire=='')
       return locationDetail;
     } catch (e) {
       console.log('Error from getLocationDetail - service ');
@@ -965,7 +965,7 @@ export default class UserMobileService {
   // ******************** GET PRICELIST BY   **************************
   public async getPriceListBY(query: any): Promise<any> {
     try {
-      const price_list = await this.priceListModel.findAll({ where: query });
+      const price_list = await this.priceListModel.findAll({  where: query, });
       return price_list;
     } catch (e) {
       console.log('Error from service- getPriceList');
@@ -1218,19 +1218,21 @@ export default class UserMobileService {
         const ld_loc = element.ld_loc;
         const ld_part = element.ld_part;
         const ld_lot = element.ld_lot;
-
+        // console.log(' date ld dt '+element.ld_expire)
         const exist = await this.locationDetailModel.findOne({
           where: { ld_site: ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
         });
 
         if (exist) {
           // UPDATE
-          console.log(element);
+           console.log(' update LocationDetails ')
+          //  element.ld_expire=null
           const location = await this.locationDetailModel.update(element, {
             where: { ld_site: element.ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
           });
         } else {
           // CREATE
+          console.log(' create LocationDetails ')
           const location = await this.locationDetailModel.create(element);
           locationCreated.push(location);
         }
