@@ -507,7 +507,7 @@ const getDataBack = async function(socket) {
   socket.on('sendData', async data => {
     // updated database
     console.log('Data keys :\n ');
-    console.log(Object.keys(data));
+    // console.log(Object.keys(data));
 
     // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
     // (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
@@ -680,6 +680,7 @@ const getDataBack = async function(socket) {
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
       //console.log('data', dataa);
+      // console.log('data', dataa);
       dataa.forEach(ld => {
       //  console.log('ld', ld.ld_expire);
         if (isNull(ld.ld_expire)) {
@@ -687,9 +688,13 @@ const getDataBack = async function(socket) {
         } else {
           console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
           formatDateOnlyFromMobileToBack(ld.ld_expire);
+          ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
+          // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
         }
+
       });
     //  console.log('dataaaa', dataa);
+      // console.log('dataaaa', dataa);
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
 
@@ -946,7 +951,7 @@ function formatDateFromBackToMobile(date) {
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
-  let str = '';
+  let str :any ;
   if (timeString != null) {
     let elements = timeString.split(' ');
     let dateComponents = elements[0].split('-');
@@ -961,6 +966,7 @@ function formatDateOnlyFromMobileToBack(timeString) {
     let dateComponents = timeString.split('-');
     str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
   }
+  console.log(' inside format date to back '+str)
   return str;
 }
 
