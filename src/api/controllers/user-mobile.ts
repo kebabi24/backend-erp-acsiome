@@ -679,16 +679,17 @@ const getDataBack = async function(socket) {
     // LOCATION DETAILS
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
-      console.log('data', dataa);
+      //console.log('data', dataa);
       dataa.forEach(ld => {
-        console.log('ld', ld);
+      //  console.log('ld', ld.ld_expire);
         if (isNull(ld.ld_expire)) {
           console.log('something here');
         } else {
+          console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
           formatDateOnlyFromMobileToBack(ld.ld_expire);
         }
       });
-      console.log('dataaaa', dataa);
+    //  console.log('dataaaa', dataa);
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
 
@@ -792,6 +793,7 @@ const getDataBack = async function(socket) {
       });
       const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
       console.log('INVENTORIES CREATION END');
+      console.log(inventories)
       if (inventoriesCreated) {
         console.log('INVENTORIES LINES CREATION');
         const inventoriesLines = data.inventairesLines;

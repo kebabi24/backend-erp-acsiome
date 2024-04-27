@@ -550,7 +550,7 @@ export default class LoadRequestService {
           // GET PRODUCT QUANTITY STORED
           // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
           // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
-          console.log('loc from : ' + load_request.role_loc_from);
+          //console.log('loc from : ' + load_request.role_loc_from);
           const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from, site, product.pt_part);
 
           // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES
@@ -689,7 +689,7 @@ export default class LoadRequestService {
           // GET PRODUCT QUANTITY STORED
           // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
           // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
-          console.log('loc from : ' + load_request.role_loc_from);
+ //         console.log('loc from : ' + load_request.role_loc_from);
           const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from, site, product.pt_part);
 
           // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES

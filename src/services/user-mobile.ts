@@ -1223,10 +1223,11 @@ export default class UserMobileService {
           where: { ld_site: ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
         });
 
+        console.log("exist",exist)
         if (exist) {
           // UPDATE
           console.log(element);
-          const location = await this.locationDetailModel.update(element, {
+          const location = await this.locationDetailModel.update({ld_qty_oh:element.ld_qty_oh}, {
             where: { ld_site: element.ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
           });
         } else {
