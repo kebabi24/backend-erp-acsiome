@@ -426,11 +426,11 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
-     console.log("loadline",load_request_details);
+     //console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
-      console.log("line",line)
+      //console.log("line",line)
       if(line.qt_effected > 0) {
-        console.log("yawhnahnawelamakch")
+        //console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
         product_code: line.product_code,
@@ -496,11 +496,11 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
-     console.log("loadline",load_request_details);
+    // console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
-      console.log("line",line)
+     // console.log("line",line)
       if(line.qt_effected > 0) {
-        console.log("yawhnahnawelamakch")
+       // console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
         product_code: line.product_code,
@@ -618,9 +618,9 @@ const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next:
     const loadRequestLines = await loadRequestService.findAllLoadRequestLines(load_request_code);
     const loadRequestDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load_request_code);
 
-    console.log(loadRequestLines);
-    console.log('********');
-    console.log(loadRequestDetails);
+    // console.log(loadRequestLines);
+    // console.log('********');
+    // console.log(loadRequestDetails);
     return res
       .status(200)
       .json({ message: 'found all load request lines', data: { loadRequestLines, loadRequestDetails } });
@@ -667,7 +667,7 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
 
     const { loadRequest, lines } = req.body;
     const role_code = loadRequest.role_code;
-    console.log('roooooooole', role_code);
+    //console.log('roooooooole', role_code);
     const role = await loadRequestService.getRole({ role_code: role_code });
 
     const token = await tokenSerieService.findOne({ token_code: role.token_serie_code });

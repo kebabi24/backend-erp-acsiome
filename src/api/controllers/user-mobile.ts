@@ -286,14 +286,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (loadRequest.length > 0) {
         loadRequest.forEach(load => {
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
-          if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
+          console.log(load.date_creation)
+          if (load.dataValues.date_charge != null) load.date_charge = formatDateOnlyFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST LINE
       if (loadRequestsLines.length > 0) {
         loadRequestsLines.forEach(load => {
+
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
-          if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
+          if (load.dataValues.date_charge != null) load.date_charge = formatDateOnlyFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST DETAILS
@@ -924,6 +926,7 @@ function formatDateOnlyFromBackToMobile(timeString) {
   if (timeString != null) {
     let dateComponents = timeString.split('-');
     str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+    console.log("date loadrequest",str)
   }
   return str;
 }

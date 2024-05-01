@@ -811,6 +811,7 @@ export default class UserMobileService {
           'pt_orderable',
           'pt_loadable',
           'pt_promotion',
+          'pt_promotion',
         ],
       });
 
