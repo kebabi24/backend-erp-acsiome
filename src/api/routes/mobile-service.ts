@@ -13,6 +13,6 @@ export default (app: Router) => {
     route.post("/findby", controller.findByAll)
     route.put("/close/:service_code", controller.closeService)
     route.put("/:id", controller.update)
-   
+    route.post("/getAllService", controller.findServicesBy)
     route.delete("/:id", controller.deleteOne)
 }

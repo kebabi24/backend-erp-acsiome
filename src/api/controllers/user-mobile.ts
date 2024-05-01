@@ -287,7 +287,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         loadRequest.forEach(load => {
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
           console.log(load.date_creation)
-          if (load.dataValues.date_charge != null) load.date_charge = formatDateOnlyFromBackToMobile(load.date_charge);
+          if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST LINE
