@@ -290,6 +290,26 @@ const findTypes = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findVerify = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findsome({ code_domain:user_domain,code_fldname: 'verify' });
+   
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_cmmt });
+    }
+   
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findColors = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -407,6 +427,7 @@ export default {
   findModule,
   findTrans,
   findEtats,
+  findVerify,
   findTypes,
   findColors,
   finddisease,

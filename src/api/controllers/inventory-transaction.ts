@@ -139,7 +139,26 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const updateTrans = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  console.log('AVANT TRY')
+  logger.debug('Calling update one  locationDetail endpoint');
+  try {
+    console.log(req.body,'test')
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    let refid = req.body.id;
+     const locationDetail = await inventoryTransactionServiceInstance.update(
+      { tr_rev: 'CHANGED', last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { id : refid},
+    );
 
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetail });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling update one  code endpoint');
@@ -1320,7 +1339,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
             tr_addr:routing,
             tr_user1:emp,
             created_by: user_code,
-            created_ip_adr: req.headers.origin,
+            // created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
@@ -2151,6 +2170,31 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findtrDateAddr = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  
+  logger.debug('Calling find by  all saleOrder endpoint');
+  const { user_domain } = req.headers;
+  try {
+    console.log(req.body.tr_addr)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const tr = await inventoryTransactionServiceInstance.findSpec({
+      tr_domain:user_domain,
+      tr_effdate: req.body.date,
+      tr_addr : req.body.tr_addr,
+      tr_type:'RCT-WO',
+      
+    });
+    
+    
+    return res.status(201).json({ message: 'created succesfully', data: tr });
+    //return res2.status(201).json({ message: 'created succesfully', data: results_body });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 const findTrType = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -2937,7 +2981,7 @@ const findByCost = async (req: Request, res: Response, next: NextFunction) => {
 const findByNbr = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  const { user_domain } = req.headers;
+  const {user_domain} = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
@@ -2994,7 +3038,7 @@ const findByNbr = async (req: Request, res: Response, next: NextFunction) => {
 const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  const { user_domain } = req.headers;
+  const {user_domain} = req.headers;
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
@@ -3045,8 +3089,8 @@ const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
 const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
-
+  const {user_domain} = req.headers;
+console.log(user_domain)
   logger.debug('Calling update one  code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -3102,7 +3146,7 @@ const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
       });
       const stkact = res.total
       
-      var trqty = await inventoryTransactionServiceInstance.find({
+      var trqty = await inventoryTransactionServiceInstance.findSpecial({
         where : {
       tr_domain: user_domain, tr_effdate: { [Op.between]: [tr.tr_effdate, new Date()]} ,
       tr_part: tr.tr_part,
@@ -3221,34 +3265,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         sct_sim: 'STD-CG',
       });
 
-      // let qty = 0;
-      // lds.map(elem => {
-      //   qty += Number(elem.ld_qty_oh);
-      // });
-      
-      // let stk= (qty + Number(item.tr_qty_loc) * Number(item.tr_um_conv));
-      // let new_price: any;
-      // if (stk != 0){ new_price = round(
-      //   (qty * Number(sct_mtl_tl) + Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price)) /
-      //     (qty + Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
-      //   2,
-      // );}
-      // else { new_price = 0}
-      
-      // await costSimulationServiceInstance.update(
-      //   {
-      //     sct_mtl_tl: new_price,
-      //     sct_cst_tot:
-      //       new_price +
-      //       Number(sctdet.sct_lbr_tl) +
-      //       Number(sctdet.sct_bdn_tl) +
-      //       Number(sctdet.sct_ovh_tl) +
-      //       Number(sctdet.sct_sub_tl),
-      //     last_modified_by: user_code,
-      //     last_modified_ip_adr: req.headers.origin,
-      //   },
-      //   { sct_part: item.tr_part, sct_site: item.tr_site, sct_sim: 'STD-CG',sct_domain:user_domain },
-      // );
+     
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
@@ -3257,7 +3274,36 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         ld_ref: item.tr_ref,
         ld_domain:user_domain
       });
-      if (ld)
+      
+      if (ld){
+        await inventoryTransactionServiceInstance.create({
+          ...item,
+          ...it,
+          tr_domain:user_domain,
+          tr_lot: nlot,
+          tr_qty_chg: Number(item.tr_qty_loc),
+          tr_loc_begin: ld.ld_qty_oh,
+          tr_type: 'RCT-UNP',
+          tr_date: new Date(),
+          tr_mtl_std: sctdet.sct_mtl_tl,
+          tr_lbr_std: sctdet.sct_lbr_tl,
+          tr_bdn_std: sctdet.sct_bdn_tl,
+          tr_ovh_std: sctdet.sct_ovh_tl,
+          tr_sub_std: sctdet.sct_sub_tl,
+          tr_desc:pt.pt_desc1,
+          tr_prod_line: pt.pt_prod_line,
+          tr__chr01:pt.pt_draw,
+          tr__chr02:pt.pt_break_cat,
+          tr__chr03:pt.pt_group,
+          dec01:Number(new Date(it.tr_effdate).getFullYear()),
+          dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+          tr_program:new Date().toLocaleTimeString(),
+          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
@@ -3266,13 +3312,41 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           },
           { id: ld.id },
         );
+      }
       else {
         
         const status = await statusServiceInstance.findOne({
           is_domain:user_domain,
           is_status: item.tr_status,
         });
-
+        await inventoryTransactionServiceInstance.create({
+          ...item,
+          ...it,
+          tr_domain:user_domain,
+          tr_lot: nlot,
+          tr_qty_chg: Number(item.tr_qty_loc),
+          tr_loc_begin: 0,
+          tr_type: 'RCT-UNP',
+          tr_date: new Date(),
+          tr_mtl_std: sctdet.sct_mtl_tl,
+          tr_lbr_std: sctdet.sct_lbr_tl,
+          tr_bdn_std: sctdet.sct_bdn_tl,
+          tr_ovh_std: sctdet.sct_ovh_tl,
+          tr_sub_std: sctdet.sct_sub_tl,
+          tr_desc:pt.pt_desc1,
+          tr_prod_line: pt.pt_prod_line,
+          tr__chr01:pt.pt_draw,
+          tr__chr02:pt.pt_break_cat,
+          tr__chr03:pt.pt_group,
+          dec01:Number(new Date(it.tr_effdate).getFullYear()),
+          dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+          tr_program:new Date().toLocaleTimeString(),
+          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
           ld_lot: item.tr_serial,
@@ -3290,40 +3364,8 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           
         });
       }
-      let qtyoh = 0;
-      if (ld) {
-        qtyoh = Number(ld.ld_qty_oh);
-      } else {
-        qtyoh = 0;
-      }
-      await inventoryTransactionServiceInstance.create({
-        ...item,
-        ...it,
-        tr_domain:user_domain,
-        tr_lot: nlot,
-        tr_qty_chg: Number(item.tr_qty_loc),
-        tr_loc_begin: Number(qtyoh),
-        tr_type: 'RCT-UNP',
-        tr_date: new Date(),
-        tr_mtl_std: sctdet.sct_mtl_tl,
-        tr_lbr_std: sctdet.sct_lbr_tl,
-        tr_bdn_std: sctdet.sct_bdn_tl,
-        tr_ovh_std: sctdet.sct_ovh_tl,
-        tr_sub_std: sctdet.sct_sub_tl,
-        tr_desc:pt.pt_desc1,
-        tr_prod_line: pt.pt_prod_line,
-        tr__chr01:pt.pt_draw,
-        tr__chr02:pt.pt_break_cat,
-        tr__chr03:pt.pt_group,
-        dec01:Number(new Date(it.tr_effdate).getFullYear()),
-        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
-        tr_program:new Date().toLocaleTimeString(),
-        tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
+      
+      
     }
 
     // const addressServiceInstance = Container.get(AddressService);
@@ -3346,6 +3388,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+
 export default {
   create,
   findOne,
@@ -3365,9 +3408,11 @@ export default {
   rctWo,
   rjctWo,
   issWo,
+  updateTrans,
   issWoD,
   //issSo,
   findtrDate,
+  findtrDateAddr,
   findTrType,
   cycCnt,
   cycRcnt,
@@ -3385,4 +3430,5 @@ export default {
   findByGroup,
   updatePrice,
   rctUnpCab,
+  
 };

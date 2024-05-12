@@ -121,6 +121,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         doc.end();
         const filePath = './output12.pdf';
         const printerName = req.body.lb_printer;
+       
+       
       },
     );
     setTimeout(() => {
@@ -133,14 +135,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         res.contentType('application/pdf');
       
         res.send(data);
+        
       });
     }, 2000);
+    
     // return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
     return next(e);
   }
+  
 };
 
 const createlAB = async (req: Request, res: Response, next: NextFunction) => {

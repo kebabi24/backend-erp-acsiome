@@ -15,6 +15,7 @@ export default (app: Router) => {
   route.delete('/:id', controller.deleteOne);
   route.post('/rct-unp', controller.rctUnp);
   route.post('/rct-unpcab', controller.rctUnpCab);
+  
   route.post('/iss-unp', controller.issUnp);
   route.post('/iss-tr', controller.issTr);
   route.post('/iss-chl', controller.issChl);
@@ -27,8 +28,10 @@ export default (app: Router) => {
   route.post('/rct-wo', controller.rctWo);
   route.post('/rjct-wo', controller.rjctWo);
   route.post('/iss-wo', controller.issWo);
+  route.post('/updateTr', controller.updateTrans);
   // route.post('/iss-so', controller.issSo);
   route.post('/findtrdate', controller.findtrDate);
+  route.post('/findtrdateaddr', controller.findtrDateAddr);
   route.post('/findtrtype', controller.findTrType);
   route.post('/cyc-cnt', controller.cycCnt);
   route.post('/cyc-rcnt', controller.cycRcnt);

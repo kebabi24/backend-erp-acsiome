@@ -41,7 +41,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       let rev : any;
       let batch : any;
       let grade : any;
-      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: it.wo_part });
+      
+      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: item.wo_part });
       for(let carac of parts){
         draw = carac.pt_draw,
         ref = carac.pt_article,
@@ -640,15 +641,16 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const { id } = req.params;
+     const { id } = req.params;
+    
     const of = await workOrderServiceInstance.findOne({
     
       wo_domain: user_domain,
-      id: req.body.id
+      id: id
     
   });
-  let diff1 = Number(Number(of.wo_qty_ord) - Number(req.body.wo_qty.comp));
-  let diff2 = Number(Number(req.body.wo_qty.rjct) / Number(Number(req.body.wo_qty.rjct) + Number(req.body.wo_qty.comp)))
+  let diff1 = Number(Number(of.wo_qty_ord) - Number(req.body.wo_qty_comp));
+  let diff2 = Number(Number(req.body.wo_qty_rjct) / Number(Number(req.body.wo_qty_rjct) + Number(req.body.wo_qty_comp)))
     const wo = await workOrderServiceInstance.update(
       { ...req.body, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
@@ -954,8 +956,9 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
       if(rctwo.length > isswo.length) {
 
         for (var j=0;j< rctwo.length; j++) {
+          
           const labelServiceInstance = Container.get(LabelService);
-          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+          // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
 
           if(j < isswo.length) {
              obj = {
@@ -971,7 +974,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: orgpal.lb_cust,
+              // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -1004,8 +1007,9 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
 
       } else {
         for (var j = 0;j < isswo.length; j++) {
+          
           const labelServiceInstance = Container.get(LabelService);
-          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+          // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
      
           if(j < rctwo.length) {
              obj = {
@@ -1021,7 +1025,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin:orgpal.lb_cust,
+              // issorigin:orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -1041,7 +1045,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : "",
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: orgpal.lb_cust,
+              // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
