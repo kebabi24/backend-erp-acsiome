@@ -1,4 +1,5 @@
 import { Service, Inject } from 'typedi';
+import { Op, Sequelize, QueryTypes } from 'sequelize';
 
 @Service()
 export default class ItemService {
@@ -6,6 +7,7 @@ export default class ItemService {
     @Inject('itemModel') private itemModel: Models.ItemModel,
     @Inject('taxeModel') private taxeModel: Models.TaxeModel,
     @Inject('locationModel') private locationModel: Models.LocationModel,
+    @Inject('locationDetailModel') private locationDetailModel: Models.LocationDetailModel,
     @Inject('logger') private logger,
   ) {}
 
@@ -14,6 +16,32 @@ export default class ItemService {
       const item = await this.itemModel.create({ ...data });
       this.logger.silly('item', item);
       return item;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findwithstk(query: any): Promise<any> {
+    try {
+      const items = await this.itemModel.findAll({ where: query,
+        include: [
+          {
+            model: this.locationDetailModel,
+            required: false,
+            // separate:true,
+            attributes: [[Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'qty']],
+            group: ['ld_part']
+        }
+      ],
+      attributes:['pt_part'],
+      //   separate: true,
+        
+      });
+
+
+      
+      this.logger.silly('find All locationDetails mstr');
+      return items;
     } catch (e) {
       this.logger.error(e);
       throw e;

@@ -216,8 +216,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code });
       }
 
-      const invoice = await userMobileServiceInstanse.getInvoice();
-      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
+      const invoice = await userMobileServiceInstanse.getInvoice(role.role_code);
+      let invoicecode= []
+      for (let inv of invoice) {
+        invoicecode.push(inv.invoice_code)
+      }
+      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine({invoice_code:invoicecode});
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods();
       const messages = await userMobileServiceInstanse.getMessages(role.role_code);
       const barCodesInfo = await userMobileServiceInstanse.findAllBarCodes();
@@ -286,14 +290,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (loadRequest.length > 0) {
         loadRequest.forEach(load => {
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
+          console.log(load.date_creation)
           if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST LINE
       if (loadRequestsLines.length > 0) {
         loadRequestsLines.forEach(load => {
+
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
-          if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
+          if (load.dataValues.date_charge != null) load.date_charge = formatDateOnlyFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST DETAILS
@@ -320,7 +326,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
       // service created on backend
       if (parameter[index].hold === true) {
-        let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code });
+        let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
+        console.log("here service",service1)
         // UPDATE SERVICE DATES
         let service = {
           // id: ,
@@ -488,6 +495,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
 //****************** GET DATA BACK ************************
 const getDataBack = async function(socket) {
+  console.log("hounahpunahpouma")
   const logger = Container.get('logger');
   // logger.debug("Calling user mobile login endpoint")
 
@@ -515,11 +523,13 @@ const getDataBack = async function(socket) {
     // SERVICE
     // CREATED FROM BACKEDN
     const { service, service_creation, user, visits, payment } = data;
+console.log("service_creation",service_creation)
     console.log(user);
     console.log(visits);
-    if (service_creation == true) {
+    if (service_creation == 1) {
       // created from backend
       console.log('UPDATING SERVICE');
+      console.log(service)
       const udpatedService = await userMobileServiceInstanse.updateService(
         {
           service_open: false,
@@ -533,6 +543,7 @@ const getDataBack = async function(socket) {
           nb_clients_created: service.nb_clients_created,
           nb_products_loaded: service.nb_products_loaded,
           sum_invoice: service.sum_invoice,
+          sum_paiement: service.sum_paiement,
           // user_mobile_code: service.user_mobile_code,
         },
         { service_code: service.service_code },
@@ -628,7 +639,7 @@ const getDataBack = async function(socket) {
       const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
       nb_invoice = filtered_invoices.length;
       const invoices = data.invoices;
-      console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
+      //console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
       const invoicesLines = data.invoicesLines;
       const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = [];
@@ -670,7 +681,7 @@ const getDataBack = async function(socket) {
     if (data.payments) {
       const dataa = data.payments;
       dataa.forEach(payment => {
-        console.log(payment);
+     //   console.log(payment);
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date);
       });
       const payments = await userMobileServiceInstanse.createPayments(dataa);
@@ -679,17 +690,21 @@ const getDataBack = async function(socket) {
     // LOCATION DETAILS
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
+      //console.log('data', dataa);
       // console.log('data', dataa);
       dataa.forEach(ld => {
-        console.log('ld', ld);
+      //  console.log('ld', ld.ld_expire);
         if (isNull(ld.ld_expire)) {
-          console.log('something here');
+       //   console.log('something here');
         } else {
+      //    console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
+          formatDateOnlyFromMobileToBack(ld.ld_expire);
           ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
           // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
         }
 
       });
+    //  console.log('dataaaa', dataa);
       // console.log('dataaaa', dataa);
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
@@ -789,17 +804,18 @@ const getDataBack = async function(socket) {
       console.log('INVENTORIES CREATION');
       const inventories = data.inventaires;
       inventories.forEach(inventory => {
-        console.log(inventory);
+       // console.log(inventory);
         inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.the_date);
       });
       const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
       console.log('INVENTORIES CREATION END');
+      //console.log(inventories)
       if (inventoriesCreated) {
         console.log('INVENTORIES LINES CREATION');
         const inventoriesLines = data.inventairesLines;
         inventoriesLines.forEach(line => {
           if (isNull(line.expiring_date)) {
-            console.log('say something');
+           // console.log('say something');
           } else {
             line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
           }
@@ -810,6 +826,8 @@ const getDataBack = async function(socket) {
     }
 
     socket.emit('dataUpdated');
+    // socket.closed()
+    console.log("end synchro")
   });
 };
 
@@ -919,6 +937,7 @@ function formatDateOnlyFromBackToMobile(timeString) {
   if (timeString != null) {
     let dateComponents = timeString.split('-');
     str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+    console.log("date loadrequest",str)
   }
   return str;
 }
@@ -973,7 +992,7 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+   // console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
         where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -1018,7 +1037,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
   logger.debug('Calling find all user endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log('rrrrrrrrrrrrrrrrrr', req.body);
+ // console.log('rrrrrrrrrrrrrrrrrr', req.body);
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
@@ -1029,7 +1048,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    console.log(invoicesline);
+   // console.log(invoicesline);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });
@@ -1047,7 +1066,7 @@ const findPaymentBy = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+    //console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
         period_active_date: { [Op.between]: [req.body.date, req.body.date1] },

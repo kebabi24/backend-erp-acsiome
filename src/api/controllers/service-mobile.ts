@@ -3,6 +3,7 @@ import RoleService from '../../services/role';
 import TokenSerieService from '../../services/token-serie';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -67,7 +68,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const MobileServiceInstance = Container.get(MobileService);
-    const services = await MobileServiceInstance.find({ service_domain: user_domain });
+    const services = await MobileServiceInstance.find({});
     return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -157,6 +158,29 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findServicesBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all service endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const MobileServiceInstance = Container.get(MobileService);
+
+    const services = await MobileServiceInstance.findAllServices({
+      
+      where: {
+        service_site: req.body.site,
+        service_period_activate_date:  { [Op.between]: [req.body.date, req.body.date1] },
+      },
+      attributes:{include: [[Sequelize.literal('nb_visits * 100 / nb_clients_itin'), 'visitrate'],[Sequelize.literal('nb_invoice * 100 / nb_visits'), 'successrate']]},
+  })
+  //console.log(services)
+    return res.status(200).json({ message: 'fetched succesfully', data: services });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -166,4 +190,5 @@ export default {
   update,
   deleteOne,
   closeService,
+  findServicesBy,
 };
