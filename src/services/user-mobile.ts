@@ -975,9 +975,9 @@ export default class UserMobileService {
     }
   }
   // ******************** GET INVOICE    **************************
-  public async getInvoice(): Promise<any> {
+  public async getInvoice(role:any): Promise<any> {
     try {
-      const invoice = await this.invoiceModel.findAll({ where: { closed: false } });
+      const invoice = await this.invoiceModel.findAll({ where: { role_code:role,closed: false } });
       return invoice;
     } catch (e) {
       console.log('Error from service- getInvoice');
@@ -987,9 +987,9 @@ export default class UserMobileService {
   }
 
   // ******************** GET INVOICE LINE    **************************
-  public async getInvoiceLine(): Promise<any> {
+  public async getInvoiceLine(query:any): Promise<any> {
     try {
-      const invoice_line = await this.invoiceLineModel.findAll();
+      const invoice_line = await this.invoiceLineModel.findAll({where:query});
       return invoice_line;
     } catch (e) {
       console.log('Error from service- getInvoiceLine');
@@ -1224,10 +1224,10 @@ export default class UserMobileService {
           where: { ld_site: ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
         });
 
-        console.log("exist",exist)
+      //  console.log("exist",exist)
         if (exist) {
           // UPDATE
-          console.log(element);
+         // console.log(element);
           const location = await this.locationDetailModel.update({ld_qty_oh:element.ld_qty_oh}, {
             where: { ld_site: element.ld_site, ld_loc: ld_loc, ld_lot: ld_lot, ld_part: ld_part },
           });
