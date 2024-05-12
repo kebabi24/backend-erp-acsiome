@@ -41,11 +41,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find all association endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-console.log("herrrrrrrrrrrrrrrre")
+
     try {
         const associationServiceInstance = Container.get(AssociationService)
         const associations = await associationServiceInstance.find({ass_domain:user_domain})
-        console.log(associations)
+      
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: associations })
@@ -101,7 +101,7 @@ const{user_domain} = req.headers
     try {
         const associationServiceInstance = Container.get(AssociationService)
         const {id} = req.params
-        console.log(id)
+       
         const association = await associationServiceInstance.update({...req.body,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
         return res
             .status(200)

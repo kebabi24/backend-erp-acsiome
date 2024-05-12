@@ -9,7 +9,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   const { customers, itinerary } = req.body;
-  //console.log(customers)
+
   logger.debug('Calling Create itn endpoint');
   try {
     const ItineraryServiceInstance = Container.get(ItineraryService);
@@ -36,12 +36,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  logger.debug('Calling find one  itn endpoint');
-  console.log('hedi hiya 2');
+  logger.debug('Calling find one  itn endpoint'); 
   try {
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const { id } = req.params;
-    console.log(id);
+  
     const itn = await ItineraryServiceInstance.findOne({ itinerary_code: id });
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
@@ -56,7 +55,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const itn = await ItineraryServiceInstance.find({});
-    //console.log(itn)
+
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -68,12 +67,12 @@ const getAllServices = async (req: Request, res: Response, next: NextFunction) =
   const logger = Container.get('logger');
   logger.debug('Calling find all itn endpoint');
   try {
-    console.log(req.body);
+    
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const ServiceMobileServiceInstance = Container.get(ServiceMobileService);
     const services = await ServiceMobileServiceInstance.findS(req.body.date);
 
-    //console.log(itn)
+   
     return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
     logger.error('🔥 error: %o', e);

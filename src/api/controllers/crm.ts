@@ -103,7 +103,7 @@ const { Op } = require('sequelize')
 
         const { user_code } = req.headers;
 
-        console.log(user_code)
+    
 
        
 
@@ -285,7 +285,7 @@ const { Op } = require('sequelize')
     //  let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate()) this is what we pass
 
     //     const dt = date.getFullYear().toString()+'-'+(date.getMonth()+1).toString()+'-'+(date.getDate()).toString()
-    //   console.log(dt)
+    
     //   const param = await this.paramHeaderModel.findOne({
     //     where:{
     //             validity_date_start :  {[Op.lte]:new Date(dt)}  ,    

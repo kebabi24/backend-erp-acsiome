@@ -43,7 +43,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       for (const element of elements) {
         const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
         const addLine = await crmServiceInstance.createAgendaLine(element.code_element, param, paramDetails, sequence);
-        console.log(addLine);
+        
       }
     }
     const items = await itemServiceInstance.find({ pt_domain: user_domain });
@@ -94,7 +94,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.headers.origin);
+
   const { user_domain } = req.headers;
   logger.debug('Calling find all site endpoint');
   try {
@@ -128,7 +128,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const siteServiceInstance = Container.get(SiteService);
     const sites = await siteServiceInstance.findOne({ ...req.body, si_domain: user_domain });
-    console.log(sites)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: sites });
   } catch (e) {
     logger.error('🔥 error: %o', e);

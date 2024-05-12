@@ -43,7 +43,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const workcenterServiceInstance = Container.get(WorkCenterService)
         const wcs = await workcenterServiceInstance.find({wc_domain: user_domain})
-        console.log(wcs)
+       
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: wcs })

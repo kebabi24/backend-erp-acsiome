@@ -22,7 +22,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const  date = new Date();
     logger.debug("Calling Create sequence endpoint")
     try {
-        console.log(req.body)
+        
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
 
         const voucherOrderDetailServiceInstance = Container.get(
@@ -183,7 +183,7 @@ const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
-        console.log(req.body)
+        
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
@@ -235,7 +235,7 @@ const{user_domain} = req.headers
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all invoiceOrder endpoint")
     const{user_domain} = req.headers
     try {
@@ -268,7 +268,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 }
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all invoiceOrder endpoint")
     const{user_domain} = req.headers
     try {
@@ -313,7 +313,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all requisition endpoint")
     const{user_domain} = req.headers
     try {
@@ -367,7 +367,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const voucherOrderServiceInstance = Container.get(VoucherOrderService)
         const { id } = req.params
-        console.log(req.body)
+        
         const voucherOrder = await voucherOrderServiceInstance.update(
             { ...req.body , last_modified_by: user_code},
             { id }

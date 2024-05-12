@@ -47,7 +47,7 @@ const{user_domain} = req.headers
         let nextck = bkd.bkd_next_ck
         const bkdup = await bankDetailServiceInstance.update ({bkd_next_ck: Number(bkd.bkd_next_ck) + 1},{id:bkd.id})
         let nbr = nextck + " " + accountPayable.ap_vend
-        console.log(nbr)
+      
         const ap = await AccountPayableServiceInstance.create({...accountPayable, ap_nbr: nbr,created_by:user_code,ap_domain : user_domain,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
        
        
@@ -75,7 +75,7 @@ const{user_domain} = req.headers
        }
        const effdate = new Date(accountPayable.ap_effdate)       
        for (let entry of gldetail) {
-       console.log(entry)
+       
         await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
             glt_domain:user_domain,
             glt_addr: accountPayable.ap_vend,
@@ -120,7 +120,7 @@ const{user_domain} = req.headers
         const providerServiceInstance = Container.get(ProviderService)
         
         const { accountPayable, accountPayableDetail, gldetail } = req.body
-        console.log(accountPayable)
+        
        
         const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountPayable.ap_bank, bkd_module: "AP", bkd_pay_method: accountPayable.ap_cr_terms,bkd_domain:user_domain})
         let nextck = bkd.bkd_next_ck
@@ -166,7 +166,7 @@ const{user_domain} = req.headers
                 }
                 const effdate = new Date(accountPayable.ap_effdate)
                 for (let entry of gldetail) {
-                console.log(entry)
+               
                 await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                     glt_domain: user_domain,
                     glt_addr: accountPayable.ap_vend,
@@ -212,7 +212,7 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
         )
         const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
         const { accountPayable, accountPayableDetail , gldetail} = req.body
-        console.log(accountPayable)
+       
        
         const apf = await accountPayableServiceInstance.findOne({id: accountPayable.id,ap_domain : user_domain,})
         const ap = await accountPayableServiceInstance.update({ap_applied: Number(apf.ap_applied) + Number(accountPayable.ap_applied), ap_base_applied: Number(apf.ap_base_applied) + Number(accountPayable.ap_base_applied),ap_open: accountPayable.ap_open,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:apf.id})
@@ -255,7 +255,7 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
                  }
                  const effdate = new Date(accountPayable.ap_effdate)
                  for (let entry of gldetail) {
-                 console.log(entry)
+                
                   await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                       glt_domain: user_domain,
                       glt_addr: accountPayable.ap_vend,

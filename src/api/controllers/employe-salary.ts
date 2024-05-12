@@ -10,7 +10,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
-    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+
     try {
         
         const empSalaryServiceInstance = Container.get(
@@ -20,10 +20,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             EmployeService
         )
         const {  empDetails } = req.body
-      // console.log(empDetails)
+   
         for (let entry of empDetails) {
                let  entr = {salary_domain:user_domain, salary_code: entry.code,salary_date: entry.date,salary_shift:entry.shift, salary_amt: entry.amt, salary_bonus: entry.bonus, salary_salary: entry.salary,salary_balance:entry.newbalance,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
-           //console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
+         
                 await empSalaryServiceInstance.create({...entr})
                 const employe = await employeServiceInstance.findOne({emp_addr:entry.code})
                 if(employe) {

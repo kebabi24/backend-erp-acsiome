@@ -21,10 +21,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
-  console.log('INVOICE\n');
+ 
   logger.debug('Calling Create sequence endpoint');
   try {
-    console.log(req.body);
+    
 
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderTempService);
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -100,7 +100,7 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.debug('Calling Create sequence endpoint');
   try {
-    console.log(req.body);
+    
     const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
 
     const invoiceOrderTempDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
@@ -151,7 +151,7 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
       adr: addr,
     };
 
-    console.log('\n\n Detail ', pdfData.detail);
+    
     let pdf = await generatePdf(pdfData, 'ih');
 
     return res.status(201).json({ message: 'created succesfully', data: ih.ith_inv_nbr, pdf: pdf.content });
@@ -168,7 +168,7 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
   const date = new Date();
   logger.debug('Calling Create sequence endpoint');
   try {
-    console.log(req.body);
+    
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
     const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
     const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
@@ -286,7 +286,7 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
     }
     const effdate = new Date(invoiceOrder.ih_inv_date);
     for (let entry of gldetail) {
-      console.log(entry);
+
       await generalLedgerServiceInstance.create({
         ...entry,
         glt_ref: ref,
@@ -329,7 +329,7 @@ const imputProject = async (req: Request, res: Response, next: NextFunction) => 
   const date = new Date();
   logger.debug('Calling Create sequence endpoint');
   try {
-    console.log(req.body);
+    
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
     const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
     const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
@@ -447,7 +447,7 @@ const imputProject = async (req: Request, res: Response, next: NextFunction) => 
     }
     const effdate = new Date(invoiceOrder.ih_inv_date);
     for (let entry of gldetail) {
-      console.log(entry);
+      
       await generalLedgerServiceInstance.create({
         ...entry,
         glt_ref: ref,
@@ -485,7 +485,7 @@ const imputProject = async (req: Request, res: Response, next: NextFunction) => 
 };
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all invoiceOrderTemp endpoint');
   const { user_domain } = req.headers;
   try {
@@ -495,7 +495,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
       ...req.body,
       ith_domain: user_domain,
     });
-    console.log('hamel', invoiceOrderTemp.ith_invoiced);
+
     if (invoiceOrderTemp) {
       const details = await invoiceOrderTempDetailServiceInstance.find({
         itdh_domain: user_domain,
@@ -591,7 +591,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
     const { id } = req.params;
-    console.log(req.body);
+    
     const invoiceOrderTemp = await invoiceOrderTempServiceInstance.update(
       { ...req.body, last_modified_by: user_code },
       { id },

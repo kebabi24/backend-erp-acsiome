@@ -13,12 +13,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const dealServiceInstance = Container.get(DealService);
 
-    // console.log(req.file);
+    
     const data = req.body.data;
     const filedata = req.file;
     const jsonData = JSON.parse(data);
-    console.log(jsonData);
-    console.log(jsonData['deal_code']);
+    
     const deal = await dealServiceInstance.create({
       deal_code: jsonData['deal_code'],
       deal_desc: jsonData['deal_desc'],
@@ -37,8 +36,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    // console.log(req.body.data);
-    // console.log(req.file);
+  
     // ADD TO AGENDA
     return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
@@ -64,7 +62,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.headers.origin);
+ 
   const { user_domain } = req.headers;
   logger.debug('Calling find all deal endpoint');
   try {
@@ -95,11 +93,11 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all deal endpoint');
   const { user_domain } = req.headers;
-  console.log(req.body);
+  
   try {
     const dealServiceInstance = Container.get(DealService);
     const deals = await dealServiceInstance.findOne({ ...req.body, deal_domain: user_domain });
-    console.log(deals);
+
     return res.status(200).json({ message: 'fetched succesfully', data: deals });
   } catch (e) {
     logger.error('🔥 error: %o', e);

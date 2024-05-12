@@ -49,6 +49,21 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByOp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ ...req.body, pt_draw: { [Op.or]:  ["BOBINE", "SQUELETTE"] },pt_domain:user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get("logger")
   logger.debug("Calling find by  all item endpoint")
@@ -91,10 +106,10 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const itemServiceInstance = Container.get(ItemService);
-    console.log(req.body)
-    console.log(user_domain)
+    
+   
     const items = await itemServiceInstance.findOne({ ...req.body,pt_domain:user_domain });
-   console.log("ohohoh",items)
+   
     return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -256,7 +271,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
     const fraisDetailServiceInstance = Container.get(FraisDetailService)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    console.log(req.body);
+    
      let result=[] 
      let i = 1
     const items = await itemServiceInstance.find({
@@ -289,7 +304,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
          cmpA   = sct.sct_mtl_tl
       } 
       else {
-      console.log(old_tr)
+    
        coutMA = old_tr.tr__dec01
        cmpA   = old_tr.tr__dec02
       }
@@ -302,7 +317,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
         raw: true,
       });
       const stkact = res.total
-      console.log(stkact)
+    
       var trqty = await inventoryTransactionServiceInstance.find({
         where : {
       tr_domain: user_domain, tr_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,
@@ -393,7 +408,7 @@ const CalcCmp = async (req: Request, res: Response, next: NextFunction) => {
 
     }
        
-    console.log("trs",trs.length);
+   
    
   //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: trs });
@@ -411,7 +426,7 @@ const findlast = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   const Sequelize = require('sequelize');
   const Op = Sequelize.Op;
-  console.log(req.body.pmcode);
+
 
   try {
     const itemServiceInstance = Container.get(ItemService);
@@ -438,6 +453,7 @@ export default {
   create,
   findBySpec,
   findBy,
+  findByOp,
   findBySupp,
   findByOne,
   findOne,

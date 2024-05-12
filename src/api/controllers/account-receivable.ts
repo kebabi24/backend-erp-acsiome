@@ -75,7 +75,7 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
         const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
         
         const { accountReceivable, accountReceivableDetail , gldetail} = req.body
-        console.log(accountReceivable)
+        
        
         const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountReceivable.ar_bank, bkd_domain :user_domain, bkd_module: "AR", bkd_pay_method: accountReceivable.ar_cr_terms})
         let nextck = bkd.bkd_next_ck
@@ -120,7 +120,7 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
            }
            const effdate = new Date(accountReceivable.ar_effdate)
            for (let entry of gldetail) {
-           console.log(entry)
+        
             await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                 glt_domain: user_domain,
                 glt_addr: accountReceivable.ar_bill,
@@ -167,7 +167,7 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
         )
         const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
         const { accountReceivable, accountReceivableDetail,gldetail } = req.body
-        console.log(accountReceivable)
+        
        
         const arf = await accountReceivableServiceInstance.findOne({id: accountReceivable.id})
         const ar = await accountReceivableServiceInstance.update({ar_applied: Number(arf.ar_applied) + Number(accountReceivable.ar_applied), ar_base_applied: Number(arf.ar_base_applied) + Number(accountReceivable.ar_base_applied),ar_open: accountReceivable.ar_open,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:arf.id})
@@ -210,7 +210,7 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
            }
            const effdate = new Date(accountReceivable.ar_effdate)
            for (let entry of gldetail) {
-           console.log(entry)
+         
             await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                 glt_domain: user_domain,
                 glt_addr: accountReceivable.ar_bill,

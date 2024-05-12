@@ -60,7 +60,6 @@ export default class UserService {
     }
   }
   public async updated(data: any, query: any): Promise<any> {
-  // console.log("data",data.usrd_pwd)
     if(data.usrd_pwd != undefined && data.usrd_pwd != null ) {
    const usrd_pwd = await argon2.hash(data.usrd_pwd);
 

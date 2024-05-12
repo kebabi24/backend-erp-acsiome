@@ -19,14 +19,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             EmployeTimeService
         )
         const {  empDetails } = req.body
-      //  console.log(empDetails)
+      
         for (let entry of empDetails) {
-           // console.log(entry)
+     
             const employe = await empTimeServiceInstance.findOne({empt_date: new Date(),empt_domain:user_domain, empt_code:entry.emp_addr})
-              //   console.log("emp",employe)
+            
             if(employe) {
                 entry = { empt_code: entry.emp_addr,empt_stat:entry.reason,empt_date: new Date(),empt_start: entry.timestart, empt_end: entry.timeend,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
-           //console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
+           
                 await empTimeServiceInstance.update({...entry},{id: employe.id})
             }
             else {
@@ -63,20 +63,20 @@ const createPoint = async (req: Request, res: Response, next: NextFunction) => {
             EmployeScoreService
         )
         const {  empDetails } = req.body
-      //  console.log(empDetails)
+     
         for (let entry of empDetails) {
-            console.log("entry",entry)
+          
             const employe = await empTimeServiceInstance.findOne({empt_date: req.body.date,empt_domain:user_domain, empt_code:entry.emp_addr})
             const emp = await employeServiceInstance.findOne({emp_addr:entry.emp_addr,emp_domain:user_domain})
      
-            //   console.log("emp",employe)
+    
         
             if(employe) {
                 const empscore = await empScoreServiceInstance.findOne({emps_addr:entry.emp_addr,emps_type:entry.type, emps_domain:user_domain})
      
                 entry = { empt_code: entry.emp_addr,empt_amt:(empscore) ? (Number(empscore.emps_amt) * Number(emp.emp_mrate) + Number(emp.emp_arate)) : 0,empt_mrate_activ: entry.empt_mrate_activ,empt_arate_activ: entry.empt_arate_activ,
                             empt_mrate:emp.emp_mrate,empt_arate:emp.emp_arate,empt_date: req.body.date, empt_type:entry.type,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}
-           //console.log("hhhhhhhhheeeeeeeeeeeerrrrrrrrrrrrrrrreeeeeeeeeeee", employe.id)
+        
                 await empTimeServiceInstance.update({...entry},{id: employe.id})
             }
             else {
@@ -181,7 +181,7 @@ const calculatesalary = async (req: Request, res: Response, next: NextFunction) 
     logger.debug("Calling find by  all code endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-    console.log(req.body)
+    
     try {
         const empdDetailsServiceInstance = Container.get(EmployeTimeService)
         const employeServiceInstance = Container.get(EmployeService)
@@ -201,7 +201,7 @@ const calculatesalary = async (req: Request, res: Response, next: NextFunction) 
 
 
         })
-        //console.log(employe)
+     
         let data = []
         var i = 1
         for (let obj of employe) {
@@ -228,7 +228,7 @@ const calculatesalary = async (req: Request, res: Response, next: NextFunction) 
             data.push(ob)
             i = i + 1
         }
-      // console.log(data) 
+
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: data })

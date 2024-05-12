@@ -33,7 +33,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    console.log(req.body)
+    
     const { saleOrder, saleOrderDetail } = req.body;
     
     const so = await saleOrderServiceInstance.create({
@@ -220,7 +220,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all purchaseOrder endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -278,7 +278,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all requisition endpoint');
   try {
@@ -297,7 +297,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByAllSo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_domain } = req.headers;
 
   logger.debug('Calling find by  all requisition endpoint');
@@ -348,7 +348,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
 
@@ -819,7 +819,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
 };
 const findAllSoJob = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all requisition endpoint');
   try {

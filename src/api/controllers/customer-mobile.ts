@@ -8,13 +8,12 @@ import CustomerItineraryService from '../../services/customer-itinerary';
 // CREATE CUSTOMER MOBILE
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const hostname = os.networkInterfaces();
-  console.log(hostname);
+  
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   const customerMobileData = req.body;
-  console.log(customerMobileData);
-  console.log(req.body);
+  
   logger.debug('Calling Create customer endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
@@ -36,7 +35,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const CustomerMobileServiceInstance = Container.get(CustomerMobileService);
     const customers = await CustomerMobileServiceInstance.findOne({ ...req.body });
-    console.log(customers);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: customers });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -63,7 +62,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const CustomerMobileServiceInstance = Container.get(CustomerMobileService);
     const customers = await CustomerMobileServiceInstance.find({ ...req.body });
-    console.log(customers);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: customers });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -75,8 +74,8 @@ const createCluster = async (req: Request, res: Response, next: NextFunction) =>
   const logger = Container.get('logger');
   const { username } = req.headers;
   // const clusterData = req.body.cluster
-  // console.log(clusterData)
-  console.log('request body' + Object.keys(req.body.cluster));
+  
+
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
@@ -93,7 +92,7 @@ const createCluster = async (req: Request, res: Response, next: NextFunction) =>
 
 const createCategory = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+ 
   logger.debug('Calling create category endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
@@ -110,7 +109,7 @@ const createCategory = async (req: Request, res: Response, next: NextFunction) =
 
 const findClusterByCode = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const { cluster_code } = req.params;
@@ -118,7 +117,7 @@ const findClusterByCode = async (req: Request, res: Response, next: NextFunction
     const cluster = await customerMobileServiceInstance.findClusterByCode({
       cluster_code: cluster_code,
     });
-    console.log(cluster);
+  
 
     return res.status(201).json({ message: 'Cluster found ', data: { cluster } });
   } catch (e) {
@@ -130,7 +129,7 @@ const findClusterByCode = async (req: Request, res: Response, next: NextFunction
 
 const findCategoryByCode = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const { category_code } = req.params;
@@ -138,7 +137,7 @@ const findCategoryByCode = async (req: Request, res: Response, next: NextFunctio
     const category = await customerMobileServiceInstance.findCategoryByCode({
       category_code: category_code,
     });
-    console.log(category);
+    
 
     return res.status(201).json({ message: 'Category found ', data: { category } });
   } catch (e) {
@@ -165,12 +164,12 @@ const findAllClusters = async (req: Request, res: Response, next: NextFunction) 
 
 const findAllCategories = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+ 
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const categories = await customerMobileServiceInstance.findAllCategories({});
-    console.log(categories);
+   
 
     return res.status(201).json({ message: 'categories found ', data: { categories } });
   } catch (e) {
@@ -183,7 +182,7 @@ const findAllCategories = async (req: Request, res: Response, next: NextFunction
 const createSubCluster = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { username } = req.headers;
-  console.log('request body' + Object.keys(req.body.sub_cluster));
+  
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
@@ -201,7 +200,7 @@ const createSubCluster = async (req: Request, res: Response, next: NextFunction)
 const createCategoryType = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { username } = req.headers;
-  console.log('request body' + Object.keys(req.body.category_type));
+  
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
@@ -218,7 +217,7 @@ const createCategoryType = async (req: Request, res: Response, next: NextFunctio
 
 const findSubClusterByCode = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find sub  cluster by code endpoint with body: %o', req.body);
   try {
     const { sub_cluster_code } = req.params;
@@ -226,7 +225,7 @@ const findSubClusterByCode = async (req: Request, res: Response, next: NextFunct
     const subCluster = await customerMobileServiceInstance.findSubClusterByCode({
       sub_cluster_code: sub_cluster_code,
     });
-    console.log(subCluster);
+    
 
     return res.status(201).json({ message: 'sub cluster found ', data: { subCluster } });
   } catch (e) {
@@ -238,7 +237,7 @@ const findSubClusterByCode = async (req: Request, res: Response, next: NextFunct
 
 const findCategoryTypeByCode = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling Create cluster endpoint with body: %o', req.body);
   try {
     const { category_type_code } = req.params;
@@ -246,7 +245,7 @@ const findCategoryTypeByCode = async (req: Request, res: Response, next: NextFun
     const categoryType = await customerMobileServiceInstance.findCategoryTypeByCode({
       category_type_code: category_type_code,
     });
-    console.log(categoryType);
+    
 
     return res.status(201).json({ message: 'Category type found ', data: { categoryType } });
   } catch (e) {
@@ -258,12 +257,12 @@ const findCategoryTypeByCode = async (req: Request, res: Response, next: NextFun
 
 const findAllSubClusters = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find all sub cluster endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const subClusters = await customerMobileServiceInstance.findAllSubClusters({});
-    console.log(subClusters);
+    
 
     return res.status(201).json({ message: 'sub clusters found ', data: { subClusters } });
   } catch (e) {
@@ -275,12 +274,12 @@ const findAllSubClusters = async (req: Request, res: Response, next: NextFunctio
 
 const findAllCategoriesTypes = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find all categories types endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const categoriesTypes = await customerMobileServiceInstance.findAllCategoriesTypes({});
-    console.log(categoriesTypes);
+   
 
     return res.status(201).json({ message: 'categories types found ', data: { categoriesTypes } });
   } catch (e) {
@@ -310,7 +309,7 @@ const deleteCategoryById = async (req: Request, res: Response, next: NextFunctio
   try {
     const userMobileServiceInstance = Container.get(CustomerMobileService);
     const { categoryId } = req.params;
-    console.log('cattt id ' + categoryId);
+  
     const category = await userMobileServiceInstance.deleteCategoryById({ id: categoryId });
     return res.status(200).json({ message: 'category deleted succesfully', data: category });
   } catch (e) {
@@ -349,13 +348,13 @@ const deleteCategoryTypeById = async (req: Request, res: Response, next: NextFun
 
 const getDataForCustomerCreate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log('hhhhhhhhhhhhhhhhhhhhhhh');
+
   logger.debug('Calling find all categories types endpoint with body: %o', req.body);
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
 
     const clusters = await customerMobileServiceInstance.findAllClusters({});
-    console.log('hert');
+  
     const categories = await customerMobileServiceInstance.findAllCategories({});
     const sales_channels = await customerMobileServiceInstance.findAllSalesChannels();
 
@@ -388,7 +387,7 @@ const getDataForCustomerCreate = async (req: Request, res: Response, next: NextF
       category.dataValues.categoryTypes = categoryTypes;
     }
 
-    console.log('clusters');
+
     return res.status(201).json({ message: 'create data found ', data: { categories, clusters, sales_channels } });
   } catch (e) {
     logger.error('🔥 error from getDataForCustomerCreate ');
@@ -420,11 +419,11 @@ const createSalesChannels = async (req: Request, res: Response, next: NextFuncti
 const findOneCustomer = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
-  console.log('hedi hiya 5');
+ 
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const { id } = req.params;
-    console.log('iddd', id);
+    
     const itn = await customerMobileServiceInstance.findOne({ customer_code: id });
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
@@ -443,7 +442,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
     const { id } = req.params;
     const { customer_mobile } = req.body;
-    console.log(req.body);
+    
     const cus = await CustomerMobileServiceInstance.update(
       { ...req.body, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { customer_code: id },
@@ -459,13 +458,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const getCustomersOfItinerary = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  itn endpoint');
-  console.log('hedi hiya 3');
+
   try {
     const customerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const { itinerary_code } = req.body;
-    console.log(itinerary_code);
+   
     const itn = await customerItineraryServiceInstance.find({ itinerary_code: itinerary_code });
-    console.log(itn);
+    
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
     logger.error('🔥 error: %o', e);

@@ -33,7 +33,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const allocationDetailServiceInstance = Container.get(AllocationDetailService);
     const lads = await allocationDetailServiceInstance.find({});
-    console.log('here', lads);
+    
     return res.status(200).json({ message: 'fetched succesfully', data: lads });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -64,7 +64,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const allocationDetailServiceInstance = Container.get(AllocationDetailService);
     const lads = await allocationDetailServiceInstance.find({ ...req.body, lad_domain: 'acsiome' });
-    console.log(lads);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: lads });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -77,10 +77,10 @@ const getData = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
 
   try {
-    console.log(req.body);
+
     // const allocationsOrdersServiceInstance = Container.get(allocationsOrdersModel);
     // const allocations = await allocationsOrdersServiceInstance.find({ ...req.body, lad_domain: 'acsiome' });
-    // console.log(allocations);
+   
     return res.status(200).json({ message: 'fetched succesfully', data: null });
   } catch (e) {
     logger.error('🔥 error: %o', e);

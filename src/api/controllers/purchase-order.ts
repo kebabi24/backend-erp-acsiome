@@ -411,7 +411,7 @@ const payPo = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
@@ -446,7 +446,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
@@ -470,7 +470,7 @@ const findAllPo = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
@@ -542,7 +542,7 @@ const findByrange = async (req: Request, res: Response, next: NextFunction) => {
 };
 const getProviderActivity = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
@@ -633,7 +633,7 @@ const getProviderActivity = async (req: Request, res: Response, next: NextFuncti
 
 const getProviderBalance = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
@@ -820,7 +820,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all requisition endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -842,7 +842,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByStat = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all requisition endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -924,7 +924,7 @@ const findAllSite = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     let result = [];
-    console.log(req.body);
+    
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const pos = await purchaseOrderServiceInstance.find({ po_domain: user_domain });
@@ -954,7 +954,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const { id } = req.params;
-    console.log(req.body);
+    
     const purchaseOrder = await purchaseOrderServiceInstance.update(
       { ...req.body, last_modified_by: user_code },
       { id },
@@ -984,7 +984,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const { id } = req.params;
-    console.log(req.body);
+    
     // const purchaseOrder = await purchaseOrderServiceInstance.update(
     //   { ...req.body, last_modified_by: user_code },
     //   { id },
@@ -1035,7 +1035,7 @@ const findAllwithDetailsite = async (req: Request, res: Response, next: NextFunc
   logger.debug('Calling find all purchaseOrder with site endpoint');
   try {
     let result = [];
-    console.log(req.body);
+    
     var site = req.body.site;
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 

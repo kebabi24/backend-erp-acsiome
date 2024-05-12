@@ -46,7 +46,7 @@ const findByPrinter = async (req: Request, res: Response, next: NextFunction) =>
   const logger = Container.get('logger');
   logger.debug('Calling find all user endpoint');
   const { user_domain } = req.headers;
-  console.log(req.body);
+  
   try {
     const printerServiceInstance = Container.get(PrinterService);
     const printers = await printerServiceInstance.findPrinter({ ...req.body });
@@ -61,7 +61,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all user endpoint');
   const { user_domain } = req.headers;
-  console.log(req.body);
+  
   try {
     const printerServiceInstance = Container.get(PrinterService);
     const printers = await printerServiceInstance.findByPrinters({ ...req.body });

@@ -19,7 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   // // Set the text color
   // doc.fillColor('white');
   logger.debug('Calling Create label endpoint');
-  //console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
+  
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
@@ -36,7 +36,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
     const time = new Date().toLocaleTimeString();
-    console.log(req.body);
+    
     // Draw the barcode image on the PDF document
     //doc.image(image, 50, 0, {
     //  fit: [180, 150], // Adjust the size of the barcode image as needed
@@ -102,7 +102,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       },
       function(err, png) {
         if (err) {
-          console.log(err);
+          
           return;
         }
 
@@ -115,12 +115,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
         // Save the PDF document
         filenamepdf = './barcode/' + labelId + '.pdf';
-        console.log('create file');
+   
         doc.pipe(fs.createWriteStream(filenamepdf));
         doc.pipe(fs.createWriteStream('./output12.pdf'));
         doc.end();
         const filePath = './output12.pdf';
         const printerName = req.body.lb_printer;
+       
+       
       },
     );
     setTimeout(() => {
@@ -131,16 +133,19 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           return;
         }
         res.contentType('application/pdf');
-        console.log(data);
+      
         res.send(data);
+        
       });
     }, 2000);
+    
     // return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
     return next(e);
   }
+  
 };
 
 const createlAB = async (req: Request, res: Response, next: NextFunction) => {
@@ -154,7 +159,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
   // // Set the text color
   // doc.fillColor('white');
   logger.debug('Calling Create label endpoint');
-  //console.log('heeeeeeeeeeeeeeeeeeeee', req.body);
+
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
@@ -197,13 +202,13 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
 
   const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
   logger.debug('Calling Create label endpoint');
-  //console.log("heeeeeeeeeeeeeeeeeeeee",req.body)
+
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
     var labelId = null;
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'CAR', seq_type: 'PL' });
-    // console.log(seq);
+    
     labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
@@ -282,7 +287,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
       },
       function(err, png) {
         if (err) {
-          console.log(err);
+          
           return;
         }
 
@@ -305,7 +310,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     printer
       .print(filePath, { printer: printerName })
       .then(() => {
-        console.log('Printing completed.');
+       
       })
       .catch(error => {
         console.error('Error while printing:', error);
@@ -323,13 +328,13 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
 
   logger.debug('Calling Create label endpoint');
-  //console.log("heeeeeeeeeeeeeeeeeeeee",req.body)
+ 
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
     var labelId = null;
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PAL', seq_type: 'PL' });
-    // console.log(seq);
+
     labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
@@ -407,7 +412,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
       },
       function(err, png) {
         if (err) {
-          console.log(err);
+          
           return;
         }
 
@@ -430,7 +435,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     printer
       .print(filePath, { printer: printerName })
       .then(() => {
-        console.log('Printing completed.');
+      
       })
       .catch(error => {
         console.error('Error while printing:', error);
@@ -445,7 +450,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all job endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -468,7 +473,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all job endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -479,7 +484,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
       ...req.body,
       lb_domain: user_domain,
     });
-    //  console.log(label)
+
     return res.status(200).json({
       message: 'fetched succesfully',
       data: label,
@@ -492,7 +497,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const addAllocation = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  //console.log(req.body);
+  //
   logger.debug('Calling find by  all job endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -517,7 +522,7 @@ const addAllocation = async (req: Request, res: Response, next: NextFunction) =>
         },
       );
     }
-    //  console.log(label)
+  
     return res.status(200).json({
       message: 'fetched succesfully',
       data: req.body.wodlot,

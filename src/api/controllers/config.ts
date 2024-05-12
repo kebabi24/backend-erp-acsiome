@@ -25,7 +25,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const configServiceInstance = Container.get(ConfigService)
         const {id} = req.params
-        console.log(id)
+        
         const config = await configServiceInstance.findOne({id})
         return res
             .status(200)
@@ -72,8 +72,8 @@ const{user_domain} = req.headers
     try {
         const configServiceInstance = Container.get(ConfigService)
         const {id} = req.params
-        console.log(id)
-        console.log(req.body)
+        
+        
         const conf = await configServiceInstance.findOne({id:1})
         if (conf) {
             const config = await configServiceInstance.update({...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})

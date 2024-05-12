@@ -33,7 +33,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all PayMeth endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers

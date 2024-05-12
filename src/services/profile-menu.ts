@@ -33,7 +33,7 @@ export default class ProfileMenuService {
         try {
             const profile_menu = await this.profileMenuModel.findAll({ where: query })
             this.logger.silly("find All profiles mobile mstr")
-            //console.log(profiles)
+     
             return profile_menu
         } catch (e) {
             this.logger.error(e)
@@ -53,16 +53,14 @@ export default class ProfileMenuService {
             }
             // tab.forEach(element => {
             //     if(profileMenuBeforeUpdate.includes(element)){
-            //         console.log(element, " il existe dans le menu déjà")
+          
             //     }else{
-            //         console.log(element, " on doit l'ajouter a la base")
+          
             //     }
 
-            //     console.log(element, " on doit le supprimer de la base ")
+
             // })
-            // console.log(profileMenuBeforeUpdate)
-            // console.log(data.menus)
-            // const profile_menu = await this.profileMenuModel.update(data, { where: query })
+          // const profile_menu = await this.profileMenuModel.update(data, { where: query })
             this.logger.silly("update one profile mobile mstr")
             return profile_menu
         } catch (e) {

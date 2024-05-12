@@ -27,7 +27,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const addressServiceInstance = Container.get(AddressService)
         const address = await addressServiceInstance.findOne({...req.body,ad_domain:user_domain})
-      //  console.log(address)
+     
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: address })
@@ -43,7 +43,23 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const addressServiceInstance = Container.get(AddressService)
-        const address = await addressServiceInstance.find({ad_domain:user_domain})
+        const address = await addressServiceInstance.find({ad_domain:user_domain,ad_type:'vendor'})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: address })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+const findAllcustomer = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const addressServiceInstance = Container.get(AddressService)
+        const address = await addressServiceInstance.find({ad_domain:user_domain,ad_type:'customer'})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: address })
@@ -104,6 +120,7 @@ export default {
     create,
     findBy,
     findAll,
+    findAllcustomer,
     update,
     findAllBy,
     findOne

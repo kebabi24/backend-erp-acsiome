@@ -37,7 +37,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find by  all site endpoint")
     const{user_domain} = req.headers
     try {
-        console.log(req.body)
+        
         const subaccountServiceInstance = Container.get(SubaccountService)
         const sub = await subaccountServiceInstance.find({...req.body,sb_domain: user_domain})
         return res
@@ -53,7 +53,7 @@ const findByDet = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find by  all site endpoint")
     const{user_domain} = req.headers
     try {
-        console.log(req.body)
+        
         const subaccountServiceInstance = Container.get(SubaccountService)
         const subaccountDetailServiceInstance = Container.get(
             SubaccountDetailService

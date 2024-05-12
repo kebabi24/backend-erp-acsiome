@@ -225,7 +225,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const{user_code} = req.headers 
   const{user_domain} = req.headers
   try {
-    console.log(req.body);
+    
     const saleShiperServiceInstance = Container.get(SaleShiperService);
     const shiper = await saleShiperServiceInstance.find({ ...req.body, psh_domain: user_domain });
     console.log(shiper);

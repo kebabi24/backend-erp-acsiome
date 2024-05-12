@@ -1094,7 +1094,7 @@ const findVisitBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    // console.log(req.body);
+    // 
     if (req.body.site == '*') {
       var visits = await userMobileServiceInstance.getVisitsBy({
         where: { periode_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -1542,7 +1542,7 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    console.log(req.body);
+    
 
     var invoices = await userMobileServiceInstance.getPaymentsByGroup({
       where: req.body,

@@ -43,7 +43,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const woroutingServiceInstance = Container.get(WoroutingService)
         const ros = await woroutingServiceInstance.find({wr_domain: user_domain})
-        console.log(ros)
+        
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ros })
@@ -59,7 +59,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const { user_domain } = req.headers;
     try {
         const woroutingServiceInstance = Container.get(WoroutingService)
-        console.log(req.body)
+        
         const ros = await woroutingServiceInstance.find({...req.body,wr_domain: user_domain})
         return res
             .status(200)

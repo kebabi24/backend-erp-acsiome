@@ -2,6 +2,7 @@ import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
 import WorkroutingService from '../../services/workrouting';
 import ItemService from '../../services/item';
+import CodeService from '../../services/code';
 import InventoryTransactionService from '../../services/inventory-transaction';
 import OperationHistoryService from "../../services/operation-history"
 import WorkCenterService from "../../services/workcenter"
@@ -35,11 +36,29 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     for (const item of detail) {
       let wolot = 0;
-
+      let draw : any;
+      let ref : any;
+      let rev : any;
+      let batch : any;
+      let grade : any;
+      
+      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: item.wo_part });
+      for(let carac of parts){
+        draw = carac.pt_draw,
+        ref = carac.pt_article,
+        rev = carac.pt_rev,
+        batch = carac.pt_break_cat,
+        grade = carac.pt_group
+      }
       await workOrderServiceInstance
         .create({
           ...item,
           ...it,
+          wo_rev: rev,
+          wo_draw: draw,
+          wo_ref : ref,
+          wo_batch : batch,
+          wo_grade : grade,
           wo_domain: user_domain,
           wo_nbr: nof,
           created_by: user_code,
@@ -91,7 +110,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const sequenceServiceInstance = Container.get(sequenceService);
     const saleOrderDetailServiceInstance =  Container.get(SaleOrderDetailService)
-   //console.log(saleOrders)
+   
    let woids = []
 
     for (const item of detail) {
@@ -110,7 +129,19 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
         {id:sequence.id},
       );
-  
+      let draw : any;
+      let ref : any;
+      let rev : any;
+      let batch : any;
+      let grade : any;
+      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: item.part });
+      for(let carac of parts){
+        draw = carac.pt_draw,
+        ref = carac.pt_article,
+        rev = carac.pt_rev,
+        batch = carac.pt_break_cat,
+        grade = carac.pt_group
+      }
       await workOrderServiceInstance
         .create({
           
@@ -128,6 +159,11 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
           wo_queue_eff: item.queue_eff,
           wo_domain: user_domain,
           wo_nbr: nof,
+          wo_rev: rev,
+          wo_draw: draw,
+          wo_ref : ref,
+          wo_batch : batch,
+          wo_grade : grade,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -171,7 +207,7 @@ const createSoJob = async (req: Request, res: Response, next: NextFunction) => {
  
     }
     }
-       // console.log(woids)
+   
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
   
     return res.status(200).json({ message: 'deleted succesfully', data: wos });
@@ -193,7 +229,7 @@ const createSfJob = async (req: Request, res: Response, next: NextFunction) => {
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
     const sequenceServiceInstance = Container.get(sequenceService);
-   //console.log(detail)
+
    let woids = []
 
     for (const item of detail) {
@@ -212,7 +248,19 @@ const createSfJob = async (req: Request, res: Response, next: NextFunction) => {
         { seq_curr_val: Number(sequence.seq_curr_val) + 1 },
         {id:sequence.id},
       );
-  
+      let draw : any;
+      let ref : any;
+      let rev : any;
+      let batch : any;
+      let grade : any;
+      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: item.part });
+      for(let carac of parts){
+        draw = carac.pt_draw,
+        ref = carac.pt_article,
+        rev = carac.pt_rev,
+        batch = carac.pt_break_cat,
+        grade = carac.pt_group
+      }
       await workOrderServiceInstance
         .create({
           
@@ -229,6 +277,11 @@ const createSfJob = async (req: Request, res: Response, next: NextFunction) => {
           wo_queue_eff: item.queue_eff,
           wo_domain: user_domain,
           wo_nbr: nof,
+          wo_rev: rev,
+          wo_draw: draw,
+          wo_ref : ref,
+          wo_batch : batch,
+          wo_grade : grade,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -264,13 +317,13 @@ const createSfJob = async (req: Request, res: Response, next: NextFunction) => {
  
     }
     
-  //  console.log(date,date1,item.part)
+  
     const wopfs = await workOrderServiceInstance.update(
       { wo__qad01: "SF", last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { wo_rel_date : {[Op.between]: [date, date1]},wo_status:"F" ,wo_domain: user_domain},
     );
  
-       // console.log(woids)
+      
     const wos = await workOrderServiceInstance.find({wo_domain: user_domain, id : woids});
   
     return res.status(200).json({ message: 'deleted succesfully', data: wos });
@@ -285,7 +338,7 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
- // console.log("hnahnahnahnahnahnahnahna")
+
   try {
     const { it, nof } = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
@@ -295,14 +348,33 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
 
   
       let wolot = 0;
-
+      let draw : any;
+      let ref : any;
+      let rev : any;
+      let batch : any;
+      let grade : any;
+      
+      const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: it.wo_part });
+      for(let carac of parts){
+        draw = carac.pt_draw,
+        ref = carac.pt_article,
+        rev = carac.pt_rev,
+        batch = carac.pt_break_cat,
+        grade = carac.pt_group
+      }
+     
       await workOrderServiceInstance
         .create({
           ...it,
           wo_domain: user_domain,
           wo_nbr: nof,
-          wo_type : "BR",
+          wo_type : "DIRECT",
           wo_status: "R",
+          wo_rev: rev,
+          wo_draw: draw,
+          wo_ref : ref,
+          wo_batch : batch,
+          wo_grade : grade,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -353,7 +425,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
     const order_code = req.body.cart.order_code;
     const { usrd_site } = req.body.cart;
     const products = req.body.cart.products;
-   // console.log(products);
+   
     for (const product of products) {
       const { pt_part, pt_qty, pt_bom_code, line } = product;
 
@@ -369,6 +441,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         wo_due_date: new Date(),
         wo_status: 'R',
         wo_site: usrd_site,
+        
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -379,12 +452,12 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
         let ps_parent = product.pt_bom_code;
 
         const ps = await psServiceInstance.find({ ps_parent ,ps_domain: user_domain});
-        //console.log(ps);
+        
         if (ps.length > 0) {
-        //  console.log('ps l dakhel f if', ps);
+  
 
           for (const pss of ps) {
-            // console.log(pss.ps_scrp_pct);
+            
             await workOrderDetailServiceInstance.create({
               wod_domain: user_domain,
               wod_nbr: nbr,
@@ -401,7 +474,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             });
           }
         } else {
-       //   console.log('ps f else', ps);
+   
           await workOrderDetailServiceInstance.create({
             wod_domain: user_domain,
             wod_nbr: nbr,
@@ -417,11 +490,11 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           });
         }
 
-        // console.log(product);
+     
         const supp = product.suppliments;
         for (const s of supp) {
           const s_part = s.pt_part;
-          // console.log(s_part);
+         
           await workOrderDetailServiceInstance.create({
             wod_domain: user_domain,
             wod_nbr: nbr,
@@ -437,7 +510,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
           });
         }
         const sauce = product.sauces;
-       // console.log(sauce);
+       
         for (const sa of sauce) {
           const sa_part = sa.pt_part;
           await workOrderDetailServiceInstance.create({
@@ -470,7 +543,7 @@ const createPosWorkOrder = async (req: Request, res: Response, next: NextFunctio
             );
 
             // const ing_part = g.pt_part;
-            // console.log(ing_part);
+         
             // await workOrderDetailServiceInstance.create({
             //   wod_nbr: req.body.cart.order_code,
             //   wod_lot: wOid.id,
@@ -511,13 +584,21 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
- // console.log(req.headers.origin);
+ 
+  
+  const { user_code } = req.headers;
   const { user_domain } = req.headers;
   logger.debug('Calling find all wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
-    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findOne({ code_domain:user_domain,code_fldname: user_code });
+    if (codes == null) {const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });}
+    else{const wos = await workOrderServiceInstance.find({wo_domain: user_domain,wo_routing: codes.code_value});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });}
+    
+    
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -555,14 +636,23 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-
-  //console.log(req.body);
+  const { user_domain } = req.headers;
+  //
   logger.debug('Calling update one  wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const { id } = req.params;
+     const { id } = req.params;
+    
+    const of = await workOrderServiceInstance.findOne({
+    
+      wo_domain: user_domain,
+      id: id
+    
+  });
+  let diff1 = Number(Number(of.wo_qty_ord) - Number(req.body.wo_qty_comp));
+  let diff2 = Number(Number(req.body.wo_qty_rjct) / Number(Number(req.body.wo_qty_rjct) + Number(req.body.wo_qty_comp)))
     const wo = await workOrderServiceInstance.update(
-      { ...req.body, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { ...req.body, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
     );
     return res.status(200).json({ message: 'fetched succesfully', data: wo });
@@ -600,7 +690,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const operationHistoryServiceInstance = Container.get(OperationHistoryService)
     const workcenterServiceInstance = Container.get(WorkCenterService)
-   // console.log(req.body);
+   // 
      let result=[] 
      let i = 1
     const wos = await workOrderServiceInstance.find({
@@ -662,7 +752,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     }
     
        
-   // console.log("trs",wos.length);
+
    
   //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: result });
@@ -684,7 +774,7 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const operationHistoryServiceInstance = Container.get(OperationHistoryService)
     const workcenterServiceInstance = Container.get(WorkCenterService)
-   // console.log(req.body);
+   // 
      
     const wo = await workOrderServiceInstance.findOne({
     
@@ -734,7 +824,7 @@ const CalcCostWo = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBywo = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  //console.log(req.body);
+  //
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all requisition endpoint');
   try {
@@ -762,14 +852,14 @@ const orders = await workOrderServiceInstance.findSpecial({
   group: ['wo_part' ],
   raw: true,
 });
-//console.log(orders)
+
 let sf = []
 let i = 1
 for (let ord of orders) {
 const ps = await psServiceInstance.findby({ps_parent: ord.wo_part})
 for (let p of ps) {
 
-//console.log(p.ps_comp,p.ps_parent)
+
 }
 for (let p of ps) {
   if(p.item.pt_bom_code != null) {
@@ -789,7 +879,7 @@ if (sfid < 0 ) {
     raw: true,
   });
   qtyonstok = ld[0] ? ld[0].total_qtyoh : 0 
-   //console.log(ld[0].total_qtyoh)
+  
   const wo = await workOrderServiceInstance.findSpecial({
     where: {
       wo_domain:user_domain,
@@ -849,7 +939,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const wos = await workOrderServiceInstance.find({ wo_rel_date : { [Op.between]: [date, date1]} , wo_site: site, wo_type : "BR",wo_domain: user_domain});
-    console.log("wos",wos.length)
+   
     let result = []
     let i = 1
     let obj
@@ -857,19 +947,19 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
     
       const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
       const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
-      console.log(rctwo.length)
+   
     for (let tr of rctwo) {
       ;
-      console.log(tr.item.pt_part)
-    } 
+          } 
     
     
       if(rctwo.length > isswo.length) {
 
         for (var j=0;j< rctwo.length; j++) {
+          
           const labelServiceInstance = Container.get(LabelService);
-          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
-          console.log(isswo[j].tr_ref)
+          // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+
           if(j < isswo.length) {
              obj = {
               id:i,
@@ -884,7 +974,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: orgpal.lb_cust,
+              // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -917,9 +1007,10 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
 
       } else {
         for (var j = 0;j < isswo.length; j++) {
+          
           const labelServiceInstance = Container.get(LabelService);
-          const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
-          console.log(isswo[j].tr_ref)
+          // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+     
           if(j < rctwo.length) {
              obj = {
               id:i,
@@ -934,7 +1025,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : rctwo[j].tr_ref,
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin:orgpal.lb_cust,
+              // issorigin:orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -954,7 +1045,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctpal : "",
               isspart: isswo[j].item.pt_desc1,
               isscolor: isswo[j].item.pt_break_cat,
-              issorigin: orgpal.lb_cust,
+              // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
               issserial : isswo[j].tr_serial,
               isspal : isswo[j].tr_ref,
@@ -969,7 +1060,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
 
     }
     
-    console.log(result)
+
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);

@@ -98,9 +98,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain});
+    const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
    // console.log(locationDetails)
-    return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });
+  
+   {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
+ 
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -205,7 +207,7 @@ const findByOneStatus = async (req: Request, res: Response, next: NextFunction) 
 
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
- // console.log(req.body);
+ // 
   logger.debug('Calling find by  all locationDetail endpoint');
   const { user_code } = req.headers;
     const { user_domain } = req.headers;

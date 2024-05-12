@@ -89,10 +89,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
-  console.log(req.body);
+
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log(user_domain);
+  
   try {
     const affectEmployeServiceInstance = Container.get(AffectEmployeService);
     const employe = await affectEmployeServiceInstance.find({ ...req.body, pme_domain: user_domain });

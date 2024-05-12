@@ -19,7 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const { bank, bankDetails } = req.body;
-    console.log(req.body);
+  
     const bk = await bankServiceInstance.create({
       ...bank,
       bk_domain: user_domain,
@@ -40,7 +40,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       };
       await bankDetailServiceInstance.create(entry);
     }
-    // console.log(bk)
+   
     return res.status(201).json({ message: 'created succesfully', data: bk });
   } catch (e) {
     //#
@@ -57,7 +57,7 @@ const bkhTr = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bkhServiceInstance = Container.get(BkhService);
     const { bank, bankDetails } = req.body;
-    console.log(req.body);
+   
     const bk = await bkhServiceInstance.create({
       bkh_domain: user_domain,
       bkh_effdate: req.body.date,
@@ -71,7 +71,7 @@ const bkhTr = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
 
-    // console.log(bk)
+   
     return res.status(201).json({ message: 'created succesfully', data: bk });
   } catch (e) {
     //#
@@ -99,7 +99,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
       seq_domain: user_domain,
     });
 
-    console.log(user_code);
+    
 
     if (type === 'O') {
       let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
@@ -159,7 +159,7 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
     } else {
-      console.log(user);
+
 
       const currentService = await ServiceInstance.findOne({
         role_code: user_code,
@@ -211,15 +211,15 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           { role_code: user_code, service_open: true, service_domain: user_domain },
         );
       }
-      console.log('avant');
+     
       await SequenceServiceInstance.update(
         { seq_curr_val: 1 },
         { seq_type: 'OF', seq_profile: user, seq_domain: user_domain },
       );
-      console.log('aprés');
+      
     }
 
-    // console.log(bk)
+
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     //#
@@ -247,8 +247,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
     const { cart, type, user_name } = req.body;
 
     const bank = await bankServiceInstance.findOne({ bk_type: type, bk_user1: user_code, bk_domain: user_domain });
-    console.log(bank);
-    console.log(cart);
+  
 
     if (bank) {
       if (cart.products.length > 0) {
@@ -259,7 +258,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
           created_date: cart.created_date,
           usrd_site: cart.usrd_site,
         });
-        console.log(currentOrder.total_price);
+        
         await bankhDetailerviceInstance.create({
           bkh_domain: user_domain,
           bkh_code: bank.bk_code,
@@ -280,7 +279,7 @@ const proccesPayement = async (req: Request, res: Response, next: NextFunction) 
           },
           { bk_type: type, bk_user1: user_name, bk_domain: user_domain },
         );
-        // console.log(cart.order_code, user_name);
+     
         await PosOrderServiceInstance.update(
           {
             status: 'P',
@@ -309,7 +308,7 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
     const PosOrderServiceInstance = Container.get(PosOrder);
     const { mv, type, user_name } = req.body;
 
-    // console.log(user_name);
+    
     const bank = await bankServiceInstance.findOne({ bk_type: 'REG', bk_user1: user_name, bk_domain: user_domain });
     if (bank) {
       await bankhDetailerviceInstance.create({
@@ -331,7 +330,7 @@ const createFRequest = async (req: Request, res: Response, next: NextFunction) =
 
 const findAR = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  // console.log(req.body);
+
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all bank endpoint');
@@ -368,7 +367,7 @@ const findAP = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log(req.body);
+  
   logger.debug('Calling find by  all bank endpoint');
   try {
     const bankServiceInstance = Container.get(BankService);
@@ -408,18 +407,18 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bankServiceInstance = Container.get(BankService);
     const bankDetailServiceInstance = Container.get(BankDetailService);
-    console.log(req.body)
+   
     const bank = await bankServiceInstance.findOne({
       ...req.body,
       bk_domain: user_domain,
     });
-    console.log(bank)
+    
     if (bank) {
       const details = await bankDetailServiceInstance.find({
         bkd_bank: bank.bk_code,
         bkd_domain: user_domain,
       });
-      //  console.log(details)
+   
       return res.status(200).json({
         message: 'fetched succesfully',
         data: { bank, details },
@@ -444,12 +443,12 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bankServiceInstance = Container.get(BankService);
    
-    console.log(req.body)
+   
     const bank = await bankServiceInstance.find({
       ...req.body,
       bk_domain: user_domain,
     });
-    console.log(bank)
+   
     
       return res.status(200).json({
         message: 'fetched succesfully',
@@ -508,10 +507,10 @@ const findAllDetails = async (req: Request, res: Response, next: NextFunction) =
   const { user_domain } = req.headers;
   logger.debug('Calling find all bank endpoint');
   try {
-    console.log(req.body);
+    
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const details = await bankDetailServiceInstance.find({ ...req.body, bkd_domain: user_domain });
-    //  console.log(details)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: details });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -525,10 +524,10 @@ const findBkByUser = async (req: Request, res: Response, next: NextFunction) => 
   const { user_domain } = req.headers;
   logger.debug('Calling find all bank endpoint');
   try {
-    console.log(req.body);
+   
     const bankServiceInstance = Container.get(BankService);
     const details = await bankServiceInstance.find({ ...req.body, bk_domain: user_domain });
-    //  console.log(details)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: details });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -576,7 +575,7 @@ const updatedet = async (req: Request, res: Response, next: NextFunction) => {
     const bankDetailServiceInstance = Container.get(BankDetailService);
     const { id } = req.params;
     const { bankdet } = req.body;
-    console.log(bankdet);
+    
     const bankdets = await bankDetailServiceInstance.update(
       { ...bankdet, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
@@ -614,7 +613,7 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
         // const effdate = new Date(ord.bkh_effdate);
         // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
         // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
-        // console.log(parttypes,groups,promos)
+      
         result.push({
           id: i,
           effdate: ord.bkh_effdate,
@@ -637,8 +636,8 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
     }
   } else {
     try {
-      // console.log(req.body)
-      console.log(req.body.date1);
+   
+      
       const orders = await bkhServiceInstance.findq({
         where: {
           bkh_effdate: { [Op.between]: [req.body.date, req.body.date1] },
@@ -656,7 +655,7 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
       for (let ord of orders) {
         // const groups = await codeServiceInstance.findOne({ code_fldname: 'pt_group', code_value: items.pt_group });
         // const promos = await codeServiceInstance.findOne({ code_fldname: 'pt_promo', code_value: items.pt_promo });
-        // console.log(parttypes,groups,promos)
+      
         result.push({
           id: i,
           effdate: ord.bkh_effdate,
@@ -673,7 +672,6 @@ const findBkhGrp = async (req: Request, res: Response, next: NextFunction) => {
         i = i + 1;
       }
 
-      //console.log(result)
       return res.status(200).json({ message: 'fetched succesfully', data: result });
     } catch (e) {
       logger.error('🔥 error: %o', e);
@@ -691,7 +689,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const bankServiceInstance = Container.get(BankService);
     
-    console.log(req.body);
+   
     const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
     const bk = await bkhServiceInstance.create({
       bkh_domain: user_domain,
@@ -719,7 +717,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
       },
       {id: banks.id},
     );
-    // console.log(bk)
+   
     return res.status(201).json({ message: 'created succesfully', data: bk });
   } catch (e) {
     //#
@@ -736,7 +734,7 @@ const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const bankServiceInstance = Container.get(BankService);
     
-    console.log(req.body);
+  
     const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
     const bk = await bkhServiceInstance.create({
       bkh_domain: user_domain,
@@ -788,11 +786,11 @@ const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
 
     await bankServiceInstance.update(
       {
-        bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
+        bk_balance: Number(bankdets.bk_balance) + Number(req.body.amt_tr),
       },
       {id: bankdets.id},
     );
-    // console.log(bk)
+
     return res.status(201).json({ message: 'created succesfully', data: bk });
   } catch (e) {
     //#
@@ -807,7 +805,7 @@ const findBKHBy = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   logger.debug('Calling find by  all bank endpoint');
   try {
-   // console.log(req.body)
+
     const bkhServiceInstance = Container.get(BkhService);
    
    

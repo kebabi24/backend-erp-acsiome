@@ -33,7 +33,7 @@ const{user_domain} = req.headers
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     
@@ -60,7 +60,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 }
 /*const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
-    console.log(req.body);
+    
     logger.debug('Calling find by  all quote endpoint');
     try {
       const quoteOrderServiceInstance = Container.get(QuoteOrderService);
@@ -88,7 +88,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   */
  const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     const{user_code} = req.headers 
     const{user_domain} = req.headers
     
@@ -177,7 +177,7 @@ const{user_domain} = req.headers
     try {
         const quoteOrderServiceInstance = Container.get(QuoteOrderService)
         const { id } = req.params
-        console.log(req.body)
+        
         const quote = await quoteOrderServiceInstance.update(
             { ...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
             { id }

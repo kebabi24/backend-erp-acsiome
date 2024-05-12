@@ -13,7 +13,7 @@ const createStandardSpecification = async (req: Request, res: Response, next: Ne
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
     const specificationService = Container.get(QualityControlService);
-    // console.log(req.body)
+    // 
 
     const standardSpecificationHeader = req.body.standardSpecificationHeader;
     const standardSpecificationDetails = req.body.standardSpecificationDetails;
@@ -123,7 +123,7 @@ const createTestsHistory = async (req: Request, res: Response, next: NextFunctio
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
     const specificationService = Container.get(QualityControlService);
-    // console.log(req.body)
+    // 
 
     const testsHistory = req.body.testsHistory;
     // console.log(standardSpecificationHeader.mp_expire)
@@ -197,7 +197,7 @@ const addIdentificationData = async (req: Request, res: Response, next: NextFunc
 
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
-    console.log(req.body);
+    
 
     return res.status(201).json({ message: 'created succesfully', data: null });
   } catch (e) {
@@ -311,7 +311,7 @@ const findQualityInspectionRouting = async (req: Request, res: Response, next: N
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
     const specificationService = Container.get(QualityControlService);
-    // console.log(req.body)
+    // 
 
     const {ipData ,ipdsData} = req.body;
     const{user_domain} = req.headers

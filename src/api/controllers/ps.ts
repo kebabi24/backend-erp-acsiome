@@ -18,6 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { detail, it } = req.body;
     const psServiceInstance = Container.get(PsService);
 
+    console.log(detail)
     for (const item of detail) {
       await psServiceInstance.create({
         ...item,
@@ -115,7 +116,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const psServiceInstance = Container.get(PsService);
     const itemServiceInstance = Container.get(ItemService);
     const ldServiceInstance = Container.get(LocationDetailService);
-    //console.log(req.body);
+    //
     const result = [];
     var j = 1;
     for (let obj of details) {
@@ -259,7 +260,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const findPrice = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all task endpoint');
   const{user_code} = req.headers 
   const{user_domain} = req.headers
@@ -271,7 +272,7 @@ const findPrice = async (req: Request, res: Response, next: NextFunction) => {
     const ps = await psServiceInstance.find({
       ...req.body,ps_domain:user_domain
     });
-    
+    console.log("ps",ps)
     for (let entry of ps) {
       const sct = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,

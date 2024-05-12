@@ -47,7 +47,7 @@ export default class psService {
       //     type: QueryTypes.SELECT,
       //   },
       // );
-      // console.log(t);
+    
       this.logger.silly('find All pss mstr');
 
       return pss;
@@ -72,7 +72,7 @@ export default class psService {
       //     type: QueryTypes.SELECT,
       //   },
       // );
-      // console.log(t);
+   
       this.logger.silly('find All pss mstr');
 
       return pss;

@@ -41,11 +41,11 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     logger.debug("Calling find all doctor endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-console.log("herrrrrrrrrrrrrrrre")
+
     try {
         const doctorServiceInstance = Container.get(DoctorService)
         const doctors = await doctorServiceInstance.find({doc_domain:user_domain})
-        console.log(doctors)
+        
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: doctors })
@@ -101,7 +101,7 @@ const{user_domain} = req.headers
     try {
         const doctorServiceInstance = Container.get(DoctorService)
         const {id} = req.params
-        console.log(id)
+        
         const doctor = await doctorServiceInstance.update({...req.body,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
         return res
             .status(200)

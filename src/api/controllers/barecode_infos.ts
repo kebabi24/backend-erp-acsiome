@@ -44,7 +44,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const barecodeInfosServiceInstance = Container.get(barecodeInfosService);
     const barecodeinfos = await barecodeInfosServiceInstance.find({});
-    console.log("here", barecodeinfos)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: barecodeinfos });
   } catch (e) {
     logger.error('🔥 error: %o', e);

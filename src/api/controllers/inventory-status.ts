@@ -44,8 +44,7 @@ const createIsm = async (req: Request, res: Response, next: NextFunction) => {
             InventoryStatusMouvementService
         )
         const { Status,inventoryStatusMouvement } = req.body
-        console.log(Status)
-        console.log(inventoryStatusMouvement)
+        
         await inventoryStatusMouvementServiceInstance.delete({ism_loc_start:Status.ism_loc_start, ism_loc_end:Status.ism_loc_end,ism_domain:user_domain})
         for (let entry of inventoryStatusMouvement) {
             entry = { ...entry, ism_loc_start:Status.ism_loc_start,ism_loc_end:Status.ism_loc_end, ism_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code }
@@ -63,7 +62,7 @@ const createIsm = async (req: Request, res: Response, next: NextFunction) => {
 
 const findByIsm = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all inventoryStatus endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
@@ -85,7 +84,7 @@ const findByIsm = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
-    console.log(req.body)
+    
     logger.debug("Calling find by  all inventoryStatus endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
@@ -218,12 +217,12 @@ const findInstanceStatus = async (req: Request, res: Response, next: NextFunctio
     try {
         const inventoryStatusServiceInstance = Container.get(InventoryStatusService)
         const status = await inventoryStatusServiceInstance.find({is_frozen:false,is_domain:user_domain})
-       // console.log("status",status)
+       
         var datas = [];
         for (let stat of status) {
           datas.push({ value: stat.is_status, label: stat.is_desc });
         }
-        console.log(datas)
+        
         return res.status(200).json(datas);
     } catch (e) {
       logger.error('🔥 error: %o', e);

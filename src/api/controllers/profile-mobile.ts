@@ -98,7 +98,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{profile_name} = req.headers
     const {profile, menus} = req.body
-    //console.log(req.body)
+    //
     logger.debug("Calling update one  profile endpoint")
     try {
         const profileMobileServiceInstance = Container.get(ProfileMobileService)

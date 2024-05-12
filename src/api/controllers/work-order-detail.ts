@@ -34,7 +34,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       );
     const wrs = await woroutingServiceInstance.find({ wr_domain: user_domain,wr_lot: req.body._wod.wod_lot });
     for (const wr of wrs) {
-     // console.log(wr);
+    
       await woroutingServiceInstance.update(
         {
           wr_status: 'R',
@@ -48,7 +48,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     for (const item of req.body.detail) {
-     // console.log(item.wod_um);
+    
       await workOrderDetailServiceInstance.create({
         ...item,
         ...req.body._wod,
@@ -93,9 +93,9 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
   const products = req.body.cart.products;
   const cart = req.body.cart;
   const { usrd_site } = req.body.cart.usrd_site;
-  //console.log(req.body);
+  //
   const id = req.body.cart.id;
- // console.log(id);
+ 
   logger.debug('Calling Create workOrderDetail endpoint');
   try {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
@@ -104,10 +104,10 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
     for (const product of products) {
       const id = await workOrderServiceInstance.findOne({ wo_domain: user_domain,wo_nbr: cart.order_code, wo_lot: product.line });
       let ps_parent = product.pt_bom_code;
-     // console.log(product);
+   
       const ps = await psServiceInstance.find({ ps_parent,ps_domain: user_domain });
       for (const pss of ps) {
-       // console.log(cart);
+    
         const workOrderDetail = await workOrderDetailServiceInstance.create({
           wod_domain: user_domain,
           wod_nbr: req.body.cart.order_code,
@@ -125,7 +125,7 @@ const createWodPos = async (req: Request, res: Response, next: NextFunction) => 
       //   const pss = ps.forEach(element => {
       //     return element.ps_parent;
       //   });
-      //   console.log(pss);
+  
     }
 
     //  const workOrderDetail = await workOrderDetailServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
@@ -144,7 +144,7 @@ const ReleaseWo = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
  
-  // console.log(id);
+
   logger.debug('Calling Create workOrderDetail endpoint');
   try {
     const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService);
@@ -163,7 +163,7 @@ const ReleaseWo = async (req: Request, res: Response, next: NextFunction) => {
     );
   const wrs = await woroutingServiceInstance.find({ wr_domain: user_domain,wr_lot: req.body._wod.wod_lot });
   for (const wr of wrs) {
-   // console.log(wr);
+
     await woroutingServiceInstance.update(
       {
         wr_status: 'R',
@@ -177,7 +177,7 @@ const ReleaseWo = async (req: Request, res: Response, next: NextFunction) => {
   }
 
     for (const item of req.body.detail) {
-      // console.log(item.wod_um);
+     
        await workOrderDetailServiceInstance.create({
          ...item,
          ...req.body._wod,
@@ -191,7 +191,7 @@ const ReleaseWo = async (req: Request, res: Response, next: NextFunction) => {
       //   const pss = ps.forEach(element => {
       //     return element.ps_parent;
       //   });
-      //   console.log(pss);
+     
     }
 
     //  const workOrderDetail = await workOrderDetailServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})

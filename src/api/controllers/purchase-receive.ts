@@ -115,9 +115,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       ].prh_rcvd += value.prh_rcvd;
       return res;
     }, {});
-    console.log('here');
+    console.log('here CREATE');
     console.log(result);
-    console.log('here');
+    console.log('here CREATE END');
 
     var i = 1;
     for (const arr of result) {
@@ -230,7 +230,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         ld_part: remain.prh_part,
         ld_site: req.body.pr.prh_site,
       });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+      const  sct_mtl_tl  = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
@@ -246,16 +246,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       lds.map(elem => {
         qty += Number(elem.ld_qty_oh);
       });
+      console.log('calcul mnt')
+      
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
-          (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
-            Number(remain.prh_pur_cost) *
-            Number(req.body.pr.prh_ex_rate2)) /
-            Number(req.body.pr.prh_ex_rate)) /
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
+          (Number(remain.prh_rcvd) * Number(remain.prh_pur_cost) * Number(req.body.pr.prh_ex_rate2)) / Number(req.body.pr.prh_ex_rate)) /
           (qty + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
         2,
       );
+      console.log(new_price)
       await costSimulationServiceInstance.update(
         {
           sct_mtl_tl: new_price,
@@ -347,7 +346,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
         /****print label**** */
         const imagePath = './logo.png';
-        console.log(req.body);
+        
         // Set the options for the image
         const imageOptions = {
           fit: [150, 150], // Size of the image
@@ -681,7 +680,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
         ld_part: remain.prh_part,
         ld_site: req.body.pr.prh_site,
       });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+      const sct_mtl_tl  = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
@@ -698,9 +697,9 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
         qty += Number(elem.ld_qty_oh);
       });
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
           (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
+           
             Number(remain.prh_pur_cost) *
             Number(req.body.pr.prh_ex_rate2)) /
             Number(req.body.pr.prh_ex_rate)) /
@@ -964,6 +963,7 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
       //     { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
       //   );
       // }
+      
       await inventoryTransactionServiceInstance.create({
         tr_domain: user_domain,
         tr_status,
@@ -972,6 +972,7 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
         tr_line: remain.prh_line,
         tr_part: remain.prh_part,
         tr_qty_loc: remain.prh_rcvd,
+        
         tr_um: remain.prh_um,
         tr_um_conv: remain.prh_um_conv,
         tr_price: remain.prh_pur_cost,
@@ -1010,7 +1011,7 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
         ld_part: remain.prh_part,
         ld_site: req.body.pr.prh_site,
       });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+      const  sct_mtl_tl  = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.prh_part,
         sct_site: req.body.pr.prh_site,
@@ -1027,9 +1028,9 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
         qty += Number(elem.ld_qty_oh);
       });
       const new_price = round(
-        (qty * Number(sct_mtl_tl) +
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
           (Number(remain.prh_rcvd) *
-            Number(remain.prh_um_conv) *
+           
             Number(remain.prh_pur_cost) *
             Number(req.body.pr.prh_ex_rate2)) /
             Number(req.body.pr.prh_ex_rate)) /
@@ -1181,7 +1182,18 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         },
         { id: pod.id },
       );
-
+      const locbegin = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
+        ld_part: po.pod_part,
+        ld_lot: po.pod_serial,
+        ld_site: po.pod_site,
+        ld_loc: po.pod_loc,
+        
+        
+      });
+      console.log('locbegin',locbegin.ld_qty_oh)
+      let qtybegin = 0;
+      if (locbegin){qtybegin = locbegin.ld_qty_oh}
       await inventoryTransactionServiceInstance.create({
         tr_domain: user_domain,
         tr_status: null,
@@ -1189,6 +1201,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         tr_line: po.pod_line,
         tr_part: po.pod_part,
         tr_qty_loc: po.pod_qty_rcvd,
+        tr_loc_begin:qtybegin,
         tr_um: po.item.pt_um,
         tr_um_conv: 1,
         tr_price: po.pod_price,
@@ -1223,7 +1236,7 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         ld_part: po.pod_part,
         ld_site: po.pod_site,
       });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({
+      const  sct_mtl_tl  = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: po.pod_part,
         sct_site: po.pod_site,
@@ -1239,8 +1252,9 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
       lds.map(elem => {
         qty += Number(elem.ld_qty_oh);
       });
+      console.log(po.pod_price,po.pod_qty_rcvd)
       const new_price = round(
-        qty * Number(sct_mtl_tl) + Number(po.pod_qty_rcvd) * Number(po.pod_price) * (qty + Number(po.pod_qty_rcvd)),
+        qty * Number(sct_mtl_tl.sct_cst_tot) + Number(po.pod_qty_rcvd) * Number(po.pod_price) * (qty + Number(po.pod_qty_rcvd)),
       );
       await costSimulationServiceInstance.update(
         {

@@ -49,7 +49,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const workroutingServiceInstance = Container.get(WorkRoutingService)
         const ros = await workroutingServiceInstance.find({ro_domain: user_domain})
-        console.log(ros)
+       
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ros })
@@ -93,20 +93,20 @@ const findAlldistinct = async (req: Request, res: Response, next: NextFunction) 
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
     const { user_domain } = req.headers;
-    console.log("hdkbevfhgevfe", user_domain)
+
     logger.debug("Calling find all purchaseOrder endpoint")
     try {
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
         const ros =await sequelize.query('SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc ,  PUBLIC.ro_det.ro_wkctr FROM   PUBLIC.ro_det where PUBLIC.ro_det.ro_domain = ?',   {replacements: [user_domain], type: QueryTypes.SELECT });
-        console.log(ros)
+        
         let id = 1;
         for(const ro of ros){
             result.push({id:id, ro_routing: ro.ro_routing, ro_desc: ro.ro_desc, ro_wkctr:ro.ro_wkctr})
             id = id + 1;    
         }
-        console.log(result)
+
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: result })
@@ -157,7 +157,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all code endpoint")
     const { user_domain } = req.headers;
-  //  console.log(req.body)
+  //  
     try {
         const workroutingServiceInstance = Container.get(WorkRoutingService)
         const workCenterServiceInstance = Container.get(WorkCenterService)
@@ -173,7 +173,6 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1
     for (let ro of ros) {
 
-       // console.log(ro.ro_routing)
        
 
 
@@ -192,7 +191,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
               lbr_tl = lbr_tl + ( (1 / Number(rop.ro_run) * Number(wc.wc_lbr_rate) * Number(wc.wc_men_mch) ) + ((Number(rop.ro_setup)/ Number(item.pt_ord_qty)) * Number(wc.wc_setup_rte) * Number(wc.wc_setup_men)))
               bdn_tl = bdn_tl + ( (1/ Number(rop.ro_run)) + (Number(rop.ro_setup)) / Number(item.pt_ord_qty)*Number(wc.wc_bdn_rate))        
         }
-            console.log(item.pt_part,item.pt_routing )
+            
             const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
             if (scts!= null) {  old_lbr = scts.sct_lbr_tl 
             old_bdn = scts.sct_bdn_tl} 
@@ -208,7 +207,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     //     var old_lbr = 0
     //     var old_bdn = 0 
     //   for (let item of items) {
-    //       console.log(item.pt_part,item.pt_routing )
+   
     //       const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: req.body.site,sct_part:item.pt_part, sct_sim:req.body.type})
     //       if (scts!= null) {  old_lbr = scts.sct_lbr_tl 
     //      old_bdn = scts.sct_bdn_tl} 
@@ -217,7 +216,7 @@ const CalcCost = async (req: Request, res: Response, next: NextFunction) => {
     //   }
 
     }
-      //  console.log("herehere",result)
+   
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: result })
@@ -234,13 +233,13 @@ const UpdateRoCost = async (req: Request, res: Response, next: NextFunction) => 
     const { user_domain } = req.headers;
     const { user_code } = req.headers;
     const { Detail } = req.body;
-   // console.log(req.body)
+   // 
    
     try {
            const costSimulationServiceInstance = Container.get(costSimulationService)
         
            for (let entry of Detail) {
-            console.log(entry)
+          
             const scts = await costSimulationServiceInstance.findOne({sct_domain:user_domain,sct_site: entry.site,sct_part:entry.part, sct_sim:entry.sim})
             if (scts) {
                 const sct = await costSimulationServiceInstance.update({
@@ -259,7 +258,7 @@ const UpdateRoCost = async (req: Request, res: Response, next: NextFunction) => 
             }
         
            }
-      //  console.log("herehere",result)
+
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: "true" })

@@ -80,7 +80,7 @@ const{user_domain} = req.headers
 
   logger.debug("Calling Create sequence endpoint")
   try {
-      console.log(req.body)
+      
       const tagServiceInstance = Container.get(TagService);
       const itemService = Container.get(ItemService);
       const locationDetailServiceInstance = Container.get(locationDetailService);
@@ -108,7 +108,7 @@ const{user_domain} = req.headers
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all tag endpoint');
   const{user_domain} = req.headers
   try {
@@ -128,7 +128,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
 };
 const findByLastId = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const{user_domain} = req.headers
   logger.debug('Calling find by  all tag endpoint');
   try {
@@ -147,7 +147,7 @@ const findByLastId = async (req: Request, res: Response, next: NextFunction) => 
 
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all tag endpoint');
   const{user_domain} = req.headers
   try {
@@ -208,7 +208,7 @@ const{user_domain} = req.headers
     const tagServiceInstance = Container.get(TagService);
     const { id } = req.params;
     console.log(req.params)
-    console.log(req.body);
+    
     const tag = await tagServiceInstance.update({ ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin}, { id });
     return res.status(200).json({ message: 'fetched succesfully', data: tag });
   } catch (e) {
@@ -226,7 +226,7 @@ const{user_domain} = req.headers
     const tagServiceInstance = Container.get(TagService);
     const { id } = req.params;
     console.log(req.params)
-    console.log(req.body);
+    
     const tag = await tagServiceInstance.reupdate({ ...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id });
     return res.status(200).json({ message: 'fetched succesfully', data: tag });
   } catch (e) {
@@ -238,7 +238,7 @@ const{user_domain} = req.headers
 
 const gap = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   logger.debug('Calling find by  all tag endpoint');
   const{user_domain} = req.headers
   try {
@@ -327,7 +327,7 @@ const{user_domain} = req.headers
 
 const validateTag = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  console.log(req.body);
+  
   const{user_code} = req.headers 
 const{user_domain} = req.headers
 

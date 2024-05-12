@@ -106,13 +106,13 @@ export default class projectService {
         where: query,
       });
       for (const emp of project_details) {
-        console.log(emp.dataValues.pme_employe);
+       
         const empData = await this.employeModel.findOne({
           where: { emp_addr: emp.dataValues.pme_employe },
         });
         emp.dataValues.emp_fname = empData.dataValues.emp_fname;
         emp.dataValues.emp_lname = empData.dataValues.emp_lname;
-        console.log(empData);
+       
       }
 
       this.logger.silly('find All project_details ');
