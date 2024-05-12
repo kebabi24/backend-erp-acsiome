@@ -18,6 +18,7 @@ export default (app: Router) => {
   route.get('/findLoadRequest20Details/:load_request_code', controller.findAllLoadRequest20Details);
   route.get('/findLoadRequestLinesDetails/:load_request_code', controller.findAllLoadRequestLinesDetails);
   route.get('/getLoadRequestInfo/:load_request_code', controller.getLoadRequestInfo);
+  route.get('/getLoadRequestLineInfo/:load_request_code', controller.getLoadRequestLineInfo);
   route.post('/findLoadRequestsDates/', controller.findLoadRequestsBetweenDates);
   route.post('/findLoadRequests40/', controller.findAllLoadRequeusts40);
   route.post('/updateLoadRequest/', controller.updateLoadRequestStauts10);
@@ -25,6 +26,7 @@ export default (app: Router) => {
   route.post('/findLostProduct/', controller.findLotsOfProduct);
   route.post('/findLostProduct2/', controller.findLotsOfProduct2);
   route.post('/createLoadRequestDetails/', controller.createLoadRequestDetails);
+  route.post('/createLoadRequestDetailsScan/', controller.createLoadRequestDetailsScan);
   route.post('/createLoadRequestDetailsStatus/', controller.createLoadRequestDetailsChangeStatus);
   route.post('/createLoadRequestAndLines/', controller.createLoadRequestAndLines);
   route.post('/LoadRequestLinesdif/', controller.findAllLoadRequestLinesDifference);

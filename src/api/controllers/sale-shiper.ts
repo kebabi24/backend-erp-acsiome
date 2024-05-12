@@ -145,22 +145,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     //const {as, pshnbr} = req.body; as is undefined
     const { detail, ps, pshnbr, tot } = req.body;
-    console.log('\n\n ps ', ps);
-    const addressServiceInstance = Container.get(AddressService);
-    const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: ps.psh_cust });
+    // console.log('\n\n ps ', ps);
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: ps.psh_cust });
 
-    const pdfData = {
-      detail: detail,
-      ps: ps,
-      pshnbr: pshnbr,
-      adr: addr,
-      tot: tot,
-    };
-    console.log(pdfData);
-    let pdf = await generatePdf(pdfData, 'psh');
+    // const pdfData = {
+    //   detail: detail,
+    //   ps: ps,
+    //   pshnbr: pshnbr,
+    //   adr: addr,
+    //   tot: tot,
+    // };
+    // console.log(pdfData);
+    // let pdf = await generatePdf(pdfData, 'psh');
 
     // const shiper = await saleShiperServiceInstance.create(req.body)
-    return res.status(201).json({ message: 'created succesfully', data: req.body.pshnbr, pdf: pdf.content });
+    return res.status(201).json({ message: 'created succesfully', data: req.body.pshnbr,/* pdf: pdf.content*/ });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);

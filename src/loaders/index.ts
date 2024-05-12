@@ -360,7 +360,7 @@ export default async ({ expressApp }) => {
   );
   require('../models/mobile_models/role_itinerary').default.hasOne(
     require('../models/mobile_models/itinerary').default,
-    { foreignKey: 'itinerary_code', targetKey: 'itinerary_code' },
+    { foreignKey: 'itinerary_code', sourceKey: 'itinerary_code' },
   );
 
   // 03 / 12 / 2022 NEW RELATIONS
@@ -608,15 +608,14 @@ export default async ({ expressApp }) => {
     sourceKey: 'ld_part',
   });
 
-  // require('../models/item').default.hasOne(require('../models/mobile_models/load_request_line').default, {
-  //   foreignKey: 'product_code',
-  //   sourceKey: 'pt_part',
-  // });
-  // require('../models/mobile_models/load_request_line').default.hasOne(require('../models/item').default, {
-  //   foreignKey: 'product_code',
-  //   targetKey: 'pt_part',
-  // });
-  
+  require('../models/item').default.hasMany(require('../models/mobile_models/load_request_line').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  require('../models/mobile_models/load_request_line').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
+  });
 
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
@@ -1108,7 +1107,7 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   // await sequelizeConnection.sync();
-  // await sequelizeConnection
+  //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {
   //     console.log('database updated');

@@ -159,4 +159,16 @@ export default class ServiceMobileService {
       throw e;
     }
   }
+  public async findAllServices(query: any): Promise<any> {
+    try {
+      // const service = await this.serviceMobileModel.findAll({ where: query })
+      const service = await this.serviceMobileModel.findAll(query);
+      this.logger.silly('find All service mobile mstr');
+      return service;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+ 
 }

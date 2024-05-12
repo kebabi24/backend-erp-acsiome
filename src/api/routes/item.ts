@@ -16,6 +16,7 @@ export default (app: Router) => {
   route.get('/:id', controller.findOne);
   route.post('/findprod', controller.findProd);
   route.post('/stk', controller.findAllwithstk);
+  route.post('/itemstk', controller.findAllItemswithstk);
   route.put('/:id', controller.update);
   route.post('/calccmp', controller.CalcCmp);
   route.post('/findlast', controller.findlast);

@@ -210,7 +210,7 @@ export default class LoadRequestService {
       // console.log(qntValidated);
       const qt_validated = qntValidated;
       const loadRequestLine = await this.loadRequestLineModel.update(
-        { qt_validated: qt_validated },
+        { qt_validated: qt_validated, /*qt_effected: qt_validated */},
         { where: { load_request_code: load_request_code, product_code: product_code } },
       );
 
@@ -229,6 +229,7 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const qt_validated = qntValidated;
+      console.log("hounahounahouna",load_request_code,product_code,qntValidated)
       const lineQt = await this.loadRequestLineModel.findOne({
         where: { load_request_code: load_request_code, product_code: product_code },
       });
@@ -272,8 +273,8 @@ export default class LoadRequestService {
   public async createLoadRequestLine(
     load_request_code: any,
     product_code: any,
-    qntValidated: any,
     qntRequested: any,
+    qntValidated: any,
     productPrice: any,
   ): Promise<any> {
     try {
@@ -281,7 +282,7 @@ export default class LoadRequestService {
         date_creation: new Date(),
         load_request_code: load_request_code,
         product_code: product_code,
-        qt_request: qntRequested,
+        qt_request: 0, //qntRequested,
         qt_validated: qntValidated,
         qt_effected: 0,
         pt_price: productPrice,
@@ -313,6 +314,27 @@ export default class LoadRequestService {
   public async findLoadRequest(query: any): Promise<any> {
     try {
       const loadRequest = await this.loadReuestModel.findOne({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findLoadRequestLines(query: any): Promise<any> {
+    let load_request_code = query.load_request_code;
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({
+        where: { load_request_code: load_request_code },
+        include: [
+          {
+            model: this.itemModel,
+            required: false,
+
+            attributes: ['pt_desc1', 'pt_desc2'],
+          },
+        ],
+      });
       this.logger.silly('find one loadRequest');
       return loadRequest;
     } catch (e) {
@@ -528,7 +550,7 @@ export default class LoadRequestService {
           // GET PRODUCT QUANTITY STORED
           // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
           // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
-          console.log('loc from : ' + load_request.role_loc_from);
+          //console.log('loc from : ' + load_request.role_loc_from);
           const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from, site, product.pt_part);
 
           // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES
@@ -667,7 +689,7 @@ export default class LoadRequestService {
           // GET PRODUCT QUANTITY STORED
           // const sum = await this.getStoredQuantityOfProduct(load_request.role_loc,load_request.role_site,product.pt_part)
           // const sum = await this.getStoredQuantityOfProduct(loc,site,product.pt_part)
-          console.log('loc from : ' + load_request.role_loc_from);
+ //         console.log('loc from : ' + load_request.role_loc_from);
           const sum = await this.getStoredQuantityOfProduct(load_request.role_loc_from, site, product.pt_part);
 
           // CHECK IF PRODUCT EXIST IN LOAD REQUEST LINES
@@ -693,18 +715,17 @@ export default class LoadRequestService {
             let qt_eff = 0;
             for (const element of details) {
               // const qnt = await this.getProductQuantityPerLot(loc,site,element.product_code,element.dataValues.lot )
-              // const qnt = await this.getProductQuantityPerLot(
-              //   load_request.role_loc_from,
-              //   site,
-              //   element.product_code,
-              //   element.dataValues.lot,
-              // );
-              // console.log(qnt);
+              const qnt = await this.getProductQuantityPerLot2(
+                load_request_code,
+                element.dataValues.ld_lot,
+                element.dataValues.ld_part,
+              );
+              console.log('qnt', qnt);
               lots.push({
                 lot_code: element.dataValues.ld_lot,
                 qnt_lot: element.dataValues.ld_qty_oh,
                 qt_effected: 0,
-                qt_preeffected: 0,
+                qt_preeffected: qnt === null ? 0 : qnt.dataValues.qt_effected,
                 ld_status: element.dataValues.ld_status,
                 ld_expire: element.dataValues.ld_expire,
               });
@@ -783,6 +804,8 @@ export default class LoadRequestService {
 
   public async updateLoadRequestStatusToX(load_request_codes: any, x: any): Promise<any> {
     try {
+      console.log('xxxxxxxxxxxxxxxxx', x);
+      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
       const loadRequest = await this.loadReuestModel.update(
         { status: x },
         { where: { load_request_code: load_request_codes } },
@@ -896,6 +919,26 @@ export default class LoadRequestService {
           ld_lot: lot,
         },
         attributes: ['ld_qty_oh', 'ld_status', 'ld_expire'],
+      });
+
+      this.logger.silly('quantity sum calculated');
+      return quanity;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  public async getProductQuantityPerLot2(load_request_code: any, lot: any, product_code: any): Promise<any> {
+    try {
+      // console.log("loc :" + ld_loc +"\t site:" + ld_site + "\tcode : "+ product_code )
+      const quanity = await this.loadRequestDetailsModel.findOne({
+        where: {
+          load_request_code: load_request_code,
+          lot: lot,
+          product_code: product_code,
+        },
+        attributes: ['qt_effected'],
       });
 
       this.logger.silly('quantity sum calculated');
@@ -1042,12 +1085,15 @@ export default class LoadRequestService {
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],
-        order: [['rank', 'ASC']],
+        order: [
+          ['rank', 'ASC'],
+          [this.productPageDetailsModel, 'rank', 'ASC'],
+        ],
         include: [
           {
             model: this.productPageDetailsModel,
             required: true,
-            order: [['rank', 'ASC']],
+            // order: [['rank', 'ASC']],
             attributes: ['product_code'],
             include: [
               {
@@ -1098,16 +1144,19 @@ export default class LoadRequestService {
         where: { role_code: role_code },
         include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
       });
-      console.log(role_codes);
+      // console.log(role_codes);
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],
-        order: [['rank', 'ASC']],
+        order: [
+          ['rank', 'ASC'],
+          [this.productPageDetailsModel, 'rank', 'ASC'],
+        ],
         include: [
           {
             model: this.productPageDetailsModel,
             required: true,
-            order: [['rank', 'ASC']],
+            // order: [['rank', 'ASC']],
             attributes: ['product_code'],
             include: [
               {
@@ -1123,7 +1172,7 @@ export default class LoadRequestService {
                   {
                     model: this.locationDetailModel,
                     required: false,
-                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc },
+                    where: { ld_site: role_codes.role_site, ld_loc: role_codes.role_loc, ld_qty_oh :{ [Op.gt] :0} },
                     attributes: [
                       'id',
                       'ld_qty_oh',
@@ -1143,7 +1192,7 @@ export default class LoadRequestService {
                     model: this.loadRequestLineModel,
                     required: false,
                     where: { load_request_code: load_request_code },
-                    attributes: ['qt_request', 'pt_price'],
+                    attributes: ['qt_request', 'pt_price',[Sequelize.literal('qt_request') , 'qt_validated']],
                   },
                 ],
               },

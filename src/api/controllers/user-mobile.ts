@@ -10,6 +10,8 @@ import Payment from '../../models/mobile_models/payment';
 import { Op, Sequelize } from 'sequelize';
 import CryptoJS from '../../utils/CryptoJS';
 import PromotionService from '../../services/promotion';
+import _ from 'lodash';
+import siteService from '../../services/site';
 import _, { isNull } from 'lodash';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
@@ -183,6 +185,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
   const promoServiceInstanse = Container.get(PromotionService);
+  const siteServiceInstance = Container.get(siteService);
 
   try {
     // const role_code = req.body.role_code;
@@ -195,7 +198,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       return res.status(404).json({ message: 'No role exist with such an id ' });
     } else {
       // these data is the same for both response cases
-
+      const site = await siteServiceInstance.findOne({ si_site: role.role_site });
       const user_mobile_code = role.user_mobile_code;
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
       var users = [];
@@ -213,8 +216,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code });
       }
 
-      const invoice = await userMobileServiceInstanse.getInvoice();
-      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine();
+      const invoice = await userMobileServiceInstanse.getInvoice(role.role_code);
+      let invoicecode= []
+      for (let inv of invoice) {
+        invoicecode.push(inv.invoice_code)
+      }
+      const invoiceLine = await userMobileServiceInstanse.getInvoiceLine({invoice_code:invoicecode});
       const paymentMethods = await userMobileServiceInstanse.getPaymentMethods();
       const messages = await userMobileServiceInstanse.getMessages(role.role_code);
       const barCodesInfo = await userMobileServiceInstanse.findAllBarCodes();
@@ -283,14 +290,16 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (loadRequest.length > 0) {
         loadRequest.forEach(load => {
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
+          console.log(load.date_creation)
           if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST LINE
       if (loadRequestsLines.length > 0) {
         loadRequestsLines.forEach(load => {
+
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
-          if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
+          if (load.dataValues.date_charge != null) load.date_charge = formatDateOnlyFromBackToMobile(load.date_charge);
         });
       }
       // LOAD REQUEST DETAILS
@@ -304,6 +313,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (locationDetail.length > 0) {
         locationDetail.forEach(ld => {
           ld.dataValues.ld_expire = formatDateOnlyFromBackToMobile(ld.ld_expire);
+          console.log('ld expire after ' + ld.dataValues.ld_expire);
         });
       }
       // INVOICE
@@ -316,13 +326,48 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
       // service created on backend
       if (parameter[index].hold === true) {
-        const service = await userMobileServiceInstanse.getService({ role_code: role.role_code });
+        let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
+        console.log("here service",service1)
         // UPDATE SERVICE DATES
-        if (service) {
-          service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
-          service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
-          service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
-        }
+        let service = {
+          // id: ,
+          service_code: service1.service_code,
+          role_code: service1.role_code,
+          user_mobile_code: service1.user_mobile_code,
+          service_site: service1.service_site,
+          itinerary_code: service1.itinerary_code,
+          service_open: service1.service_open,
+          service_kmdep: service1.service_kmdep,
+          service_kmarr: service1.service_kmarr,
+          service_domain: service1.service_domain,
+          nb_visits: service1.nb_visits,
+          nb_clients_itin: service1.nb_clients_itin,
+          nb_invoice: service1.nb_invoice,
+          nb_products_sold: service1.nb_products_sold,
+          nb_products_loaded: service1.nb_products_loaded,
+          nb_clients_created: service1.nb_clients_created,
+          sum_invoice: service1.sum_invoice,
+          sum_paiement: service1.sum_paiement,
+          service_period_activate_date: formatDateOnlyFromBackToMobile(service1.service_period_activate_date),
+          service_creation_date: formatDateFromBackToMobile(service1.service_creation_date),
+          service_closing_date: formatDateFromBackToMobile(service1.service_closing_date),
+        };
+
+        // console.log(' service periode activate date '+service.service_period_activate_date)
+        // console.log(' service periode activate date2 '+formatDateOnlyFromBackToMobile(service.service_period_activate_date))
+        // console.log(' service_creation_date2 '+formatDateFromBackToMobile(service.service_creation_date))
+        // console.log(' service_creation_date1 '+service.service_creation_date)
+        // service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
+        // service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
+        // service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
+        // console.log(' service periode activate date3 '+service.service_period_activate_date)
+        // console.log(' service_creation_date3 '+service.service_creation_date)
+
+        // if (service) {
+        //   service.service_period_activate_date = formatDateOnlyFromBackToMobile(service.service_period_activate_date);
+        //   service.service_creation_date = formatDateFromBackToMobile(service.service_creation_date);
+        //   service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
+        // }
 
         const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
         const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
@@ -380,6 +425,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
+          site: site,
         });
       }
       // service created by mobile user
@@ -437,6 +483,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           populationsArticle: populationsArticle,
           population: populationsCustomer,
           barCodesInfo: barCodesInfo,
+          site: site,
         });
       }
     }
@@ -448,6 +495,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
 
 //****************** GET DATA BACK ************************
 const getDataBack = async function(socket) {
+  console.log("hounahpunahpouma")
   const logger = Container.get('logger');
   // logger.debug("Calling user mobile login endpoint")
 
@@ -467,7 +515,7 @@ const getDataBack = async function(socket) {
   socket.on('sendData', async data => {
     // updated database
     console.log('Data keys :\n ');
-    console.log(Object.keys(data));
+    // console.log(Object.keys(data));
 
     // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;
     // (nb_clients_itin = 5), (nb_products_loaded = 8), (sum_invoice = 8);
@@ -475,11 +523,13 @@ const getDataBack = async function(socket) {
     // SERVICE
     // CREATED FROM BACKEDN
     const { service, service_creation, user, visits, payment } = data;
+console.log("service_creation",service_creation)
     console.log(user);
     console.log(visits);
-    if (service_creation == true) {
+    if (service_creation == 1) {
       // created from backend
       console.log('UPDATING SERVICE');
+      console.log(service)
       const udpatedService = await userMobileServiceInstanse.updateService(
         {
           service_open: false,
@@ -493,6 +543,7 @@ const getDataBack = async function(socket) {
           nb_clients_created: service.nb_clients_created,
           nb_products_loaded: service.nb_products_loaded,
           sum_invoice: service.sum_invoice,
+          sum_paiement: service.sum_paiement,
           // user_mobile_code: service.user_mobile_code,
         },
         { service_code: service.service_code },
@@ -588,7 +639,7 @@ const getDataBack = async function(socket) {
       const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
       nb_invoice = filtered_invoices.length;
       const invoices = data.invoices;
-      console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
+      //console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
       const invoicesLines = data.invoicesLines;
       const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = [];
@@ -630,7 +681,7 @@ const getDataBack = async function(socket) {
     if (data.payments) {
       const dataa = data.payments;
       dataa.forEach(payment => {
-        console.log(payment);
+     //   console.log(payment);
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date);
       });
       const payments = await userMobileServiceInstanse.createPayments(dataa);
@@ -639,9 +690,22 @@ const getDataBack = async function(socket) {
     // LOCATION DETAILS
     if (data.locationsDetails) {
       const dataa = data.locationsDetails;
+      //console.log('data', dataa);
+      // console.log('data', dataa);
       dataa.forEach(ld => {
-        ld.ld_expire = isNull(ld.ld_expire) ? null : formatDateOnlyFromMobileToBack(ld.ld_expire);
+      //  console.log('ld', ld.ld_expire);
+        if (isNull(ld.ld_expire)) {
+       //   console.log('something here');
+        } else {
+      //    console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
+          formatDateOnlyFromMobileToBack(ld.ld_expire);
+          ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
+          // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
+        }
+
       });
+    //  console.log('dataaaa', dataa);
+      // console.log('dataaaa', dataa);
       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
     }
 
@@ -740,16 +804,21 @@ const getDataBack = async function(socket) {
       console.log('INVENTORIES CREATION');
       const inventories = data.inventaires;
       inventories.forEach(inventory => {
-        console.log(inventory);
+       // console.log(inventory);
         inventory.the_date = formatDateFromMobileToBackAddTimezone(inventory.the_date);
       });
       const inventoriesCreated = await userMobileServiceInstanse.createInventories(inventories);
       console.log('INVENTORIES CREATION END');
+      //console.log(inventories)
       if (inventoriesCreated) {
         console.log('INVENTORIES LINES CREATION');
         const inventoriesLines = data.inventairesLines;
         inventoriesLines.forEach(line => {
-          line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          if (isNull(line.expiring_date)) {
+           // console.log('say something');
+          } else {
+            line.expiring_date = formatDateOnlyFromMobileToBack(line.expiring_date);
+          }
         });
         const inventoriesLinesCreated = await userMobileServiceInstanse.createInventoriesLines(inventoriesLines);
         console.log('INVENTORIES LINES CREATION END');
@@ -757,6 +826,8 @@ const getDataBack = async function(socket) {
     }
 
     socket.emit('dataUpdated');
+    // socket.closed()
+    console.log("end synchro")
   });
 };
 
@@ -861,40 +932,55 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 };
 
 function formatDateOnlyFromBackToMobile(timeString) {
-  let dateComponents = timeString.split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  let str = '';
+  console.log(' timeString ' + timeString);
+  if (timeString != null) {
+    let dateComponents = timeString.split('-');
+    str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+    console.log("date loadrequest",str)
+  }
   return str;
 }
 
 function formatDateFromBackToMobile(date) {
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const str =
-    d +
-    '-' +
-    m +
-    '-' +
-    date.getFullYear() +
-    ' ' +
-    date.getHours() +
-    ':' +
-    String(date.getMinutes()).padStart(2, '0') +
-    ':' +
-    String(date.getSeconds()).padStart(2, '0');
+  let str = '';
+  if (date != null) {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    str =
+      d +
+      '-' +
+      m +
+      '-' +
+      date.getFullYear() +
+      ' ' +
+      date.getHours() +
+      ':' +
+      String(date.getMinutes()).padStart(2, '0') +
+      ':' +
+      String(date.getSeconds()).padStart(2, '0');
+  }
 
   return str;
 }
 
 function formatDateFromMobileToBackAddTimezone(timeString) {
-  let elements = timeString.split(' ');
-  let dateComponents = elements[0].split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0] + ' ' + elements[1] + '.63682+01';
+  let str :any ;
+  if (timeString != null) {
+    let elements = timeString.split(' ');
+    let dateComponents = elements[0].split('-');
+    str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0] + ' ' + elements[1] + '.63682+01';
+  }
   return str;
 }
 
 function formatDateOnlyFromMobileToBack(timeString) {
-  let dateComponents = timeString.split('-');
-  const str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  let str = '';
+  if (timeString != null) {
+    let dateComponents = timeString.split('-');
+    str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
+  }
+  console.log(' inside format date to back '+str)
   return str;
 }
 
@@ -906,7 +992,7 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    
+   // console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
         where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
@@ -951,7 +1037,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
   logger.debug('Calling find all user endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log('rrrrrrrrrrrrrrrrrr', req.body);
+ // console.log('rrrrrrrrrrrrrrrrrr', req.body);
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
@@ -962,7 +1048,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-    console.log(invoicesline);
+   // console.log(invoicesline);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });
@@ -980,7 +1066,7 @@ const findPaymentBy = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    
+    //console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
         period_active_date: { [Op.between]: [req.body.date, req.body.date1] },

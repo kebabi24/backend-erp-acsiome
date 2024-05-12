@@ -3,6 +3,7 @@ import RoleService from '../../services/role';
 import TokenSerieService from '../../services/token-serie';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -21,8 +22,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     console.log(tokenSerie);
     
     const service = await MobileServiceInstance.create({
-      service_code: tokenSerie.service_prefix + '-' + tokenSerie.service_next_number,
-      service_period_activate_date: req.body.service_creation_date,
+      service_code: tokenSerie.service_prefix + '-' +  tokenSerie.service_next_number.toString().padStart(tokenSerie.token_digitcount, '0'),
+      service_creation_date: new Date(),       
       ...req.body,
       service_open: true,
       service_domain: user_domain,
@@ -67,7 +68,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const MobileServiceInstance = Container.get(MobileService);
-    const services = await MobileServiceInstance.find({ service_domain: user_domain });
+    const services = await MobileServiceInstance.find({});
     return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -122,6 +123,26 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
+}
+const closeService = async (req: Request, res: Response, next: NextFunction) => {
+  console.log("enter")
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  service endpoint');
+  try {
+    const MobileServiceInstance = Container.get(MobileService);
+    const { service_code } = req.params;
+    
+    const service = await MobileServiceInstance.update(
+      { service_closing_date:new Date(),service_open:false, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { service_code:service_code},
+    );
+    return res.status(200).json({ message: 'fetched succesfully', data: service_code });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
 };
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
@@ -137,6 +158,29 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findServicesBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all service endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const MobileServiceInstance = Container.get(MobileService);
+
+    const services = await MobileServiceInstance.findAllServices({
+      
+      where: {
+        service_site: req.body.site,
+        service_period_activate_date:  { [Op.between]: [req.body.date, req.body.date1] },
+      },
+      attributes:{include: [[Sequelize.literal('nb_visits * 100 / nb_clients_itin'), 'visitrate'],[Sequelize.literal('nb_invoice * 100 / nb_visits'), 'successrate']]},
+  })
+  //console.log(services)
+    return res.status(200).json({ message: 'fetched succesfully', data: services });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findOne,
@@ -145,4 +189,6 @@ export default {
   findByAll,
   update,
   deleteOne,
+  closeService,
+  findServicesBy,
 };

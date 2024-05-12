@@ -209,30 +209,37 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
 
     const load_request_code = req.body.load_request_code;
     const load_request_data = req.body.load_request_data;
-
+   // console.log('how are you', load_request_data);
     for (const page of load_request_data) {
       for (const product of page.productPageDetails) {
-      
+      //  console.log(product);
+        // console.log(product);
         const isExist = await loadRequestService.findLoadRequestLine({
           load_request_code: load_request_code,
           product_code: product.product_code,
         });
+        // console.log("isExist",isExist, product.item.pt_part)
         if (isExist) {
+         // console.log("hozhoz", product.item.loadRequestLines[0].qt_validated)
           const updatedLoadRequestLine = await loadRequestService.updateLoadRequestLine(
             load_request_code,
             product.product_code,
-            product.item.loadRequestLine.qt_request,
+           // product.item.loadRequestLine.qt_request,
+           product.item.loadRequestLines[0].qt_validated,
           );
         } else {
-          if (product.item.loadRequestLine.qt_request > 0) {
+          // console.log("dkhalet")
+          if( product.item.loadRequestLines[0] != null) {
+          if (product.item.loadRequestLines[0].qt_request == 0 && product.item.loadRequestLines[0].qt_validated > 0) {
             const createdLoadRequestLine = await loadRequestService.createLoadRequestLine(
               load_request_code,
               product.product_code,
-              product.item.loadRequestLine.qt_request,
-              product.item.loadRequestLine.qt_request,
+              product.item.loadRequestLines[0].qt_request,
+              product.item.loadRequestLines[0].qt_validated,
               product.item.pt_price,
             );
           }
+        }
         }
         // if (product.item.loadRequestLine.qt_request === 0 && product.item.loadRequestLine.qt_request === 0) {
         //   continue;
@@ -257,7 +264,7 @@ const updateLoadRequestStauts10 = async (req: Request, res: Response, next: Next
       }
     }
 
-    // const updatedLoadRequest = await loadRequestService.updateLoadRequestStatusTo10(load_request_code);
+    const updatedLoadRequest = await loadRequestService.updateLoadRequestStatusTo10(load_request_code);
 
     return res.status(200).json({ message: 'data ready', data: 'here' });
   } catch (e) {
@@ -411,16 +418,20 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
 
   try {
     const loadRequestService = Container.get(LoadRequestService);
-
+//console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
+    const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
-   
+     //console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
+      //console.log("line",line)
+      if(line.qt_effected > 0) {
+        //console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
         product_code: line.product_code,
       });
-      
+      //  console.log('elem', elem);
       if (elem !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
           line.load_request_code,
@@ -428,11 +439,11 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
           line.qt_effected,
         );
       } else {
-       
+     //   console.log('creatioon', line);
         const maxLine = await loadRequestService.findLoadRequestMaxLine({
           load_request_code: line.load_request_code,
         });
-        
+       // console.log('maaaaaaaaaaaaaaaax', maxLine);
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -443,13 +454,15 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         });
       }
     }
+    }
     for (const detail of load_request_details) {
+      if(detail.qt_effected > 0) {
       const elemDet = await loadRequestService.findLoadRequestDetail({
         load_request_code: detail.load_request_code,
         product_code: detail.product_code,
         lot: detail.lot,
       });
-  
+     // console.log('elemDet', elemDet);
       if (elemDet !== null) {
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
@@ -461,7 +474,77 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
         const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails2(detail);
       }
     }
+    }
+    const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
+    return res.status(201).json({ message: 'created succesfully', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const createLoadRequestDetailsScan = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+//console.log("req.body",req.body)
+    const load_request_details = req.body.load_request_details;
+    const load_request_code = load_request_details[0].load_request_code
+    const load_request_lines = req.body.load_request_lines;
+    // console.log("loadline",load_request_details);
+    for (const line of load_request_lines) {
+     // console.log("line",line)
+      if(line.qt_effected > 0) {
+       // console.log("yawhnahnawelamakch")
+      const elem = await loadRequestService.findLoadRequestLine({
+        load_request_code: line.load_request_code,
+        product_code: line.product_code,
+      });
+      //  console.log('elem', elem);
+      if (elem !== null) {
+        const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
+          line.load_request_code,
+          line.product_code,
+          line.qt_effected,
+        );
+      } else {
+     //   console.log('creatioon', line);
+        const maxLine = await loadRequestService.findLoadRequestMaxLine({
+          load_request_code: line.load_request_code,
+        });
+       // console.log('maaaaaaaaaaaaaaaax', maxLine);
+        const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
+          ...line,
+          date_creation: maxLine.date_creation,
+          line: maxLine.line + 1,
+          date_charge: new Date(),
+          qt_request: 0,
+          qt_validated: 0,
+        });
+      }
+    }
+    }
+    for (const detail of load_request_details) {
+      if(detail.qt_effected > 0) {
+      const elemDet = await loadRequestService.findLoadRequestDetail({
+        load_request_code: detail.load_request_code,
+        product_code: detail.product_code,
+        lot: detail.lot,
+      });
+     // console.log('elemDet', elemDet);
+      if (elemDet !== null) {
+        const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
+          elemDet.load_request_code,
+          elemDet.product_code,
+          detail.qt_effected,
+          elemDet.lot,
+        );
+      } else {
+        const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails2(detail);
+      }
+    }
+    }
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -498,6 +581,7 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     // CREATE NEW LOAD REQUEST DETAILS
     const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details);
     // UPDATE LOAD REQUEST STATUS TO 20
+    // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
     return res.status(201).json({ message: 'created succesfully', data: loadRequestsDetails });
@@ -530,7 +614,9 @@ const findAllLoadRequestLinesDetails = async (req: Request, res: Response, next:
     const loadRequestLines = await loadRequestService.findAllLoadRequestLines(load_request_code);
     const loadRequestDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load_request_code);
 
-
+    // console.log(loadRequestLines);
+    // console.log('********');
+    // console.log(loadRequestDetails);
     return res
       .status(200)
       .json({ message: 'found all load request lines', data: { loadRequestLines, loadRequestDetails } });
@@ -577,13 +663,14 @@ const createLoadRequestAndLines = async (req: Request, res: Response, next: Next
 
     const { loadRequest, lines } = req.body;
     const role_code = loadRequest.role_code;
-    
+    //console.log('roooooooole', role_code);
     const role = await loadRequestService.getRole({ role_code: role_code });
 
     const token = await tokenSerieService.findOne({ token_code: role.token_serie_code });
     let code =
       token.load_request_prefix +
-      /*'-' +*/ token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
+      /*'-' +*/ '-' +
+      token.load_request_next_number.toString().padStart(token.token_digitcount, '0');
     const updatedToken = await tokenSerieService.update(
       { load_request_next_number: token.load_request_next_number + 1 },
       { token_code: role.token_serie_code },
@@ -623,6 +710,26 @@ const getLoadRequestInfo = async (req: Request, res: Response, next: NextFunctio
     }
 
     return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest, userMobile } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getLoadRequestLineInfo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const loadRequestLineService = Container.get(LoadRequestService);
+    const userMobileService = Container.get(UserMobileService);
+    const load_request_code = req.params.load_request_code;
+    const loadRequest = await loadRequestService.findLoadRequestLines({ load_request_code: load_request_code });
+    // let userMobile = null;
+    // if (loadRequest != null) {
+    //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
+    // }
+
+    return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -750,6 +857,7 @@ export default {
   findLotsOfProduct,
   findLotsOfProduct2,
   createLoadRequestDetails,
+  createLoadRequestDetailsScan,
   createLoadRequestDetailsChangeStatus,
   findAllLoadRequeusts20,
   findAllLoadRequest20Details,
@@ -759,6 +867,7 @@ export default {
   getLoadRequestCreationData,
   createLoadRequestAndLines,
   getLoadRequestInfo,
+  getLoadRequestLineInfo,
   getLoadRequestDataV3,
   findAllLoadRequestLinesDifference,
   getLoadRequestCreationDataRole,

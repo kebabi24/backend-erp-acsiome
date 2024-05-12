@@ -11,12 +11,13 @@ const{user_domain} = req.headers
 
     logger.debug("Calling Create account endpoint")
     try {
-        
+        console.log(req.body)
         const accountShiperServiceInstance = Container.get(AccountShiperService)
         const customerServiceInstance = Container.get(CustomerService)
         const accountShiper = await accountShiperServiceInstance.create({...req.body.as,as_nbr: req.body.pshnbr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         const cm = await customerServiceInstance.findOne({cm_addr: req.body.as.as_cust,cm_domain : user_domain,})
-        if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(req.body.as_base_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+        
+        if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(req.body.as.as_base_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  accountShiper })
@@ -58,6 +59,28 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const createPCUST = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    let nbr : String;
+    let open: Boolean;
+    logger.debug("Calling Create account endpoint")
+    try {
+       
+        const accountShiperServiceInstance = Container.get(AccountShiperService)
+        const customerServiceInstance = Container.get(CustomerService)
+        const accountShiper = await accountShiperServiceInstance.create({...req.body,as_domain : user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const cm = await customerServiceInstance.findOne({cm_addr: req.body.as_cust,cm_domain : user_domain,})
+        if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) - Number(req.body.as_applied)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data:  accountShiper })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -148,6 +171,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 export default {
     create,
     createP,
+    createPCUST,
     findOne,
     findAll,
     findBy,
