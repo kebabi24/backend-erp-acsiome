@@ -4,6 +4,8 @@ import TokenSerieService from '../../services/token-serie';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { Op, Sequelize } from 'sequelize';
+import ItineraryService from '../../services/itinerary';
+import CustomerItineraryService from '../../services/customer-itinerary';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -15,16 +17,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const MobileServiceInstance = Container.get(MobileService);
     const RoleServiceInstance = Container.get(RoleService);
     const TokenSerieServiceInstance = Container.get(TokenSerieService);
+    const ItineraryServiceInstance = Container.get(ItineraryService);
+    const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const role_code = req.body.role_code;
     const roleTknSerie = await RoleServiceInstance.findOne({ role_code });
     const token_code = roleTknSerie.token_serie_code;
     const tokenSerie = await TokenSerieServiceInstance.findOne({ token_code });
     console.log(tokenSerie);
     
+    const nbcust = await CustomerItineraryServiceInstance.count({ itinerary_code: req.body.itinerary_code });
+    console.log("nbcust",nbcust);
+
     const service = await MobileServiceInstance.create({
       service_code: tokenSerie.service_prefix + '-' +  tokenSerie.service_next_number.toString().padStart(tokenSerie.token_digitcount, '0'),
       service_creation_date: new Date(),       
       ...req.body,
+      nb_clients_itin: nbcust,
       service_open: true,
       service_domain: user_domain,
       created_by: user_code,
@@ -171,7 +179,9 @@ const findServicesBy = async (req: Request, res: Response, next: NextFunction) =
         service_site: req.body.site,
         service_period_activate_date:  { [Op.between]: [req.body.date, req.body.date1] },
       },
-      attributes:{include: [[Sequelize.literal('nb_visits * 100 / nb_clients_itin'), 'visitrate'],[Sequelize.literal('nb_invoice * 100 / nb_visits'), 'successrate']]},
+      attributes:{include: [//[ //Sequelize.literal(  //'if ( nb_clients_itin  > 0 )', 'nb_visits * 100 / nb_clients_itin' , '0' , 'visitrate'],
+      [Sequelize.literal('nb_visits * 100 / nb_clients_itin'),'visitrate'],
+      [Sequelize.literal('nb_invoice * 100 / nb_visits'), 'successrate']]},
   })
   //console.log(services)
     return res.status(200).json({ message: 'fetched succesfully', data: services });

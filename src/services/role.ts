@@ -33,7 +33,7 @@ export default class RoleService {
 
   public async find(query: any): Promise<any> {
     try {
-      const roles = await this.roleModel.findAll({ where: query });
+      const roles = await this.roleModel.findAll({ where: query ,order: [['role_code', 'ASC']]});
       this.logger.silly('find All roles mstr');
       return roles;
     } catch (e) {
