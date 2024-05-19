@@ -507,14 +507,15 @@ const getDataBack = async function(socket) {
   var nb_clients_created;
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
-
+  
   console.log('socket connected');
 
   socket.emit('readyToRecieve');
 
   socket.on('sendData', async data => {
+    console.log("heeeeeeeeeeeeeeeeee")
     // updated database
-    console.log('Data keys :\n ');
+    //console.log('Data keys :\n ');
     // console.log(Object.keys(data));
 
     // var { nb_clients_itin, nb_products_loaded, sum_invoice } = data;

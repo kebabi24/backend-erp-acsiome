@@ -29,6 +29,16 @@ export default class CustomerItineraryService {
         }
     }
 
+    public async count(query: any): Promise<any> {
+        try {
+            const cus_itn = await this.customerItineraryModel.count({ where: query })
+            this.logger.silly("find one customer-itn mstr")
+            return cus_itn
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async find(query: any): Promise<any> {
         try {
             const cus_itn = await this.customerItineraryModel.findAll({ where: query })
