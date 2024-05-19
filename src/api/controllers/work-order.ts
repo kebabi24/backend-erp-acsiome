@@ -594,6 +594,17 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.findOne({ code_domain:user_domain,code_fldname: user_code });
     if (codes == null) {const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
+    // let result=[]; 
+    // let obj;
+    // for (let wo of wos){ obj = wo
+    //                     if (wo.wo_status == 'C') {obj.wo_status = 'CLOS'} 
+    //                     else { if (wo.wo_status == 'R') {obj.wo_status = 'LANCE'} 
+    //                            else {if (wo.wo_status == 'F') {obj.wo_status = 'VALIDE'}}
+    //                          }
+    //                          result.push(obj)        
+    //                    }
+                      
+                    
     return res.status(200).json({ message: 'fetched succesfully', data: wos });}
     else{const wos = await workOrderServiceInstance.find({wo_domain: user_domain,wo_routing: codes.code_value});
     return res.status(200).json({ message: 'fetched succesfully', data: wos });}
@@ -649,8 +660,9 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       id: id
     
   });
-  let diff1 = Number(Number(of.wo_qty_ord) - Number(req.body.wo_qty_comp));
-  let diff2 = Number(Number(req.body.wo_qty_rjct) / Number(Number(req.body.wo_qty_rjct) + Number(req.body.wo_qty_comp)))
+  console.log('diff1', of.wo_qty_ord, req.body.wo_qty_comp)
+  let diff1 = Number(Number(of.wo_qty_comp) - Number(req.body.wo_qty_ord));
+  let diff2 = Number(Number(of.wo_qty_rjct) / Number(Number(of.wo_qty_rjct) + Number(of.wo_qty_comp)))
     const wo = await workOrderServiceInstance.update(
       { ...req.body, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
