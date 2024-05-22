@@ -258,11 +258,18 @@ export default class UserMobileService {
   // ******************** GET ITINEREARY FROM ROLE_ITINERARY **************************
   public async getItineraryFromRoleItinerary(query: any): Promise<any> {
     try {
-      const it = await this.role_itineraryModel.findOne({ where: query });
-      const itinerary_code = it.dataValues.itinerary_code;
-      const itinerary = await this.itineraryModel.findOne({ where: { itinerary_code: itinerary_code } });
+      const it = await this.role_itineraryModel.findAll({ where: query });
+      //console.log("it",it)
+      //const itinerary_code = it.role_itinerary.dataValues.itinerary_code;
+      let itinerarys = []
+      for (let itin of it) {
+        itinerarys.push(itin.itinerary_code)
 
-      return itinerary.dataValues;
+      }
+      // console.log("itine",itinerarys)
+      const itinerary = await this.itineraryModel.findAll({ where:  { itinerary_code :  itinerarys } });
+
+      return itinerary;
     } catch (e) {
       console.log('Error from service-getInineraryV2');
       this.logger.error(e);

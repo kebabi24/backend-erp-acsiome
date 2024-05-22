@@ -369,14 +369,36 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         //   service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
         // }
 
-        const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
-        const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
-        if (role.pricelist_code != null && role.pricelist_code != '') {
-          customers.forEach(element => {
-            element.pricelist_code = '';
-          });
-        }
+        // let itinerary2 :any
+        // let customers: any
+        // if (parameter[index].hold === true) {
+      
 
+        const   itinerary2 = await userMobileServiceInstanse.getItineraryFromService({ itinerary_code: service1.itinerary_code });
+
+        const   customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: service1.itinerary_code /*itinerary2.itinerary_code*/ });
+          if (role.pricelist_code != null && role.pricelist_code != '') {
+            customers.forEach(element => {
+              element.pricelist_code = '';
+            });
+          }
+      //   } else {
+      //    itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
+
+      //    console.log("itinerary",itinerary2)
+      //   let itineraryss = []
+      //     for (let itin of itinerary2) {
+      //       itineraryss.push(itin.itinerary_code)
+
+      //     }
+      //    customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itineraryss /*itinerary2.itinerary_code*/ });
+      //   if (role.pricelist_code != null && role.pricelist_code != '') {
+      //     customers.forEach(element => {
+      //       element.pricelist_code = '';
+      //     });
+      //   }
+
+      // }
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
@@ -640,7 +662,7 @@ console.log("service_creation",service_creation)
       const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
       nb_invoice = filtered_invoices.length;
       const invoices = data.invoices;
-      //console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
+      console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
       const invoicesLines = data.invoicesLines;
       const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = [];
@@ -993,17 +1015,22 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-   // console.log(req.body);
+   console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
-        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
       });
     } else {
       var invoices = await userMobileServiceInstance.getAllInvoice({
-        where: { site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1]} },
+          attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
       });
+      console.log("here",invoices)
     }
-    // console.log("invoices",invoices);
+     console.log("invoices",invoices);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
