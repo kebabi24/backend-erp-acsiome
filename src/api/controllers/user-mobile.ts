@@ -276,6 +276,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
       // console.log(productPagesDetails);
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
+      console.log("product",products)
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({
         user_mobile_code: user_mobile_code,
         status: 40,

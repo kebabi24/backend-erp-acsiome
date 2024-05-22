@@ -45,6 +45,7 @@ export default class UserMobileService {
     @Inject('messagesModel') private messagesModel: Models.messagesModel,
     @Inject('domainModel') private domainModel: Models.DomainModel,
     @Inject('barecodeInfosModel') private barecodeInfosModel: Models.barecodeInfosModel,
+    @Inject('codeModel') private codeModel: Models.CodeModel,
 
     @Inject('logger') private logger,
   ) {}
@@ -768,6 +769,13 @@ export default class UserMobileService {
           attributes: ['tx2_tax_pct'],
         });
         product.dataValues.tax_pct = +tax_value.dataValues.tx2_tax_pct;
+        
+        const  code = await this.codeModel.findOne({
+          where: { code_fldname: 'pt_group', code_value: product.pt_group },
+          attributes: ['code_cmmt'],
+        });
+        //console.log("codevalue",code.dataValues.code_cmmt)
+         if(code.dataValues != null ) {product.dataValues.group = code.dataValues.code_cmmt } else { product.dataValues.group = null};
       }
       return products;
     } catch (e) {
