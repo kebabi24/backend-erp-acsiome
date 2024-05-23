@@ -1590,6 +1590,41 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
     return next(e);
   }
 };
+
+
+const findAllInvoicewithDetails = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+  console.log("req",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+      if (req.body.site == '*') {
+      var invs =await Sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, public.aa_invoiceLine  where public.aa_invoiceLine.invoice_code = PUBLIC.aa_invoice.invoice_code and public.aa_invoiceLine.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date > ? and PUBLIC.aa_invoice.periode_active_date < ? ORDER BY public.aa_invoiceLine.id DESC", { replacements: [user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    } else {
+
+     // var invs =await sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceLine  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceLine.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceLine.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date > ? and PUBLIC.aa_invoice.periode_active_date < ? ORDER BY PUBLIC.aa_invoiceLine.id DESC", { replacements: [req.body.site,user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+     var invs =await Sequelize.query('select * from Public.aa_invoiceLine', {type: QueryTypes.SELECT });
+   //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
+    console.log(invs)
+    }
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
 export default {
   create,
   findOne,
@@ -1613,4 +1648,5 @@ export default {
   testHash,
   getDashboardAddData,
   findPaymentByService,
+  findAllInvoicewithDetails,
 };

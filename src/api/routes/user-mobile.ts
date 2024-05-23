@@ -29,7 +29,7 @@ export default (app: Router) => {
   route.post('/getInvoiceLines', controller.findByInvoiceLine);
   route.post('/getAllPayment', controller.findPaymentBy);
   route.post('/getAllPaymentService', controller.findPaymentByService),
-  
+  route.post('/getAllInvoicesdet', controller.findAllInvoicewithDetails);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   

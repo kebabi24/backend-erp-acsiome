@@ -829,8 +829,15 @@ export default class UserMobileService {
           'pt_desc2'
         ],
       });
-
-      return products;
+      for (const product of products) {
+      const  code = await this.codeModel.findOne({
+        where: { code_fldname: 'pt_group', code_value: product.pt_group },
+        attributes: ['code_cmmt'],
+      });
+      //console.log("codevalue",code.dataValues.code_cmmt)
+       if(code.dataValues != null ) {product.dataValues.group = code.dataValues.code_cmmt } else { product.dataValues.group = null};
+    }
+       return products;
     } catch (e) {
       console.log('Error from getProducts - service ');
       this.logger.error(e);
