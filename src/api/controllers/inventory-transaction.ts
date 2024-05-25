@@ -3388,7 +3388,181 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const issTrV = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling update one  code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
+
+  
+  try {
+    const { detail, it, nlot } = req.body;
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(itemService);
+    const statusServiceInstance = Container.get(statusService);
+
+    for (const item of detail) {
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_part: item.tr_part,
+        sct_site: it.tr_site,
+        sct_sim: 'STD-CG',
+        sct_domain: user_domain,
+      });
+      const sctrct = await costSimulationServiceInstance.findOne({
+        sct_part: item.tr_part,
+        sct_site: it.tr_ref_site,
+        sct_sim: 'STD-CG',
+        sct_domain: user_domain
+      });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
+
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: item.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: it.tr_site,
+        ld_loc: it.tr_loc,
+        ld_ref:item.tr_ref,
+        ld_domain:user_domain,
+      });
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      await inventoryTransactionServiceInstance.create({
+        ...item,
+        ...it,
+        tr_lot: nlot,
+        tr_qty_loc: -1 * Number(item.tr_qty_loc),
+        tr_loc_begin: (ld) ? ld.ld_qty_oh : 0,
+        tr_type: 'ISS-TR',
+        tr_date: new Date(),
+        tr_mtl_std: sct.sct_mtl_tl,
+        tr_lbr_std: sct.sct_lbr_tl,
+        tr_bdn_std: sct.sct_bdn_tl,
+        tr_ovh_std: sct.sct_ovh_tl,
+        tr_sub_std: sct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_batch: (ld) ? ld.ld__chr01: null,
+        tr_grade:(ld) ? ld.ld_grade: null,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
+      });
+
+      const ld1 = await locationDetailServiceInstance.findOne({
+        ld_part: item.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: it.tr_ref_site,
+        ld_loc: it.tr_ref_loc,
+        ld_ref:item.tr_ref,
+        ld_domain: user_domain,
+      });
+     
+      // if (ld1)
+      //   await locationDetailServiceInstance.update(
+      //     {
+      //       ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //       last_modified_by: user_code,
+      //       last_modified_ip_adr: req.headers.origin,
+      //     },
+      //     { id: ld1.id },
+      //   );
+      // else {
+      //   const status = await statusServiceInstance.findOne({
+      //     is_status: item.tr_status,
+      //     is_domain: user_domain,
+      //   });
+      //   await locationDetailServiceInstance.create({
+      //     ld_part: item.tr_part,
+      //     ld_lot: item.tr_serial,
+      //     ld_ref: item.tr_ref,
+      //     ld_date: new Date(),
+      //     ld_site: it.tr_ref_site,
+      //     ld_loc: it.tr_ref_loc,
+      //     ld_status: item.tr_status,
+      //     ld__log01: status.is_nettable,
+      //     ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //     ld_expire: item.tr_expire,
+      //     created_by: user_code,
+      //     created_ip_adr: req.headers.origin,
+      //     last_modified_by: user_code,
+      //     last_modified_ip_adr: req.headers.origin,
+      //     ld_domain: user_domain,
+      //     chr01:ld.chr01,
+      //     chr02:ld.chr02,
+      //     chr03:ld.chr03,
+      //     ld_grade:(ld) ? ld.ld_grade : null,
+      //     ld_batch: (ld) ? ld.ld_batch : null
+      //   });
+      // }
+      await inventoryTransactionServiceInstance.create({
+        ...item,
+        ...it,
+        tr_lot: nlot,
+        tr_qty_loc: Number(item.tr_qty_loc),
+        tr_type: 'RCT-TR',
+        tr_date: new Date(),
+        tr_loc: it.tr_ref_loc,
+        tr_loc_begin: (ld1) ? ld1.ld_qty_oh : 0,
+        tr_site: it.tr_ref_site,
+        tr_ref_site: it.tr_site,
+        tr_ref_loc: it.tr_loc,
+        tr_mtl_std: sctrct.sct_mtl_tl,
+        tr_lbr_std: sctrct.sct_lbr_tl,
+        tr_bdn_std: sctrct.sct_bdn_tl,
+        tr_ovh_std: sctrct.sct_ovh_tl,
+        tr_sub_std: sctrct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:(ld) ? ld.ld_grade : null,
+        tr_batch: (ld) ? ld.ld__chr01 : null,
+        dec01:Number(new Date(it.tr_effdate).getFullYear()),
+        dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
+      });
+    }
+
+    // const pdfData = {
+    //   double: true,
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    // };
+
+    // const pdf = await generatePdf(pdfData, 'it-tr');
+
+    //pdf
+    return res.status(200).json({ message: 'deleted succesfully', data: true, /*pdf: pdf.content*/ });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -3399,6 +3573,7 @@ export default {
   rctUnp,
   issUnp,
   issTr,
+  issTrV,
   issChl,
   inventoryToDate,
   inventoryActivity,

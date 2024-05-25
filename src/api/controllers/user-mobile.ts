@@ -1605,15 +1605,15 @@ const findAllInvoicewithDetails = async (req: Request, res: Response, next: Next
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, public.aa_invoiceLine  where public.aa_invoiceLine.invoice_code = PUBLIC.aa_invoice.invoice_code and public.aa_invoiceLine.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date > ? and PUBLIC.aa_invoice.periode_active_date < ? ORDER BY public.aa_invoiceLine.id DESC", { replacements: [user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline  where PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     } else {
 
-     // var invs =await sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceLine  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceLine.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceLine.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date > ? and PUBLIC.aa_invoice.periode_active_date < ? ORDER BY PUBLIC.aa_invoiceLine.id DESC", { replacements: [req.body.site,user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount ,*  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
-     var invs =await Sequelize.query('select * from Public.aa_invoiceLine', {type: QueryTypes.SELECT });
+    //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
-    console.log(invs)
+   // console.log(invs)
     }
       return res
           .status(200)

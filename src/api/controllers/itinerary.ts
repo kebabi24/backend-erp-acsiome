@@ -70,6 +70,7 @@ const getAllServices = async (req: Request, res: Response, next: NextFunction) =
     
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const ServiceMobileServiceInstance = Container.get(ServiceMobileService);
+    console.log(req.body)
     const services = await ServiceMobileServiceInstance.findS(req.body.date);
 
    

@@ -49,7 +49,7 @@ const InvoiceLine = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_invoiceLine",
+        tableName: "aa_invoiceline",
     }
 )
 export default  InvoiceLine ;
