@@ -55,6 +55,8 @@ const Service = sequelize.define(
     nb_clients_created : {type: Sequelize.INTEGER ,defaultValue : 0  },
     sum_invoice : {type: Sequelize.FLOAT ,defaultValue : 0  },
     sum_paiement : {type: Sequelize.FLOAT ,defaultValue : 0  },
+    sum_versement : {type: Sequelize.FLOAT ,defaultValue : 0  },
+    service_versement_open: { type: Sequelize.BOOLEAN,defaultValue : true  },
 
     // ...base,
   },
