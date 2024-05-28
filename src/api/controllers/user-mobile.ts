@@ -1077,7 +1077,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-   // console.log(invoicesline);
+    console.log(invoicesline);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });

@@ -664,6 +664,20 @@ export default class UserMobileService {
     }
   }
 
+  public async getVisitsBy(query:any): Promise<any> {
+    try {
+      const visitData = await this.visitsModel.findAll(query);
+
+   
+
+      // console.log(visititresult)
+      return visitData;
+    } catch (e) {
+      console.log('Error from service-getVisitlist');
+      this.logger.error(e);
+      throw e;
+    }
+  }
   // ****************************************************
   // ******** PHASE 2 ***********************************
   // ****************************************************
@@ -1424,6 +1438,9 @@ export default class UserMobileService {
     }
   }
 }
+
+
+
 
 function encrypt_string(plain_text, encryptionMethod, secret, iv) {
   var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);

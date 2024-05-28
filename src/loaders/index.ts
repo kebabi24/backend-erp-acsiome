@@ -582,6 +582,14 @@ export default async ({ expressApp }) => {
     sourceKey: 'product_code',
   });
 
+  require('../models/item').default.hasMany(require('../models/mobile_models/load_request_details').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  require('../models/mobile_models/load_request_details').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
+  });
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
     sourceKey: 'pt_part',
@@ -1072,14 +1080,14 @@ export default async ({ expressApp }) => {
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //  await sequelizeConnection.sync();
-   await sequelizeConnection
-    .sync({ alter: true })
-    .then(() => {
-      console.log('database updated');
-    })
-    .catch(err => {
+  //  await sequelizeConnection
+  //   .sync({ alter: true })
+  //   .then(() => {
+  //     console.log('database updated');
+  //   })
+  //   .catch(err => {
       
-    });
+  //   });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });
