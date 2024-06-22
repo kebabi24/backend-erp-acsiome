@@ -31,4 +31,6 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.post('/getDataCreateCustomer', controller.getDataForCustomerCreate);
   route.post('/getCustomersOfItinerary', controller.getCustomersOfItinerary);
+  route.post('/getCustomersByItinerary', controller.getCustomersByItinerary);
+  route.post('/getOneCustomersByItinerary',controller.getOneCustomersByItinerary)
 };

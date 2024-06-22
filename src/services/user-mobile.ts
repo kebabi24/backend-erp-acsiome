@@ -774,6 +774,7 @@ export default class UserMobileService {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          
         ],
       });
 
@@ -840,7 +841,8 @@ export default class UserMobileService {
           'pt_orderable',
           'pt_loadable',
           'pt_promotion',
-          'pt_desc2'
+          'pt_desc2',
+          
         ],
       });
       for (const product of products) {
