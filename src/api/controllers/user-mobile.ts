@@ -324,7 +324,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date);
         });
       }
-
+//console.log("invoice",invoice)
       // service created on backend
       if (parameter[index].hold === true) {
         let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
@@ -553,7 +553,7 @@ console.log("service_creation",service_creation)
     if (service_creation == 1) {
       // created from backend
       console.log('UPDATING SERVICE');
-      console.log(service)
+    //  console.log(service)
       const udpatedService = await userMobileServiceInstanse.updateService(
         {
           service_open: false,
@@ -592,7 +592,7 @@ console.log("service_creation",service_creation)
       // service.nb_products_loaded = service.nb_products_loaded;
       // service.sum_invoice = service.sum_invoice;
       // service.user_mobile_code= service.user_mobile_code,
-      console.log(service);
+      //console.log(service);
       const createdService = await userMobileServiceInstanse.createService(service);
       console.log('CREATING SERVICE END');
     }
@@ -663,7 +663,7 @@ console.log("service_creation",service_creation)
       const filtered_invoices = _.mapValues(_.groupBy(data.invoices, 'customer_code'));
       nb_invoice = filtered_invoices.length;
       const invoices = data.invoices;
-      console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
+      //console.log('INVOICEEEEEEEEEEEEEEEEEEEES', invoices);
       const invoicesLines = data.invoicesLines;
       const filtered_products = _.mapValues(_.groupBy(invoicesLines, 'product_code'));
       let invoicesToCreate = [];
@@ -707,11 +707,11 @@ console.log("service_creation",service_creation)
       //dataa.push({period_active_date:null})
       //dataa.push({period_active_date:null});
       dataa.forEach(payment => {
-        //console.log(payment);
+       // console.log(payment);
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date);
-        payment.period_active_date = formatDateOnlyFromMobileToBack(payment.periode_active_date);
+        payment.period_active_date = formatDateOnlyFromMobileToBack(payment.period_active_date);
       });
-      console.log(dataa)
+     // console.log(dataa)
       const payments = await userMobileServiceInstanse.createPayments(dataa);
     }
 

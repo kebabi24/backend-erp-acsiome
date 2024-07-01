@@ -27,4 +27,6 @@ export default (app: Router) => {
     route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
+    route.post("/deletes", controller.deletes)
+    route.post("/sumbitDomain", controller.DomainTraining)
 }

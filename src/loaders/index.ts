@@ -228,6 +228,8 @@ export default async ({ expressApp }) => {
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
       { name: 'itemModelModel', model: require('../models/item-model').default },
+      { name: 'itemDetailModel', model: require('../models/item-detail').default },
+    
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1077,6 +1079,17 @@ export default async ({ expressApp }) => {
     foreignKey: 'product_code',
     sourceKey: 'pt_part',
   });
+
+
+
+  require('../models/item-detail').default.belongsTo(
+    require('../models/item').default,
+    { foreignKey: 'ptd_part', sourceKey: 'pt_part' },
+  );
+  require('../models/item').default.hasMany(
+    require('../models/item-detail').default,
+    { foreignKey: 'ptd_part', sourceKey: 'pt_part' },
+  );
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //  await sequelizeConnection.sync();

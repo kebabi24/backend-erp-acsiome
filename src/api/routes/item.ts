@@ -20,4 +20,5 @@ export default (app: Router) => {
   route.put('/:id', controller.update);
   route.post('/calccmp', controller.CalcCmp);
   route.post('/findlast', controller.findlast);
+  route.post("/detail", controller.createDetail)
 };

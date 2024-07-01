@@ -723,19 +723,40 @@ const getLoadRequestLineInfo = async (req: Request, res: Response, next: NextFun
     const loadRequestLineService = Container.get(LoadRequestService);
     const userMobileService = Container.get(UserMobileService);
     const load_request_code = req.params.load_request_code;
+    //console.log(load_request_code)
     const loadRequest = await loadRequestService.findLoadRequestLines({ load_request_code: load_request_code });
     // let userMobile = null;
     // if (loadRequest != null) {
     //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
     // }
-
+//console.log(loadRequest)
     return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
-
+const getLoadRequestLineInfoDif = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const loadRequestLineService = Container.get(LoadRequestService);
+    const userMobileService = Container.get(UserMobileService);
+    const load_request_code = req.params.load_request_code;
+   // console.log(load_request_code)
+    const loadRequest = await loadRequestService.findLoadRequestLinesDif({ load_request_code: load_request_code, qt_validated: { [Op.ne]: Sequelize.col('qt_effected') , }});
+    // let userMobile = null;
+    // if (loadRequest != null) {
+    //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
+    // }
+//console.log(loadRequest)
+    return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 function formatDateFromMobileToBackAddTimezone(timeString) {
   let elements = timeString.split(' ');
   let dateComponents = elements[0].split('-');
@@ -868,6 +889,7 @@ export default {
   createLoadRequestAndLines,
   getLoadRequestInfo,
   getLoadRequestLineInfo,
+  getLoadRequestLineInfoDif,
   getLoadRequestDataV3,
   findAllLoadRequestLinesDifference,
   getLoadRequestCreationDataRole,

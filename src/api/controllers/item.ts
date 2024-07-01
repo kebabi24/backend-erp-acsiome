@@ -12,7 +12,7 @@ import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
 import { cpuUsage } from 'process';
-
+import ItemDetailService from '../../services/item-detail';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -28,6 +28,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    return res.status(201).json({ message: 'created succesfully', data: { item } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const createDetail = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create item endpoint ');
+  try {
+    const { item, itemDetail } = req.body
+    const itemServiceInstance = Container.get(ItemService);
+    const itemDetailServiceInstance = Container.get(ItemDetailService);
+    const training = await itemServiceInstance.create({
+      ...item,
+      pt_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    for (let entry of itemDetail) {
+      entry = { ...entry,ptd_domain:user_domain, ptd_part: item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+      await itemDetailServiceInstance.create(entry)
+
+  
+  }
     return res.status(201).json({ message: 'created succesfully', data: { item } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -464,4 +493,5 @@ export default {
   update,
   CalcCmp,
   findlast,
+  createDetail
 };
