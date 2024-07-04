@@ -32,7 +32,9 @@ const Itinerary_Customer = sequelize.define(
                 key: "customer_code",
             },
         },
-        
+        rank:{
+            type:Sequelize.INTEGER
+        }
         // ...base,
     },
     {
