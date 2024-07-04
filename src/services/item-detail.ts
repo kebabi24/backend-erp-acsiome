@@ -93,5 +93,14 @@ export default class ItemDetailService {
       throw e;
     }
   }
-  
+  public async delete(query: any): Promise<any> {
+    try {
+        const item = await this.itemDetailModel.destroy({ where: query })
+        this.logger.silly("delete one job mstr")
+        return item
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
 }

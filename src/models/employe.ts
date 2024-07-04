@@ -58,7 +58,11 @@ const Employe = sequelize.define(
     emp_balance: { type: Sequelize.DECIMAL, defaultValue: 0 },
     emp_userid: Sequelize.STRING,
     emp_domain: Sequelize.STRING,
-
+    emp_conf_date: Sequelize.DATEONLY,
+    emp_dism_date: Sequelize.DATEONLY,
+    emp_loyalty:  { type: Sequelize.BOOLEAN, defaultValue: false },
+    emp_loyal_date: Sequelize.STRING,
+    emp_upper : Sequelize.STRING,
     ...base,
   },
   {

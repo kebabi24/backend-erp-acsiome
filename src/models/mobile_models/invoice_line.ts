@@ -41,6 +41,7 @@ const InvoiceLine = sequelize.define(
         loyalty_necessary_score:{type: Sequelize.INTEGER}, 
         lot:{type:Sequelize.STRING},
         promoamt: {type: Sequelize.FLOAT},
+        price:{type: Sequelize.FLOAT}, 
 
         
        

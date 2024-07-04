@@ -488,14 +488,14 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
 
   try {
     const loadRequestService = Container.get(LoadRequestService);
-//console.log("req.body",req.body)
+console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
     // console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
      // console.log("line",line)
-      if(line.qt_effected > 0) {
+      if(line.qt_effected != 0) {
        // console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
@@ -526,7 +526,7 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
     }
     }
     for (const detail of load_request_details) {
-      if(detail.qt_effected > 0) {
+      if(detail.qt_effected != 0) {
       const elemDet = await loadRequestService.findLoadRequestDetail({
         load_request_code: detail.load_request_code,
         product_code: detail.product_code,
