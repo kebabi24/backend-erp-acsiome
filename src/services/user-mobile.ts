@@ -321,7 +321,7 @@ export default class UserMobileService {
 
       }
       // });
-console.log(customersFinal)
+//console.log(customersFinal)
       return customersFinal;
     } catch (e) {
       console.log('Error from service-getCustomers');
