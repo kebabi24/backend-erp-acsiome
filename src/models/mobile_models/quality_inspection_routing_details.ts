@@ -47,7 +47,7 @@ const QualityInspectionRoutingDetails = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_qualityInspectionRoutingDetails",
+        tableName: "aa_qualityinspectionroutingdetails",
     }
 )
 export default  QualityInspectionRoutingDetails ;

@@ -27,7 +27,7 @@ const PriceList = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_priceList",
+        tableName: "aa_pricelist",
     }
 )
 export default  PriceList ;

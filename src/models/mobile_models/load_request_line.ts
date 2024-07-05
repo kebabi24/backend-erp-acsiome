@@ -44,7 +44,7 @@ const LoadRequestLine = sequelize.define(
     // ...base
   },
   {
-    tableName: 'aa_loadRequestLine',
+    tableName: 'aa_loadrequestline',
   },
 );
 export default LoadRequestLine;

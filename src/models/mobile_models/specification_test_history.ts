@@ -50,7 +50,7 @@ const SpecificationTestHistory = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_specificationTestHistory",
+        tableName: "aa_specificationtesthistory",
     }
 )
 export default  SpecificationTestHistory ;

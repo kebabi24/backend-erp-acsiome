@@ -52,7 +52,7 @@ const ItemSpecificationDetails = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_itemSpecificationDetails",
+        tableName: "aa_itemspecificationdetails",
     }
 )
 export default  ItemSpecificationDetails ;

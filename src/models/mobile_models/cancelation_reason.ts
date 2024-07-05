@@ -31,7 +31,7 @@ const CancelationReason = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_cancelationReason",
+        tableName: "aa_cancelationreason",
     }
 )
 export default  CancelationReason ;

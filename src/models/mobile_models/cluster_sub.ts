@@ -40,7 +40,7 @@ const SubCluster = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_subCluster",
+        tableName: "aa_subcluster",
     }
 )
 export default  SubCluster ;

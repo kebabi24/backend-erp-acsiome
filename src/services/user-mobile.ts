@@ -285,27 +285,51 @@ export default class UserMobileService {
         where: query,
       });
 
-      var customersCodes = [];
+//       var customersCodesData1 = [];
+//       customersCodesData.forEach(customer => {
+//         customersCodesData1.push(customer.dataValues.customer_code,customer.dataValues.rank);
+//       });
+// console.log("customersCodesData1",customersCodesData1)
+      const customersCodes = [];
       customersCodesData.forEach(customer => {
         customersCodes.push(customer.dataValues.customer_code);
       });
 
-      const customers = await this.customerMobileModel.findAll({
+      var customers = await this.customerMobileModel.findAll({
         where: { customer_code: customersCodes },
+        // include: [[Sequelize.fn('count', Sequelize.col('id')), 'rank']], 
       });
+
+      // customers = customers.map(item => {
+      //   const item2 = customersCodesData1.find(i2 => i2.transid === item.transid);
+      //   return item2 ? { ...item, ...item2 } : item;
+      // });
 
       const customersFinal = [];
-      customers.forEach(customer => {
+     // customers.forEach(customer => {
+        for (let customer of customers) {
+        // if (customersCodesData1.indexOf(customer.customer_code) != -1){
+        //   customer.rank = customersCodesData1.indexOf(customer.customer_code).rank
+        // }
+        const customersCodesiti = await this.itineraryCustomerModel.findOne({
+          where: {itinerary_code :customersCodesData[0].itinerary_code, customer_code:customer.customer_code},
+        });
+  
+        customer.dataValues.rank =  customersCodesiti.rank
+      //  console.log(customer,"here")
         customersFinal.push(customer.dataValues);
-      });
 
+      }
+      // });
+console.log(customersFinal)
       return customersFinal;
     } catch (e) {
       console.log('Error from service-getCustomers');
       this.logger.error(e);
       throw e;
-    }
+    
     this.logger.silly('find one user mstr');
+    }
   }
 
   // ******************** GET CHECKLIST **************************

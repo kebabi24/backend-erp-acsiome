@@ -38,7 +38,7 @@ const UserMobile = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_userMobile",
+        tableName: "aa_usermobile",
     }
 )
 export default  UserMobile;

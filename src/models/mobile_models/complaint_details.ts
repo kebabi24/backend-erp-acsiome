@@ -31,7 +31,7 @@ const ComplaintDetails = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_complaintDetails",
+        tableName: "aa_complaintdetails",
     }
 )
 export default  ComplaintDetails ;

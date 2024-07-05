@@ -35,7 +35,7 @@ const InventoryLine = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_inventoryLine",
+        tableName: "aa_inventoryline",
     }
 )
 export default  InventoryLine ;

@@ -41,7 +41,7 @@ const QualityTestBillDetails = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_qualityTestBillDetails",
+        tableName: "aa_qualitytestbilldetails",
     }
 )
 export default  QualityTestBillDetails ;

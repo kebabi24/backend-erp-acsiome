@@ -41,7 +41,7 @@ const CategoryType = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_categoryType",
+        tableName: "aa_categorytype",
     }
 )
 export default  CategoryType ;
