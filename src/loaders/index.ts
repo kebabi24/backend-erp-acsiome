@@ -229,7 +229,7 @@ export default async ({ expressApp }) => {
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
       { name: 'itemModelModel', model: require('../models/item-model').default },
       { name: 'itemDetailModel', model: require('../models/item-detail').default },
-    
+      { name: 'repertoryDetailModel', model: require('../models/repertory-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1092,7 +1092,7 @@ export default async ({ expressApp }) => {
   );
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-    //await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

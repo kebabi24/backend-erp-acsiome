@@ -65,6 +65,7 @@
     "moment-timezone": "^0.5.23",
     "mongoose": "^5.7.5",
     "morgan": "^1.10.0",
+    "mssql": "^11.0.1",
     "multer": "^1.4.5-lts.1",
     "node-printer": "^1.0.4",
     "node-thermal-printer": "^4.2.0",

@@ -220,6 +220,7 @@ declare global {
     export type calendarTimingModel = S.Model;
     export type ItemModelModel = S.Model;
     export type ItemDetailModel = S.Model;
+    export type RepertoryDetailModel = S.Model;
    
   }
 }
