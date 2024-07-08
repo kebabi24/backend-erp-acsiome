@@ -32,6 +32,20 @@ export default class ItemDetailService {
       throw e;
     }
   }
+  public async findS(query: any): Promise<any> {
+    try {
+      const details = await this.itemDetailModel.findAll({
+        where: query,
+         attributes: ['ptd_part']
+      });
+
+      this.logger.silly('find item ');
+      return details;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   
   public async findBySupp(query: any): Promise<any> {
     try {

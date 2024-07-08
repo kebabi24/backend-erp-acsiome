@@ -550,6 +550,45 @@ const updateDet = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const Sequelize = require('sequelize');
+  const Op = Sequelize.Op;
+  
+  try {
+    
+  
+    const itemServiceInstance = Container.get(ItemService);
+    const itemDetailServiceInstance = Container.get(ItemDetailService);
+    const { detail } = req.body;
+    const itemsd = await itemDetailServiceInstance.findS({
+      ...{
+        ptd_domain: user_domain,
+        ptd_gol: detail,
+      },
+         
+    });
+    let it = []
+    for (let ite of itemsd) {
+      it.push(ite.ptd_part)
+    }
+    const items = await itemServiceInstance.find({
+      ...{
+        pt_domain: user_domain,
+        pt_part: it,
+      },
+         
+    });
+    console.log(items)
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -569,4 +608,5 @@ export default {
   createDetail,
   findByDetTr,
   updateDet,
+  findJob,
 };

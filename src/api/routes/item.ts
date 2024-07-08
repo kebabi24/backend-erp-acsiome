@@ -24,4 +24,5 @@ export default (app: Router) => {
   route.post("/detail", controller.createDetail);
   route.post("/finddettr", controller.findByDetTr);
   route.put('/updated/:id', controller.updateDet);
+  route.post('/findjob', controller.findJob);
 };
