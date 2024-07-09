@@ -61,21 +61,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       });
 
 
-      /*create lad_det*/
-      let lad = {
-        lad_code: req.body.lpnbr,
-        lad_nbr: item.wod_lot,
-        lad_addr: wo.wo_routing,
-        lad_carrier: item.wod_part,
-        lad_qty_ord: item.wod_qty_req,
-        lad_qty_chg:0,
-        lad_lot: item.wod_serial,
-        lad_ref: item.wod_ref
+      // /*create lad_det*/
+      // let lad = {
+      //   lad_code: req.body.lpnbr,
+      //   lad_nbr: item.wod_lot,
+      //   lad_addr: wo.wo_routing,
+      //   lad_carrier: item.wod_part,
+      //   lad_qty_ord: item.wod_qty_req,
+      //   lad_qty_chg:0,
+      //   lad_lot: item.wod_serial,
+      //   lad_ref: item.wod_ref
 
-      }
-      const allocation = await allocationDetailServiceInstance.create({...lad, lad_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+      // }
+      // const allocation = await allocationDetailServiceInstance.create({...lad, lad_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     
-      /*create lad_det*/
+      // /*create lad_det*/
     }
     //  const workOrderDetail = await workOrderDetailServiceInstance.create({...req.body,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     return res.status(201).json({ message: 'created succesfully', data: req.body });

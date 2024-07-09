@@ -1,6 +1,9 @@
 import LocationDetailService from '../../services/location-details';
 import InventoryStatusDetailService from '../../services/inventory-status-details';
 import InventoryStatusService from '../../services/inventory-status';
+import InventoryTransactionService from '../../services/inventory-transaction';
+import costSimulationService from '../../services/cost-simulation';
+import itemService from '../../services/item';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
@@ -382,16 +385,106 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const updateS = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
   logger.debug('Calling update one  locationDetail endpoint');
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(itemService);
+
     let locationDetail;
 for (let ld of req.body.details) {
+  const ref = await locationDetailServiceInstance.findOne({ ld_domain:user_domain,ld_ref:ld.ld_ref });
      locationDetail = await locationDetailServiceInstance.update(
-      { ld_status: ld.ld_status, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { ld_user1:ld.ld_user1,ld_user2:ld.ld_user2,ld_status: ld.ld_status, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id : ld.id},
+      
     );
+    const sct = await costSimulationServiceInstance.findOne({
+      sct_domain:user_domain,
+      sct_part: ld.ld_part,
+      sct_site: ld.ld_site,
+      sct_sim: 'STD-CG',
+    });
+    const pt = await itemServiceInstance.findOne({ pt_part: ld.ld_part,pt_domain:user_domain });
+    await inventoryTransactionServiceInstance.create({
+       tr_site: ref.ld_site,
+       tr_loc: ref.ld_loc,
+       tr_status: ref.ld_status,
+       tr_part: ref.ld_part,
+       tr_type: "ISS-CHL",
+       tr_serial: ref.ld_lot,
+       tr_vend_lot: ref.ld_vend_lot,
+       tr_rmks: ld.ld_user2,
+       tr_expire: ref.ld_expire,
+       tr_domain:user_domain,
+       tr_ref: ld.ld_ref,
+       tr_qty_loc: 0,
+       tr_line: 1,
+       tr_um: pt.pt_um,
+       tr_effdate: new Date(),
+       tr_date: new Date(),
+       tr_price: sct.sct_mtl_tl,
+       tr_mtl_std: sct.sct_mtl_tl,
+       tr_lbr_std: sct.sct_lbr_tl,
+       tr_bdn_std: sct.sct_bdn_tl,
+       tr_ovh_std: sct.sct_ovh_tl,
+       tr_sub_std: sct.sct_sub_tl,
+       tr_desc:pt.pt_desc1,
+       tr_prod_line: pt.pt_prod_line,
+       tr__chr01:pt.pt_draw,
+       tr__chr02:pt.pt_break_cat,
+       tr__chr03:pt.pt_group,
+       tr_grade:ref.ld_grade,
+       tr_batch:ref.ld__chr01,
+       dec01:Number(new Date().getFullYear()),
+       dec02:Number(new Date().getMonth() + 1),
+       tr_program:new Date().toLocaleTimeString(),
+       created_by: user_code,
+       created_ip_adr: req.headers.origin,
+       last_modified_by: user_code,
+       last_modified_ip_adr: req.headers.origin,
+    });
+    await inventoryTransactionServiceInstance.create({
+      tr_site: ld.ld_site,
+       tr_loc: ld.ld_loc,
+       tr_status: ld.ld_status,
+       tr_part: ld.ld_part,
+       tr_type: "RCT-CHL",
+       tr_serial: ld.ld_lot,
+       tr_vend_lot: ld.ld_vend_lot,
+       tr_rmks: '',
+       tr_expire: ld.ld_expire,
+      tr_domain:user_domain,
+      tr_qty_loc: 0,
+      tr_ref: ld.ld_ref,
+      tr_line: 1,
+      tr_um: pt.pt_um,
+      tr_effdate: new Date(),
+      tr_date: new Date(),
+      tr_price: sct.sct_mtl_tl,
+      tr_mtl_std: sct.sct_mtl_tl,
+      tr_lbr_std: sct.sct_lbr_tl,
+      tr_bdn_std: sct.sct_bdn_tl,
+      tr_ovh_std: sct.sct_ovh_tl,
+      tr_sub_std: sct.sct_sub_tl,
+      tr_desc:pt.pt_desc1,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr_grade:ld.ld_grade,
+        tr_batch:ld.ld__chr01,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
 }
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetail });
   } catch (e) {

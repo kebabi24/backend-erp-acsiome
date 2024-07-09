@@ -28,8 +28,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const totalSecondsd = (+hoursd) * 60 * 60 + (+minutesd) * 60 ;
        
         const wo = await workOrderServiceInstance.findOne({id : item.op_wo_lot,wo_domain:user_domain})
+        let operation = Number(wo.wo_line)
+        if (wo.wo_line = null){operation = 0}
 
-        const ro = await workroutingServiceInstance.findOne({ro_routing : wo.wo_routing,ro_domain:user_domain})
+        const ro = await workroutingServiceInstance.findOne({ro_routing : wo.wo_routing,ro_op:operation,ro_domain:user_domain})
 
         await operationHistoryServiceInstance.create({
           ...item,

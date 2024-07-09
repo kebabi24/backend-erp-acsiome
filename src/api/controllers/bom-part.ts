@@ -13,7 +13,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const bomPartServiceInstance = Container.get(BomPartService)
         const { BomPart, Details } = req.body
 
-        await bomPartServiceInstance.delete({ptb_part: BomPart.ptb_part, ptb_domain: user_domain})
+        await bomPartServiceInstance.delete({ptb_bom: BomPart.ptb_bom, ptb_domain: user_domain})
         for (let entry of Details) {
             
             

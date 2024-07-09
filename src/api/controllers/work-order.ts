@@ -21,6 +21,7 @@ import saleOrder from '../../models/saleorder';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import LocationDetailService from '../../services/location-details';
 import LabelService from '../../services/label';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -50,11 +51,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         batch = carac.pt_break_cat,
         grade = carac.pt_group
       }
+      console.log(item)
       await workOrderServiceInstance
         .create({
           ...item,
           ...it,
-          wo_rev: rev,
+          wo_queue_eff:item.line,
+          // wo_rev: rev,
           wo_draw: draw,
           wo_ref : ref,
           wo_batch : batch,
@@ -69,7 +72,29 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         .then(result => {
           wolot = result.id;
         });
-      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing,ro__chr01:parts.pt_break_cat, ro__dec01:parts.int01 });
+      if (ros.data = null){const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing,ro_op:0 });
+      for (const ro of ros) {
+          await woroutingServiceInstance.create({
+        wr_domain: user_domain,
+        wr_nbr: nof,
+        wr_lot: wolot,
+        wr_start: item.wo_rel_date,
+        wr_routing: ro.ro_routing,
+        wr_wkctr: ro.ro_wkctr,
+        wr_mch: ro.ro_mch,
+        wr_status: 'F',
+        wr_part: item.wo_part,
+        wr_site: item.wo_site,
+        wr_op: ro.ro_op,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+           });
+      }
+    }
+    else{
       for (const ro of ros) {
         await woroutingServiceInstance.create({
           wr_domain: user_domain,
@@ -90,6 +115,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
     }
+  }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -650,28 +676,40 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   //
   logger.debug('Calling update one  wo endpoint');
-  try {
+try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
+    const workRoutingServiceInstance = Container.get(WorkroutingService);
      const { id } = req.params;
+     let result=[]
+     let passage = Number(req.body.wo_queue_eff)
+    let lancement = req.body.wo_due_date
+    let echeance  = req.body.wo_due_date
+    const of = await workOrderServiceInstance.findOne({wo_domain: user_domain,id: id});
+    const ros = await workRoutingServiceInstance.find({ ro_routing : req.body.wo_routing,ro_domain: user_domain});
+  for (let ro of ros){
+    let version = of.wo_rev;
+    version = Number(version) + 1;
+    let diff2 = 0
+    let diff1 = Number(Number(of.wo_qty_comp) - Number(req.body.wo_qty_ord));
+    if (of.wo_qty_comp != 0){diff2 = Number(Number(of.wo_qty_rjct) / Number(Number(of.wo_qty_rjct) + Number(of.wo_qty_comp)))}
+    const wo = await workOrderServiceInstance.update({ ...req.body, wo_rev: version, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin},{ id });
+    result.push(wo);
+    const ofs = await workOrderServiceInstance.find({wo_domain: user_domain,wo_nbr: of.wo_nbr,wo_queue_eff:{[Op.gte]:req.body.wo_queue_eff},id:{[Op.ne]:id}});
+    for (let wos of ofs){ 
+      let jours = Number(Number(req.body.wo_qty_ord) / (Number(ro.ro_run) * 24))
+         echeance.setDate(lancement.getDate() + jours)
+         passage = passage + 1
+         const otherwo = await workOrderServiceInstance.update({ wo_rel_date:lancement,wo_due_date:echeance,wo_queue_eff:passage, wo__log01: true,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },{ wo_nbr:wos.wo_nbr,wo_queue_eff:wos.wo_queue_eff,id:{[Op.ne]:id},wo__log01:{[Op.ne]:true} });
+         lancement = echeance
+         result.push(otherwo)
+    }
+    const rewo = await workOrderServiceInstance.update({ wo__log01: null,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin},{ wo_nbr:of.wo_nbr,wo__log01:true })
+    result.push(rewo)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
     
-    const of = await workOrderServiceInstance.findOne({
-    
-      wo_domain: user_domain,
-      id: id
-    
-  });
-  console.log('diff1', of.wo_qty_ord, req.body.wo_qty_comp)
-  let diff1 = Number(Number(of.wo_qty_comp) - Number(req.body.wo_qty_ord));
-  let diff2 = Number(Number(of.wo_qty_rjct) / Number(Number(of.wo_qty_rjct) + Number(of.wo_qty_comp)))
-    const wo = await workOrderServiceInstance.update(
-      { ...req.body, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
-      { id },
-    );
-    return res.status(200).json({ message: 'fetched succesfully', data: wo });
-  } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
   }
+}
+catch (e) {logger.error('🔥 error: %o', e);return next(e)}
 };
 
 const deleteOne = async (req: Request, res: Response, next: NextFunction) => {

@@ -35,7 +35,7 @@ export default class workOrderService {
       const workOrders = await this.workOrderModel.findAll({
         where: query,
         include: this.itemModel,
-        order: [['id', 'DESC']],
+         order: [['id', 'ASC']],
       });
       this.logger.silly('find All workOrders mstr');
       return workOrders;

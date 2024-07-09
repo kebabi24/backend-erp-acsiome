@@ -55,6 +55,7 @@ const{user_domain} = req.headers
           tag_part: item.pt_part,
           tag_loc: detail.ld_loc,
           tag_serial: detail.ld_lot,
+          tag_ref:detail.ld_ref,
           tag_site: detail.ld_site,
           tag_type: detail.pt_part_type,
         };
@@ -253,6 +254,7 @@ const gap = async (req: Request, res: Response, next: NextFunction) => {
         ld_domain: user_domain,
         ld_part: tag.tag_part,
         ld_lot: tag.tag_serial,
+        ld_ref:tag.tag_ref,
         ld_site: tag.tag_site,
         ld_loc: tag.tag_loc,
       });
@@ -354,6 +356,7 @@ const{user_domain} = req.headers
         tag_cnt_cnv,
         tag_cnt_nam,
         tag_serial,
+        tag_ref,
         tag_cnt_dt,
         tag_rcnt_dt,
         tag_site,
@@ -369,7 +372,7 @@ const{user_domain} = req.headers
         }); 
       
         await locationDetailServiceInstance.create(
-          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_ref: tag_ref,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
         )
       }
       const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STD-CG' });
@@ -394,6 +397,7 @@ const{user_domain} = req.headers
         ld_domain: user_domain ,
         ld_part: tag.tag_part,
         ld_lot: tag.tag_serial,
+        ld_ref:tag.tag_ref,
         ld_site: tag.tag_site,
         ld_loc: tag.tag_loc,
       });
@@ -422,6 +426,7 @@ const{user_domain} = req.headers
         tr_rmks: tag_cnt_nam,
         tr_lot: '',
         tr_serial: tag_serial,
+        tr_ref: tag_ref,
         tr_loc: ld.ld_loc,
         tr_site: ld.ld_site,
         tr_effdate: tag_cnt_dt,

@@ -504,8 +504,26 @@ const addAllocation = async (req: Request, res: Response, next: NextFunction) =>
 
   try {
     const labelServiceInstance = Container.get(LabelService);
-
+    
+    
     for (let obj of req.body.detail) {
+     console.log(obj.adresse)
+     if(obj.adresse == null){
+      const labels = await labelServiceInstance.update(
+        {
+          lb__chr01: req.body.wodlot,
+          lb__log01: true,
+          lb_actif: true,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        {
+          lb_part: obj.wod_part,
+          lb_domain: user_domain,
+        },
+      );
+     } 
+     else {
       const labels = await labelServiceInstance.update(
         {
           lb__chr01: req.body.wodlot,
@@ -517,10 +535,10 @@ const addAllocation = async (req: Request, res: Response, next: NextFunction) =>
         {
           lb_part: obj.wod_part,
           lb_addr: obj.adresse,
-          lb_actif: false,
           lb_domain: user_domain,
         },
       );
+     }
     }
   
     return res.status(200).json({

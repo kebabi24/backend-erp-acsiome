@@ -624,7 +624,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.debug('Calling update one  code endpoint');
   try {
-    const it = req.body;
+    const it = req.body; 
     
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
@@ -695,6 +695,8 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
           ld_expire: it.tr_expire,
           ld_lot: it.tr_serial,
           ld__log01: status.is_nettable,
+          ld_user1:it.tr_user1,
+          ld_user2:it.tr_rmks,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
@@ -812,9 +814,9 @@ const inventoryActivity = async (req: Request, res: Response, next: NextFunction
     
     const items = await itemService.find({
       pt_domain:user_domain,
-      pt_part: {
-        [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
-      },
+      // pt_part: {
+      //   [Op.between]: [req.body.pt_part_1, req.body.pt_part_2],
+      // },
     });
     const result = [];
     for (const item of items) {

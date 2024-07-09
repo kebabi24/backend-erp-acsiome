@@ -73,6 +73,26 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findstatuschangereason = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all reasons endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        
+        const reasonServiceInstance = Container.get(ReasonService)
+        const reasons = await reasonServiceInstance.find({rsn_type:'STATUSCHANGE',rsn_domain: user_domain})
+        var datas = [];
+        for (let stat of reasons) {
+          datas.push({ value: stat.rsn_ref, label: stat.rsn_desc });
+        }
+        
+        return res.status(200).json(datas);
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+}
 
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -133,5 +153,6 @@ export default {
     findBy,
     findByOne,
     update,
+    findstatuschangereason,
     deleteOne
 }
