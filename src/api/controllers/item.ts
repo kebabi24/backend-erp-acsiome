@@ -12,7 +12,7 @@ import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
 import { cpuUsage } from 'process';
-
+import ItemDetailService from '../../services/item-detail';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -28,6 +28,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    return res.status(201).json({ message: 'created succesfully', data: { item } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const createDetail = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create item endpoint ');
+  try {
+    const { item, itemDetail } = req.body
+    const itemServiceInstance = Container.get(ItemService);
+    const itemDetailServiceInstance = Container.get(ItemDetailService);
+    const training = await itemServiceInstance.create({
+      ...item,
+      pt_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    for (let entry of itemDetail) {
+      entry = { ...entry,ptd_domain:user_domain, ptd_part: item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+      await itemDetailServiceInstance.create(entry)
+
+  
+  }
     return res.status(201).json({ message: 'created succesfully', data: { item } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -126,6 +155,23 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const { id } = req.params;
     const item = await itemServiceInstance.findOne({ id });
+    return res.status(200).json({ message: 'fetched succesfully', data: item });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findOneDet = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const { id } = req.params;
+    const item = await itemServiceInstance.findOneDet({ id });
+    //console.log(item)
     return res.status(200).json({ message: 'fetched succesfully', data: item });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -449,6 +495,100 @@ const findlast = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+
+const findByDetTr = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find by  all item endpoint")
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+      const itemDetailServiceInstance = Container.get(ItemDetailService)
+      const items = await itemDetailServiceInstance.find({...req.body,ptd_domain:user_domain})
+      
+      
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: items })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+const updateDet = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling update one  job endpoint');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const itemDetailServiceInstance = Container.get(ItemDetailService);
+    const { id } = req.params;
+    const { item, details } = req.body;
+    const it = await itemServiceInstance.update(
+      { ...item, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { id },
+    );
+    // console.log("details",details)
+    await itemDetailServiceInstance.delete({ ptd_part: item.pt_part, ptd_domain: user_domain });
+    for (let entry of details) {
+      // console.log("here")
+      entry = {
+        ...entry,
+        ptd_part: item.pt_part,
+        ptd_domain: user_domain,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await itemDetailServiceInstance.create(entry);
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: it });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findJob = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const Sequelize = require('sequelize');
+  const Op = Sequelize.Op;
+  
+  try {
+    
+  
+    const itemServiceInstance = Container.get(ItemService);
+    const itemDetailServiceInstance = Container.get(ItemDetailService);
+    const { detail } = req.body;
+    const itemsd = await itemDetailServiceInstance.findS({
+      ...{
+        ptd_domain: user_domain,
+        ptd_gol: detail,
+      },
+         
+    });
+    let it = []
+    for (let ite of itemsd) {
+      it.push(ite.ptd_part)
+    }
+    const items = await itemServiceInstance.find({
+      ...{
+        pt_domain: user_domain,
+        pt_part: it,
+      },
+         
+    });
+    console.log(items)
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -457,6 +597,7 @@ export default {
   findBySupp,
   findByOne,
   findOne,
+  findOneDet,
   findAll,
   findProd,
   findAllwithstk,
@@ -464,4 +605,8 @@ export default {
   update,
   CalcCmp,
   findlast,
+  createDetail,
+  findByDetTr,
+  updateDet,
+  findJob,
 };

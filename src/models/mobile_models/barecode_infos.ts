@@ -29,7 +29,7 @@ const BarcodeInfos = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_barcodeInfos",
+        tableName: "aa_barcodeinfos",
     }
 )
 export default  BarcodeInfos ;

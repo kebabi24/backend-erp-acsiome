@@ -24,7 +24,7 @@ const PopulationClientPromo = sequelize.define(
         type:{type:Sequelize.STRING}
     },
     {
-        tableName: "aa_populationClientPromo",
+        tableName: "aa_populationclientpromo",
     }
 )
 export default  PopulationClientPromo ;

@@ -27,7 +27,7 @@ const PopulationArticle = sequelize.define(
         volume:{type:Sequelize.DECIMAL},
     },
     {
-        tableName: "aa_populationArticle",
+        tableName: "aa_populationarticle",
     }
 )
 export default  PopulationArticle ;

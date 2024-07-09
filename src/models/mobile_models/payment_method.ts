@@ -31,7 +31,7 @@ const PaymentMethod = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_paymentMethod",
+        tableName: "aa_paymentmethod",
     }
 )
 export default  PaymentMethod ;

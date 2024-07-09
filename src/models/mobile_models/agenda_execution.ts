@@ -37,7 +37,7 @@ const AgendaExecution = sequelize.define(
 
     },
     {
-        tableName: "aa_agendaExecution",
+        tableName: "aa_agendaexecution",
     }
 )
 export default  AgendaExecution ;

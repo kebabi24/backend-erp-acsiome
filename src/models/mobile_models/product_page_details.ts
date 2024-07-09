@@ -39,7 +39,7 @@ const productPageDetails = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_productPageDetails",
+        tableName: "aa_productpagedetails",
     }
 )
 export default   productPageDetails ;

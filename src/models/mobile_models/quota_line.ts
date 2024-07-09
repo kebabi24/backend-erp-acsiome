@@ -26,7 +26,7 @@ const QuotaLine = sequelize.define(
     
     },
     {
-        tableName: "aa_quotaLine",
+        tableName: "aa_quotaline",
     }
 )
 export default  QuotaLine ;

@@ -33,7 +33,6 @@ export default async ({ expressApp }) => {
     models: [
       testModel,
       { name: 'repertoryModel', model: require('../models/repertory').default },
-
       { name: 'addressModel', model: require('../models/address').default },
       { name: 'providerModel', model: require('../models/provider').default },
       { name: 'customerModel', model: require('../models/customer').default },
@@ -91,7 +90,6 @@ export default async ({ expressApp }) => {
       { name: 'workcenterModel', model: require('../models/workcenter').default },
       { name: 'workroutingModel', model: require('../models/workrouting').default },
       { name: 'woroutingModel', model: require('../models/worouting').default },
-
       { name: 'bomModel', model: require('../models/bom').default },
       { name: 'bomPartModel', model: require('../models/bom-part').default },
       { name: 'psModel', model: require('../models/ps').default },
@@ -140,6 +138,7 @@ export default async ({ expressApp }) => {
       { name: 'audiogramModel', model: require('../models/audiogram').default },
       // mobile models
       // MOBILE DATABASE MODELS
+      { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
       { name: 'roleModel', model: require('../models/mobile_models/role').default },
       { name: 'profileMobileModel', model: require('../models/mobile_models/profile').default },
@@ -162,107 +161,75 @@ export default async ({ expressApp }) => {
       { name: 'loadRequestLineModel', model: require('../models/mobile_models/load_request_line').default },
       { name: 'loadRequestDetailsModel', model: require('../models/mobile_models/load_request_details').default },
       { name: 'paymentMethodModel', model: require('../models/mobile_models/payment_method').default },
-      //
       { name: 'profile_menuModel', model: require('../models/mobile_models/profile_menu').default },
       { name: 'role_itineraryModel', model: require('../models/mobile_models/role_itinerary').default },
       { name: 'itinerary_CustomerModel', model: require('../models/mobile_models/itinerary_customer').default },
       { name: 'productPageDetailsModel', model: require('../models/mobile_models/product_page_details').default },
       { name: 'profileProductPageModel', model: require('../models/mobile_models/profile_product_page').default },
-
       { name: 'posCategoryModel', model: require('../models/pos-categories').default },
       { name: 'posCategoryProductModel', model: require('../models/pos-category-product').default },
       { name: 'posProductModel', model: require('../models/pos-product').default },
       { name: 'posOrderModel', model: require('../models/pos-order').default },
       { name: 'posOrderDetailProductModel', model: require('../models/pos-order-detail-product').default },
       { name: 'itemModel', model: require('../models/item').default },
-
       { name: 'orderPosProductSuppModel', model: require('../models/pos-order-detail-product-supp').default },
-
       { name: 'bkhModel', model: require('../models/bkh').default },
       { name: 'ordersHistoryModel', model: require('../models/order-history').default },
       { name: 'deliveryModel', model: require('../models/delivery').default },
       { name: 'orderPosProductIngModel', model: require('../models/pos-order-detail-product-ing').default },
-
       { name: 'complaintModel', model: require('../models/mobile_models/complaint').default },
       { name: 'complaintDetailsModel', model: require('../models/mobile_models/complaint_details').default },
       { name: 'satisfactionModel', model: require('../models/mobile_models/satisfaction').default },
-
       { name: 'priceListModel', model: require('../models/mobile_models/price_list').default },
       { name: 'fidelityCardModel', model: require('../models/mobile_models/fidelity_card').default },
       { name: 'cancelationReasonModel', model: require('../models/mobile_models/cancelation_reason').default },
       { name: 'paymentModel', model: require('../models/mobile_models/payment').default },
       { name: 'invoiceModel', model: require('../models/mobile_models/invoice').default },
-      { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
       { name: 'barecodeInfosModel', model: require('../models/mobile_models/barecode_infos').default },
       { name: 'messagesModel', model: require('../models/mobile_models/messages').default },
       { name: 'visitsModel', model: require('../models/mobile_models/visits').default },
-
       { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
       { name: 'inventoryLineModel', model: require('../models/mobile_models/inventory_line').default },
-
       // CRM
       { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
       { name: 'agendaExecutionModel', model: require('../models/mobile_models/agenda_execution').default },
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
-      {
-        name: 'agendaExecutionDetailsModel',
-        model: require('../models/mobile_models/agenda_execution_details').default,
-      },
-
+      {name: 'agendaExecutionDetailsModel',model: require('../models/mobile_models/agenda_execution_details').default},
       // ADDED : 10/03/2023
       { name: 'specificationModel', model: require('../models/mobile_models/specification').default },
       { name: 'specificationDetailsModel', model: require('../models/mobile_models/specification_details').default },
-      {
-        name: 'SpecificationTestResultsModel',
-        model: require('../models/mobile_models/specification_test_results').default,
-      },
-      {
-        name: 'itemSpecificationDetailsModel',
-        model: require('../models/mobile_models/item_specification_details').default,
-      },
-      {
-        name: 'specificationTestHistoryModel',
-        model: require('../models/mobile_models/specification_test_history').default,
-      },
-      {
-        name: 'qualityTestBillDetailsModel',
-        model: require('../models/mobile_models/quality_test_bill_details').default,
-      },
-      {
-        name: 'qualityInspectionRoutingDetailsModel',
-        model: require('../models/mobile_models/quality_inspection_routing_details').default,
-      },
+      { name: 'SpecificationTestResultsModel',model: require('../models/mobile_models/specification_test_results').default},
+      { name: 'itemSpecificationDetailsModel', model: require('../models/mobile_models/item_specification_details').default},
+      { name: 'specificationTestHistoryModel',model: require('../models/mobile_models/specification_test_history').default},
+      { name: 'qualityTestBillDetailsModel',model: require('../models/mobile_models/quality_test_bill_details').default,},
+      { name: 'qualityInspectionRoutingDetailsModel',model: require('../models/mobile_models/quality_inspection_routing_details').default},
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
-
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
       { name: 'printerModel', model: require('../models/printer').default },
       { name: 'RepertoryModel', model: require('../models/repertory').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
-
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
       { name: 'allocationDetailModel', model: require('../models/allocation-detail').default },
       { name: 'TransportcostModel', model: require('../models/transportcost').default },
       { name: 'CostlistModel', model: require('../models/costlist').default },
       { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
-
       // PROMOTION
       { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
       { name: 'userPrinterModel', model: require('../models/user-printers').default },
       { name: 'populationClientPromoModel', model: require('../models/mobile_models/population_client').default },
-
       { name: 'salesOrderModel', model: require('../models/mobile_models/sales_order').default },
       { name: 'salesOrderLineModel', model: require('../models/mobile_models/sales_order_line').default },
-
       { name: 'quotaModel', model: require('../models/mobile_models/quota').default },
       { name: 'quotaLineModel', model: require('../models/mobile_models/quota_line').default },
-
       { name: 'calendarTimingModel', model: require('../models/mobile_models/calendar_timing').default },
       { name: 'itemModelModel', model: require('../models/item-model').default },
+      { name: 'itemDetailModel', model: require('../models/item-detail').default },
+      { name: 'repertoryDetailModel', model: require('../models/repertory-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -617,6 +584,14 @@ export default async ({ expressApp }) => {
     sourceKey: 'product_code',
   });
 
+  require('../models/item').default.hasMany(require('../models/mobile_models/load_request_details').default, {
+    foreignKey: 'product_code',
+    sourceKey: 'pt_part',
+  });
+  require('../models/mobile_models/load_request_details').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
+  });
   require('../models/item').default.hasOne(require('../models/inventory-transaction').default, {
     foreignKey: 'tr_part',
     sourceKey: 'pt_part',
@@ -1104,9 +1079,20 @@ export default async ({ expressApp }) => {
     foreignKey: 'product_code',
     sourceKey: 'pt_part',
   });
+
+
+
+  require('../models/item-detail').default.belongsTo(
+    require('../models/item').default,
+    { foreignKey: 'ptd_part', sourceKey: 'pt_part' },
+  );
+  require('../models/item').default.hasMany(
+    require('../models/item-detail').default,
+    { foreignKey: 'ptd_part', sourceKey: 'pt_part' },
+  );
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  // //  await sequelizeConnection.sync();
+  //await sequelizeConnection.sync();
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

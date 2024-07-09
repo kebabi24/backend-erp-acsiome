@@ -40,7 +40,7 @@ const ParamDetails = sequelize.define(
         population_nb: {type: Sequelize.STRING},
     },
     {
-        tableName: "aa_paramDetails",
+        tableName: "aa_paramdetails",
     }
 )
 export default  ParamDetails ;

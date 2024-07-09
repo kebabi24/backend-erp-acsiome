@@ -45,7 +45,7 @@ export default class requisitionDetailService {
                   model: this.itemModel,
                   as: 'item',
                   required: true,
-                  include: [{ model: this.taxeModel, as: 'taxe', required: true }],
+                  include: [{ model: this.taxeModel, as: 'taxe', required: false }],
                 },
               ],})
             this.logger.silly("find All requisitionDetails mstr")

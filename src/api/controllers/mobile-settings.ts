@@ -96,7 +96,7 @@ const getPaymentMethods = async (req: Request, res: Response, next: NextFunction
     
     try{
             const paymenetMethods = await mobileSettingsServiceInstanse.getPaymentMethods()
-    
+    console.log(paymenetMethods)
                 return res
                     .status(202)
                     .json({

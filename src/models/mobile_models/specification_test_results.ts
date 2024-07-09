@@ -40,7 +40,7 @@ const SpecificationTestResults = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_specificationTestResults",
+        tableName: "aa_specificationtestresults",
     }
 )
 export default  SpecificationTestResults ;

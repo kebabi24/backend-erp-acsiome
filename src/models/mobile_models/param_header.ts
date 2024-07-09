@@ -26,7 +26,7 @@ const ParamHeader = sequelize.define(
         profile_code : {type:Sequelize.STRING},
     },
     {
-        tableName: "aa_paramHeader",
+        tableName: "aa_paramheader",
     }
 )
 export default  ParamHeader ;

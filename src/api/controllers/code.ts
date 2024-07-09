@@ -394,7 +394,6 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.findOne({ ...req.body ,code_domain:user_domain});
-   
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -428,12 +427,96 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const codeServiceInstance = Container.get(CodeService);
     const { id } = req.params;
     const code = await codeServiceInstance.delete({ id });
-    return res.status(200).json({ message: 'deleted succesfully', data: id });
+    return res.status(200).json({ message: 'deleted succesfully', data: true});
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
+const deletes = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_domain } = req.headers;
+  logger.debug('Calling update one  code endpoint');
+  try {
+    console.log("here",req.body)
+    const codeServiceInstance = Container.get(CodeService);
+    const  id  = req.body.id;
+    const field = req.body.field
+    const code = await codeServiceInstance.delete({ id });
+    const codes = await codeServiceInstance.find({ code_fldname:field,code_domain:user_domain});
+    return res.status(200).json({ message: 'deleted succesfully', data: codes});
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const DomainTraining = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling Create Multiple Visit results  endpoint")
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+      const codeServiceInstanse = Container.get(CodeService)
+
+      var creationDomain = 'no enteries to be created was sent'
+     
+      var updateDomain  = ['no enteries to be updated was sent']
+      //console.log("ppppppppppppppppppppppp",req.body)
+      // CREATE 
+      if(req.body.domain){
+          // console.log(req.body.visitResults)
+          const listOfDomainToCreate = [...req.body.domain]
+          // let obj = {
+          //   code_domain:user_domain
+          //   , created_by: user_code,
+          //    created_ip_adr: req.headers.origin,
+          //    last_modified_by: user_code,
+          //    last_modified_ip_adr: req.headers.origin,
+          // }
+        
+          for (let dom of listOfDomainToCreate ) {
+            
+        //  console.log(dom)
+          creationDomain = await codeServiceInstanse.create({...dom, code_fldname:req.body.field ,code_domain:user_domain
+            , created_by: user_code,
+             created_ip_adr: req.headers.origin,
+             last_modified_by: user_code,
+             last_modified_ip_adr: req.headers.origin})
+             //listOfDomainToCreate)
+        }
+      }
+//console.log("updatedData",req.body.updateData)
+      // UPDATE 
+      if(req.body.updateData){
+        //  console.log("updatedData"+ Object.keys(req.body.updateData))
+          const listOfDomainToCreate = req.body.updateData
+          // creationResults = await mobileSettingsServiceInstanse.createManyVisitResult(listOfVisitResultsToCreate)
+          for(const domain of listOfDomainToCreate ){
+              const updatedDomainList = await codeServiceInstanse.update(
+                  {...domain}, 
+                  { id : domain.id})
+                  updateDomain.push(updatedDomainList)
+          }
+          // console.log(listOfVisitResultsToCreate)
+      }
+      
+  
+      const newDomain = await codeServiceInstanse.find({code_fldname:req.body.field,code_domain:user_domain})
+      return res
+          .status(201)
+          .json({ 
+              message: "created visit results succesfully", 
+              createResults:  creationDomain, 
+              updateResults:updateDomain,
+              newVisitResults : newDomain,
+          })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
+
 export default {
   create,
   createCodes,
@@ -456,5 +539,7 @@ export default {
   findByOne,
   update,
   deleteOne,
-  findTriggerType
+  findTriggerType,
+  DomainTraining,
+  deletes
 };

@@ -49,7 +49,7 @@ const SalesOrderLine = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_salesOrderLine",
+        tableName: "aa_salesorderline",
     }
 )
 export default  SalesOrderLine ;

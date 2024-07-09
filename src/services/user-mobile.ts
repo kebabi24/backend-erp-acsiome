@@ -45,6 +45,7 @@ export default class UserMobileService {
     @Inject('messagesModel') private messagesModel: Models.messagesModel,
     @Inject('domainModel') private domainModel: Models.DomainModel,
     @Inject('barecodeInfosModel') private barecodeInfosModel: Models.barecodeInfosModel,
+    @Inject('codeModel') private codeModel: Models.CodeModel,
 
     @Inject('logger') private logger,
   ) {}
@@ -258,11 +259,18 @@ export default class UserMobileService {
   // ******************** GET ITINEREARY FROM ROLE_ITINERARY **************************
   public async getItineraryFromRoleItinerary(query: any): Promise<any> {
     try {
-      const it = await this.role_itineraryModel.findOne({ where: query });
-      const itinerary_code = it.dataValues.itinerary_code;
-      const itinerary = await this.itineraryModel.findOne({ where: { itinerary_code: itinerary_code } });
+      const it = await this.role_itineraryModel.findAll({ where: query });
+      //console.log("it",it)
+      //const itinerary_code = it.role_itinerary.dataValues.itinerary_code;
+      let itinerarys = []
+      for (let itin of it) {
+        itinerarys.push(itin.itinerary_code)
 
-      return itinerary.dataValues;
+      }
+      // console.log("itine",itinerarys)
+      const itinerary = await this.itineraryModel.findAll({ where:  { itinerary_code :  itinerarys } });
+
+      return itinerary;
     } catch (e) {
       console.log('Error from service-getInineraryV2');
       this.logger.error(e);
@@ -277,27 +285,51 @@ export default class UserMobileService {
         where: query,
       });
 
-      var customersCodes = [];
+//       var customersCodesData1 = [];
+//       customersCodesData.forEach(customer => {
+//         customersCodesData1.push(customer.dataValues.customer_code,customer.dataValues.rank);
+//       });
+// console.log("customersCodesData1",customersCodesData1)
+      const customersCodes = [];
       customersCodesData.forEach(customer => {
         customersCodes.push(customer.dataValues.customer_code);
       });
 
-      const customers = await this.customerMobileModel.findAll({
+      var customers = await this.customerMobileModel.findAll({
         where: { customer_code: customersCodes },
+        // include: [[Sequelize.fn('count', Sequelize.col('id')), 'rank']], 
       });
+
+      // customers = customers.map(item => {
+      //   const item2 = customersCodesData1.find(i2 => i2.transid === item.transid);
+      //   return item2 ? { ...item, ...item2 } : item;
+      // });
 
       const customersFinal = [];
-      customers.forEach(customer => {
+     // customers.forEach(customer => {
+        for (let customer of customers) {
+        // if (customersCodesData1.indexOf(customer.customer_code) != -1){
+        //   customer.rank = customersCodesData1.indexOf(customer.customer_code).rank
+        // }
+        const customersCodesiti = await this.itineraryCustomerModel.findOne({
+          where: {itinerary_code :customersCodesData[0].itinerary_code, customer_code:customer.customer_code},
+        });
+  
+        customer.dataValues.rank =  customersCodesiti.rank
+      //  console.log(customer,"here")
         customersFinal.push(customer.dataValues);
-      });
 
+      }
+      // });
+//console.log(customersFinal)
       return customersFinal;
     } catch (e) {
       console.log('Error from service-getCustomers');
       this.logger.error(e);
       throw e;
-    }
+    
     this.logger.silly('find one user mstr');
+    }
   }
 
   // ******************** GET CHECKLIST **************************
@@ -656,6 +688,20 @@ export default class UserMobileService {
     }
   }
 
+  public async getVisitsBy(query:any): Promise<any> {
+    try {
+      const visitData = await this.visitsModel.findAll(query);
+
+   
+
+      // console.log(visititresult)
+      return visitData;
+    } catch (e) {
+      console.log('Error from service-getVisitlist');
+      this.logger.error(e);
+      throw e;
+    }
+  }
   // ****************************************************
   // ******** PHASE 2 ***********************************
   // ****************************************************
@@ -752,6 +798,7 @@ export default class UserMobileService {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          
         ],
       });
 
@@ -761,6 +808,13 @@ export default class UserMobileService {
           attributes: ['tx2_tax_pct'],
         });
         product.dataValues.tax_pct = +tax_value.dataValues.tx2_tax_pct;
+        
+        const  code = await this.codeModel.findOne({
+          where: { code_fldname: 'pt_group', code_value: product.pt_group },
+          attributes: ['code_cmmt'],
+        });
+        //console.log("codevalue",code.dataValues.code_cmmt)
+         if(code.dataValues != null ) {product.dataValues.group = code.dataValues.code_cmmt } else { product.dataValues.group = null};
       }
       return products;
     } catch (e) {
@@ -811,11 +865,19 @@ export default class UserMobileService {
           'pt_orderable',
           'pt_loadable',
           'pt_promotion',
-          'pt_desc2'
+          'pt_desc2',
+          
         ],
       });
-
-      return products;
+      for (const product of products) {
+      const  code = await this.codeModel.findOne({
+        where: { code_fldname: 'pt_group', code_value: product.pt_group },
+        attributes: ['code_cmmt'],
+      });
+      //console.log("codevalue",code.dataValues.code_cmmt)
+       if(code.dataValues != null ) {product.dataValues.group = code.dataValues.code_cmmt } else { product.dataValues.group = null};
+    }
+       return products;
     } catch (e) {
       console.log('Error from getProducts - service ');
       this.logger.error(e);
@@ -1402,6 +1464,9 @@ export default class UserMobileService {
     }
   }
 }
+
+
+
 
 function encrypt_string(plain_text, encryptionMethod, secret, iv) {
   var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);

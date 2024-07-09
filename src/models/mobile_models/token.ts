@@ -70,7 +70,7 @@ const TokenSerie = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_tokenSerie",
+        tableName: "aa_tokenserie",
     }
 )
 export default  TokenSerie ;

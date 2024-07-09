@@ -31,7 +31,7 @@ const SalesChannel = sequelize.define(
         // ...base,
     },
     {
-        tableName: "aa_salesChannel",
+        tableName: "aa_saleschannel",
     }
 )
 export default  SalesChannel ;

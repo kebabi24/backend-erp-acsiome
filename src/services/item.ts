@@ -5,6 +5,7 @@ import { Op, Sequelize, QueryTypes } from 'sequelize';
 export default class ItemService {
   constructor(
     @Inject('itemModel') private itemModel: Models.ItemModel,
+    @Inject('itemDetailModel') private itemDetailModel: Models.ItemDetailModel,
     @Inject('taxeModel') private taxeModel: Models.TaxeModel,
     @Inject('locationModel') private locationModel: Models.LocationModel,
     @Inject('locationDetailModel') private locationDetailModel: Models.LocationDetailModel,
@@ -155,4 +156,15 @@ export default class ItemService {
       throw e;
     }
   }
+  public async findOneDet(query: any): Promise<any> {
+    try {
+      const item = await this.itemModel.findOne({ where: query, include: this.itemDetailModel });
+      this.logger.silly('find one item mstr');
+      return item;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
 }

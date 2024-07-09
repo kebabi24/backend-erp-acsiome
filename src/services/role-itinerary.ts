@@ -4,6 +4,7 @@ import { Service, Inject } from "typedi"
 export default class RoleItineraryService {
     constructor(
         @Inject("role_itineraryModel") private roleItineraryModel: Models.Role_itineraryModel,
+        @Inject("itineraryModel") private ItineraryModel: Models.ItineraryModel,
         @Inject("logger") private logger
     ) {}
 
@@ -34,6 +35,26 @@ export default class RoleItineraryService {
             const itn = await this.roleItineraryModel.findAll({ where: query })
             this.logger.silly("find All role-itn mstr")
             return itn
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async finddet(query: any): Promise<any> {
+        try {
+            console.log("query",query)
+            const itn = await this.roleItineraryModel.findAll({ where: query })
+          
+           // console.log(itn)
+            let itns = []
+            for (let it of itn) {
+                console.log(it)
+                itns.push (it.itinerary_code)
+            }
+            console.log(itns)
+            const itins = await this.ItineraryModel.findAll({where : {itinerary_code:itns}})
+            this.logger.silly("find All role-itn mstr")
+            return itins
         } catch (e) {
             this.logger.error(e)
             throw e

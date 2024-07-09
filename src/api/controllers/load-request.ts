@@ -488,14 +488,14 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
 
   try {
     const loadRequestService = Container.get(LoadRequestService);
-//console.log("req.body",req.body)
+console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
     // console.log("loadline",load_request_details);
     for (const line of load_request_lines) {
      // console.log("line",line)
-      if(line.qt_effected > 0) {
+      if(line.qt_effected != 0) {
        // console.log("yawhnahnawelamakch")
       const elem = await loadRequestService.findLoadRequestLine({
         load_request_code: line.load_request_code,
@@ -526,7 +526,7 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
     }
     }
     for (const detail of load_request_details) {
-      if(detail.qt_effected > 0) {
+      if(detail.qt_effected != 0) {
       const elemDet = await loadRequestService.findLoadRequestDetail({
         load_request_code: detail.load_request_code,
         product_code: detail.product_code,
@@ -723,19 +723,40 @@ const getLoadRequestLineInfo = async (req: Request, res: Response, next: NextFun
     const loadRequestLineService = Container.get(LoadRequestService);
     const userMobileService = Container.get(UserMobileService);
     const load_request_code = req.params.load_request_code;
+    //console.log(load_request_code)
     const loadRequest = await loadRequestService.findLoadRequestLines({ load_request_code: load_request_code });
     // let userMobile = null;
     // if (loadRequest != null) {
     //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
     // }
-
+//console.log(loadRequest)
     return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
-
+const getLoadRequestLineInfoDif = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const loadRequestLineService = Container.get(LoadRequestService);
+    const userMobileService = Container.get(UserMobileService);
+    const load_request_code = req.params.load_request_code;
+   // console.log(load_request_code)
+    const loadRequest = await loadRequestService.findLoadRequestLinesDif({ load_request_code: load_request_code, qt_validated: { [Op.ne]: Sequelize.col('qt_effected') , }});
+    // let userMobile = null;
+    // if (loadRequest != null) {
+    //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
+    // }
+//console.log(loadRequest)
+    return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 function formatDateFromMobileToBackAddTimezone(timeString) {
   let elements = timeString.split(' ');
   let dateComponents = elements[0].split('-');
@@ -868,6 +889,7 @@ export default {
   createLoadRequestAndLines,
   getLoadRequestInfo,
   getLoadRequestLineInfo,
+  getLoadRequestLineInfoDif,
   getLoadRequestDataV3,
   findAllLoadRequestLinesDifference,
   getLoadRequestCreationDataRole,

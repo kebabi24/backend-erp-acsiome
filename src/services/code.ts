@@ -166,4 +166,15 @@ export default class codeService {
       throw e;
     }
   }
+  public async createManyCode(data: any): Promise<any> {
+    try {
+        const codes = await this.codeModel.bulkCreate(data)
+        console.log('created')
+        this.logger.silly("visitResults", codes)
+        return codes
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
 }

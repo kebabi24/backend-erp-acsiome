@@ -688,6 +688,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bkhServiceInstance = Container.get(BkhService);
     const bankServiceInstance = Container.get(BankService);
+    const serviceMobileServiceInstance = Container.get(serviceMobile);
     
    
     const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
@@ -717,7 +718,15 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
       },
       {id: banks.id},
     );
+    const service = await serviceMobileServiceInstance.findOne({ service_code: req.body.service_code });
    
+    await serviceMobileServiceInstance.update(
+      {
+        sum_versement:  Number(req.body.amt_tr),
+        service_versement_open: false
+      },
+      {id: service.id},
+    );
     return res.status(201).json({ message: 'created succesfully', data: bk });
   } catch (e) {
     //#

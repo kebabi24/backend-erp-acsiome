@@ -1,4 +1,5 @@
 import RepertoryService from "../../services/repertory"
+import RepertoryDetailService from "../../services/repertory-detail"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import AddressService from "../../services/address"
@@ -27,7 +28,36 @@ const{user_domain} = req.headers
         return next(e)
     }
 }
+const createDetJob = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+const{user_domain} = req.headers
+    logger.debug("Calling Create site endpoint")
+    try {
+        const repertoryServiceInstance = Container.get(RepertoryService)
+        const repertoryDetailServiceInstance = Container.get(RepertoryDetailService)
 
+        const {addr, repDetails,jobDetails} = req.body
+        await repertoryServiceInstance.delete({rep_code: addr,rep_domain:user_domain})
+        for (let entry of repDetails) {
+            entry = { ...entry, rep_domain:user_domain,rep_code: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await repertoryServiceInstance.create(entry)
+        }
+        await repertoryDetailServiceInstance.delete({repd_code: addr,repd_domain:user_domain})
+        for (let entry of jobDetails) {
+            entry = { ...entry, repd_domain:user_domain,repd_code: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await repertoryDetailServiceInstance.create(entry)
+        }
+       // const repertory = await repertoryServiceInstance.create({...req.body, rep_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data:  addr })
+    } catch (e) {
+        //#
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find one  site endpoint")
@@ -81,7 +111,24 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
+const findByJob = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all site endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    
+    try {
+        console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+        const repertoryDetailServiceInstance = Container.get(RepertoryDetailService)
+        const jobs = await repertoryDetailServiceInstance.find({...req.body,repd_domain: user_domain})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: jobs })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const findByAddress = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all site endpoint")
@@ -162,9 +209,11 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 }
 export default {
     create,
+    createDetJob,
     findOne,
     findAll,
     findBy,
+    findByJob,
     findByAddress,
     findByOne,
     update,

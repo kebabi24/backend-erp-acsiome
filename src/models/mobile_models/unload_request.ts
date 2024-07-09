@@ -49,7 +49,7 @@ const UnloadRequest = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_unloadRequest",
+        tableName: "aa_unloadrequest",
     }
 )
 export default  UnloadRequest ;

@@ -193,7 +193,14 @@ export default class LoadRequestService {
   public async findAllLoadRequestsDetailsByLoadRequestsCode(load_requests_codes: any): Promise<any> {
     try {
       const loadRequestsDetails = await this.loadRequestDetailsModel.findAll({
-        where: { load_request_code: load_requests_codes },
+        where: { load_request_code: load_requests_codes },include: [
+          {
+            model: this.itemModel,
+            required: false,
+
+            attributes: ['pt_desc1', 'pt_desc2'],
+          },
+        ],
       });
       this.logger.silly('find all load requests details');
       return loadRequestsDetails;
@@ -326,6 +333,27 @@ export default class LoadRequestService {
     try {
       const loadRequest = await this.loadRequestLineModel.findAll({
         where: { load_request_code: load_request_code },
+        include: [
+          {
+            model: this.itemModel,
+            required: false,
+
+            attributes: ['pt_desc1', 'pt_desc2'],
+          },
+        ],
+      });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findLoadRequestLinesDif(query: any): Promise<any> {
+    // let load_request_code = query.load_request_code;
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({
+        where: query,
         include: [
           {
             model: this.itemModel,
@@ -792,7 +820,14 @@ export default class LoadRequestService {
   public async findAllLoadRequestLines(load_request_code: any): Promise<any> {
     try {
       const loadRequestLines = await this.loadRequestLineModel.findAll({
-        where: { load_request_code: load_request_code },
+        where: { load_request_code: load_request_code },include: [
+          {
+            model: this.itemModel,
+            required: false,
+
+            attributes: ['pt_desc1', 'pt_desc2'],
+          },
+        ],
       });
       this.logger.silly('find all loadRequestLines');
       return loadRequestLines;

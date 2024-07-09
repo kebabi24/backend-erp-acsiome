@@ -31,7 +31,7 @@ const CalendarTiming = sequelize.define(
  
     },
     {
-        tableName: "aa_calendartTiming",
+        tableName: "aa_calendarttiming",
     }
 )
 export default  CalendarTiming ;

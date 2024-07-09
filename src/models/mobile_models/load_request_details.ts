@@ -45,7 +45,7 @@ const LoadRequestDetails = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_loadRequestDetails",
+        tableName: "aa_loadrequestdetails",
     }
 )
 export default  LoadRequestDetails ;

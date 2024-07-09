@@ -276,6 +276,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const productPagesDetails = await userMobileServiceInstanse.getProductPagesDetails(productPages);
       // console.log(productPagesDetails);
       const products = await userMobileServiceInstanse.getProducts(productPagesDetails);
+     // console.log("product",products)
       const loadRequest = await userMobileServiceInstanse.getLoadRequest({
         user_mobile_code: user_mobile_code,
         status: 40,
@@ -290,7 +291,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (loadRequest.length > 0) {
         loadRequest.forEach(load => {
           load.dataValues.date_creation = formatDateOnlyFromBackToMobile(load.date_creation);
-          console.log(load.date_creation)
+         // console.log(load.date_creation)
           if (load.dataValues.date_charge != null) load.date_charge = formatDateFromBackToMobile(load.date_charge);
         });
       }
@@ -313,7 +314,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       if (locationDetail.length > 0) {
         locationDetail.forEach(ld => {
           ld.dataValues.ld_expire = formatDateOnlyFromBackToMobile(ld.ld_expire);
-          console.log('ld expire after ' + ld.dataValues.ld_expire);
+         // console.log('ld expire after ' + ld.dataValues.ld_expire);
         });
       }
       // INVOICE
@@ -323,11 +324,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date);
         });
       }
-
+//console.log("invoice",invoice)
       // service created on backend
       if (parameter[index].hold === true) {
         let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
-        console.log("here service",service1)
+       // console.log("here service",service1)
         // UPDATE SERVICE DATES
         let service = {
           // id: ,
@@ -369,14 +370,36 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         //   service.service_closing_date = formatDateFromBackToMobile(service.service_closing_date);
         // }
 
-        const itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
-        const customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itinerary2.itinerary_code });
-        if (role.pricelist_code != null && role.pricelist_code != '') {
-          customers.forEach(element => {
-            element.pricelist_code = '';
-          });
-        }
+        // let itinerary2 :any
+        // let customers: any
+        // if (parameter[index].hold === true) {
+      
 
+        const   itinerary2 = await userMobileServiceInstanse.getItineraryFromService({ itinerary_code: service1.itinerary_code });
+
+        const   customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: service1.itinerary_code /*itinerary2.itinerary_code*/ });
+          if (role.pricelist_code != null && role.pricelist_code != '') {
+            customers.forEach(element => {
+              element.pricelist_code = '';
+            });
+          }
+      //   } else {
+      //    itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
+
+      //    console.log("itinerary",itinerary2)
+      //   let itineraryss = []
+      //     for (let itin of itinerary2) {
+      //       itineraryss.push(itin.itinerary_code)
+
+      //     }
+      //    customers = await userMobileServiceInstanse.getCustomers({ itinerary_code: itineraryss /*itinerary2.itinerary_code*/ });
+      //   if (role.pricelist_code != null && role.pricelist_code != '') {
+      //     customers.forEach(element => {
+      //       element.pricelist_code = '';
+      //     });
+      //   }
+
+      // }
         const tokenSerie = await userMobileServiceInstanse.getTokenSerie({ token_code: role.token_serie_code });
         const categories = await userMobileServiceInstanse.findAllCategories({});
         const categoriesTypes = await userMobileServiceInstanse.findAllGategoryTypes({});
@@ -530,7 +553,7 @@ console.log("service_creation",service_creation)
     if (service_creation == 1) {
       // created from backend
       console.log('UPDATING SERVICE');
-      console.log(service)
+    //  console.log(service)
       const udpatedService = await userMobileServiceInstanse.updateService(
         {
           service_open: false,
@@ -569,7 +592,7 @@ console.log("service_creation",service_creation)
       // service.nb_products_loaded = service.nb_products_loaded;
       // service.sum_invoice = service.sum_invoice;
       // service.user_mobile_code= service.user_mobile_code,
-      console.log(service);
+      //console.log(service);
       const createdService = await userMobileServiceInstanse.createService(service);
       console.log('CREATING SERVICE END');
     }
@@ -681,10 +704,14 @@ console.log("service_creation",service_creation)
     // PAYMENTS
     if (data.payments) {
       const dataa = data.payments;
+      //dataa.push({period_active_date:null})
+      //dataa.push({period_active_date:null});
       dataa.forEach(payment => {
-     //   console.log(payment);
+       // console.log(payment);
         payment.the_date = formatDateFromMobileToBackAddTimezone(payment.the_date);
+        payment.period_active_date = formatDateOnlyFromMobileToBack(payment.period_active_date);
       });
+     // console.log(dataa)
       const payments = await userMobileServiceInstanse.createPayments(dataa);
     }
 
@@ -934,11 +961,11 @@ const getDataBackTest = async (req: Request, res: Response, next: NextFunction) 
 
 function formatDateOnlyFromBackToMobile(timeString) {
   let str = '';
-  console.log(' timeString ' + timeString);
+  //console.log(' timeString ' + timeString);
   if (timeString != null) {
     let dateComponents = timeString.split('-');
     str = dateComponents[2] + '-' + dateComponents[1] + '-' + dateComponents[0];
-    console.log("date loadrequest",str)
+   // console.log("date loadrequest",str)
   }
   return str;
 }
@@ -993,17 +1020,22 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-   // console.log(req.body);
+   console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
-        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
       });
     } else {
       var invoices = await userMobileServiceInstance.getAllInvoice({
-        where: { site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1] } },
+        where: { site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1]} },
+          attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
       });
+      console.log("here",invoices)
     }
-    // console.log("invoices",invoices);
+     console.log("invoices",invoices);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
@@ -1049,7 +1081,7 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
       },
     });
 
-   // console.log(invoicesline);
+    console.log(invoicesline);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });
@@ -1067,7 +1099,7 @@ const findPaymentBy = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
 
-    //console.log(req.body);
+    console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
         period_active_date: { [Op.between]: [req.body.date, req.body.date1] },
@@ -1562,6 +1594,41 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
     return next(e);
   }
 };
+
+
+const findAllInvoicewithDetails = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+  console.log("req",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+      if (req.body.site == '*') {
+      var invs =await Sequelize.query("SELECT *  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline  where PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    } else {
+
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount ,*  FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,user_domain,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
+   //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
+   // console.log(invs)
+    }
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
 export default {
   create,
   findOne,
@@ -1585,4 +1652,5 @@ export default {
   testHash,
   getDashboardAddData,
   findPaymentByService,
+  findAllInvoicewithDetails,
 };
