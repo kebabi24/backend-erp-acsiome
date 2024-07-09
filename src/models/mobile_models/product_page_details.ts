@@ -21,7 +21,7 @@ const productPageDetails = sequelize.define(
         product_page_code:{
             type: Sequelize.STRING,
             references: {
-                model: "aa_productPage",
+                model: "aa_productpage",
                 key: "product_page_code",
             },
         },

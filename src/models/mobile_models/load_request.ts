@@ -38,7 +38,7 @@ const LoadRequest = sequelize.define(
         user_mobile_code:{
             type: Sequelize.STRING,
             references: {
-                model: "aa_userMobile",
+                model: "aa_usermobile",
                 key: "user_mobile_code",
             },
         },

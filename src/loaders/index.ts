@@ -136,8 +136,6 @@ export default async ({ expressApp }) => {
       { name: 'patientDetailTreatmentModel', model: require('../models/patient-detail-treatment').default },
       { name: 'audiometryModel', model: require('../models/audiometry').default },
       { name: 'audiogramModel', model: require('../models/audiogram').default },
-      // mobile models
-      // MOBILE DATABASE MODELS
       { name: 'invoiceLineModel', model: require('../models/mobile_models/invoice_line').default },
       { name: 'userMobileModel', model: require('../models/mobile_models/userMobile').default },
       { name: 'roleModel', model: require('../models/mobile_models/role').default },
@@ -190,14 +188,12 @@ export default async ({ expressApp }) => {
       { name: 'visitsModel', model: require('../models/mobile_models/visits').default },
       { name: 'inventoryModel', model: require('../models/mobile_models/inventory').default },
       { name: 'inventoryLineModel', model: require('../models/mobile_models/inventory_line').default },
-      // CRM
       { name: 'agendaModel', model: require('../models/mobile_models/agenda').default },
       { name: 'agendaExecutionModel', model: require('../models/mobile_models/agenda_execution').default },
       { name: 'paramHeaderModel', model: require('../models/mobile_models/param_header').default },
       { name: 'paramDetailsModel', model: require('../models/mobile_models/param_details').default },
       { name: 'populationModel', model: require('../models/mobile_models/population').default },
-      {name: 'agendaExecutionDetailsModel',model: require('../models/mobile_models/agenda_execution_details').default},
-      // ADDED : 10/03/2023
+      { name: 'agendaExecutionDetailsModel',model: require('../models/mobile_models/agenda_execution_details').default},
       { name: 'specificationModel', model: require('../models/mobile_models/specification').default },
       { name: 'specificationDetailsModel', model: require('../models/mobile_models/specification_details').default },
       { name: 'SpecificationTestResultsModel',model: require('../models/mobile_models/specification_test_results').default},
@@ -208,7 +204,6 @@ export default async ({ expressApp }) => {
       { name: 'pjdDetailsModel', model: require('../models/mobile_models/pjd_det').default },
       { name: 'projectAssetDownDetailsModel', model: require('../models/mobile_models/project_asset_down').default },
       { name: 'printerModel', model: require('../models/printer').default },
-      { name: 'RepertoryModel', model: require('../models/repertory').default },
       { name: 'orderPosProductSauceModel', model: require('../models/pos-order-detail-product-sauce').default },
       { name: 'unloadRequestModel', model: require('../models/mobile_models/unload_request').default },
       { name: 'unloadRequestDetailsModel', model: require('../models/mobile_models/unload_request_details').default },
@@ -216,7 +211,6 @@ export default async ({ expressApp }) => {
       { name: 'TransportcostModel', model: require('../models/transportcost').default },
       { name: 'CostlistModel', model: require('../models/costlist').default },
       { name: 'CostlistDetailModel', model: require('../models/costlist-detail').default },
-      // PROMOTION
       { name: 'populationArticleModel', model: require('../models/mobile_models/population_article').default },
       { name: 'promotionModel', model: require('../models/mobile_models/promotion').default },
       { name: 'advantageModel', model: require('../models/mobile_models/advantage').default },
@@ -294,7 +288,7 @@ export default async ({ expressApp }) => {
     targetKey: 'menu_code',
   });
 
-  require('../models/mobile_models/customer').default.hasOne(
+  require('../models/mobile_models/customer').default.hasMany(
     require('../models/mobile_models/itinerary_customer').default,
     { foreignKey: 'customer_code', sourceKey: 'customer_code' },
   );
@@ -1092,7 +1086,7 @@ export default async ({ expressApp }) => {
   );
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //await sequelizeConnection.sync();
+  await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

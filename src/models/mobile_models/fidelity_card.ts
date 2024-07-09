@@ -27,7 +27,7 @@ const FidelityCard = sequelize.define(
         // ...base
     },
     {
-        tableName: "aa_fidelityCard",
+        tableName: "aa_fidelitycard",
     }
 )
 export default  FidelityCard ;
