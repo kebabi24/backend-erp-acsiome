@@ -29,7 +29,7 @@ const Role = sequelize.define(
       primaryKey: true,
       unique: true,
       references: {
-        model: 'aa_userMobile',
+        model: 'aa_usermobile',
         key: 'user_mobile_code',
       },
     },
@@ -38,7 +38,7 @@ const Role = sequelize.define(
       type: Sequelize.STRING,
       allowNull: true,
       references: {
-        model: 'aa_userMobile',
+        model: 'aa_usermobile',
         key: 'user_mobile_code',
       },
     },
@@ -46,7 +46,7 @@ const Role = sequelize.define(
       type: Sequelize.STRING,
       unique: true,
       references: {
-        model: 'aa_tokenSerie',
+        model: 'aa_tokenserie',
         key: 'token_code',
       },
     },

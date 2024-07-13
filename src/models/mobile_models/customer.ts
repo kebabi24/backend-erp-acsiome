@@ -58,7 +58,7 @@ const CustomerMobile = sequelize.define(
     category_type_code: {
       type: Sequelize.STRING,
       references: {
-        model: 'aa_categoryType',
+        model: 'aa_categorytype',
         key: 'category_type_code',
       },
     },
@@ -74,7 +74,7 @@ const CustomerMobile = sequelize.define(
     sub_cluster_code: {
       type: Sequelize.STRING,
       references: {
-        model: 'aa_subCluster',
+        model: 'aa_subcluster',
         key: 'sub_cluster_code',
       },
     },
@@ -83,7 +83,7 @@ const CustomerMobile = sequelize.define(
     sales_channel_code: {
       type: Sequelize.STRING,
       references: {
-        model: 'aa_salesChannel',
+        model: 'aa_saleschannel',
         key: 'sales_channel_code',
       },
     },

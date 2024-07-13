@@ -31,7 +31,7 @@ const LoadRequestLine = sequelize.define(
     load_request_code: {
       type: Sequelize.STRING,
       references: {
-        model: 'aa_loadRequest',
+        model: 'aa_loadrequest',
         key: 'load_request_code',
       },
     },

@@ -33,7 +33,7 @@ const UnloadRequestDetails = sequelize.define(
         unload_request_code:{
             type: Sequelize.STRING,
             references: {
-                model: "aa_unloadRequest",
+                model: "aa_unloadrequest",
                 key: "unload_request_code",
             },
         },
