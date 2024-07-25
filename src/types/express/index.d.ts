@@ -221,6 +221,8 @@ declare global {
     export type ItemModelModel = S.Model;
     export type ItemDetailModel = S.Model;
     export type RepertoryDetailModel = S.Model;
+    export type FinancialchargeModel = S.Model;
+    export type AccountUnplanifedDetailModel = S.Model;
    
   }
 }

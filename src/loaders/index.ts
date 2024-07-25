@@ -224,6 +224,8 @@ export default async ({ expressApp }) => {
       { name: 'itemModelModel', model: require('../models/item-model').default },
       { name: 'itemDetailModel', model: require('../models/item-detail').default },
       { name: 'repertoryDetailModel', model: require('../models/repertory-detail').default },
+      { name: 'financialchargeModel', model: require('../models/financialcharge').default },
+      { name: 'accountUnplanifedDetailModel', model: require('../models/account-unplanifed-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

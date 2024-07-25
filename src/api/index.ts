@@ -114,6 +114,7 @@ import audiometry from './routes/audiometry';
 import itemModel from './routes/item-model';
 import message from './routes/message';
 import barecodeInfos from './routes/barecode_infos'
+import financialcharge from './routes/financialcharge'
 
 // guaranteed to get dependencies
 export default () => {
@@ -232,6 +233,7 @@ export default () => {
   itemModel(app);
   message(app)
   barecodeInfos(app)
+  financialcharge(app)
   
   return app;
 };
