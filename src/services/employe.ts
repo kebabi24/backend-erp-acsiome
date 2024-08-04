@@ -44,7 +44,7 @@ export default class employeService {
       throw e;
     }
   }
-
+ 
   public async update(data: any, query: any): Promise<any> {
     try {
       const employe = await this.employeModel.update(data, {

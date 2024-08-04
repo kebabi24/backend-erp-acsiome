@@ -17,5 +17,7 @@ export default (app: Router) => {
     route.post("/finddet", controller.findByDet)
     route.post("/findjob",controller.findByJob)
     route.put("/:id", controller.update)
+    route.post("/child", controller.findChild)
+    route.post("/tr", controller.findTrBy)
  
 }

@@ -1,8 +1,12 @@
 import AccountUnplanifedService from "../../services/account-unplanifed"
 import BankDetailService from "../../services/bank-detail"
+import BankService from "../../services/bank"
+import BkhService from '../../services/bkh';
 import ProviderService from "../../services/provider"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
+import SequenceService from "../../services/sequence"
+import AccountUnplanifedDetailService from "../../services/account-unplanifed-detail"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -58,6 +62,74 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const createFC = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    let nbr : String;
+    let open: Boolean;
+    logger.debug("Calling Create account endpoint")
+    try {
+       
+        const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService)
+        const bankServiceInstance = Container.get(BankService)
+        const providerServiceInstance = Container.get(ProviderService)
+        const sequenceServiceInstance = Container.get(SequenceService)
+        const bkhServiceInstance = Container.get(BkhService);
+        const accountUnplanifedDetailServiceInstance = Container.get(AccountUnplanifedDetailService)
+        const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AU', seq_type: 'AU' });
+        let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { id: seq.id, seq_type: 'AU', seq_seq: 'AU', seq_domain: user_domain },
+    );
+        //let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
+        const accountUnplanifed = await accountUnplanifedServiceInstance.create({...req.body.accountUnplanifed, au_nbr : nbr,au_domain : user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const banks = await bankServiceInstance.findOne({ bk_code: req.body.accountUnplanifed.au_bank, bk_domain: user_domain });
+   
+        const bk = await bkhServiceInstance.create({
+            bkh_domain: user_domain,
+            bkh_code: nbr,
+            bkh_effdate: req.body.accountUnplanifed.au_effdate,
+            bkh_date: new Date(),
+            bkh_num_doc : req.body.accountUnplanifed.au_so_nbr,
+            bkh_addr : req.body.accountUnplanifed.au_vend,
+            bkh_bank: req.body.accountUnplanifed.au_bank,
+            bkh_type: 'ISS',
+            bkh_balance: banks.bk_balance,
+            bk_2000: - Number(req.body.accountUnplanifed.au_amt),
+            // bkh_site: req.body.site,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+          await bankServiceInstance.update(
+            {
+              bk_balance: Number(banks.bk_balance)  - Number(req.body.accountUnplanifed.au_amt),
+  
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id:banks.id, bk_domain: user_domain },
+          );
+          for (let entry of req.body.accountUnplanifedDetail) {
+            entry = { ...entry, aud_so_nbr:req.body.accountUnplanifed.au_so_nbr,aud_nbr: nbr,aud_domain:user_domain,  created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await accountUnplanifedDetailServiceInstance.create(entry)
+           
+            
+        }
+
+       
+       
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data:  accountUnplanifed })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -148,6 +220,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 export default {
     create,
     createP,
+    createFC,
     findOne,
     findAll,
     findBy,

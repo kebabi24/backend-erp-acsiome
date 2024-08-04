@@ -1,9 +1,11 @@
 import EmployeService from '../../services/employe';
+import ItemService from '../../services/item';
 import EmployeAvailabilityService from '../../services/employe-availability';
 import AffectEmployeService from '../../services/affect-employe';
 import EmployeScoreService from '../../services/employe-score';
 import EmployeJobService from '../../services/employe-job';
 import EmployeTimeService from '../../services/employe-time';
+import EmployeTrainingService from '../../services/employe-training';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 
@@ -18,7 +20,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const employeServiceInstance = Container.get(EmployeService);
     const employeScoreServiceInstance = Container.get(EmployeScoreService);
     const employeJobServiceInstance = Container.get(EmployeJobService);
-    const { Employe, employeScoreDetail, employeJobDetail } = req.body;
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const { Employe, employeScoreDetail, employeJobDetail , employeTrDetail } = req.body;
    
     const employe = await employeServiceInstance.create({
       ...Employe,
@@ -48,6 +51,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
       };
       await employeJobServiceInstance.create(entry);
+    }
+    for (let entry of employeTrDetail) {
+      entry = {
+        ...entry,
+        empf_domain: user_domain,
+        empf_code: Employe.emp_addr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+      };
+      await employeTrainingServiceInstance.create(entry);
     }
     return res.status(201).json({ message: 'created succesfully', data: employe });
   } catch (e) {
@@ -103,6 +117,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const employeServiceInstance = Container.get(EmployeService);
     const employeScoreServiceInstance = Container.get(EmployeScoreService);
     const employeJobServiceInstance = Container.get(EmployeJobService);
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const itemServiceInstance = Container.get(ItemService);
     const { id } = req.params;
     const employe = await employeServiceInstance.findOne({ id });
     const employeScoreDetail = await employeScoreServiceInstance.find({
@@ -124,9 +140,29 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
       };
       (i = i + 1), employeJobDetail.push(obj);
     }
+    const employeTr = await employeTrainingServiceInstance.find({
+      empf_domain: user_domain,
+      empf_code: employe.emp_addr,
+    });
+    let employeTrDetail = [];
+    var i = 1;
+    for (let emptr of employeTr) {
+      const item = await itemServiceInstance.findOne({
+        pt_domain: user_domain,
+        pt_part: emptr.empf_part,
+      });
+      let obj = {
+        id: i,
+        empf_part: emptr.empf_part,
+        desc: item.pt_desc1,
+        empf_beging_date: emptr.empf_beging_date,
+        empf_end_date: emptr.empf_end_date,
+      };
+      (i = i + 1), employeTrDetail.push(obj);
+    }
     return res
       .status(200)
-      .json({ message: 'fetched succesfully', data: { employe, employeScoreDetail, employeJobDetail } });
+      .json({ message: 'fetched succesfully', data: { employe, employeScoreDetail, employeJobDetail,employeTrDetail } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -337,8 +373,9 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const employeServiceInstance = Container.get(EmployeService);
     const employeScoreServiceInstance = Container.get(EmployeScoreService);
     const employeJobServiceInstance = Container.get(EmployeJobService);
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
     const { id } = req.params;
-    const { Employe, employeScoreDetail, employeJobDetail } = req.body;
+    const { Employe, employeScoreDetail, employeJobDetail ,  employeTrDetail} = req.body;
     const employe = await employeServiceInstance.update({ ...Employe, last_modified_by: user_code }, { id });
 
     await employeJobServiceInstance.delete({ empj_addr: Employe.emp_addr, empj_domain: user_domain });
@@ -369,6 +406,20 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       };
       await employeScoreServiceInstance.create(entry);
     }
+    await employeTrainingServiceInstance.delete({ empf_code: Employe.emp_addr, empf_domain: user_domain });
+    for (let entry of employeTrDetail) {
+      entry = {
+        ...entry,
+        empf_domain: user_domain,
+        empf_code: Employe.emp_addr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await employeTrainingServiceInstance.create(entry);
+    }
+
     return res.status(200).json({ message: 'fetched succesfully', data: employe });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -427,7 +478,74 @@ const findAvailable = async (req: Request, res: Response, next: NextFunction) =>
     return next(e);
   }
 };
+const findChild = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeServiceInstance = Container.get(EmployeService);
+    let list= []
+    //console.log(req.body)
+    let addr = req.body.emp_addr
+    const employe = await employeServiceInstance.find({ emp_domain: user_domain ,});
+    //console.log(employe) emp_upper :{ [Op.ne]: null }
+    for (let emp of employe) {
+      console.log("emp.emp_addr",emp.emp_addr)
+      const childs = await employeServiceInstance.find({ emp_upper: emp.emp_addr,emp_domain: user_domain });
+    //  console.log(childs)
+  let ch=[]
+  for (let c of childs) {
+    ch.push(c.emp_addr)
+  }
+  //console.log(ch)
+      let obj= { "parent_id":emp.emp_addr   
+    ,childerens:ch}
+    list.push(obj)
 
+    }
+
+   // console.log(list)
+    function findAllChildren(element,is_root,childerens) {
+      if(is_root==false&&element!=undefined){
+          childerens.push(element);   
+      }
+      var doc = list.find(o => o.parent_id === element);
+      if(doc["childerens"].length==0){
+          return [];
+      }
+      else{
+          doc["childerens"].forEach(function (element) {
+              findAllChildren(element,false,childerens);
+          })
+      }   
+  } 
+  
+  var childerens=[];
+  findAllChildren(addr,true,childerens);
+  console.log("childerens==>",childerens);
+  childerens.push(addr)
+  const employes = await employeServiceInstance.find({ emp_addr:childerens,emp_domain: user_domain ,});
+    return res.status(200).json({ message: 'fetched succesfully', data: employes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findTrBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const employe = await employeTrainingServiceInstance.findOne({ ...req.body, empf_domain: user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createC,
@@ -441,5 +559,7 @@ export default {
   update,
   deleteOne,
   findAvailable,
-  findByOne
+  findByOne,
+  findChild,
+  findTrBy,
 };
