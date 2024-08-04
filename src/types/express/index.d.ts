@@ -223,6 +223,7 @@ declare global {
     export type RepertoryDetailModel = S.Model;
     export type FinancialchargeModel = S.Model;
     export type AccountUnplanifedDetailModel = S.Model;
+    export type EmployeTrainingModel = S.Model;
    
   }
 }

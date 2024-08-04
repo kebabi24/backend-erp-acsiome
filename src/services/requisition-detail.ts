@@ -37,7 +37,16 @@ export default class requisitionDetailService {
             throw e
         }
     }
-
+    public async findOneS(query: any): Promise<any> {
+        try {
+            const requisitionDetail = await this.requisitionDetailModel.findOne({ where: query })
+            this.logger.silly("find one requisitionDetail mstr")
+            return requisitionDetail
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async find(query: any): Promise<any> {
         try {
             const requisitionDetails = await this.requisitionDetailModel.findAll({ where: query ,include: [
@@ -55,7 +64,16 @@ export default class requisitionDetailService {
             throw e
         }
     }
-
+    public async findDet(query: any): Promise<any> {
+        try {
+            const requisitionDetails = await this.requisitionDetailModel.findAll({ where: query })
+            this.logger.silly("find All requisitionDetails mstr")
+            return requisitionDetails
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const requisitionDetail = await this.requisitionDetailModel.update(data, { where: query })

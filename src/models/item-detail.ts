@@ -22,6 +22,7 @@ const ItemDetail = sequelize.define(
     },
     ptd_desc : Sequelize.STRING,
     ptd_gol: Sequelize.STRING,
+    ptd_level: Sequelize.STRING,
     ptd_domain: Sequelize.STRING,
    
     ...base,
