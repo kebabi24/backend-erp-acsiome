@@ -2155,16 +2155,49 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-    
+    console.log(req.body.date)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
-      tr_effdate: { [Op.between]: [req.body.date, req.body.date1] },
       
+      tr_effdate:new Date(req.body.date),
     });
     
-    
-    return res.status(201).json({ message: 'created succesfully', data: tr });
+    let result = [];
+    var i = 1;
+    for (let trs of tr){
+    if(trs.tr_rev != 'CHANGED'){  
+    result.push({
+      id:i,
+      tr_part:trs.tr_part,
+      tr_desc:trs.tr_desc,
+      tr_addr:trs.tr_addr,
+      tr_serial:trs.tr_serial,
+      tr_site:trs.tr_site,
+      tr_loc:trs.tr_loc,
+      tr_qty_loc:trs.tr_qty_loc,
+      tr_qty_chg:trs.tr_qty_chg,
+      tr__chr01:trs.tr__chr01,
+      tr__chr02:trs.tr__chr02,
+      tr__chr03:trs.tr__chr03,
+      tr_um:trs.tr_um,
+      tr_status:trs.tr_status,
+      tr_ref:trs.tr_ref,
+      tr_effdate:trs.tr_effdate,
+      tr_program:trs.tr_program,
+      tr_type:trs.tr_type,
+      tr_nbr:trs.tr_nbr,
+      tr_lot:trs.tr_lot,
+      tr_oldpart:trs.tr_part,
+      tr_oldaddr:trs.tr_addr,
+      tr_oldserial:trs.tr_serial,
+      
+    })
+    i = i + 1
+  }
+  }
+  
+    return res.status(201).json({ message: 'created succesfully', data: result });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
     //#
@@ -3363,7 +3396,9 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           ld_domain:user_domain,
           ld_grade: item.tr_grade,
           ld__chr01:item.tr_batch,
-          
+          chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group
         });
       }
       

@@ -3,6 +3,7 @@ import SequenceService from '../../services/sequence';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
+import { Console } from 'console';
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const bwipjs = require('bwip-js');
@@ -27,16 +28,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const pageWidth = 284; // Width of the page in points
     const pageHeight = 284; // Height of the page in points
     var labelId = null;
-    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
-
-    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`;
+    let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
+    labelId = req.body.lb_ref;
+    if(seq == null){seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' })}
+    if(labelId == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`}
+    let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: req.body.lb_ref})
     
-
+    
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
-    const time = new Date().toLocaleTimeString();
-    
+    let time = new Date().toLocaleTimeString();
+    if(lab !=null){time = new Date(lab.createdAt).toLocaleTimeString()}
     // Draw the barcode image on the PDF document
     //doc.image(image, 50, 0, {
     //  fit: [180, 150], // Adjust the size of the barcode image as needed
@@ -167,13 +170,19 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     const pageWidth = 284; // Width of the page in points
     const pageHeight = 284; // Height of the page in points
     var labelId = null;
-    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
-
-    labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
-    await sequenceServiceInstance.update(
+    let test = false;
+    let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
+    console.log(req.body.lb_ref)
+    if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+    else {labelId = req.body.lb_ref}
+    if(test == true){await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
-    );
+    );}
+    else{await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
     const label = await labelServiceInstance.create({
       ...req.body,
       lb_ref: labelId,
