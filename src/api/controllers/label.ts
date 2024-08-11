@@ -32,7 +32,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     labelId = req.body.lb_ref;
     if(seq == null){seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' })}
     if(labelId == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`}
-    let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: req.body.lb_ref})
+    let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: labelId})
     
     
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
@@ -161,7 +161,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
 
   // // Set the text color
   // doc.fillColor('white');
-  logger.debug('Calling Create label endpoint');
+  logger.debug('Calling Createlab label endpoint');
 
   try {
     const labelServiceInstance = Container.get(LabelService);
@@ -172,7 +172,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     var labelId = null;
     let test = false;
     let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
-    console.log(req.body.lb_ref)
+    
     if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
     if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
     else {labelId = req.body.lb_ref}
@@ -210,7 +210,7 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
   const pageHeight = 120 * 2.83465; // Height of the page in points
 
   const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
-  logger.debug('Calling Create label endpoint');
+  logger.debug('Calling Createprod label endpoint');
 
   try {
     const labelServiceInstance = Container.get(LabelService);
@@ -336,7 +336,7 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
 
-  logger.debug('Calling Create label endpoint');
+  logger.debug('Calling Createpal label endpoint');
  
   try {
     const labelServiceInstance = Container.get(LabelService);

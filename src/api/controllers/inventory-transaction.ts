@@ -145,9 +145,10 @@ const updateTrans = async (req: Request, res: Response, next: NextFunction) => {
   console.log('AVANT TRY')
   logger.debug('Calling update one  locationDetail endpoint');
   try {
-    console.log(req.body,'test')
+    
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     let refid = req.body.id;
+    console.log(refid)
      const locationDetail = await inventoryTransactionServiceInstance.update(
       { tr_rev: 'CHANGED', last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id : refid},
@@ -3299,8 +3300,9 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         sct_site: item.tr_site,
         sct_sim: 'STD-CG',
       });
-
-     
+      
+      
+    
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
