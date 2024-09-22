@@ -14,6 +14,7 @@ const Provider = sequelize.define(
     },
     vd_addr: {
       type: Sequelize.STRING,
+      primaryKey: true,
       unique: true,
       // references: {
       //     model: "ad_mstr",

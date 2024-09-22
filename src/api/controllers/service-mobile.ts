@@ -6,6 +6,7 @@ import { Container } from 'typedi';
 import { Op, Sequelize } from 'sequelize';
 import ItineraryService from '../../services/itinerary';
 import CustomerItineraryService from '../../services/customer-itinerary';
+import RoleItineraryService from '../../services/role-itinerary'
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -191,6 +192,29 @@ const findServicesBy = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const findItinireryBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all service endpoint');
+  const { user_domain } = req.headers;
+  console.log("qqqqqqqqqqqqqqqqqqqqqqqqqq",req.body)
+  try {
+    const MobileServiceInstance = Container.get(MobileService);
+    const roleItineraryServiceInstance = Container.get(RoleItineraryService);
+    const itineraryServiceInstance = Container.get(ItineraryService);
+console.log("qqqqqqqqqqqqqqqqqqqqqqqqqq",req.body)
+let result=[]
+    const itinerays = await roleItineraryServiceInstance.find({...req.body})
+for (let it of itinerays) {
+  const itn = await itineraryServiceInstance.findOne({itinerary_code: it.itinerary_code})
+  result.push({itinerary_code:it.itinerary_code, itinerary_name: itn.itinerary_name})
+}
+    //console.log(services)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -201,4 +225,5 @@ export default {
   deleteOne,
   closeService,
   findServicesBy,
+  findItinireryBy,
 };

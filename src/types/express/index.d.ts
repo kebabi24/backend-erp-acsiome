@@ -224,6 +224,8 @@ declare global {
     export type FinancialchargeModel = S.Model;
     export type AccountUnplanifedDetailModel = S.Model;
     export type EmployeTrainingModel = S.Model;
+    export type TrainingcalenderModel = S.Model;
+    export type PopulationemployeModel = S.Model;
    
   }
 }
