@@ -115,7 +115,8 @@ import itemModel from './routes/item-model';
 import message from './routes/message';
 import barecodeInfos from './routes/barecode_infos'
 import financialcharge from './routes/financialcharge'
-
+import populationemploye from './routes/populationemploye'
+import trainingcalender from './routes/trainingcalender';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -231,9 +232,11 @@ export default () => {
   locationDeclared(app);
   audiometry(app);
   itemModel(app);
-  message(app)
-  barecodeInfos(app)
-  financialcharge(app)
+  message(app);
+  barecodeInfos(app);
+  financialcharge(app);
+  populationemploye(app);
+  trainingcalender(app)
   
   return app;
 };

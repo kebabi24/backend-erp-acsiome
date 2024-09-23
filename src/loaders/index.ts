@@ -227,6 +227,9 @@ export default async ({ expressApp }) => {
       { name: 'financialchargeModel', model: require('../models/financialcharge').default },
       { name: 'accountUnplanifedDetailModel', model: require('../models/account-unplanifed-detail').default },
       { name: 'employeTrainingModel', model: require('../models/employe-training').default },
+      { name: 'TrainingcalenderModel', model: require('../models/trainingcalender').default },
+      { name: 'populationemployeModel', model: require('../models/populationemploye').default },
+      
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1096,6 +1099,26 @@ export default async ({ expressApp }) => {
     foreignKey: 'fc_code',
     sourceKey: 'aud_fc_code',
   });
+  require('../models/item').default.hasMany(require('../models/trainingcalender').default, {
+    foreignKey: 'tc_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/trainingcalender').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'tc_part',
+  });
+  require('../models/provider').default.hasMany(require('../models/trainingcalender').default, {
+    foreignKey: 'tc_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/trainingcalender').default.hasOne(require('../models/provider').default, {
+    foreignKey: 'vd_addr',
+    sourceKey: 'tc_vend',
+  });
+
+
+  
+
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
  await sequelizeConnection.sync().catch(err => { console.log(err)});
