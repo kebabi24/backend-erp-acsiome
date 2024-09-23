@@ -224,6 +224,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+        
       });
       const lds = await locationDetailServiceInstance.find({
         ld_domain: user_domain,
@@ -312,6 +319,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           chr01:part.pt_draw,
           chr02:part.pt_break_cat,
           chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:req.body.pr.prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -674,6 +687,13 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+       
       });
       const lds = await locationDetailServiceInstance.find({
         ld_domain: user_domain,
@@ -763,6 +783,12 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
           chr01:part.pt_draw,
           chr02:part.pt_break_cat,
           chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:req.body.pr.prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -1005,6 +1031,13 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+       
       });
       const lds = await locationDetailServiceInstance.find({
         ld_domain: user_domain,
@@ -1098,6 +1131,12 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
           chr01:part.pt_draw,
           chr02:part.pt_break_cat,
           chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:req.body.pr.prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -1230,6 +1269,13 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:po.item.pt_desc1,
+        tr_prod_line: po.item.pt_prod_line,
+        
+        tr__chr04:po.item.pt_part_type,
+        int01:po.item.int01,
+        int02:po.it.emint02,
+       
       });
       const lds = await locationDetailServiceInstance.find({
         ld_domain: user_domain,
@@ -1304,6 +1350,12 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           chr01:po.item.pt_draw,
           chr02:po.item.pt_break_cat,
           chr03:po.item.pt_group,
+          int01:po.item.int01,
+          int02:po.item.int02,
+          chr04:poo.po_vend,
+          chr05:po.item.pt_prod_line,
+          ld__chr02:po.item.pt_part_type,
+          ld_rev:po.item.pt_rev,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,

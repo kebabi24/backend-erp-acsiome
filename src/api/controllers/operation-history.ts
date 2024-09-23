@@ -3,6 +3,7 @@ import WorkOrderService from "../../services/work-order"
 import WorkroutingService from "../../services/workrouting"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
@@ -15,7 +16,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const operationHistoryServiceInstance = Container.get(OperationHistoryService)
       const workOrderServiceInstance = Container.get(WorkOrderService)
       const workroutingServiceInstance = Container.get(WorkroutingService)
-      console.log(op.op_wo_nbr)
+      
       for (const item of detail) {
 
 
@@ -36,6 +37,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await operationHistoryServiceInstance.create({
           ...item,
           ...op,
+          chr01:hmsd,
+          chr02:hms,
           op_domain:user_domain,
           op_type: "labor", 
           op_std_run:1 / ro.ro_run,
@@ -52,21 +55,83 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
         const hms = down.fin_cause;
         const [hours, minutes] = hms.split(':');
-        const totalSeconds = (+hours) * 60 * 60 + (+minutes) * 60 ;
+        const totalSeconds = Number(+hours) * 60 * 60 + Number(+minutes) * 60 ;
         const hmsd = down.debut_cause;
         const [hoursd, minutesd] = hmsd.split(':');
-        const totalSecondsd = (+hoursd) * 60 * 60 + (+minutesd) * 60 ;
+        const totalSecondsd = Number(+hoursd) * 60 * 60 + Number(+minutesd) * 60 ;
         await operationHistoryServiceInstance.create({
           ...down,
           ...op,
+          chr01:hmsd,
+          chr02:hms,
           op_domain:user_domain,
           op_type: "down", 
-          op_act_run : totalSeconds - totalSecondsd,
+          op_act_run : Number(totalSeconds - totalSecondsd) / ( 60 ),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         });
+        const wos = await workOrderServiceInstance.find({ wo_routing:op.op_mch,wo_rel_date:{[Op.gte]: op.op_tran_date},wo_domain: user_domain })
+        for (let wo of wos)
+        {
+            const addSecondsToDaterel = (date, n,id) => {
+                const d = new Date(date);
+                d.setTime(d.getTime() + n * 1000 );
+                console.log(d)
+                const work = workOrderServiceInstance.update(
+                    { wo_rel_date:d },
+                    { id:id},)
+                return d;
+                
+              };
+            const addSecondsToDatedue = (date, n,id) => {
+                const d = new Date(date);
+                d.setTime(d.getTime() + n * 1000 );
+                console.log(d)
+                const work = workOrderServiceInstance.update(
+                    { wo_due_date:d },
+                    { id:id},)
+                return d;
+                
+              };
+            var reldate = wo.wo_rel_date
+            var duedate = wo.wo_due_date
+            addSecondsToDaterel(reldate, totalSeconds - totalSecondsd,wo.id);
+            addSecondsToDatedue(duedate, totalSeconds - totalSecondsd,wo.id);
+           
+            
+            }
+            const wos2 = await workOrderServiceInstance.find({ wo_routing:op.op_mch,wo_rel_date:{[Op.lt]: op.op_tran_date},wo_due_date:{[Op.gt]: op.op_tran_date},wo_domain: user_domain })
+        for (let wo2 of wos2)
+        {
+            const addSecondsToDaterel = (date, n,id) => {
+                const d = new Date(date);
+                d.setTime(d.getTime() + n * 1000 );
+                console.log(d)
+                const work = workOrderServiceInstance.update(
+                    { wo_rel_date:d },
+                    { id:id},)
+                return d;
+                
+              };
+            const addSecondsToDatedue = (date, n,id) => {
+                const d = new Date(date);
+                d.setTime(d.getTime() + n * 1000 );
+                console.log(d)
+                const work = workOrderServiceInstance.update(
+                    { wo_due_date:d },
+                    { id:id},)
+                return d;
+                
+              };
+            var reldate2 = wo2.wo_rel_date
+            var duedate2 = wo2.wo_due_date
+            addSecondsToDaterel(reldate2, totalSeconds - totalSecondsd,wo2.id);
+            addSecondsToDatedue(duedate2, totalSeconds - totalSecondsd,wo2.id);
+            
+            
+            }
       }
       for (const rjct of rjctdetail) {
 

@@ -21,6 +21,7 @@ export default (app: Router) => {
   route.post('/iss-trv', controller.issTrV);
   route.post('/iss-chl', controller.issChl);
   route.post('/iss-chlref', controller.issChlRef);
+  route.post('/Reprint', controller.reprint);
   route.post('/inventoryOfDate', controller.inventoryToDate);
   route.post('/inventoryactivity', controller.inventoryActivity);
   route.post('/inventorybyloc', controller.inventoryByLoc);
@@ -29,6 +30,7 @@ export default (app: Router) => {
   route.post('/rct-wo', controller.rctWo);
   route.post('/rjct-wo', controller.rjctWo);
   route.post('/iss-wo', controller.issWo);
+  route.post('/retiss-wo', controller.retissWo);
   route.post('/updateTr', controller.updateTrans);
   // route.post('/iss-so', controller.issSo);
   route.post('/findtrdate', controller.findtrDate);
@@ -49,4 +51,5 @@ export default (app: Router) => {
   route.post('/findnbr', controller.findByNbr);
   route.post('/findgroup', controller.findByGroup);  
   route.post('/updateprice', controller.updatePrice);
+  route.post('/findiss', controller.findByIss);
 };

@@ -16,6 +16,7 @@ export default (app: Router) => {
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
   route.post('/findbrrep', controller.findByRPBR);
+  route.post('/findexrep', controller.findByEXBR);
   route.post('/findbrrecap', controller.findByRecapBR);
   route.post('/findOne', controller.findByOne);
   route.put('/:id', controller.update);

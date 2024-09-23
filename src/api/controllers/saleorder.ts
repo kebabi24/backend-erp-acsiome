@@ -169,6 +169,18 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:pt.pt_desc1,
+        
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        
       });
 
       if (remain.sod_type != 'M') {
@@ -200,6 +212,15 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
             ld_qty_oh: -(Number(remain.sod_qty_ord) * Number(remain.sod_um_conv)),
             ld_expire: remain.sod_expire,
             ld_status: remain.sod_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:so.so_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -750,6 +771,18 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
+          tr_desc:pt.pt_desc1,
+        
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+       
         });
 
         if (details.sod_type != 'M') {
@@ -781,6 +814,15 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
               ld_qty_oh: -(Number(details.sod_qty_ord) * Number(1)),
               ld_expire: details.sod_expire,
               ld_status: details.sod_status,
+              chr01:pt.pt_draw,
+              chr02:pt.pt_break_cat,
+              chr03:pt.pt_group,
+              int01:pt.int01,
+              int02:pt.int02,
+              chr04:so.so_cust,
+              chr05:pt.pt_prod_line,
+              ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,

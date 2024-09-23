@@ -1,5 +1,6 @@
 import LabelService from '../../services/label';
 import SequenceService from '../../services/sequence';
+import ItemService from '../../services/item';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
@@ -33,8 +34,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     if(seq == null){seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' })}
     if(labelId == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`}
     let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: labelId})
-    
-    
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
+    let desc:any;
+    for (let item of items){if(item.pt_draw != 'BOBINE'){desc = item.pt_desc2} else {desc = item.pt_draw + ' ' + item.pt_part_type}}
+    console.log(lab.lb_part,desc,'DESC')
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
@@ -65,7 +69,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       //  .stroke()
       //  .font('Helvetica-Bold')
       //  .fontSize(12)
-      .text('PRODUIT :' + req.body.lb_desc, 20, 78)
+      .text('PRODUIT :' + desc, 20, 78)
       .font('Helvetica-Bold')
       .fontSize(12)
       .text('CODE :' + '', 20, 118)
@@ -183,8 +187,15 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     else{await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
+    
+      const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
+    let desc:any;
+    for (let item of items){desc = item.pt_desc2}
+    console.log(req.body.lb_part,desc,'DESC')
     const label = await labelServiceInstance.create({
       ...req.body,
+      lb_desc:desc,
       lb_ref: labelId,
       lb_cab: labelId,
       lb_domain: user_domain,
@@ -637,6 +648,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
 export default {
   create,
   createProd,

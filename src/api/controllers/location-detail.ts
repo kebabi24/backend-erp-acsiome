@@ -4,6 +4,7 @@ import InventoryStatusService from '../../services/inventory-status';
 import InventoryTransactionService from '../../services/inventory-transaction';
 import costSimulationService from '../../services/cost-simulation';
 import itemService from '../../services/item';
+import LabelService from '../../services/label';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
@@ -52,19 +53,25 @@ const createldpos = async (req: Request, res: Response, next: NextFunction) => {
     const sequence = await SequenceServiceInstance.findOne({ seq_seq: 'OP' });
     let nbr = `${sequence.seq_prefix}-${Number(sequence.seq_curr_val) + 1}`;
     for (const product of products) {
-      const { pt_part, pt_qty, pt_loc } = product;
+      // const { pt_part, pt_qty, pt_loc } = product;
 
       await locationDetailServiceInstance.create({
         ld_domain:user_domain,
-        ld_loc: pt_loc,
-        ld_part: pt_part,
+        ld_loc: product.pt_loc,
+        ld_part: product.pt_part,
         ld_lot: nbr,
-        ld_qty_oh: pt_qty,
+        ld_qty_oh: product.pt_qty,
         ld_site: usrd_site,
         ld_date: new Date(),
         chr01:product.pt_draw,
         chr02:product.pt_break_cat,
         chr03:product.pt_group,
+        int01:product.int01,
+          int02:product.int02,
+          // chr04:item.tr_addr,
+          chr05:product.pt_prod_line,
+          ld__chr02:product.pt_part_type,
+          ld_rev:product.pt_rev,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -101,9 +108,68 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const itemServiceInstance = Container.get(ItemService);
+    const labelServiceInstance = Container.get(LabelService);
     const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
    // console.log(locationDetails)
-  
+  //  const result = []
+  //  for (let det of locationDetails) {
+  //   let part = await itemServiceInstance.findOne({pt_part: det.ld_part, pt_domain: user_domain})
+  //   let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: det.ld_ref})
+      
+  //      if(lab == null){
+  //       const result_body = {
+  //         id:det.id,
+  //         ld_loc: det.ld_loc,
+  //         ld_part: det.ld_part,
+  //         pt_desc1: part.pt_desc1,
+  //         pt_um: part.pt_um,
+  //         pt_break_cat:part.pt_break_cat,
+  //         pt_draw:part.pt_draw,
+  //         pt_group:part.pt_group,
+  //         pt_part_type:part.pt_part_type,
+  //         pt_prod_line:part.pt_prod_line,
+  //         pt_rev:part.pt_rev,
+  //         lb_cust:'',
+  //         ld_qty_oh: det.ld_qty_oh,
+  //         ld_lot: det.ld_lot,
+  //         ld_site: det.ld_site,
+  //         ld_ref: det.ld_ref,
+  //         ld_status:det.ld_status,
+  //         created_by:det.created_by,
+  //         last_modified_by:det.last_modified_by,
+  //         ld_date:det.ld_date,
+
+  //       };
+  //       result.push(result_body);
+  //      }
+  //      else{
+  //       const result_body = {
+  //         id:det.id,
+  //         ld_loc: det.ld_loc,
+  //         ld_part: det.ld_part,
+  //         pt_desc1: part.pt_desc1,
+  //         pt_um: part.pt_um,
+  //         pt_break_cat:part.pt_break_cat,
+  //         pt_draw:part.pt_draw,
+  //         pt_group:part.pt_group,
+  //         pt_part_type:part.pt_part_type,
+  //         pt_prod_line:part.pt_prod_line,
+  //         pt_rev:part.pt_rev,
+  //         lb_cust:lab.lb_cust,
+  //         ld_qty_oh: det.ld_qty_oh,
+  //         ld_lot: det.ld_lot,
+  //         ld_site: det.ld_site,
+  //         ld_ref: det.ld_ref,
+  //         ld_status:det.ld_status,
+  //         created_by:det.created_by,
+  //         last_modified_by:det.last_modified_by,
+  //         ld_date:det.ld_date,
+  //       };
+  //       result.push(result_body);
+  //     }
+       
+  //     }
    {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
  
   } catch (e) {
@@ -446,6 +512,11 @@ for (let ld of req.body.details) {
        created_ip_adr: req.headers.origin,
        last_modified_by: user_code,
        last_modified_ip_adr: req.headers.origin,
+       
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        
     });
     await inventoryTransactionServiceInstance.create({
       tr_site: ld.ld_site,
@@ -484,6 +555,11 @@ for (let ld of req.body.details) {
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
+      
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+       
     });
 }
     return res.status(200).json({ message: 'fetched succesfully', data: locationDetail });

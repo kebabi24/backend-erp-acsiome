@@ -1,4 +1,4 @@
-import ItemService from '../../services/item';
+import ItemService from '../../services/item'; 
 import WorkRoutingService from "../../services/workrouting"
 import LocationDetailService from '../../services/location-details';
 import FraisService from "../../services/frais"
@@ -72,7 +72,88 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const itemServiceInstance = Container.get(ItemService);
     const items = await itemServiceInstance.find({ ...req.body,pt_domain:user_domain });
+    // let result = []
+    // for (let det of items){
+    //   let result_body={
+    //     id:det.id,
+    //     pt_part:det.pt_part,
+    //     pt_desc1:det.pt_desc1,
+    //     pt_um:det.pt_um,
+    //     pt_site:det.pt_site,
+    //     pt_loc:det.pt_loc,
+    //     pt_prod_line:det.pt_prod_line,
+    //     pt_part_type:det.pt_part_type,
+    //     pt_draw:det.pt_draw,
+    //     pt_group:det.pt_group,
+    //     pt_rev:det.pt_rev,
+    //     pt_break_cat:det.pt_break_cat,
+    //     pt_dsgn_grp:det.pt_dsgn_grp,
+
+
+    //   }
+    //   result.push(result_body)
+    // }
+    
+    
     return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBywithperte = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ ...req.body,pt_domain:user_domain });
+    let result = []
+    for (let det of items){
+      let result_body={
+        id:det.id,
+        pt_part:det.pt_part,
+        pt_desc1:det.pt_desc1,
+        pt_um:det.pt_um,
+        pt_site:det.pt_site,
+        pt_loc:det.pt_loc,
+        pt_prod_line:det.pt_prod_line,
+        pt_part_type:det.pt_part_type,
+        pt_draw:det.pt_draw,
+        pt_group:det.pt_group,
+        pt_rev:det.pt_rev,
+        pt_break_cat:det.pt_break_cat,
+        pt_dsgn_grp:det.pt_dsgn_grp,
+
+
+      }
+      result.push(result_body)
+    }
+    const pertes = await itemServiceInstance.find({ pt_draw:'PERTE',pt_domain:user_domain });
+    let resultperte = []
+    for (let det of pertes){
+      let resultperte_body={
+        id:det.id,
+        pt_part:det.pt_part,
+        pt_desc1:det.pt_desc1,
+        pt_um:det.pt_um,
+        pt_site:det.pt_site,
+        pt_loc:det.pt_loc,
+        pt_prod_line:det.pt_prod_line,
+        pt_part_type:det.pt_part_type,
+        pt_draw:det.pt_draw,
+        pt_group:det.pt_group,
+        pt_rev:det.pt_rev,
+        pt_break_cat:det.pt_break_cat,
+        pt_dsgn_grp:det.pt_dsgn_grp,
+
+      }
+      result.push(resultperte_body)
+    }
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -593,6 +674,7 @@ export default {
   create,
   findBySpec,
   findBy,
+  findBywithperte,
   findByOp,
   findBySupp,
   findByOne,

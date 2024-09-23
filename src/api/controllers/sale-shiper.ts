@@ -104,6 +104,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
+        tr_desc:pt.pt_desc1,
+        
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+       
       });
 
       if (remain.psh_type != 'M') {
@@ -135,6 +147,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             ld_qty_oh: -(Number(remain.psh_qty_ship) * Number(remain.psh_um_conv)),
             ld_expire: remain.psh_expire,
             ld_status: remain.psh_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:req.body.ps.psh_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,

@@ -9,6 +9,7 @@ export default (app: Router) => {
     route.get("/", controller.findAll)
     route.get("/check", controller.findCheck)
     route.get("/act", controller.findAct)
+    route.get("/wostatus", controller.findwostatus)
     route.get("/emptime", controller.findEmpTime)
     route.get("/empshift", controller.findEmpShift)
     route.get("/emptype", controller.findEmpType)

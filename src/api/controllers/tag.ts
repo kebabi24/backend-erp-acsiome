@@ -362,7 +362,7 @@ const{user_domain} = req.headers
         tag_site,
         tag_part,
         tag_loc,
-        item: { pt_prod_line, pt_part },
+        item: { pt_prod_line, pt_part,pt_rev,pt_part_type,pt_draw,pt_group,pt_break_cat,int01,int02,pt_desc1 },
       } = tag;
       if(tag.bool01==true){
         const loc = await locationServiceInstance.findOne({
@@ -372,7 +372,7 @@ const{user_domain} = req.headers
         }); 
       
         await locationDetailServiceInstance.create(
-          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_ref: tag_ref,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_ref: tag_ref,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,ld_rev:pt_rev,ld__chr02:pt_part_type,chr01:pt_draw,chr02:pt_break_cat,chr03:pt_group,chr05:pt_prod_line,int01:int01,int02:int02 }
         )
       }
       const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STD-CG' });
@@ -437,7 +437,19 @@ const{user_domain} = req.headers
         tr_price: sct_cst_tot,
         tr_gl_amt: sct_cst_tot * tr_qty_loc,
         created_by:user_code,created_ip_adr: req.headers.origin,
-        last_modified_by:user_code,last_modified_ip_adr: req.headers.origin
+        last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,
+        tr_desc:pt_desc1,
+        
+        tr__chr01:pt_draw,
+        tr__chr02:pt_break_cat,
+        tr__chr03:pt_group,
+        tr__chr04:pt_part_type,
+        int01:int01,
+        int02:int02,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        
       });
     }
     return res.status(200).json({

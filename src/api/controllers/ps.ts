@@ -79,7 +79,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     var i = 1;
     for (let p of ps) {
       p.int01 = i;
-      p.chr01 = p.item.pt_desc1;
+      p.chr01 = p.ps_ref;
 
       i = i + 1;
     }

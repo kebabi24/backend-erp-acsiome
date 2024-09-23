@@ -24,9 +24,9 @@ wo_so_job: Sequelize.STRING,
 
 wo_ord_date: Sequelize.DATEONLY, 
 
-wo_rel_date: Sequelize.DATEONLY, 
+wo_rel_date: Sequelize.DATE, 
 
-wo_due_date: Sequelize.DATEONLY, 
+wo_due_date: Sequelize.DATE, 
 
 wo_per_date: Sequelize.DATEONLY, 
 

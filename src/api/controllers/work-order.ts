@@ -9,7 +9,7 @@ import WorkCenterService from "../../services/workcenter"
 import { Op, Sequelize } from 'sequelize';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-import { multiply, result } from 'lodash';
+import { multiply, orderBy, result } from 'lodash';
 import { IntegerDataType } from 'sequelize/types';
 import psService from '../../services/ps';
 import workOrderDetailService from '../../services/work-order-detail';
@@ -21,6 +21,7 @@ import saleOrder from '../../models/saleorder';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import LocationDetailService from '../../services/location-details';
 import LabelService from '../../services/label';
+import inventoryTransactionService from '../../services/inventory-transaction';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -33,7 +34,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
-   
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
 
     for (const item of detail) {
       let wolot = 0;
@@ -42,7 +43,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       let rev : any;
       let batch : any;
       let grade : any;
-      
+      let mic:any;
+      let lai:any;
+      let desc:any;
+      let um:any;
+      let pl:any;
+      let type:any;
       const parts = await itemServiceInstance.find({ pt_domain: user_domain,pt_part: item.wo_part });
       for(let carac of parts){
         draw = carac.pt_draw,
@@ -50,18 +56,27 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         rev = carac.pt_rev,
         batch = carac.pt_break_cat,
         grade = carac.pt_group
+        mic = carac.int01
+        lai = carac.int02
+        desc = carac.pt_desc1
+        um = carac.pt_um
+        pl = carac.pt_prod_line
+        type = carac.pt_part_type
       }
       console.log(item)
-      await workOrderServiceInstance
+if(item.woid == null || item.woid == "")
+    {    await workOrderServiceInstance
         .create({
           ...item,
           ...it,
           wo_queue_eff:item.line,
-          // wo_rev: rev,
+           wo_rev: '01',
           wo_draw: draw,
           wo_ref : ref,
           wo_batch : batch,
           wo_grade : grade,
+          int01:mic,
+          int02:lai,
           wo_domain: user_domain,
           wo_nbr: nof,
           created_by: user_code,
@@ -70,9 +85,71 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         })
         .then(result => {
+          
           wolot = result.id;
+          
         });
-      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing,ro__chr01:parts.pt_break_cat, ro__dec01:parts.int01 });
+    }    
+else{let revision = 1
+  const wos = await workOrderServiceInstance.findOne({ id:item.woid,wo_domain: user_domain })
+  revision = Number(wos.wo_rev) + 1
+  console.log(revision)
+  await workOrderServiceInstance.update(
+  { wo_rev:'', wo_queue_eff: item.line,wo_status:item.wo_status, wo_rel_date:item.wo_rel_date,wo_due_date:item.wo_due_date,wo_qty_ord:item.wo_qty_ord,chr01:item.chr01,chr02:item.chr02,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+  { id : item.woid,wo_domain: user_domain},
+);} 
+if(item.woid == null || item.woid == "")
+  {await workOrderServiceInstance.update(
+  { wo_lot:wolot },
+  { id : wolot,wo_domain: user_domain},) }  
+      
+      
+      
+  await inventoryTransactionServiceInstance.create({
+    tr_rmks:it.wo_rmks,
+    tr_user1:'',
+    tr_addr:it.wo_routing,
+    tr_part:item.wo_part,
+    tr_site:'1000',
+    tr_loc:'EMPL PLAST2',
+    tr_serial: '',
+    tr_domain:user_domain,
+    tr_status: '',
+    tr_expire: item.wo_due_date,
+    tr_ref: '',
+    tr_qty_loc: item.wo_qty_ord,
+    tr_type: 'ORD-WO',
+    tr_line: item.wo_queue_eff,
+    tr_um: um,
+    tr_effdate: item.wo_rel_date,
+    tr_date: new Date(),
+    tr_price: 0,
+    tr_mtl_std: 0,
+    tr_lbr_std: 0,
+    tr_bdn_std: 0,
+    tr_ovh_std: 0,
+    tr_sub_std: 0,
+    tr_desc:desc,
+      tr_prod_line: pl,
+      tr__chr01:draw,
+      tr__chr02:batch,
+      tr__chr03:grade,
+      dec01:Number(new Date().getFullYear()),
+      dec02:Number(new Date().getMonth() + 1),
+      tr_program:new Date().toLocaleTimeString(),
+      tr_batch:'',
+      tr_grade:'',
+    created_by: user_code,
+    created_ip_adr: req.headers.origin,
+    last_modified_by: user_code,
+    last_modified_ip_adr: req.headers.origin,
+    
+      tr__chr04:type,
+      int01:mic,
+      int02:lai,
+      
+  });
+      const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing,ro__chr01:batch, ro__dec01:mic});
       if (ros.data = null){const ros = await workroutingServiceInstance.find({ ro_domain: user_domain,ro_routing: it.wo_routing,ro_op:0 });
       for (const ro of ros) {
           await woroutingServiceInstance.create({
@@ -120,6 +197,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
+    
   }
 };
 
@@ -1117,6 +1195,599 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByEXBR = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const {site,date,date1,wo_nbr,shift,wo_lot} = req.body;
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    let wos:any;
+    
+    if(wo_nbr == null || wo_nbr == ''){wos = await workOrderServiceInstance.find({ wo_rel_date : { [Op.between]: [date, date1]} , wo_routing:'U1',wo_site: site, wo_domain: user_domain});
+    }
+    else{wos = await workOrderServiceInstance.find({ id: wo_lot,wo_rel_date : { [Op.between]: [date, date1]} , wo_routing:'U1', wo_site: site, wo_domain: user_domain})}
+     
+    //  for(let it of wos){console.log(it.id)}
+    let result = []
+    let result2 = []
+    let result3 = []
+    let i = 1
+    let m = 1
+    let obj
+    for(let wo of wos) {
+      // console.log(wo.id)
+      const PAI = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:wo.wo_routing, tr_lot: String(wo.id), tr_type: "ISS-WO",tr__chr01:'PAYETTE',tr_effdate : { [Op.between]: [date, date1]}})
+      const SQL = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:wo.wo_routing, tr_lot: String(wo.id), tr_type: "ISS-WO",tr__chr01:'SQUELETTE',tr_effdate : { [Op.between]: [date, date1]}})
+      const PRE = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:wo.wo_routing, tr_lot: String(wo.id), tr_type: "ISS-WO",tr__chr01:'PREFORME',tr_effdate : { [Op.between]: [date, date1]}})
+      const ORG = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:wo.wo_routing, tr_lot: String(wo.id), tr_type: "ISS-WO",tr__chr01:'ORIGINAL',tr_effdate : { [Op.between]: [date, date1]}})
+      const COL = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:wo.wo_routing, tr_lot: String(wo.id), tr_type: "ISS-WO",tr__chr01:'COLORANT',tr_effdate : { [Op.between]: [date, date1]}})
+      
+      const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+      let maxlength = Math.max(PAI.length,SQL.length,PRE.length,ORG.length)
+      if(maxlength > 0)
+      {
+        
+        for (var j = 0;j < maxlength; j++) {
+                    
+            
+            if(j < PAI.length && j < SQL.length && j < PRE.length && j < ORG.length) {
+              console.log(1,1,1,1) 
+              obj = {
+                id:i,
+                PAYREF: PAI[j].tr_ref,
+                PAYCOLOR: PAI[j].tr__chr02,
+                PAYQTY:-PAI[j].tr_qty_loc,
+                PAYTIME:PAI[j].tr_program,
+                PAYDEBIT: '',
+                SQLREF: SQL[j].tr_ref,
+                SQLCOLOR: SQL[j].tr__chr02,
+                SQLQTY:-SQL[j].tr_qty_loc,
+                SQLTIME:SQL[j].tr_program,
+                SQLDEBIT: '',
+                PREREF: PRE[j].tr_ref,
+                PRECOLOR: PRE[j].tr__chr02,
+                PREQTY:-PRE[j].tr_qty_loc,
+                PRETIME:PRE[j].tr_program,
+                PREDEBIT: '',
+                ORGREF: ORG[j].tr_ref,
+                ORGCOLOR: ORG[j].tr__chr02,
+                ORGQTY:-ORG[j].tr_qty_loc,
+                ORGTIME:ORG[j].tr_program,
+                ORGDEBIT: '',
+              }
+              result.push(obj)
+            } 
+            else 
+            {
+              if(j > PAI.length){
+                if(j < SQL.length && j < PRE.length && j < ORG.length)
+                { 
+                  console.log(0,1,1,1)
+                  obj = {
+                        id:i,
+                        PAYREF: '',
+                        PAYCOLOR: '',
+                        PAYQTY:'',
+                        PAYTIME:'',
+                        PAYDEBIT: '',
+                        SQLREF: SQL[j].tr_ref,
+                        SQLCOLOR: SQL[j].tr__chr02,
+                        SQLQTY:-SQL[j].tr_qty_loc,
+                        SQLTIME:SQL[j].tr_program,
+                        SQLDEBIT: '',
+                        PREREF: PRE[j].tr_ref,
+                        PRECOLOR: PRE[j].tr__chr02,
+                        PREQTY:-PRE[j].tr_qty_loc,
+                        PRETIME:PRE[j].tr_program,
+                        PREDEBIT: '',
+                        ORGREF: ORG[j].tr_ref,
+                        ORGCOLOR: ORG[j].tr__chr02,
+                        ORGQTY:-ORG[j].tr_qty_loc,
+                        ORGTIME:ORG[j].tr_program,
+                        ORGDEBIT: '',
+                  }
+                  result.push(obj)
+                }
+                else
+                {
+                  if(j > SQL.length )
+                  { 
+                    if( j < PRE.length && j < ORG.length)
+                    { 
+                      console.log(0,0,1,1)
+                      obj = {
+                          id:i,
+                          PAYREF: '',
+                          PAYCOLOR: '',
+                          PAYQTY:'',
+                          PAYTIME:'',
+                          PAYDEBIT: '',
+                          SQLREF: '',
+                          SQLCOLOR: '',
+                          SQLQTY:'',
+                          SQLTIME:'',
+                          SQLDEBIT: '',
+                          PREREF: PRE[j].tr_ref,
+                          PRECOLOR: PRE[j].tr__chr02,
+                          PREQTY:-PRE[j].tr_qty_loc,
+                          PRETIME:PRE[j].tr_program,
+                          PREDEBIT: '',
+                          ORGREF: ORG[j].tr_ref,
+                          ORGCOLOR: ORG[j].tr__chr02,
+                          ORGQTY:-ORG[j].tr_qty_loc,
+                          ORGTIME:ORG[j].tr_program,
+                          ORGDEBIT: '',
+                      }
+                      result.push(obj)
+                    }
+                    else
+                    {
+                      if( j < ORG.length)
+                      { 
+                        console.log(0,0,0,1)
+                        obj = {
+                              id:i,
+                              PAYREF: '',
+                              PAYCOLOR: '',
+                              PAYQTY:'',
+                              PAYTIME:'',
+                              PAYDEBIT: '',
+                              SQLREF: '',
+                              SQLCOLOR: '',
+                              SQLQTY:'',
+                              SQLTIME:'',
+                              SQLDEBIT: '',
+                              PREREF: '',
+                              PRECOLOR: '',
+                              PREQTY:'',
+                              PRETIME:'',
+                              PREDEBIT: '',
+                              ORGREF: ORG[j].tr_ref,
+                              ORGCOLOR: ORG[j].tr__chr02,
+                              ORGQTY:-ORG[j].tr_qty_loc,
+                              ORGTIME:ORG[j].tr_program,
+                              ORGDEBIT: '',
+                        }
+                        result.push(obj)
+                      }
+                      else
+                      {
+                        if( j < PRE.length)
+                          { 
+                            console.log(0,0,1,0)
+                            obj = {
+                                  id:i,
+                                  PAYREF: '',
+                                  PAYCOLOR: '',
+                                  PAYQTY:'',
+                                  PAYTIME:'',
+                                  PAYDEBIT: '',
+                                  SQLREF: '',
+                                  SQLCOLOR: '',
+                                  SQLQTY:'',
+                                  SQLTIME:'',
+                                  SQLDEBIT: '',
+                                  PREREF: PRE[j].tr_ref,
+                                  PRECOLOR: PRE[j].tr__chr02,
+                                  PREQTY:-PRE[j].tr_qty_loc,
+                                  PRETIME:PRE[j].tr_program,
+                                  PREDEBIT: '',
+                                  ORGREF: '',
+                                  ORGCOLOR: '',
+                                  ORGQTY:'',
+                                  ORGTIME:4,
+                                  ORGDEBIT: '',
+                            }
+                            result.push(obj)
+                          }
+                      }
+                    }  
+                  }
+                  else
+                  { 
+                      
+                        if( j < ORG.length)
+                        { console.log(0,1,0,1)
+                          obj = {
+                                id:i,
+                                PAYREF: '',
+                                PAYCOLOR: '',
+                                PAYQTY:'',
+                                PAYTIME:'',
+                                PAYDEBIT: '',
+                                SQLREF: SQL[j].tr_ref,
+                                SQLCOLOR: SQL[j].tr__chr02,
+                                SQLQTY:-SQL[j].tr_qty_loc,
+                                SQLTIME:SQL[j].tr_program,
+                                SQLDEBIT: '',
+                                PREREF: '',
+                                PRECOLOR: '',
+                                PREQTY:'',
+                                PRETIME:'',
+                                PREDEBIT: '',
+                                ORGREF: ORG[j].tr_ref,
+                                ORGCOLOR: ORG[j].tr__chr02,
+                                ORGQTY:-ORG[j].tr_qty_loc,
+                                ORGTIME:ORG[j].tr_program,
+                                ORGDEBIT: '',
+                          }
+                          result.push(obj)
+                        }
+                        else
+                        {
+                          if( j < PRE.length)
+                          { console.log(0,1,1,0)
+                              obj = {
+                                    id:i,
+                                    PAYREF: '',
+                                    PAYCOLOR: '',
+                                    PAYQTY:'',
+                                    PAYTIME:'',
+                                    PAYDEBIT: '',
+                                    SQLREF: SQL[j].tr_ref,
+                                    SQLCOLOR: SQL[j].tr__chr02,
+                                    SQLQTY:-SQL[j].tr_qty_loc,
+                                    SQLTIME:SQL[j].tr_program,
+                                    SQLDEBIT: '',
+                                    PREREF: PRE[j].tr_ref,
+                                    PRECOLOR: PRE[j].tr__chr02,
+                                    PREQTY:-PRE[j].tr_qty_loc,
+                                    PRETIME:PRE[j].tr_program,
+                                    PREDEBIT: '',
+                                    ORGREF: '',
+                                    ORGCOLOR: '',
+                                    ORGQTY:'',
+                                    ORGTIME:'',
+                                    ORGDEBIT: '',
+                              }
+                              result.push(obj)
+                          }
+                          else
+                          { console.log(0,1,0,0)
+                            obj = {
+                                      id:i,
+                                      PAYREF: '',
+                                      PAYCOLOR: '',
+                                      PAYQTY:'',
+                                      PAYTIME:'',
+                                      PAYDEBIT: '',
+                                      SQLREF: SQL[j].tr_ref,
+                                      SQLCOLOR: SQL[j].tr__chr02,
+                                      SQLQTY:-SQL[j].tr_qty_loc,
+                                      SQLTIME:SQL[j].tr_program,
+                                      SQLDEBIT: '',
+                                      PREREF: '',
+                                      PRECOLOR:'',
+                                      PREQTY:'',
+                                      PRETIME:'',
+                                      PREDEBIT: '',
+                                      ORGREF: '',
+                                      ORGCOLOR: '',
+                                      ORGQTY:'',
+                                      ORGTIME:'',
+                                      ORGDEBIT: '',
+                            }
+                            result.push(obj)
+                          }
+                        }
+                        
+                  }   
+                }   
+              }
+              else
+              {
+                if(j > SQL.length)
+                {
+                  if( j < PRE.length && j < ORG.length)
+                      { console.log(1,0,1,1)
+                        obj = {
+                            id:i,
+                            PAYREF: PAI[j].tr_ref,
+                            PAYCOLOR: PAI[j].tr__chr02,
+                            PAYQTY:-PAI[j].tr_qty_loc,
+                            PAYTIME:PAI[j].tr_program,
+                            PAYDEBIT: '',
+                            SQLREF: '',
+                            SQLCOLOR: '',
+                            SQLQTY:'',
+                            SQLTIME:'',
+                            SQLDEBIT: '',
+                            PREREF: PRE[j].tr_ref,
+                            PRECOLOR: PRE[j].tr__chr02,
+                            PREQTY:-PRE[j].tr_qty_loc,
+                            PRETIME:PRE[j].tr_program,
+                            PREDEBIT: '',
+                            ORGREF: ORG[j].tr_ref,
+                            ORGCOLOR: ORG[j].tr__chr02,
+                            ORGQTY:-ORG[j].tr_qty_loc,
+                            ORGTIME:ORG[j].tr_program,
+                            ORGDEBIT: '',
+                        }
+                        result.push(obj)
+                  }
+                  else
+                  {
+                    if( j < ORG.length)
+                          { console.log(1,0,0,1)
+                            obj = {
+                                id:i,
+                                PAYREF: PAI[j].tr_ref,
+                                PAYCOLOR: PAI[j].tr__chr02,
+                                PAYQTY:PAI[j].tr_qty_loc,
+                                PAYTIME:PAI[j].tr_program,
+                                PAYDEBIT: '',
+                                SQLREF: '',
+                                SQLCOLOR: '',
+                                SQLQTY:'',
+                                SQLTIME:'',
+                                SQLDEBIT: '',
+                                PREREF: '',
+                                PRECOLOR: '',
+                                PREQTY:'',
+                                PRETIME:'',
+                                PREDEBIT: '',
+                                ORGREF: ORG[j].tr_ref,
+                                ORGCOLOR: ORG[j].tr__chr02,
+                                ORGQTY:-ORG[j].tr_qty_loc,
+                                ORGTIME:ORG[j].tr_program,
+                                ORGDEBIT: '',
+                            }
+                            result.push(obj)
+                    }
+                    else
+                    {
+                      if( j < PRE.length)
+                      { console.log(1,0,1,0)
+                          obj = {
+                              id:i,
+                              PAYREF: PAI[j].tr_ref,
+                              PAYCOLOR: PAI[j].tr__chr02,
+                              PAYQTY:PAI[j].tr_qty_loc,
+                              PAYTIME:PAI[j].tr_program,
+                              PAYDEBIT: '',
+                              SQLREF: '',
+                              SQLCOLOR: '',
+                              SQLQTY:'',
+                              SQLTIME:'',
+                              SQLDEBIT: '',
+                              PREREF: PRE[j].tr_ref,
+                              PRECOLOR: PRE[j].tr__chr02,
+                              PREQTY:-PRE[j].tr_qty_loc,
+                              PRETIME:PRE[j].tr_program,
+                              PREDEBIT: '',
+                              ORGREF: '',
+                              ORGCOLOR: '',
+                              ORGQTY:'',
+                              ORGTIME:'',
+                              ORGDEBIT: '',
+                          }
+                          result.push(obj)
+                      }
+                      else
+                      {  console.log(1,0,0,0)
+                        obj = {
+                              id:i,
+                              PAYREF: PAI[j].tr_ref,
+                              PAYCOLOR: PAI[j].tr__chr02,
+                              PAYQTY:PAI[j].tr_qty_loc,
+                              PAYTIME:PAI[j].tr_program,
+                              PAYDEBIT: '',
+                              SQLREF: '',
+                              SQLCOLOR: '',
+                              SQLQTY:'',
+                              SQLTIME:'',
+                              SQLDEBIT: '',
+                              PREREF: '',
+                              PRECOLOR: '',
+                              PREQTY:'',
+                              PRETIME:'',
+                              PREDEBIT: '',
+                              ORGREF: '',
+                              ORGCOLOR:'',
+                              ORGQTY:'',
+                              ORGTIME:'',
+                              ORGDEBIT: '',
+                        }
+                        result.push(obj)
+                      }  
+                    }
+
+                  }  
+                }
+                else
+                {
+                  if(j > PRE.length){
+                    if(j < ORG.length)
+                    { console.log(1,1,0,1)
+                      obj = {
+                            id:i,
+                            PAYREF: PAI[j].tr_ref,
+                            PAYCOLOR: PAI[j].tr__chr02,
+                            PAYQTY:PAI[j].tr_qty_loc,
+                            PAYTIME:PAI[j].tr_program,
+                            PAYDEBIT: '',
+                            SQLREF: SQL[j].tr_ref,
+                            SQLCOLOR: SQL[j].tr__chr02,
+                            SQLQTY:SQL[j].tr_qty_loc,
+                            SQLTIME:SQL[j].tr_program,
+                            SQLDEBIT: '',
+                            PREREF: '',
+                            PRECOLOR: '',
+                            PREQTY:'',
+                            PRETIME:'',
+                            PREDEBIT: '',
+                            ORGREF: ORG[j].tr_ref,
+                            ORGCOLOR: ORG[j].tr__chr02,
+                            ORGQTY:-ORG[j].tr_qty_loc,
+                            ORGTIME:ORG[j].tr_program,
+                            ORGDEBIT: '',
+                      }
+                      result.push(obj)
+                    }
+                    else
+                    { console.log(1,1,0,0)
+                      obj = {
+                                id:i,
+                                PAYREF: PAI[j].tr_ref,
+                                PAYCOLOR: PAI[j].tr__chr02,
+                                PAYQTY:PAI[j].tr_qty_loc,
+                                PAYTIME:PAI[j].tr_program,
+                                PAYDEBIT: '',
+                                SQLREF: SQL[j].tr_ref,
+                                SQLCOLOR: SQL[j].tr__chr02,
+                                SQLQTY:SQL[j].tr_qty_loc,
+                                SQLTIME:SQL[j].tr_program,
+                                SQLDEBIT: '',
+                                PREREF: '',
+                                PRECOLOR: '',
+                                PREQTY:'',
+                                PRETIME:'',
+                                PREDEBIT: '',
+                                ORGREF: '',
+                                ORGCOLOR: '',
+                                ORGQTY:'',
+                                ORGTIME:'',
+                                ORGDEBIT: '',
+                          }
+                          result.push(obj)
+                    }    
+                    
+                  }
+                  else
+                  {
+                    if(j > ORG.length)
+                      { console.log(1,1,1,0)
+                        obj = {
+                              id:i,
+                              PAYREF: PAI[j].tr_ref,
+                              PAYCOLOR: PAI[j].tr__chr02,
+                              PAYQTY:PAI[j].tr_qty_loc,
+                              PAYTIME:PAI[j].tr_program,
+                              PAYDEBIT: '',
+                              SQLREF: SQL[j].tr_ref,
+                              SQLCOLOR: SQL[j].tr__chr02,
+                              SQLQTY:SQL[j].tr_qty_loc,
+                              SQLTIME:SQL[j].tr_program,
+                              SQLDEBIT: '',
+                              ORGREF: '',
+                              ORGCOLOR: '',
+                              ORGQTY:'',
+                              ORGTIME:'',
+                              ORGDEBIT: '',
+                              PREREF: PRE[j].tr_ref,
+                              PRECOLOR: PRE[j].tr__chr02,
+                              PREQTY:-PRE[j].tr_qty_loc,
+                              PRETIME:PRE[j].tr_program,
+                              PREDEBIT: '',
+                        }
+                        result.push(obj)
+                      }
+                  }
+                }
+              }
+            }
+            
+            
+   
+             
+          
+            i = i + 1
+        }
+      } 
+      if(COL.length > 0)
+      {
+        for (var l = 0;l < maxlength; l++) {
+          obj = {
+            id:m,
+            COLREF: COL[l].tr_ref,
+            COLCOLOR: COL[l].tr__chr02,
+            COLQTY:-PAI[l].tr_qty_loc,
+            COLTIME:PAI[l].tr_program,
+            COLDEBIT: '',
+          }
+          result3.push(obj)
+          m = m + 1
+        }
+      }
+      
+      
+    }
+    const RETOUR = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:'U1', tr_type: "ISS-WO",tr_qty_loc:{[Op.gte]: 0},tr_effdate : { [Op.between]: [date, date1]}})
+    const PERTE = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain,tr_addr:'U1', tr_type: "RCT-UNP",tr__chr01:'PERTE',tr_qty_loc:{[Op.gte]: 0},tr_effdate : { [Op.between]: [date, date1]}})
+    let maxlength2 = Math.max(RETOUR.length,PERTE.length)
+    if(maxlength2>0)
+      { 
+        for (var k = 0;k < maxlength2; k++) {
+        console.log(maxlength2) 
+        
+        if(k <RETOUR.length && k <PERTE.length)
+        { obj = {
+            id:i,
+            RETOURCOLOR: RETOUR[k].tr__chr01 + ' ' + RETOUR[k].tr__chr02,
+            RETOURREF1: RETOUR[k].tr_so_job,
+            RETOURREF2: RETOUR[k].tr_ref,
+            RETOURQTY:RETOUR[k].tr_qty_loc,
+            PERTECOLOR:PERTE[k].tr_desc,
+            PERTEREF:PERTE[k].tr_ref,
+            PERTEQTY:PERTE[k].tr_qty_loc,
+            
+          }
+          result2.push(obj)   
+        }
+        else
+        {
+          if(k < RETOUR.length)
+          {
+            obj = {
+              id:i,
+              RETOURCOLOR: RETOUR[k].tr__chr02,
+              RETOURREF1: RETOUR[k].tr_ref,
+              RETOURREF2: RETOUR[k].tr_so_job,
+              RETOURQTY:RETOUR[k].tr_qty_loc,
+              PERTECOLOR:'',
+              PERTEREF:'',
+              PERTEQTY:'',
+              
+            }
+            result2.push(obj) 
+
+          }
+          else
+          {
+            obj = {
+              id:i,
+              RETOURCOLOR: '',
+              RETOURREF1: '',
+              RETOURREF2: '',
+              RETOURQTY:'',
+              PERTECOLOR:PERTE[k].tr__chr01,
+              PERTEREF:PERTE[k].tr_ref,
+              PERTEQTY:PERTE[k].tr_qty_loc,
+              
+            }
+            result2.push(obj)
+          }
+        }
+              
+      
+        
+
+         
+      
+        i = i + 1
+        }
+      }    
+    
+    
+
+    return res.status(200).json({ message: 'fetched succesfully', data: result,data2:result2,data3:result3 });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByRecapBR = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all wo endpoint');
@@ -1243,6 +1914,7 @@ export default {
   CalcCostWo,
   findBywo,
   findByRPBR,
+  findByEXBR,
   findByRecapBR
 
 };
