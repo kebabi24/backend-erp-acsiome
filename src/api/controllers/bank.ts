@@ -2,7 +2,7 @@ import BankService from '../../services/bank';
 import BankDetailService from '../../services/bank-detail';
 import BkhService from '../../services/bkh';
 import PosOrder from '../../services/pos-order';
-
+import DecompteService from '../../services/decompte';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import sequenceService from '../../services/sequence';
@@ -689,7 +689,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const bankServiceInstance = Container.get(BankService);
     const serviceMobileServiceInstance = Container.get(serviceMobile);
-    
+    const decompteService = Container.get(DecompteService)
    
     const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
     const bk = await bkhServiceInstance.create({
@@ -710,7 +710,11 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
 
-    
+    const decompte = await decompteService.create({dec_code:req.body.service_code,dec_role:req.body.role,dec_desc:"Versement",dec_amt:req.body.amt_tr,dec_type:"P",dec_effdate:new Date(),dec_domain:user_domain,
+    created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin, });
     await bankServiceInstance.update(
       {
         bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),

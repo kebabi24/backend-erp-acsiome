@@ -116,6 +116,16 @@ export default class LoadRequestService {
     }
   }
 
+  public async findLoadRequestsByRoleCode(load_requests_codes: any): Promise<any> {
+    try {
+      const loadRequests = await this.loadReuestModel.findOne({ where: { load_request_code: load_requests_codes } });
+      this.logger.silly('find all loadRequests');
+      return loadRequests;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findAllLoadRequests40ByRoleCode(role_code: any): Promise<any> {
     try {
       const loadRequests = await this.loadReuestModel.findAll({ where: { role_code: role_code, status: 40 } });
@@ -1237,6 +1247,18 @@ export default class LoadRequestService {
       });
 
       return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
+  public async findLoadRequestLineBy(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
     } catch (e) {
       this.logger.error(e);
       throw e;

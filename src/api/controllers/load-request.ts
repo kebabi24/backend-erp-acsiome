@@ -2,6 +2,7 @@ import LoadRequestService from '../../services/load-request';
 import TokenSerieService from '../../services/token-serie';
 import UserMobileService from '../../services/user-mobile';
 import ItemService from '../../services/item';
+import DecompteService from '../../services/decompte';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
@@ -415,7 +416,8 @@ const updateLoadRequests4O = async (req: Request, res: Response, next: NextFunct
 
 const createLoadRequestDetails = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
   try {
     const loadRequestService = Container.get(LoadRequestService);
 //console.log("req.body",req.body)
@@ -488,6 +490,7 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
 
   try {
     const loadRequestService = Container.get(LoadRequestService);
+    const itemServiceInstance = Container.get(ItemService);
 console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
@@ -514,6 +517,10 @@ console.log("req.body",req.body)
           load_request_code: line.load_request_code,
         });
        // console.log('maaaaaaaaaaaaaaaax', maxLine);
+       const ptpart = await itemServiceInstance.findOne({
+        pt_part: line.product_code,
+      });
+      console.log("line",line)
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -521,6 +528,7 @@ console.log("req.body",req.body)
           date_charge: new Date(),
           qt_request: 0,
           qt_validated: 0,
+          pt_price: ptpart.pt_price,
         });
       }
     }
@@ -534,6 +542,7 @@ console.log("req.body",req.body)
       });
      // console.log('elemDet', elemDet);
       if (elemDet !== null) {
+        console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
           elemDet.product_code,
@@ -554,37 +563,59 @@ console.log("req.body",req.body)
 
 const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const loadRequestService = Container.get(LoadRequestService);
+    const decompteService = Container.get(DecompteService)
     const load_request_details = req.body.load_request_details;
     const load_request_lines = req.body.load_request_lines;
     const load_request_code = req.body.load_request_code;
 
     // UPDATE LOAD REQUEST LINES
-    for (const line of load_request_lines) {
-      const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
-        line.load_request_code,
-        line.product_code,
-        line.qt_effected,
-      );
-    }
+    // for (const line of load_request_lines) {
+    //   const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
+    //     line.load_request_code,
+    //     line.product_code,
+    //     line.qt_effected,
+    //   );
+    // }
 
     // DELETE OLD LOAD REQUEST DETAILS
-    for (const load of load_request_details) {
-      const deletedLoadRequest = await loadRequestService.deleteLoadRequestDetail({
-        product_code: load.product_code,
-        load_request_code: load.load_request_code,
-      });
-    }
+    // for (const load of load_request_details) {
+    //   const deletedLoadRequest = await loadRequestService.deleteLoadRequestDetail({
+    //     product_code: load.product_code,
+    //     load_request_code: load.load_request_code,
+    //   });
+    // }
 
     // CREATE NEW LOAD REQUEST DETAILS
-    const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details);
+    // const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails(load_request_details);
+
+
+    const loadLine = await loadRequestService.findLoadRequestLineBy(
+      {load_request_code:load_request_code}      
+    );
+    let tot = 0
+    for (let line of loadLine) {
+console.log(line.pt_price,line.qt_effected)
+      tot = tot +( Number(line.pt_price) * Number(line.qt_effected) * Number(1.2019))
+    }
+
+    const lr = await loadRequestService.findLoadRequestsByRoleCode(load_request_code);
+    console.log(lr)
+    const decompte = await decompteService.create({dec_code:load_request_code,dec_role:lr.role_code,dec_desc:"Chargement",dec_amt:tot,dec_type:"C",dec_effdate:new Date(),dec_domain:user_domain,
+    created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin, });
+
     // UPDATE LOAD REQUEST STATUS TO 20
     // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
 
-    return res.status(201).json({ message: 'created succesfully', data: loadRequestsDetails });
+
+    return res.status(201).json({ message: 'created succesfully', data: loadRequest });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -850,7 +881,7 @@ const getLoadRequestWithCode = async (req: Request, res: Response, next: NextFun
   //const profile_code = req.params.profile_code
   try {
     const loadRequestService = Container.get(LoadRequestService);
-
+    
     const role_code = req.body.role_code;
     const load_request_code = req.body.load_request_code;
     const loadRequestData = await loadRequestService.getLoadRequestWithCode(role_code, load_request_code);

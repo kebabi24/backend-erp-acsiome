@@ -11,10 +11,10 @@ const connectDb = async () => {
 
     try {
         var config = {
-            "user": "hht", // Database username
-            "password": "hht", // Database password
+            "user": "sa", // Database username
+            "password": "admin", // Database password
             "server": "localhost", // Server IP address
-            "database": "Assabil", // Database name
+            "database": "test", // Database name
             "options": {
                 "encrypt": false // Disable encryption
             }
@@ -40,8 +40,8 @@ const synchro = async () => {
         console.log("ld")
         // // synchro ld_det***************************************
 
-        const res = await sql.query("SELECT * FROM role ")
-       // await this.pool.query("DELETE FROM ld_det WHERE ld_site='1601'")
+        const res = await sql.query("SELECT * FROM Utilisateur ")
+      //  await this.pool.query("DELETE FROM ld_det WHERE ld_site='1601'")
         console.log(res)
     } catch (error) {
         console.log(error)
