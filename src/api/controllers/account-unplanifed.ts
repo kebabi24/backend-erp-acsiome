@@ -97,7 +97,7 @@ const createFC = async (req: Request, res: Response, next: NextFunction) => {
             bkh_bank: req.body.accountUnplanifed.au_bank,
             bkh_type: 'ISS',
             bkh_balance: banks.bk_balance,
-            bk_2000: - Number(req.body.accountUnplanifed.au_amt),
+            bkh_amt: - Number(req.body.accountUnplanifed.au_amt),
             // bkh_site: req.body.site,
             created_by: user_code,
             created_ip_adr: req.headers.origin,

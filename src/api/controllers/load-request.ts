@@ -1,6 +1,7 @@
 import LoadRequestService from '../../services/load-request';
 import TokenSerieService from '../../services/token-serie';
 import UserMobileService from '../../services/user-mobile';
+import RoleService from '../../services/role';
 import ItemService from '../../services/item';
 import DecompteService from '../../services/decompte';
 import { Router, Request, Response, NextFunction } from 'express';
@@ -568,6 +569,7 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
   try {
     const loadRequestService = Container.get(LoadRequestService);
     const decompteService = Container.get(DecompteService)
+    const roleServiceInstance = Container.get(RoleService)
     const load_request_details = req.body.load_request_details;
     const load_request_lines = req.body.load_request_lines;
     const load_request_code = req.body.load_request_code;
@@ -605,11 +607,15 @@ console.log(line.pt_price,line.qt_effected)
     const lr = await loadRequestService.findLoadRequestsByRoleCode(load_request_code);
     console.log(lr)
     const decompte = await decompteService.create({dec_code:load_request_code,dec_role:lr.role_code,dec_desc:"Chargement",dec_amt:tot,dec_type:"C",dec_effdate:new Date(),dec_domain:user_domain,
+    
     created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin, });
 
+            const role = await roleServiceInstance.findOne({role_code: lr.role_code});
+  
+    await roleServiceInstance.updated(   {solde: role.solde + Number(tot)},{role_code:lr.role_code})      
     // UPDATE LOAD REQUEST STATUS TO 20
     // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
