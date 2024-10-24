@@ -3508,9 +3508,11 @@ const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
         'tr_loc',
         'tr_rmks',
         'tr_addr',
+        'tr_ref_site',
+        'tr_ref_loc',
         //[Sequelize.fn('sum', Sequelize.col('tr_gl_amt')), 'amt'],
       ],
-      group: ['tr_effdate', 'tr_lot', 'tr_rmks', 'tr_site', 'tr_loc','tr_addr'],
+      group: ['tr_effdate', 'tr_lot', 'tr_rmks', 'tr_site', 'tr_loc','tr_ref_site', 'tr_ref_loc','tr_addr'],
       raw: true,
     });
 
@@ -3528,6 +3530,8 @@ const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
         tr_loc : tr.tr_loc,
         tr_rmks: tr.tr_rmks,
         tr_addr: tr.tr_addr,
+        tr_ref_site: tr.tr_ref_site,
+        tr_ref_loc: tr.tr_ref_loc
        // amt: tr.amt,
       });
       i = i + 1;

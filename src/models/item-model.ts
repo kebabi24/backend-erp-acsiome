@@ -30,7 +30,7 @@ const ItemModel = sequelize.define(
     mod_part_type: Sequelize.STRING,
     mod_draw: Sequelize.STRING,
     mod_group: Sequelize.STRING,
-
+    mod_promo:Sequelize.STRING,
     mod_dsgn_grp: Sequelize.STRING,
     mod_origin: Sequelize.STRING,
     mod_drwg_loc: Sequelize.STRING,

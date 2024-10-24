@@ -52,21 +52,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
       for (const down of dwndetail) {
-
-        const hms = down.fin_cause;
-        const [hours, minutes] = hms.split(':');
-        const totalSeconds = Number(+hours) * 60 * 60 + Number(+minutes) * 60 ;
-        const hmsd = down.debut_cause;
-        const [hoursd, minutesd] = hmsd.split(':');
-        const totalSecondsd = Number(+hoursd) * 60 * 60 + Number(+minutesd) * 60 ;
+        var elapsed = Math.abs(new Date(down.fin_cause).getTime() - new Date(down.debut_cause).getTime()) / (1000 * 60)
+        // console.log('elapsed',elapsed)
+        // const hms = down.fin_cause;
+        // const [hours, minutes] = hms.split(':');
+        // const totalSeconds = Number(+hours) * 60 * 60 + Number(+minutes) * 60 ;
+        // const hmsd = down.debut_cause;
+        // const [hoursd, minutesd] = hmsd.split(':');
+        // const totalSecondsd = Number(+hoursd) * 60 * 60 + Number(+minutesd) * 60 ;
         await operationHistoryServiceInstance.create({
           ...down,
           ...op,
-          chr01:hmsd,
-          chr02:hms,
+          chr01:down.debut_cause,
+          chr02:down.fin_cause,
           op_domain:user_domain,
           op_type: "down", 
-          op_act_run : Number(totalSeconds - totalSecondsd) / ( 60 ),
+          op_act_run : elapsed,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -97,8 +98,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               };
             var reldate = wo.wo_rel_date
             var duedate = wo.wo_due_date
-            addSecondsToDaterel(reldate, totalSeconds - totalSecondsd,wo.id);
-            addSecondsToDatedue(duedate, totalSeconds - totalSecondsd,wo.id);
+            addSecondsToDaterel(reldate, Number(elapsed) * 60,wo.id);
+            addSecondsToDatedue(duedate, Number(elapsed) * 60,wo.id);
            
             
             }
@@ -127,8 +128,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
               };
             var reldate2 = wo2.wo_rel_date
             var duedate2 = wo2.wo_due_date
-            addSecondsToDaterel(reldate2, totalSeconds - totalSecondsd,wo2.id);
-            addSecondsToDatedue(duedate2, totalSeconds - totalSecondsd,wo2.id);
+            addSecondsToDaterel(reldate2, Number(elapsed) * 60,wo2.id);
+            addSecondsToDatedue(duedate2, Number(elapsed) * 60,wo2.id);
             
             
             }

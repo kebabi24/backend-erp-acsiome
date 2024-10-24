@@ -22,7 +22,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const tc = await trainingcalenderServiceInstance.findOne({
           
             tc_year: Trainingcalender.tc_year,
-            tc_site: Trainingcalender.tc_site,
+            tc_site: entry.tc_site,
             tc_service: Trainingcalender.tc_service,
             tc_part: entry.tc_part,
             tc_pop: entry.tc_pop,
@@ -35,7 +35,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             const tk = await trainingcalenderServiceInstance.create({
             ...entry,
             tc_year: Trainingcalender.tc_year,
-            tc_site: Trainingcalender.tc_site,
             tc_service: Trainingcalender.tc_service,
             tc_domain: user_domain,
             created_by: user_code,

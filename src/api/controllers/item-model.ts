@@ -19,6 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     console.log(modelexist)
     if(modelexist == null){ model = await itemModelServiceInstance.create({
       ...req.body,
+      mod_promo:req.body.mod_promo,
       mod_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -27,7 +28,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     });}
     else {
       model = await itemModelServiceInstance.update(
-        { mod_desc:req.body.mod_desc,mod_um:req.body.mod_um,mod_part_type:req.body.mod_part_type,mod_group:req.body.mod_group,int01:req.body.int01,int02:req.body.int02, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+        { mod_desc:req.body.mod_desc,mod_um:req.body.mod_um,mod_part_type:req.body.mod_part_type,mod_group:req.body.mod_group,mod_promo:req.body.mod_promo,int01:req.body.int01,int02:req.body.int02, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
         { mod_code: req.body.mod_code },
       );
     }

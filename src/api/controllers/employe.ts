@@ -117,7 +117,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const employeServiceInstance = Container.get(EmployeService);
     const employeScoreServiceInstance = Container.get(EmployeScoreService);
     const employeJobServiceInstance = Container.get(EmployeJobService);
-    // const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
     const itemServiceInstance = Container.get(ItemService);
     const { id } = req.params;
     const employe = await employeServiceInstance.findOne({ id });
@@ -140,29 +140,29 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
       };
       (i = i + 1), employeJobDetail.push(obj);
     }
-    // const employeTr = await employeTrainingServiceInstance.find({
-    //   empf_domain: user_domain,
-    //   empf_code: employe.emp_addr,
-    // });
-    // let employeTrDetail = [];
-    // var i = 1;
-    // for (let emptr of employeTr) {
-    //   const item = await itemServiceInstance.findOne({
-    //     pt_domain: user_domain,
-    //     pt_part: emptr.empf_part,
-    //   });
-    //   let obj = {
-    //     id: i,
-    //     empf_part: emptr.empf_part,
-    //     desc: item.pt_desc1,
-    //     empf_beging_date: emptr.empf_beging_date,
-    //     empf_end_date: emptr.empf_end_date,
-    //   };
-    //   (i = i + 1), employeTrDetail.push(obj);
-    // }
+    const employeTr = await employeTrainingServiceInstance.find({
+      empf_domain: user_domain,
+      empf_code: employe.emp_addr,
+    });
+    let employeTrDetail = [];
+    var i = 1;
+    for (let emptr of employeTr) {
+      const item = await itemServiceInstance.findOne({
+        pt_domain: user_domain,
+        pt_part: emptr.empf_part,
+      });
+      let obj = {
+        id: i,
+        empf_part: emptr.empf_part,
+        desc: item.pt_desc1,
+        empf_beging_date: emptr.empf_beging_date,
+        empf_end_date: emptr.empf_end_date,
+      };
+      (i = i + 1), employeTrDetail.push(obj);
+    }
     return res
       .status(200)
-      .json({ message: 'fetched succesfully', data: { employe, employeScoreDetail, employeJobDetail, } });
+      .json({ message: 'fetched succesfully', data: { employe, employeScoreDetail, employeJobDetail,employeTrDetail } });
       // employeTrDetail
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -533,20 +533,20 @@ const findChild = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-// const findTrBy = async (req: Request, res: Response, next: NextFunction) => {
-//   const logger = Container.get('logger');
-//   logger.debug('Calling find by  all code endpoint');
-//   const { user_code } = req.headers;
-//   const { user_domain } = req.headers;
-//   try {
-//     // const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
-//     // const employe = await employeTrainingServiceInstance.findOne({ ...req.body, empf_domain: user_domain });
-//   //   return res.status(200).json({ message: 'fetched succesfully', data: employe });
-//   // } catch (e) {
-//   //   logger.error('🔥 error: %o', e);
-//   //   return next(e);
-//   }
-// };
+const findTrBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const employe = await employeTrainingServiceInstance.findOne({ ...req.body, empf_domain: user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createC,
@@ -562,5 +562,5 @@ export default {
   findAvailable,
   findByOne,
   findChild,
-  // findTrBy,
+  findTrBy,
 };

@@ -13,8 +13,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { affectEmp, empDetail } = req.body;
 
     for (let entry of empDetail) {
+      
+      const found =  await affectEmployeServiceInstance.findOne({pme_pm_code:affectEmp.pme_pm_code,pme_nbr:affectEmp.pme_nbr,pme_employe:entry.pme_employe})
+      console.log(found)
+      if(found)
+        {console.log('existe')}
+      else{  
+        console.log(affectEmp.pme_pm_code,affectEmp.pme_nbr,entry.pme_employe)
       await affectEmployeServiceInstance.create({
         ...entry,
+        pme_nbr: affectEmp.pme_nbr,
+        pme_site:affectEmp.pme_site,
+        pme_duration:affectEmp.pme_duration,
         pme_pm_code: affectEmp.pme_pm_code,
         pme_domain: user_domain,
         pme_inst: affectEmp.pme_inst,
@@ -28,23 +38,27 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_by: user_code,
         last_modified_ip_adr: req.headers.origin,
       });
-      for (let entry of empDetail) {
-        await affectEmployeServiceInstance.create({
-          ...entry,
-          pme_pm_code: affectEmp.pme_pm_code,
-          pme_domain: user_domain,
-          pme_inst: affectEmp.pme_inst,
-          pme_task: affectEmp.pme_task,
-          pme_start_date: affectEmp.pme_start_date,
-          pme_end_date: affectEmp.pme_end_date,
-          pme_start_time: affectEmp.pme_start_time,
-          pme_end_time: affectEmp.pme_end_time,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
       }
+      // for (let entry of empDetail) {
+      //   await affectEmployeServiceInstance.create({
+      //     ...entry,
+      //     pme_nbr: nbr,
+      //   pme_site:affectEmp.pmr_site,
+      //   pme_duration:affectEmp.pmr_duration,
+      //     pme_pm_code: affectEmp.pme_pm_code,
+      //     pme_domain: user_domain,
+      //     pme_inst: affectEmp.pme_inst,
+      //     pme_task: affectEmp.pme_task,
+      //     pme_start_date: affectEmp.pme_start_date,
+      //     pme_end_date: affectEmp.pme_end_date,
+      //     pme_start_time: affectEmp.pme_start_time,
+      //     pme_end_time: affectEmp.pme_end_time,
+      //     created_by: user_code,
+      //     created_ip_adr: req.headers.origin,
+      //     last_modified_by: user_code,
+      //     last_modified_ip_adr: req.headers.origin,
+      //   });
+      // }
       //  const affectemploye = await affectEmployeServiceInstance.create({...req.body, created_by: user_code, last_modified_by: user_code})
       return res.status(201).json({ message: 'created succesfully', data: affectEmp });
     }
