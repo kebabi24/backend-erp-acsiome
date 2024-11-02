@@ -44,7 +44,7 @@ const Service = sequelize.define(
     service_open: { type: Sequelize.BOOLEAN },
     service_kmdep: { type: Sequelize.STRING },
     service_kmarr: { type: Sequelize.STRING },
-    // frais: { type: Sequelize.STRING },
+    frais: {type: Sequelize.FLOAT ,defaultValue : 0  },
     service_domain: Sequelize.STRING,
 
     nb_visits : {type: Sequelize.INTEGER ,defaultValue : 0  }, 
@@ -58,6 +58,8 @@ const Service = sequelize.define(
     sum_versement : {type: Sequelize.FLOAT ,defaultValue : 0  },
     service_versement_open: { type: Sequelize.BOOLEAN,defaultValue : true  },
 
+    date_quitter_depot: { type: Sequelize.DATE },
+    date_retour_depot: { type: Sequelize.DATE },
     // ...base,
   },
   {

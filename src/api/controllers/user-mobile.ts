@@ -568,6 +568,10 @@ console.log("service_creation",service_creation)
           nb_products_loaded: service.nb_products_loaded,
           sum_invoice: service.sum_invoice,
           sum_paiement: service.sum_paiement,
+          frais: service.frais,
+          date_quitter_depot : formatDateFromMobileToBackAddTimezone(service.date_quitter_depot),
+      date_retour_depot : formatDateFromMobileToBackAddTimezone(service.date_retour_depot),
+      
           // user_mobile_code: service.user_mobile_code,
         },
         { service_code: service.service_code },
@@ -584,6 +588,9 @@ console.log("service_creation",service_creation)
       service.service_closing_date = formatDateFromMobileToBackAddTimezone(service.service_closing_date);
       service.service_period_activate_date = formatDateOnlyFromMobileToBack(service.service_period_activate_date);
       service.service_open = false;
+      service.date_quitter_depot = formatDateFromMobileToBackAddTimezone(service.date_quitter_depot);
+      service.date_retour_depot = formatDateFromMobileToBackAddTimezone(service.date_retour_depot);
+      
       // service.nb_visits = service.nb_visits;
       // service.nb_clients_itin = service.nb_clients_itin;
       // service.nb_invoice = service.nb_invoice;
@@ -592,7 +599,7 @@ console.log("service_creation",service_creation)
       // service.nb_products_loaded = service.nb_products_loaded;
       // service.sum_invoice = service.sum_invoice;
       // service.user_mobile_code= service.user_mobile_code,
-      //console.log(service);
+      console.log(service);
       const createdService = await userMobileServiceInstanse.createService(service);
       console.log('CREATING SERVICE END');
     }

@@ -412,6 +412,16 @@ export default class LoadRequestService {
     }
   }
 
+  public async findLoadsRequestDetail(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestDetailsModel.findAll({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async getLotsOfProduct(ld_loc: any, ld_site: any, product_code: any): Promise<any> {
     try {
       const lots = await this.locationDetailModel.findAll({
