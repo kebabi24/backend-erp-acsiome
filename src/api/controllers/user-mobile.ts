@@ -385,12 +385,14 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         //     });
         //   }
 
-/*modification tourne*/
+
           const iitineraries = await userMobileServiceInstanse.getItinerariesOnly({ role_code: role.role_code });
           const iitineraries_customers = await userMobileServiceInstanse.getItinerariesCustomers({
             role_code: role.role_code,
           });
           const customers = await userMobileServiceInstanse.getCustomersOnly({ role_code: role.role_code });
+        
+/*modification tourne*/
 
       //   } else {
       //    itinerary2 = await userMobileServiceInstanse.getItineraryFromRoleItinerary({ role_code: role.role_code });
@@ -427,11 +429,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           profiles: profiles,
           menus: menus,
           service: service,
-          //modification itinerary: itinerary2,
-          /*modification tourne*/
+          //itinerary: itinerary2,
+          //customers: customers,
           itinerary: iitineraries,
           iitineraries_customers: iitineraries_customers,
-          /*modification tourne*/
           customers: customers,
           checklist: checklist,
           token_serie: tokenSerie,
