@@ -29,6 +29,7 @@ export default (app: Router) => {
   route.post('/addbkhtransfertc', controller.bkhTrC);
   route.post('/addbkhtransfertcdet', controller.bkhTrCDet);
   route.post('/findbkh', controller.findBKHBy);
+  route.post('/findbkhtr', controller.findBKHTRBy);
   
   route.get('/', controller.findAll);
   

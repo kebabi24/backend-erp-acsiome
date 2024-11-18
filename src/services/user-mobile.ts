@@ -1075,6 +1075,7 @@ export default class UserMobileService {
   public async getAllInvoice(query: any): Promise<any> {
     try {
       const invoice = await this.invoiceModel.findAll(query);
+     //const invoice = await this.invoiceModel.findAll({where:query,include:[this.customerMobileModel]});
       return invoice;
     } catch (e) {
       console.log('Error from service- getInvoice');
@@ -1308,6 +1309,47 @@ export default class UserMobileService {
     }
   }
 
+
+  /*invoice*/
+
+  // ******************** UPDATE CREATE LOCATION DETAILS  **************************
+  public async updateCreateInvoices(data: any): Promise<any> {
+    try {
+      var invoiceCreated = [];
+      for (const element of data) {
+        if (element.id) delete element.id;
+        // const ld_site = element.ld_site;
+        // const ld_loc = element.ld_loc;
+        // const ld_part = element.ld_part;
+        // const ld_lot = element.ld_lot;
+        // console.log(' date ld dt '+element.ld_expire)
+        const exist = await this.invoiceModel.findOne({
+          where: { invoice_code: element.invoice_code },
+        });
+//console.log("exist",exist)
+      //  console.log("exist",exist)
+        if (exist!=null) {
+          // UPDATE
+         // console.log(element);
+          const invupdate = await this.invoiceModel.update(element, {
+            where: { invoice_code: element.invoice_code },
+          });
+        } else {
+          // CREATE
+          console.log(' createinvoiceDetails ')
+console.log(element)
+          const invoice = await this.invoiceModel.create(element);
+          invoiceCreated.push(invoice);
+        }
+      }
+      return invoiceCreated;
+    } catch (e) {
+     
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  /*invoice*/
   // ******************** GET PAYMENT METHOD  **************************
   public async getMessages(role_code: any): Promise<any> {
     try {

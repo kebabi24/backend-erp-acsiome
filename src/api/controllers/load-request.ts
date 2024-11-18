@@ -8,7 +8,8 @@ import DecompteService from '../../services/decompte';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
-
+import ChariotService from '../../services/chariot';
+import ChariotDetailService from '../../services/chariot-detail';
 const findAllRoles = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  code endpoint');
@@ -451,7 +452,7 @@ console.log(days)
   
       }
        
-      let filename = code.code_cmmt +  load.load_request_code + '.txt'
+      let filename = code.code_cmmt +  'IN-' + load.load_request_code + '.txt'
       console.log("filename :",filename)
         try {
           fs.writeFileSync(filename, str);
@@ -541,15 +542,30 @@ const createLoadRequestDetails = async (req: Request, res: Response, next: NextF
 };
 const createLoadRequestDetailsScan = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
   try {
     const loadRequestService = Container.get(LoadRequestService);
     const itemServiceInstance = Container.get(ItemService);
-console.log("req.body",req.body)
+    const chariotDetailServiceInstance = Container.get(ChariotDetailService);
+    const chariotServiceInstance = Container.get(ChariotService);
+//console.log("req.body",req.body)
     const load_request_details = req.body.load_request_details;
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
-    // console.log("loadline",load_request_details);
+    const chariotdetail = req.body.chariotdetail
+     console.log("chariotdetail",chariotdetail);
+     const char = await chariotServiceInstance.find({load_request_code:load_request_code})
+     console.log(char.length)
+     let nchar = 0 
+     if(char.length > 0) {
+      nchar = char.length + 1 
+     } else { nchar = 1}
+     const chariot = await chariotServiceInstance.create({chariot_nbr:nchar,load_request_code:load_request_code,chariot_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+     for (let detchar of chariotdetail) {
+       const chariotdet = await chariotDetailServiceInstance.create({...detchar,load_request_code:load_request_code,chariot_nbr: nchar,chariot_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    }
+    
     for (const line of load_request_lines) {
      // console.log("line",line)
       if(line.qt_effected != 0) {
@@ -608,7 +624,7 @@ console.log("req.body",req.body)
       }
     }
     }
-    return res.status(201).json({ message: 'created succesfully', data: true });
+    return res.status(201).json({ message: 'created succesfully', data: nchar });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -668,10 +684,10 @@ console.log(line.pt_price,line.qt_effected)
 
             const role = await roleServiceInstance.findOne({role_code: lr.role_code});
   
-    await roleServiceInstance.updated(   {solde: role.solde + Number(tot)},{role_code:lr.role_code})      
+    await roleServiceInstance.updated(   {solde: Number(role.solde) + Number(tot)},{role_code:lr.role_code})      
     // UPDATE LOAD REQUEST STATUS TO 20
     // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
-    const loadRequest = await loadRequestService.updateLoadRequestStatusToX(load_request_code, 20);
+    const loadRequest = await loadRequestService.updateLoadRequestStatusTo20(load_request_code, 20);
 
 
     return res.status(201).json({ message: 'created succesfully', data: loadRequest });
@@ -956,6 +972,52 @@ const getLoadRequestWithCode = async (req: Request, res: Response, next: NextFun
     return next(e);
   }
 };
+const findBychariot = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    const chariotServiceInstance = Container.get(ChariotService);
+    const chariots = await chariotServiceInstance.find({ ...req.body,chariot_domain:user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: chariots });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBychariotDet = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    const chariotDetailServiceInstance = Container.get(ChariotDetailService);
+    const chariots = await chariotDetailServiceInstance.find({ ...req.body,chariot_domain:user_domain });
+    let result=[]
+    for (let char of chariots) {
+      result.push({
+        id:char.id,
+        load_request_code: char.load_request_code,
+        chariot_nbr: char.chariot_nbr,
+        code_prod: char.code_prod,
+        prodlot: char.code_prod+char.lot,
+        desc_prod: char.desc_prod,
+        lot : char.lot,
+        serie:char.serie,
+        quantity: char.quantity,
+        price : char.price,
+      })
+    }
+    console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -984,6 +1046,8 @@ export default {
   findAllLoadRequestLinesDifference,
   getLoadRequestCreationDataRole,
   getLoadRequestWithCode,
+  findBychariot,
+  findBychariotDet,
 };
 
 // validation 0-10

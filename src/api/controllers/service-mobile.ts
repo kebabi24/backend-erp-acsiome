@@ -178,7 +178,8 @@ const findServicesBy = async (req: Request, res: Response, next: NextFunction) =
       
       where: {
         service_site: req.body.site,
-        service_period_activate_date:  { [Op.between]: [req.body.date, req.body.date1] },
+        service_open:false,
+        service_period_activate_date:  {[Op.between]: [req.body.date, req.body.date1] },
       },
       attributes:{include: [//[ //Sequelize.literal(  //'if ( nb_clients_itin  > 0 )', 'nb_visits * 100 / nb_clients_itin' , '0' , 'visitrate'],
       [Sequelize.literal('nb_visits * 100 / nb_clients_itin'),'visitrate'],

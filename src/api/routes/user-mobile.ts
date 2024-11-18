@@ -7,10 +7,12 @@ export default (app: Router) => {
   app.use('/users-mobile', route);
   
   route.post('/getAllVisit', controller.findVisitBy);
+  route.post('/getAllVisitrole', controller.findVisitByRole);
   route.get('/findAllwithDetails', controller.findAllwithDetails);
   // route.get('/getVisits/', controller.getAllVisits);
   route.post('/', controller.create);
   route.get('/findterms', controller.findPaymentterm)
+  route.get('/findrolebyuser', controller.findRoleByuser)
   route.get('/findvisits', controller.findAllVisits)
   route.get('/testHash', controller.testHash)
   route.post('/getDashboardData', controller.getDashboardAddData)
@@ -28,9 +30,12 @@ export default (app: Router) => {
   route.post('/getAllInvoices', controller.findAllInvoice);
   route.post('/getInvoiceLines', controller.findByInvoiceLine);
   route.post('/getAllPayment', controller.findPaymentBy);
+  route.post('/getAllPaymentByRole', controller.findPaymentByRole);
   route.post('/getAllPaymentService', controller.findPaymentByService),
   route.post('/getAllInvoicesdet', controller.findAllInvoicewithDetails);
+  route.post('/getAllInvoicesdetrole', controller.findAllInvoicewithDetailsRole);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
+  route.post('/getAllInvoicesRole', controller.findAllInvoiceRole);
   
 };

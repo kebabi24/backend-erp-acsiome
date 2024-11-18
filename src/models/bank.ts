@@ -115,6 +115,7 @@ const Bank = sequelize.define(
     bk_p010: { type: Sequelize.DECIMAL, defaultValue: 0 },
     bk_p005: { type: Sequelize.DECIMAL, defaultValue: 0 },
     bk_bon: { type: Sequelize.DECIMAL, defaultValue: 0 },
+    bk_cheque: { type: Sequelize.DECIMAL, defaultValue: 0 },
     bk_domain: Sequelize.STRING,
     oid_bk_mstr: Sequelize.STRING,
     ...base,

@@ -98,8 +98,8 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
-   // console.log(locationDetails)
+    const locationDetails = await locationDetailServiceInstance.find({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
+    console.log("locationDetails")
   
    {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
  
@@ -482,7 +482,35 @@ const findStatusInstance = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
-
+const findByPrice = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const locationDetails = await locationDetailServiceInstance.find({...req.body,ld_qty_oh: {[Op.ne]: 0},ld_domain:user_domain});
+    console.log(locationDetails)
+    let result=[]
+    let i=1
+    for (let data of locationDetails) {
+result.push({
+  id:i,
+  part:data.ld_part,
+  desc: data.item.pt_desc1,
+  lot:data.ld_lot,
+  qty: data.ld_qty_oh,
+  amt: Number(data.ld_qty_oh) * Number(data.item.pt_price) * 1.2019
+})
+i++
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createldpos,
@@ -501,4 +529,5 @@ export default {
   findByFifoLot,
   findByWeek,
   findStatusInstance,
+  findByPrice,
 };

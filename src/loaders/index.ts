@@ -231,6 +231,9 @@ export default async ({ expressApp }) => {
       { name: 'accountModel', model: require('../models/account').default },
       { name: 'subaccountModel', model: require('../models/subaccount').default },
       { name: 'subaccountDetailModel', model: require('../models/subaccount-detail').default },
+
+      { name: 'chariotModel', model: require('../models/chariot').default },
+      { name: 'chariotDetailModel', model: require('../models/chariot-detail').default },
       
     ],
   });
@@ -1123,7 +1126,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
- //await sequelizeConnection.sync().catch(err => { console.log(err)});
+//  await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

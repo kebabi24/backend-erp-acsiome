@@ -952,6 +952,7 @@ const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
       bkh_p010: req.body.bkh_p010,
       bkh_p005: req.body.bkh_p005,
       bkh_bon:  req.body.bkh_bon,
+      bkh_cheque: req.body.bkh_cheque,
       
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -974,6 +975,7 @@ const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
         bk_p010: Number(banks.bk_p010) - Number(req.body.bkh_p010),
         bk_p005: Number(banks.bk_p005) - Number(req.body.bkh_p005),
         bk_bon:  Number(banks.bk_bon)  - Number(req.body.bkh_bon),
+        bk_cheque: Number(banks.bk_cheque)  - Number(req.body.bkh_cheque),
        
       },
       {id: banks.id},
@@ -1005,6 +1007,7 @@ const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
       bkh_p010: req.body.bkh_p010,
       bkh_p005: req.body.bkh_p005,
       bkh_bon:  req.body.bkh_bon,
+      bkh_cheque: req.body.bkh_cheque,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -1014,22 +1017,23 @@ const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
     await bankServiceInstance.update(
       {
         bk_balance: Number(bankdets.bk_balance) + Number(req.body.amt_tr),
-        bk_2000: Number(banks.bk_2000) + Number(req.body.bkh_2000),
-        bk_1000: Number(banks.bk_1000) + Number(req.body.bkh_1000),
-        bk_0500: Number(banks.bk_0500) + Number(req.body.bkh_0500),
-        bk_0200: Number(banks.bk_0200) + Number(req.body.bkh_0200),
-        bk_p200: Number(banks.bk_p200) + Number(req.body.bkh_p200),
-        bk_p100: Number(banks.bk_p100) + Number(req.body.bkh_p100),
-        bk_p050: Number(banks.bk_p050) + Number(req.body.bkh_p050),
-        bk_p020: Number(banks.bk_p020) + Number(req.body.bkh_p020),
-        bk_p010: Number(banks.bk_p010) + Number(req.body.bkh_p010),
-        bk_p005: Number(banks.bk_p005) + Number(req.body.bkh_p005),
-        bk_bon:  Number(banks.bk_bon)  + Number(req.body.bkh_bon),
+        bk_2000: Number(bankdets.bk_2000) + Number(req.body.bkh_2000),
+        bk_1000: Number(bankdets.bk_1000) + Number(req.body.bkh_1000),
+        bk_0500: Number(bankdets.bk_0500) + Number(req.body.bkh_0500),
+        bk_0200: Number(bankdets.bk_0200) + Number(req.body.bkh_0200),
+        bk_p200: Number(bankdets.bk_p200) + Number(req.body.bkh_p200),
+        bk_p100: Number(bankdets.bk_p100) + Number(req.body.bkh_p100),
+        bk_p050: Number(bankdets.bk_p050) + Number(req.body.bkh_p050),
+        bk_p020: Number(bankdets.bk_p020) + Number(req.body.bkh_p020),
+        bk_p010: Number(bankdets.bk_p010) + Number(req.body.bkh_p010),
+        bk_p005: Number(bankdets.bk_p005) + Number(req.body.bkh_p005),
+        bk_bon:  Number(bankdets.bk_bon)  + Number(req.body.bkh_bon),
+        bk_cheque:  Number(bankdets.bk_cheque)  + Number(req.body.bkh_cheque),
       },
       {id: bankdets.id},
     );
 
-    return res.status(201).json({ message: 'created succesfully', data: bk });
+    return res.status(201).json({ message: 'created succesfully', data: nbr });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);
@@ -1049,6 +1053,31 @@ const findBKHBy = async (req: Request, res: Response, next: NextFunction) => {
    
     const bkhs = await bkhServiceInstance.find({
       ...req.body,
+      bkh_domain: user_domain,
+    });
+    
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBKHTRBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'P'},
       bkh_domain: user_domain,
     });
     
@@ -1107,5 +1136,6 @@ export default {
   bkhTrC,
   bkhTrCDet,
   findBKHBy,
+  findBKHTRBy,
   findTransfertBy
 };

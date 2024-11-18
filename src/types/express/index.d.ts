@@ -227,6 +227,8 @@ declare global {
     export type TrainingcalenderModel = S.Model;
     export type PopulationemployeModel = S.Model;
     export type DecompteModel = S.Model;
+    export type ChariotModel = S.Model;
+    export type ChariotDetailModel = S.Model;
    
   }
 }

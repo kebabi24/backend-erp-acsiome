@@ -33,4 +33,6 @@ export default (app: Router) => {
   route.post('/LoadRequestLinesdif/', controller.findAllLoadRequestLinesDifference);
   route.get('/findLoadRequestCreationDataRole/:role_code', controller.getLoadRequestCreationDataRole);
   route.post('/getLoadRequestWithCode', controller.getLoadRequestWithCode);
+  route.post('/findchariot', controller.findBychariot);
+  route.post('/findchariotdet', controller.findBychariotDet);
 };

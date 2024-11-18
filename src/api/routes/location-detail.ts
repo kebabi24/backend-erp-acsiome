@@ -22,6 +22,7 @@ export default (app: Router) => {
   route.delete('/:id', controller.deleteOne);
   route.post('/findWeekProduct', controller.findByWeek);
   route.post('/findinstance', controller.findStatusInstance);
+  route.post('/findbyprice', controller.findByPrice);
   
   
 };

@@ -48,7 +48,7 @@ export default class LoadRequestService {
 
   public async createMultipleLoadRequestsLines(data: any): Promise<any> {
     try {
-      console.log(data);
+     // console.log(data);
       const loadRequestsLines = await this.loadRequestLineModel.bulkCreate(data);
       this.logger.silly('created load requests lines');
       return loadRequestsLines;
@@ -874,6 +874,22 @@ export default class LoadRequestService {
     }
   }
 
+  public async updateLoadRequestStatusTo20(load_request_codes: any, x: any): Promise<any> {
+    try {
+      console.log('xxxxxxxxxxxxxxxxx', x);
+      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
+      const loadRequest = await this.loadReuestModel.update(
+        { status: x ,date_charge: new Date()},
+        { where: { load_request_code: load_request_codes } },
+      );
+
+      this.logger.silly('load request status updated to ' + x);
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findAllLoadRequest20Details(load_request_code: any): Promise<any> {
     try {
       const loadRequestDetails = await this.loadRequestDetailsModel.findAll({
