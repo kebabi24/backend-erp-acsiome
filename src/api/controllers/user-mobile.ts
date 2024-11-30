@@ -429,8 +429,8 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           profiles: profiles,
           menus: menus,
           service: service,
-          //itinerary: itinerary2,
-          //customers: customers,
+          // itinerary: itinerary2,
+          // customers: customers,
           itinerary: iitineraries,
           iitineraries_customers: iitineraries_customers,
           customers: customers,
@@ -885,8 +885,13 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
         }
       });
       const loadRequestService = Container.get(UnloadRequestService);
+      for (let unloadRequestsDetail of unloadRequestsDetails) {
+        unloadRequestsDetail.date_expiration = null
+      }
       const createdUnloadRequests = await loadRequestService.createMultipleUnoadRequests(unloadRequestes);
       if (createdUnloadRequests) {
+        console.log(createdUnloadRequests)
+        console.log(unloadRequestsDetails)
         const createdUnloadRequestsDetails = await loadRequestService.createMultipleUnoadRequestsDetails(
           unloadRequestsDetails,
         );
@@ -1136,6 +1141,7 @@ const findAllInvoiceRole = async (req: Request, res: Response, next: NextFunctio
   const { user_domain } = req.headers;
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
+    const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
 
    console.log(req.body);
     if (req.body.site == '*') {
@@ -1153,7 +1159,12 @@ const findAllInvoiceRole = async (req: Request, res: Response, next: NextFunctio
      // console.log("here",invoices)
     }
     // console.log("invoices",invoices);
+    for (let inv of invoices) {
+      const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+      console.log(customer.customer_name)
+        inv.sdelivery_note_code = customer.customer_name
 
+    }
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
   } catch (e) {
@@ -1859,6 +1870,35 @@ const findPaymentByRole = async (req: Request, res: Response, next: NextFunction
     return next(e);
   }
 };
+
+
+const findAllCA = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+ // console.log("reqrrrrrrrrrrrrrrr",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      console.log(req.body)
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+    
+      var invs =await Sequelize.query("SELECT PUBLIC.aa_customer.id,PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis, SUM(PUBLIC.aa_invoice.horstax_amount) as horstax, SUM(PUBLIC.aa_invoice.taxe_amount) as tax,SUM(PUBLIC.aa_invoice.stamp_amount) as stamp,SUM(PUBLIC.aa_invoice.amount) as amount,SUM(PUBLIC.aa_invoice.due_amount) as due_amount FROM PUBLIC.aa_customer, PUBLIC.aa_invoice WHERE PUBLIC.aa_customer.customer_code = PUBLIC.aa_invoice.customer_code and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ?  and  PUBLIC.aa_invoice.canceled = false GROUP BY PUBLIC.aa_customer.id, PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis ORDER BY PUBLIC.aa_customer.customer_code", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    
+   // console.log("iiiiiiiiiiiiiiii",invs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
 export default {
   create,
   findOne,
@@ -1888,4 +1928,5 @@ export default {
   findRoleByuser,
   findPaymentByRole,
   findVisitByRole,
+  findAllCA
 };

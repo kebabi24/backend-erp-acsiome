@@ -7,6 +7,8 @@ import { localeData } from 'moment';
 import sequenceService from '../../services/sequence';
 import { Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
+import LoadRequestService from '../../services/load-request';
+import RoleService from '../../services/role';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -511,6 +513,87 @@ i++
     return next(e);
   }
 };
+const findByPriceRole = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  //console.log(req.body)
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const loadRequestServiceInstance = Container.get(LoadRequestService);
+    const roleServiceInstance = Container.get(RoleService)
+    const itemServiceInstance = Container.get(ItemService)
+    // const locationDetails = await locationDetailServiceInstance.find({...req.body,ld_qty_oh: {[Op.ne]: 0},ld_domain:user_domain});
+    const locationDetails = await locationDetailServiceInstance.findSpecial({
+      where: {
+        ld_domain:user_domain,
+        ...req.body,
+        ld_qty_oh: {[Op.ne]: 0},
+      },
+      attributes: ['ld_part',  [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total_qty']],
+      group: ['ld_part',],
+      raw: true,
+    });
+    const role = await roleServiceInstance.findOne({role_loc:req.body.ld_loc})
+    const loadrequest = await loadRequestServiceInstance.findAllLoadRequests40ByRoleCode(role.role_code)
+    let lr = []
+    for(let load of loadrequest) {
+      lr.push(load.load_request_code)
+    }
+    console.log("lr",lr)
+
+
+   // console.log(locationDetails)
+    let result=[]
+    let i=1
+    for (let data of locationDetails) {
+      const line = await loadRequestServiceInstance.findLoadRequestLineBysum({where : {load_request_code:lr,product_code: data.ld_part},
+        attributes: ['product_code',  [Sequelize.fn('sum', Sequelize.col('qt_effected')), 'total_qtyeffected']],
+        group: ['product_code',],
+        raw: true,
+      })
+      const item = await itemServiceInstance.findOne({ pt_part: data.ld_part,pt_domain:user_domain });
+
+result.push({
+  id:i,
+  part:data.ld_part,
+  desc: item.pt_desc1,
+  qty: (line[0] != null) ? Number(data.total_qty) + Number(line[0].total_qtyeffected) : Number(data.total_qty) ,
+  amt:  Number(item.pt_price) 
+})
+i++
+    }
+
+    const lines = await loadRequestServiceInstance.findLoadRequestLineBysum({where : {load_request_code:lr},
+      attributes: ['product_code',  [Sequelize.fn('sum', Sequelize.col('qt_effected')), 'total_qtyeffected']],
+      group: ['product_code',],
+      raw: true,
+    })
+    console.log(lines)
+    for (let ln of lines) {
+    const item = await itemServiceInstance.findOne({ pt_part: ln.product_code,pt_domain:user_domain });
+
+    const idpart =  result.findIndex(({ part }) => part == ln.product_code);
+    if(idpart < 0) {
+     
+        result.push({
+          id:i,
+          part:ln.product_code,
+          desc: item.pt_desc1,
+          qty: Number(ln.total_qtyeffected) ,
+          amt:  Number(item.pt_price) 
+        })
+        i++
+      }
+    }
+    //console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createldpos,
@@ -530,4 +613,5 @@ export default {
   findByWeek,
   findStatusInstance,
   findByPrice,
+  findByPriceRole,
 };

@@ -23,6 +23,7 @@ export default (app: Router) => {
   route.post('/findWeekProduct', controller.findByWeek);
   route.post('/findinstance', controller.findStatusInstance);
   route.post('/findbyprice', controller.findByPrice);
+  route.post('/findbypricerole', controller.findByPriceRole);
   
   
 };

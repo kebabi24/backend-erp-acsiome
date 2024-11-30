@@ -1290,4 +1290,14 @@ export default class LoadRequestService {
       throw e;
     }
   }
+  public async findLoadRequestLineBysum(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({ ...query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

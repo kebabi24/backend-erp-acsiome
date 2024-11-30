@@ -66,7 +66,7 @@ const findByRange = async (req: Request, res: Response, next: NextFunction) => {
             order: [['dec_type', 'ASC'],['dec_effdate','ASC']],
           });
            var charge = await decompteServiceInstance.findS({
-            where: { dec_role: req.body.role,dec_type:"C", dec_effdate: { [Op.between]: [req.body.date, req.body.date1]} },
+            where: { dec_role: req.body.role,dec_type: {[Op.or]:["C","D"]}, dec_effdate: { [Op.between]: [req.body.date, req.body.date1]} },
             
             attributes: 
                 ['dec_role', [Sequelize.fn('sum', Sequelize.col('dec_amt')), 'charge' ]],

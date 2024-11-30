@@ -510,7 +510,14 @@ export default class UserMobileService {
         customers.push(...customer);
       }
 
-      return customers;
+      const custs = customers.filter((obj1, i, arr) => 
+      arr.findIndex(obj2 => (obj2.customer_code === obj1.customer_code)) === i
+    )
+// for (let cu of custs) {
+//   if(cu.customer_code == '21001') {console.log (1)}
+// } 
+      // console.log(result);
+      return custs;
     } catch (e) {
       console.log('Error from service-getItineraries');
       this.logger.error(e);
@@ -1337,7 +1344,7 @@ export default class UserMobileService {
         } else {
           // CREATE
           console.log(' createinvoiceDetails ')
-console.log(element)
+// console.log(element)
           const invoice = await this.invoiceModel.create(element);
           invoiceCreated.push(invoice);
         }
