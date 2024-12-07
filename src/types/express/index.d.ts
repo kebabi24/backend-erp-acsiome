@@ -229,6 +229,7 @@ declare global {
     export type DecompteModel = S.Model;
     export type ChariotModel = S.Model;
     export type ChariotDetailModel = S.Model;
+    export type AccountOrderModel = S.Model;
    
   }
 }

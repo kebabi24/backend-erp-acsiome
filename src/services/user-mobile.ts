@@ -513,9 +513,9 @@ export default class UserMobileService {
       const custs = customers.filter((obj1, i, arr) => 
       arr.findIndex(obj2 => (obj2.customer_code === obj1.customer_code)) === i
     )
-// for (let cu of custs) {
-//   if(cu.customer_code == '21001') {console.log (1)}
-// } 
+for (let cu of custs) {
+  if(cu.customer_code == '21001') {console.log (1)}
+} 
       // console.log(result);
       return custs;
     } catch (e) {

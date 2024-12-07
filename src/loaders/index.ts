@@ -234,6 +234,7 @@ export default async ({ expressApp }) => {
 
       { name: 'chariotModel', model: require('../models/chariot').default },
       { name: 'chariotDetailModel', model: require('../models/chariot-detail').default },
+      { name: 'accountOrderModel', model: require('../models/account-order').default },
       
     ],
   });
@@ -1121,12 +1122,19 @@ export default async ({ expressApp }) => {
     sourceKey: 'tc_vend',
   });
 
-
+  require('../models/customer').default.hasMany(require('../models/account-order').default, {
+    foreignKey: 'ao_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/account-order').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ao_cust',
+    targetKey: 'cm_addr',
+  });
   
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
- // await sequelizeConnection.sync().catch(err => { console.log(err)});
+  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {
