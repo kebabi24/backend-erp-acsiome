@@ -119,6 +119,7 @@ import populationemploye from './routes/populationemploye'
 import trainingcalender from './routes/trainingcalender';
 import decompte from './routes/decompte';
 import accountOrder from './routes/account-order';
+import priceListQuantity from './routes/price-list-quantity';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -241,5 +242,6 @@ export default () => {
   trainingcalender(app)
   decompte(app)
   accountOrder(app)
+  priceListQuantity(app)
   return app;
 };

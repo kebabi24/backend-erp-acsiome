@@ -1018,6 +1018,94 @@ const findBychariotDet = async (req: Request, res: Response, next: NextFunction)
     return next(e);
   }
 };
+const exportLoadRequest = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const codeService = Container.get(CodeService);
+    const loadRequestsCodes = req.body.load_requests_codes;
+   
+/* export */
+
+    const code = await codeService.findOne({code_fldname:"export-chargement",code_value:"chg"});
+
+    if(code != null) {
+    const loadR = await loadRequestService.findLoadsRequestDetail({load_request_code:loadRequestsCodes});
+    const load = await loadRequestService.findLoadRequest({load_request_code:loadRequestsCodes});
+
+
+
+    const fs = require('node:fs');
+        const content = 'Some content!';
+        let str = ``
+        var days: String
+        var months : String
+        var year : String
+        let date= new Date()
+        let day = date.getDate();
+        console.log(day)
+    if (day < 10) {
+        days = "0" + String(day)
+    }
+    else {days = String(day)}
+console.log(days)
+    let month = date.getMonth();
+    console.log(month)
+    if (month < 9) {
+        month = month + 1
+        months = "0" + month
+    } else {
+        months = String(month + 1)
+    }
+
+    let years = date.getFullYear();
+    let datelr = `${days}/${months}/${years}`;
+
+        for (let lr of loadR) {
+          str += `${load.load_request_code}|${load.load_request_code}|${datelr}|${load.role_loc}|${load.user_mobile_code}|${lr.product_code}|${lr.lot}|${lr.qt_effected}|${"C|"}\n`;
+  
+      }
+       
+      let filename = code.code_cmmt +  'IN-' + load.load_request_code + '.txt'
+      console.log("filename :",filename)
+        try {
+          fs.writeFileSync(filename, str);
+          // file written successfully
+        } catch (err) {
+          console.error(err);
+        }
+      }
+/*export end*/        
+    return res.status(200).json({ message: 'Load Requests exported', data: true });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getLoadRequest = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const loadRequestLineService = Container.get(LoadRequestService);
+    const userMobileService = Container.get(UserMobileService);
+    const load_request_code = req.params.load_request_code;
+    //console.log(load_request_code)
+    const loadRequest = await loadRequestService.findLoadRequest({ load_request_code: load_request_code });
+    const loadRequestLines = await loadRequestService.findLoadRequestLines({ load_request_code: load_request_code });
+    
+    // let userMobile = null;
+    // if (loadRequest != null) {
+    //   userMobile = await userMobileService.findOne({ user_mobile_code: loadRequest.user_mobile_code });
+    // }
+//console.log(loadRequest)
+    return res.status(200).json({ message: 'found all roles of upper role', data: { loadRequest,loadRequestLines } });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -1048,6 +1136,8 @@ export default {
   getLoadRequestWithCode,
   findBychariot,
   findBychariotDet,
+  exportLoadRequest,
+  getLoadRequest
 };
 
 // validation 0-10

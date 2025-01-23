@@ -29,6 +29,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     //const lastId = await saleShiperServiceInstance.max('psh_nbr');
 
     for (const item of req.body.detail) {
+      console.log(req.body.detail)
       const { ...remain } = item;
       await saleShiperServiceInstance.create({
         psh_domain: user_domain,
@@ -43,10 +44,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const sod = await saleOrderDetailServiceInstance.findOne({
         sod_domain: user_domain,
         sod_nbr: req.body.ps.psh_nbr,
-        sod_line: remain.psh_line,
+      //  sod_line: remain.psh_line,
         sod_part: remain.psh_part,
       });
-      if (sod)
+      if (sod){
+      console.log("remain",remain.psh_qty_ship)
         await saleOrderDetailServiceInstance.update(
           {
             sod_qty_ship: Number(sod.sod_qty_ship) + Number(remain.psh_qty_ship),
@@ -54,7 +56,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_ip_adr: req.headers.origin,
           },
           { id: sod.id },
-        );
+        );}
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.psh_part,

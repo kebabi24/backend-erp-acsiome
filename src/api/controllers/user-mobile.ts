@@ -1899,6 +1899,71 @@ const findAllCA = async (req: Request, res: Response, next: NextFunction) => {
       return next(e)
   } 
 }
+const findAllSalesRole = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+ // console.log("reqrrrrrrrrrrrrrrr",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+      if (req.body.site == '*') {
+      var invs =await Sequelize.query("SELECT id, role_code, role_name, (select COALESCE(sum(quantity),0) as quantity  from public.aa_invoiceline where invoice_code in (select invoice_code from public.aa_invoice where public.aa_invoice.role_code = public.aa_role.role_code and canceled = false and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? ) )  FROM public.aa_role ORDER by id", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    } else {
+
+      var invs =await Sequelize.query('SELECT id, role_code, role_name, (select COALESCE(sum(quantity),0) as "quantity" from public.aa_invoiceline where invoice_code in (select invoice_code from public.aa_invoice where public.aa_invoice.role_code = public.aa_role.role_code and PUBLIC.aa_invoice.site = ? and canceled = false  and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? ))  FROM public.aa_role ORDER by id', { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+   //  console.log("inv",invs)
+    //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
+   //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
+   // console.log(invs)
+    }
+    
+    //console.log("iiiiiiiiiiiiiiii",invs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
+
+const findSalesType = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+ // console.log("reqrrrrrrrrrrrrrrr",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      console.log(req.body)
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+    
+      var invs =await Sequelize.query("SELECT PUBLIC.pt_mstr.id,PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_desc1, PUBLIC.pt_mstr.pt_part_type, PUBLIC.code_mstr.code_cmmt, SUM(PUBLIC.aa_invoiceline.quantity) as quantity, SUM(PUBLIC.aa_invoiceline.price * PUBLIC.aa_invoiceline.quantity) as price FROM PUBLIC.pt_mstr, PUBLIC.code_mstr ,PUBLIC.aa_invoiceline WHERE PUBLIC.pt_mstr.pt_part = PUBLIC.aa_invoiceline.product_code and  PUBLIC.code_mstr.code_fldname = 'pt_part_type' and PUBLIC.code_mstr.code_value = PUBLIC.pt_mstr.pt_part_type and PUBLIC.aa_invoiceline.invoice_code in(select invoice_code from PUBLIC.aa_invoice where  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? and  PUBLIC.aa_invoice.canceled = false) GROUP BY PUBLIC.pt_mstr.id, PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_part_type,PUBLIC.code_mstr.code_cmmt,PUBLIC.pt_mstr.pt_desc1 ORDER BY PUBLIC.pt_mstr.pt_part_type ASC, PUBLIC.pt_mstr.pt_part ASC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+    
+   console.log("iiiiiiiiiiiiiiii",invs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
+
+
 export default {
   create,
   findOne,
@@ -1928,5 +1993,7 @@ export default {
   findRoleByuser,
   findPaymentByRole,
   findVisitByRole,
-  findAllCA
+  findAllCA,
+  findAllSalesRole,
+  findSalesType
 };

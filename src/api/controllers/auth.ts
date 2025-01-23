@@ -3,7 +3,7 @@ import DomainService from "../../services/domain"
 import CustomerService from '../../services/customer';
 import addresseService from '../../services/address';
 import CodeService from "../../services/code"
-
+import UserMobileService from '../../services/user-mobile';
 import crmService from '../../services/crm';
 import SequenceService from '../../services/sequence';
 
@@ -12,7 +12,9 @@ import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import argon2 from "argon2"
 import jwt from "jsonwebtoken"
+import CryptoJS from "../../utils/CryptoJS";
 
+var Crypto = require('crypto');
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling login endpoint")
@@ -248,8 +250,47 @@ const getValidePromo= async (req: Request, res: Response, next: NextFunction) =>
         return next(e)
     }
 }
+const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling login endpoint")
+   
+    try {
+        
+        const userServiceInstance = Container.get(UserMobileService)
+        // const domainServiceInstance = Container.get(DomainService)\
+        console.log(req.body)
+        const { userName, password } = req.body
+        const user = await userServiceInstance.findOne({
+            user_mobile_code: userName,
+        })
+        if (!user)
+            return res
+                .status(401)
+                .json({ message: "user not found", data: null })
 
- 
+                let decrypt= CryptoJS.AES.decrypt(user.password,'b4cb72173ee45d8c7d188e8f77eb16c2').toString(CryptoJS.enc.Utf8);
+            //    console.log('decrypt',decrypt)
+        if (decrypt == password) {
+
+            
+            const token = jwt.sign({ user: user.id }, "acsiome")
+            const menus = await userServiceInstance.getMenus({ profile_code: user.profile_code });
+            // const domain = await domainServiceInstance.findOne({
+            //     dom_domain: user.usrd_domain,
+            // })
+            return res
+                .status(200)
+                .json({ message: "succesfully", data: { user, token,menus } })
+        } else
+            return res
+                .status(401)
+                .json({ message: "error password", data: null })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
 
 export default {
     login,
@@ -259,5 +300,6 @@ export default {
     getNotifications,
     getWilayasCommunes,
     getValidePromo,
+    loginMobile,
     
 }

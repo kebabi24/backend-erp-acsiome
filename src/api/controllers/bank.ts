@@ -784,6 +784,8 @@ const bkhPDet = async (req: Request, res: Response, next: NextFunction) => {
       bkh_p005: req.body.bkh_p005,
       bkh_bon:  req.body.bkh_bon,
       bkh_rmks: req.body.bkh_rmks, 
+      bkh_terms: req.body.bkh_terms,
+      bkh_cheque: req.body.bkh_cheque,
       
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -814,6 +816,7 @@ const bkhPDet = async (req: Request, res: Response, next: NextFunction) => {
         bk_p010: Number(banks.bk_p010) + Number(req.body.bkh_p010),
         bk_p005: Number(banks.bk_p005) + Number(req.body.bkh_p005),
         bk_bon:  Number(banks.bk_bon)  + Number(req.body.bkh_bon),
+        bk_cheque:  Number(banks.bk_cheque)  + Number(req.body.bkh_cheque),
       },
       {id: banks.id},
     );

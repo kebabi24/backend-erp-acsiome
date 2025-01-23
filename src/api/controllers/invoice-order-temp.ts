@@ -144,17 +144,17 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
     const addressServiceInstance = Container.get(AddressService);
     const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: invoiceOrderTemp.ith_bill });
 
-    const pdfData = {
-      ih: invoiceOrderTemp,
-      detail: invoiceOrderTempDetail,
-      ihnbr: ih.ith_inv_nbr,
-      adr: addr,
-    };
+    // const pdfData = {
+    //   ih: invoiceOrderTemp,
+    //   detail: invoiceOrderTempDetail,
+    //   ihnbr: ih.ith_inv_nbr,
+    //   adr: addr,
+    // };
 
     
-    let pdf = await generatePdf(pdfData, 'ih');
+    // let pdf = await generatePdf(pdfData, 'ih');
 
-    return res.status(201).json({ message: 'created succesfully', data: ih.ith_inv_nbr, pdf: pdf.content });
+    return res.status(201).json({ message: 'created succesfully', data: ih.ith_inv_nbr/*, pdf: pdf.content*/ });
   } catch (e) {
     //#
     logger.error('🔥 error: %o', e);

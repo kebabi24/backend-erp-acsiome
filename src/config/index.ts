@@ -20,8 +20,12 @@ export default {
   /**
    * That long string from mlab
    */
-  databaseURL: process.env.DB_URI,
+   databaseURL: process.env.DB_URI,
 
+  // server : "SQLxxx.site4now.net",
+  // database : "DB_xxx_xxx",
+  // userName : "DB_xxx_xxx_admin",
+  // password : "your_password",
   /**
    * Used by winston logger
    */

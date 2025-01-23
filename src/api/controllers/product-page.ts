@@ -4,6 +4,7 @@ import { Container } from "typedi"
 import { DATE, Op, Sequelize } from 'sequelize';
 import sequelize from '../../loaders/sequelize';
 import { isNull } from "lodash";
+import ItemService from "../../services/item";
 
 const createProductPage = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -54,10 +55,18 @@ const findOneByCode = async (req: Request, res: Response, next: NextFunction) =>
     logger.debug("Calling find one  code endpoint")
     try {
         const productPageService = Container.get(ProductPageService)
+        const itemService = Container.get(ItemService)
         const {product_page_code} = req.params
         console.log(req.params)
         const productPage = await productPageService.findOneByCode(product_page_code)
-        const details = await productPageService.getPageAllProducts(product_page_code)
+        const deta = await productPageService.getPageAllProducts(product_page_code)
+        let details = []
+        for(let det of deta) {
+            const item = await itemService.findOne({pt_part:det.product_code})
+            details.push({id:det.id,product_page_code: det.product_page_code,product_code:det.product_code,desc: item.pt_desc1,rank:det.rank})
+            det.desc = item.pt_desc1
+        }
+        //console.log(details)
         return res
             .status(200)
             .json({ message: "found one product page", data: {productPage,details}  })

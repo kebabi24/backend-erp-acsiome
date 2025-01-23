@@ -52,6 +52,8 @@ export default class ItemService {
     try {
       const codes = await this.itemModel.findAll({
         where: query,
+        order: [
+          ['pt_part', 'ASC']],
         include: this.taxeModel,
         incluse: this.locationModel,
       });

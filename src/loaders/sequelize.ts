@@ -7,6 +7,14 @@ export default async (): Promise<any> => {
       },
       timezone: '+01:00', })
 
+  //   const sequelize = new Sequelize({
+  //     dialect: 'mssql',
+  //     database: 'Axiom',
+  //     username: 'sa',
+  //     host: 'localhost',
+  //     password: 'admin',
+  //     logging: true,
+  // },)
     await sequelize.authenticate()
 
     return sequelize

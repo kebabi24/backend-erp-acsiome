@@ -35,4 +35,6 @@ export default (app: Router) => {
   route.post('/getLoadRequestWithCode', controller.getLoadRequestWithCode);
   route.post('/findchariot', controller.findBychariot);
   route.post('/findchariotdet', controller.findBychariotDet);
+  route.post('/exportlr/', controller.exportLoadRequest);
+  route.get('/getLoadRequest/:load_request_code', controller.getLoadRequest);
 };

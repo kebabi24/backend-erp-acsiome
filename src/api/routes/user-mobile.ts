@@ -33,10 +33,13 @@ export default (app: Router) => {
   route.post('/getAllPaymentByRole', controller.findPaymentByRole);
   route.post('/getAllPaymentService', controller.findPaymentByService),
   route.post('/getAllInvoicesdet', controller.findAllInvoicewithDetails);
+  route.post('/getsalesrole', controller.findAllSalesRole);
   route.post('/getAllInvoicesdetrole', controller.findAllInvoicewithDetailsRole);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/getAllInvoicesRole', controller.findAllInvoiceRole);
   route.post('/findallca', controller.findAllCA);
+  route.post('/findsalestype', controller.findSalesType);
+  
   
 };

@@ -68,7 +68,9 @@ export default class ProductPageService {
             for (const pageCode of pagesCodes) {
                 const addProfilePage = await this.profileProductPageModel.create({
                     profile_code: profile_code,
-                    product_page_code: pageCode,
+                    product_page_code: pageCode.product_page_code,
+                    rank:pageCode.rank,
+                   
                 })
                 addProfilePages.push(addProfilePage)
             }

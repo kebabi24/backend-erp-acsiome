@@ -5,6 +5,7 @@ export default class ProfileMobileService {
     constructor(
         @Inject("profileMobileModel") private profileMobileModel: Models.ProfileMobileModel,
         @Inject("profile_menuModel") private profile_menuModel: Models.Profile_menuModel,
+        @Inject("profileProductPageModel") private profileProductPageModel: Models.profileProductPageModel,
         @Inject("logger") private logger
     ) {}
 
@@ -86,6 +87,17 @@ export default class ProfileMobileService {
             const profile = await this.profileMobileModel.destroy({ where: query })
             this.logger.silly("delete one profile mobile mstr")
             return profile
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async findPPP(query: any): Promise<any> {
+        try {
+            const pages = await this.profileProductPageModel.findAll({ where: query ,order: [['rank', 'ASC']]})
+            this.logger.silly("find All profiles mobile mstr")
+
+            return pages
         } catch (e) {
             this.logger.error(e)
             throw e

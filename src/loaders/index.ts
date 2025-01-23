@@ -236,6 +236,8 @@ export default async ({ expressApp }) => {
       { name: 'chariotDetailModel', model: require('../models/chariot-detail').default },
       { name: 'accountOrderModel', model: require('../models/account-order').default },
       
+      { name: 'priceListQuantityModel', model: require('../models/mobile_models/price-list-quantity').default },
+      { name: 'priceListQuantityDetailModel', model: require('../models/mobile_models/price-list-quantity-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1134,7 +1136,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
+  // await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {
