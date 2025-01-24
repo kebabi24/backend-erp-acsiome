@@ -21,7 +21,11 @@ export default {
    * That long string from mlab
    */
    databaseURL: process.env.DB_URI,
-
+  
+  //  database: process.env.database,
+  //  user: process.env.user,
+  //  host: process.env.host,
+  //  password: process.env.password,
   // server : "SQLxxx.site4now.net",
   // database : "DB_xxx_xxx",
   // userName : "DB_xxx_xxx_admin",
