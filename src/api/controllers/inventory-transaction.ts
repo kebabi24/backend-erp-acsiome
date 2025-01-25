@@ -93,7 +93,372 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const trs = await inventoryTransactionServiceInstance.find({ ...req.body,tr_domain:user_domain });
+    
     return res.status(200).json({ message: 'fetched succesfully', data: trs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByRef = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_domain:user_domain,
+        ...req.body
+      },
+      attributes: [
+        
+        'tr_lot',
+        'tr_effdate',
+        'tr_ref',
+        'tr_type',
+        'tr_site',
+        'tr_loc',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'amt'],
+        
+      ],
+      group: ['tr_effdate', 'tr_lot','tr_ref','tr_type','tr_site', 'tr_loc'],
+      raw: true,
+    });
+    let result = [];
+    var i = 1;
+    for (let tr of trs) {
+      const inv = await inventoryTransactionServiceInstance.find({
+        tr_ref:tr.tr_ref,
+        tr_effdate:tr.tr_effdate,
+        tr_type:tr.tr_type,
+        tr_lot:tr.tr_lot,
+        tr_site:tr.tr_site,
+        tr_loc:tr.tr_loc,
+        tr_domain:user_domain
+      });
+      console.log(tr.amt,inv[inv.length-1].tr_nbr,inv[inv.length-1].tr__chr01)
+      //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+      const effdate = new Date(tr.tr_effdate);
+      result.push({
+        id: i,
+        tr_line:inv[inv.length-1].tr_line,
+        tr_part:inv[inv.length-1].tr_part,
+        tr_desc:inv[inv.length-1].tr_desc,
+        tr_effdate: tr.tr_effdate,
+        tr_nbr:inv[inv.length-1].tr_nbr,
+        tr_lot: tr.tr_lot,
+        tr_site: tr.tr_site,
+        tr_loc : tr.tr_loc,
+        tr_rmks: inv[inv.length-1].tr_rmks,
+        tr_addr: inv[inv.length-1].tr_addr,
+        tr_ref_site: inv[inv.length-1].tr_ref_site,
+        tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+        tr_user1:inv[inv.length-1].tr_user1,
+        tr_user2:inv[inv.length-1].tr_user2,
+        tr_qty_loc: tr.amt,
+        tr_ref: tr.tr_ref,
+        tr_type:tr.tr_type,
+        tr_um:inv[inv.length-1].tr_um,
+        tr_um_conv:inv[inv.length-1].tr_um_conv,
+        tr_price:inv[inv.length-1].tr_price,
+        tr_status:inv[inv.length-1].tr_status,
+        tr_expire:inv[inv.length-1].tr_expire,
+        tr_serial:inv[inv.length-1].tr_serial,
+        tr__chr01:inv[inv.length-1].tr__chr01,
+      });
+      i = i + 1;
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByRefs = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const {tr_type,date1,date2,time1,time2} = req.body
+    
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_domain:user_domain,
+        tr_type: tr_type,
+        tr_effdate : { [Op.between]: [date1, date2]}
+      },
+      attributes: [
+        
+        'tr_lot',
+        'tr_effdate',
+        'tr_ref',
+        'tr_type',
+        'tr_site',
+        'tr_loc',
+        'createdAt',
+        'tr_part',
+        
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'amt'],
+        
+      ],
+      group: ['tr_effdate', 'tr_lot','tr_ref','tr_type','tr_site', 'tr_loc','createdAt','tr_part'],
+      raw: true,
+    });
+    let result = [];
+    var i = 1;
+    for (let tr of trs) {
+      
+      if(tr.amt != 0)
+      {
+const inv = await inventoryTransactionServiceInstance.find({
+          tr_ref:tr.tr_ref,
+          tr_effdate:tr.tr_effdate,
+          tr_type:tr.tr_type,
+          tr_lot:tr.tr_lot,
+          tr_site:tr.tr_site,
+          tr_loc:tr.tr_loc,
+          tr_domain:user_domain
+        });
+      if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString())
+      { 
+console.log(1,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+       
+        //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+        const effdate = new Date(tr.tr_effdate);
+        result.push({
+          id: i,
+          tr_line:inv[inv.length-1].tr_line,
+          tr_part:inv[inv.length-1].tr_part,
+          tr_desc:inv[inv.length-1].tr_desc,
+          tr_effdate: tr.tr_effdate,
+          tr_lot: tr.tr_lot,
+          tr_site: tr.tr_site,
+          tr_loc : tr.tr_loc,
+          tr_rmks: inv[inv.length-1].tr_rmks,
+          tr_addr: inv[inv.length-1].tr_addr,
+          tr_ref_site: inv[inv.length-1].tr_ref_site,
+          tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+          tr_user1:inv[inv.length-1].tr_user1,
+          tr_user2:inv[inv.length-1].tr_user2,
+          tr_qty_loc: tr.amt,
+          tr_ref: tr.tr_ref,
+          tr_type:tr.tr_type,
+          tr_um:inv[inv.length-1].tr_um,
+          tr_um_conv:inv[inv.length-1].tr_um_conv,
+          tr_price:inv[inv.length-1].tr_price,
+          tr_status:inv[inv.length-1].tr_status,
+          tr_expire:inv[inv.length-1].tr_expire,
+          tr_serial:inv[inv.length-1].tr_serial,
+          tr_program:inv[0].tr_program,
+        });
+        i = i + 1;
+      }
+      
+        if(new Date(date1).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(inv[0].createdAt).toLocaleTimeString() >= time1 && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
+        { 
+console.log(2,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+         
+          //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+          const effdate = new Date(tr.tr_effdate);
+          result.push({
+            id: i,
+            tr_line:inv[inv.length-1].tr_line,
+            tr_part:inv[inv.length-1].tr_part,
+            tr_desc:inv[inv.length-1].tr_desc,
+            tr_effdate: tr.tr_effdate,
+            tr_lot: tr.tr_lot,
+            tr_site: tr.tr_site,
+            tr_loc : tr.tr_loc,
+            tr_rmks: inv[inv.length-1].tr_rmks,
+            tr_addr: inv[inv.length-1].tr_addr,
+            tr_ref_site: inv[inv.length-1].tr_ref_site,
+            tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+            tr_user1:inv[inv.length-1].tr_user1,
+            tr_user2:inv[inv.length-1].tr_user2,
+            tr_qty_loc: tr.amt,
+            tr_ref: tr.tr_ref,
+            tr_type:tr.tr_type,
+            tr_um:inv[inv.length-1].tr_um,
+            tr_um_conv:inv[inv.length-1].tr_um_conv,
+            tr_price:inv[inv.length-1].tr_price,
+            tr_status:inv[inv.length-1].tr_status,
+            tr_expire:inv[inv.length-1].tr_expire,
+            tr_serial:inv[inv.length-1].tr_serial,
+            tr_program:inv[0].tr_program,
+          });
+          i = i + 1;
+        }
+          if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date1).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() >= time1)
+          { 
+console.log(3,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+           
+            //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+            const effdate = new Date(tr.tr_effdate);
+            result.push({
+              id: i,
+              tr_line:inv[inv.length-1].tr_line,
+              tr_part:inv[inv.length-1].tr_part,
+              tr_desc:inv[inv.length-1].tr_desc,
+              tr_effdate: tr.tr_effdate,
+              tr_lot: tr.tr_lot,
+              tr_site: tr.tr_site,
+              tr_loc : tr.tr_loc,
+              tr_rmks: inv[inv.length-1].tr_rmks,
+              tr_addr: inv[inv.length-1].tr_addr,
+              tr_ref_site: inv[inv.length-1].tr_ref_site,
+              tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+              tr_user1:inv[inv.length-1].tr_user1,
+              tr_user2:inv[inv.length-1].tr_user2,
+              tr_qty_loc: tr.amt,
+              tr_ref: tr.tr_ref,
+              tr_type:tr.tr_type,
+              tr_um:inv[inv.length-1].tr_um,
+              tr_um_conv:inv[inv.length-1].tr_um_conv,
+              tr_price:inv[inv.length-1].tr_price,
+              tr_status:inv[inv.length-1].tr_status,
+              tr_expire:inv[inv.length-1].tr_expire,
+              tr_serial:inv[inv.length-1].tr_serial,
+              tr_program:inv[0].tr_program,
+            });
+            i = i + 1;
+          }
+            if(new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
+              {
+                
+console.log(4,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString(),time2)
+                //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+                const effdate = new Date(tr.tr_effdate);
+                result.push({
+                  id: i,
+                  tr_line:inv[inv.length-1].tr_line,
+                  tr_part:inv[inv.length-1].tr_part,
+                  tr_desc:inv[inv.length-1].tr_desc,
+                  tr_effdate: tr.tr_effdate,
+                  tr_lot: tr.tr_lot,
+                  tr_site: tr.tr_site,
+                  tr_loc : tr.tr_loc,
+                  tr_rmks: inv[inv.length-1].tr_rmks,
+                  tr_addr: inv[inv.length-1].tr_addr,
+                  tr_ref_site: inv[inv.length-1].tr_ref_site,
+                  tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+                  tr_user1:inv[inv.length-1].tr_user1,
+                  tr_user2:inv[inv.length-1].tr_user2,
+                  tr_qty_loc: tr.amt,
+                  tr_ref: tr.tr_ref,
+                  tr_type:tr.tr_type,
+                  tr_um:inv[inv.length-1].tr_um,
+                  tr_um_conv:inv[inv.length-1].tr_um_conv,
+                  tr_price:inv[inv.length-1].tr_price,
+                  tr_status:inv[inv.length-1].tr_status,
+                  tr_expire:inv[inv.length-1].tr_expire,
+                  tr_serial:inv[inv.length-1].tr_serial,
+                  tr_program:inv[0].tr_program,
+                });
+                i = i + 1;
+              }
+         
+    }
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByActivity = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_domain:user_domain,
+        ...req.body
+      },
+      attributes: [
+        
+        'tr_lot',
+        'tr_effdate',
+        'tr_ref',
+        'tr_type',
+        'tr_site',
+        'tr_loc',
+        [Sequelize.fn('sum', Sequelize.col('tr_qty_loc')), 'amt'],
+        
+      ],
+      group: ['tr_effdate', 'tr_lot','tr_ref','tr_type','tr_site', 'tr_loc'],
+      raw: true,
+    });
+    let result = [];
+    var i = 1;
+    for (let tr of trs) {
+      let rctunp = 0;
+      let issunp = 0;
+      let rcttr = 0;
+      let isstr = 0;
+      let rctpo = 0;
+      let rctwo = 0;
+      let isswo = 0;
+      let rjctwo = 0;
+
+      const inv = await inventoryTransactionServiceInstance.find({
+        tr_ref:tr.tr_ref,
+        tr_effdate:tr.tr_effdate,
+        tr_type:tr.tr_type,
+        tr_lot:tr.tr_lot,
+        tr_site:tr.tr_site,
+        tr_loc:tr.tr_loc,
+        tr_domain:user_domain
+      });
+      console.log(inv.length)
+      //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+      const effdate = new Date(tr.tr_effdate);
+      if (tr.tr_type == 'RCT-UNP'){rctunp = tr.amt}
+      if (tr.tr_type == 'RCT-PO'){rctpo = tr.amt}
+      if (tr.tr_type == 'RCT-WO'){rctwo = tr.amt}
+      if (tr.tr_type == 'RJCT-WO'){rjctwo = tr.amt}
+      if (tr.tr_type == 'ISS-UNP'){issunp = -tr.amt}
+      if (tr.tr_type == 'RCT-TR'){rcttr = tr.amt}
+      if (tr.tr_type == 'ISS-WO'){isswo = -tr.amt}
+      if (tr.tr_type == 'ISS-TR'){isstr = -tr.amt}
+      
+      result.push({
+        id: i,
+        tr_line:inv[inv.length-1].tr_line,
+        tr_part:inv[inv.length-1].tr_part,
+        tr_desc:inv[inv.length-1].tr_desc,
+        tr_effdate: tr.tr_effdate,
+        tr_lot: tr.tr_lot,
+        tr_site: tr.tr_site,
+        tr_loc : tr.tr_loc,
+        tr_rmks: inv[inv.length-1].tr_rmks,
+        tr_addr: inv[inv.length-1].tr_addr,
+        tr_ref_site: inv[inv.length-1].tr_ref_site,
+        tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+        tr_user1:inv[inv.length-1].tr_user1,
+        tr_user2:inv[inv.length-1].tr_user2,
+        tr_qty_loc: tr.amt,
+        tr_ref: tr.tr_ref,
+        tr_type:tr.tr_type,
+        tr_um:inv[inv.length-1].tr_um,
+        tr_um_conv:inv[inv.length-1].tr_um_conv,
+        tr_price:inv[inv.length-1].tr_price,
+        tr_status:inv[inv.length-1].tr_status,
+        tr_expire:inv[inv.length-1].tr_expire,
+        tr_serial:inv[inv.length-1].tr_serial,
+        tr_program:inv[inv.length-1].tr_program,
+      });
+      i = i + 1;
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -266,6 +631,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -299,7 +665,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
               created_ip_adr: req.headers.origin,
@@ -400,6 +766,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -477,6 +844,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
     const statusServiceInstance = Container.get(statusService);
 
     for (const item of detail) {
+      console.log(item)
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_site,
@@ -587,7 +955,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           chr03:ld.chr03,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:(ld) ? ld.chr04 : null,
           chr05:pt.pt_prod_line,
           ld_grade:(ld) ? ld.ld_grade : null,
           ld__chr01: (ld) ? ld.ld__chr01 : null,
@@ -1297,6 +1665,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1329,7 +1698,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
               created_ip_adr: req.headers.origin,
@@ -1347,7 +1716,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
       const sct = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
         sct_part: it.tr_part,
-        sct_site: item.tr_site,
+        sct_site: it.tr_site,
         sct_sim: 'STD-CG',
       });
       
@@ -1452,6 +1821,7 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1484,7 +1854,7 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
               created_ip_adr: req.headers.origin,
@@ -1608,6 +1978,7 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+           
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1638,7 +2009,7 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         tr_batch:ld.ld__chr01,
         dec01:Number(new Date(item.tr_effdate).getFullYear()),
         dec02:Number(new Date(item.tr_effdate).getMonth() + 1),
-        tr_program:new Date().toLocaleTimeString(),
+        // tr_program:new Date().toLocaleTimeString(),
           tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
@@ -1654,42 +2025,7 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
           ld_lot: item.tr_nbr,
         });
       }
-      // if (!isNaN(item.wodid)) {
-      //   const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid });
-      //   if (wod) {
-      //     var bool = false;
-
-      //     if (
-      //       Number(wod.wod_qty_req) - (Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >=
-      //       0
-      //     ) {
-      //       bool = true;
-      //     }
-      //     await workOrderDetailServiceInstance.update(
-      //       {
-      //         wod__qadl01: true ? bool : false,
-      //         wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //         last_modified_by: user_code,
-      //         last_modified_ip_adr: req.headers.origin,
-      //       },
-      //       { id: wod.id },
-      //     );
-      //   }
-      // } else {
-      //   await workOrderDetailServiceInstance.create({
-      //     wod_nbr: it.tr_nbr,
-      //     wod_lot: it.tr_lot,
-      //     wod_part: item.tr_part,
-      //     wod_qty_req: 0,
-      //     wod_qty_iss: item.tr_qty_loc,
-      //     wod_site: item.tr_site,
-      //     wod_loc: item.tr_loc,
-      //     wod_um: item.tr_um,
-      //     wod_serial: item.tr_serial,
-      //     wod_ref: item.tr_ref,
-      //     wod__qadl01: true,
-      //   });
-      // }
+     
     }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
   } catch (e) {
@@ -1936,7 +2272,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
               chr03:pt.pt_group,
               int01:pt.int01,
           int02:pt.int02,
-          chr04:remain.tr_addr,
+          chr04:'INVENTAIRE',
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
@@ -2102,7 +2438,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               chr03:pt.pt_group,
               int01:pt.int01,
           int02:pt.int02,
-          chr04:remain.tr_addr,
+          chr04:'INVENTAIRE',
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
@@ -2289,6 +2625,8 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
       tr__chr02:trs.tr__chr02,
       tr__chr03:trs.tr__chr03,
       tr_um:trs.tr_um,
+      tr_um_conv:trs.tr_um_conv,
+      tr_price:trs.tr_price,
       tr_status:trs.tr_status,
       tr_ref:trs.tr_ref,
       tr_effdate:trs.tr_effdate,
@@ -2312,6 +2650,7 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
     //#
+    
     logger.error('🔥 error: %o', e);
     return next(e);
   }
@@ -2322,7 +2661,7 @@ const findtrDateAddr = async (req: Request, res: Response, next: NextFunction) =
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-    console.log(req.body.tr_addr)
+    console.log(req.body.tr_addr,req.body.date)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
@@ -2863,16 +3202,16 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(workOrderService);
 
     for (const item of detail) {
+      console.log(item.old)
+      if (item.old != true){
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: item.tr_site,
         sct_sim: 'STD-CG',
       });
 
-
-      
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part });
-      console.log(item)
+      
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
@@ -2882,9 +3221,11 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
       });
 
       if (ld)
+       { 
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2900,8 +3241,8 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         routing = wo.wo_routing
         emp = wo.wo_user1
         if (ld){locbegin = ld.ld_qty_oh;chr01 = ld.ld__chr01;grade = ld.ld_grade}else{locbegin = 0;chr01=null;grade=null}
-      if (wo)
-        await inventoryTransactionServiceInstance.create({
+        if (wo)
+        {  await inventoryTransactionServiceInstance.create({
          ...item,
          ...it,
          tr_domain: user_domain,
@@ -2939,47 +3280,50 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         int01:pt.int01,
         int02:pt.int02,
         
-      });
-  if( !isNaN(item.wodid)) {
-        const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
-        if(wod)  {
-          var bool = false
+          });
+        }  
+        if( !isNaN(item.wodid)) {
+              const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
+              if(wod)  {
+                var bool = false
 
-          if(Number(wod.wod_qty_req) - ( Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >= 0) { bool = true}
-          await workOrderDetailServiceInstance.update(
-          {
-            wod__qadl01 : true ? (bool) : false,
-            wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
-          },
-          { id: wod.id },
-        );
-      } 
-  }else {
+                if(Number(wod.wod_qty_req) - ( Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)) >= 0) { bool = true}
+                await workOrderDetailServiceInstance.update(
+                {
+                  wod__qadl01 : true ? (bool) : false,
+                  wod_qty_iss: Number(wod.wod_qty_iss) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+                  last_modified_by: user_code,
+                  last_modified_ip_adr: req.headers.origin,
+                },
+                { id: wod.id },
+              );
+            } 
+        }else {
 
-    await workOrderDetailServiceInstance.create({
-      wod_nbr     : it.tr_nbr,
-      wod_lot     : it.tr_lot,
-      wod_part    : item.tr_part,
-      wod_qty_req : 0,
-      wod_qty_iss : item.tr_qty_loc,
-      wod_site    : item.tr_site,
-      wod_loc     : item.tr_loc,
-      wod_um      : item.tr_um,
-      wod_serial  : item.tr_serial,
-      wod_ref     : item.tr_ref,
-      wod__qadl01 : true,
+          await workOrderDetailServiceInstance.create({
+            wod_nbr     : it.tr_nbr,
+            wod_lot     : it.tr_lot,
+            wod_part    : item.tr_part,
+            wod_qty_req : 0,
+            wod_qty_iss : item.tr_qty_loc,
+            wod_site    : item.tr_site,
+            wod_loc     : item.tr_loc,
+            wod_um      : item.tr_um,
+            wod_serial  : item.tr_serial,
+            wod_ref     : item.tr_ref,
+            wod__qadl01 : true,
 
-    })
-
-
+          })
 
 
-  }
+
+
+        }
 
     }
-    return res.status(200).json({ message: 'deleted succesfully', data: true });
+  }
+}
+    return res.status(200).json({ message: 'updated succesfully', data: true });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -3052,7 +3396,7 @@ const retissWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:ld.chr04,
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
@@ -3506,13 +3850,14 @@ const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
         'tr_effdate',
         'tr_site',
         'tr_loc',
-        'tr_rmks',
+        
         'tr_addr',
         'tr_ref_site',
         'tr_ref_loc',
+        
         //[Sequelize.fn('sum', Sequelize.col('tr_gl_amt')), 'amt'],
       ],
-      group: ['tr_effdate', 'tr_lot', 'tr_rmks', 'tr_site', 'tr_loc','tr_ref_site', 'tr_ref_loc','tr_addr'],
+      group: ['tr_effdate', 'tr_lot', 'tr_site', 'tr_loc','tr_ref_site', 'tr_ref_loc','tr_addr'],
       raw: true,
     });
 
@@ -3524,14 +3869,14 @@ const findByGroup = async (req: Request, res: Response, next: NextFunction) => {
       const effdate = new Date(tr.tr_effdate);
       result.push({
         id: i,
-        tr_effdate: effdate.getFullYear() + '-' + (effdate.getMonth() + 1) + '-' + effdate.getUTCDate(),
+        tr_effdate: tr.tr_effdate,
         tr_lot: tr.tr_lot,
         tr_site: tr.tr_site,
         tr_loc : tr.tr_loc,
-        tr_rmks: tr.tr_rmks,
         tr_addr: tr.tr_addr,
         tr_ref_site: tr.tr_ref_site,
-        tr_ref_loc: tr.tr_ref_loc
+        tr_ref_loc: tr.tr_ref_loc,
+        
        // amt: tr.amt,
       });
       i = i + 1;
@@ -3683,7 +4028,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
-    const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
+    // const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
     const providerServiceInstance = Container.get(ProviderService);
 
     let tot = 0.00  
@@ -3693,16 +4038,16 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
      // tot = +10 * +100.020
       
     }
-    if (it.tr_addr != null) {console.log(it.tr_addr,nlot)
-    const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
-    if(aufind) {
-    const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
-    } else {
-      const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
-    }
-    const vd = await providerServiceInstance.findOne({vd_addr: it.tr_addr,vd_domain : user_domain,})
-    if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(tot)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})  
-    }
+    // if (it.tr_addr != null) {console.log(it.tr_addr,nlot)
+    // const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
+    // if(aufind) {
+    // const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
+    // } else {
+    //   const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    // }
+    // const vd = await providerServiceInstance.findOne({vd_addr: it.tr_addr,vd_domain : user_domain,})
+    // if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(tot)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})  
+    // }
     for (const data of detail) {
       const { desc, ...item } = data;
       // const sct = await costSimulationServiceInstance.findOne({
@@ -3711,11 +4056,11 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
       //   sct_site: item.tr_site,
       //   sct_sim: 'STD-CG',
       // });
-      console.log(item.tr_part)
+      console.log(item.tr_oldpart,item.tr_part,item.tr_site)
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
       const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
-      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
+      // const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain:user_domain,
         sct_part: item.tr_part,
@@ -3771,6 +4116,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -3791,6 +4137,226 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           tr_qty_chg: Number(item.tr_qty_loc),
           tr_loc_begin: 0,
           tr_type: 'RCT-UNP',
+          tr_date: new Date(),
+          // tr_mtl_std: sctdet.sct_mtl_tl,
+          // tr_lbr_std: sctdet.sct_lbr_tl,
+          // tr_bdn_std: sctdet.sct_bdn_tl,
+          // tr_ovh_std: sctdet.sct_ovh_tl,
+          // tr_sub_std: sctdet.sct_sub_tl,
+          tr_desc:pt.pt_desc1,
+          tr_prod_line: pt.pt_prod_line,
+          tr__chr01:pt.pt_draw,
+          tr__chr02:pt.pt_break_cat,
+          tr__chr03:pt.pt_group,
+          dec01:Number(new Date(it.tr_effdate).getFullYear()),
+          dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+          tr_program:new Date().toLocaleTimeString(),
+          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+         
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+       
+        });
+        await locationDetailServiceInstance.create({
+          ld_part: item.tr_part,
+          ld_lot: item.tr_serial,
+          ld_ref: item.tr_ref,
+          ld_date: new Date(),
+          ld_site: item.tr_site,
+          ld_loc: item.tr_loc,
+          ld_status: item.tr_status,
+          ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+          ld_expire: item.tr_expire,
+          ld__log01: status.is_nettable,
+          ld_domain:user_domain,
+          ld_grade: item.tr_grade,
+          ld__chr01:item.tr_batch,
+          chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:it.tr_addr,
+          chr05:pt.pt_prod_line,
+          ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
+          created_by: user_code,
+              created_ip_adr: req.headers.origin,
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+        });
+      }
+      
+      
+    }
+
+    // const addressServiceInstance = Container.get(AddressService);
+    // const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr,ad_domain:user_domain });
+
+    // const pdfData = {
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    //   adr: addr,
+    // };
+
+    
+    // const pdf = await generatePdf(pdfData, 'rct-unp');
+
+    return res.status(200).json({ message: 'Added succesfully', data: true, /*pdf: pdf.content*/ });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+
+  logger.debug('Calling update one  code endpoint');
+  try {
+    const { detail, it, nlot } = req.body;
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const itemServiceInstance = Container.get(itemService);
+    const statusServiceInstance = Container.get(statusService);
+    const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
+    const providerServiceInstance = Container.get(ProviderService);
+
+    let tot = 0.00  
+    for (const data of detail) {
+    
+       tot = tot + Number(data.tr_qty_loc) * Number(data.tr_price)
+     // tot = +10 * +100.020
+      
+    }
+    if (it.tr_addr != null) {console.log(it.tr_addr,nlot)
+    const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
+    if(aufind) {
+    const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
+    } else {
+      const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_effdate:it.tr_effdate,au_vend:it.tr_addr,au_curr:"DA",au_nbr: nlot,au_amt:tot,au_type:"I",au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    }
+    const vd = await providerServiceInstance.findOne({vd_addr: it.tr_addr,vd_domain : user_domain,})
+    if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(tot)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})  
+    }
+    for (const data of detail) {
+      const { desc, ...item } = data;
+      // const sct = await costSimulationServiceInstance.findOne({
+      //   sct_domain:user_domain,
+      //   sct_part: item.tr_part,
+      //   sct_site: item.tr_site,
+      //   sct_sim: 'STD-CG',
+      // });
+      console.log(item.tr_oldpart,item.tr_part)
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
+
+      const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
+      const { sct_mtl_tl } = await costSimulationServiceInstance.findOne({ sct_domain:user_domain,sct_part: item.tr_part, sct_sim: 'STD-CG' });
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
+        sct_part: item.tr_part,
+        sct_site: item.tr_site,
+        sct_sim: 'STD-CG',
+      });
+      
+      
+    
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: item.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: item.tr_site,
+        ld_loc: item.tr_loc,
+        ld_ref: item.tr_ref,
+        ld_domain:user_domain
+      });
+      
+      if (ld){
+        await inventoryTransactionServiceInstance.create({
+          ...item,
+          ...it,
+          tr_domain:user_domain,
+          tr_lot: nlot,
+          tr_qty_chg: Number(item.tr_qty_loc),
+          tr_loc_begin: ld.ld_qty_oh,
+          tr_type: 'RCT-PO',
+          tr_date: new Date(),
+          tr_mtl_std: sctdet.sct_mtl_tl,
+          tr_lbr_std: sctdet.sct_lbr_tl,
+          tr_bdn_std: sctdet.sct_bdn_tl,
+          tr_ovh_std: sctdet.sct_ovh_tl,
+          tr_sub_std: sctdet.sct_sub_tl,
+          tr_desc:pt.pt_desc1,
+          tr_prod_line: pt.pt_prod_line,
+          tr__chr01:pt.pt_draw,
+          tr__chr02:pt.pt_break_cat,
+          tr__chr03:pt.pt_group,
+          dec01:Number(new Date(it.tr_effdate).getFullYear()),
+          dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
+          tr_program:new Date().toLocaleTimeString(),
+          tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+          
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        
+        });
+        await locationDetailServiceInstance.update(
+          {ld_part: item.tr_part,
+            ld_lot: item.tr_serial,
+            ld_ref: item.tr_ref,
+            ld_date: new Date(),
+            ld_site: item.tr_site,
+            ld_loc: item.tr_loc,
+            ld_status: item.tr_status,
+            ld_expire: item.tr_expire,
+            ld_domain:user_domain,
+            ld_grade: item.tr_grade,
+            ld__chr01:item.tr_batch,
+            chr01:pt.pt_draw,
+            chr02:pt.pt_break_cat,
+            chr03:pt.pt_group,
+            int01:pt.int01,
+            int02:pt.int02,
+            chr04:it.tr_addr,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+            ld_rev:pt.pt_rev,
+            created_by: user_code,
+                created_ip_adr: req.headers.origin,
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            
+          },
+          { id: ld.id },
+        );
+      }
+      else {
+        
+        const status = await statusServiceInstance.findOne({
+          is_domain:user_domain,
+          is_status: item.tr_status,
+        });
+        await inventoryTransactionServiceInstance.create({
+          ...item,
+          ...it,
+          tr_domain:user_domain,
+          tr_lot: nlot,
+          tr_qty_chg: Number(item.tr_qty_loc),
+          tr_loc_begin: 0,
+          tr_type: 'RCT-PO',
           tr_date: new Date(),
           tr_mtl_std: sctdet.sct_mtl_tl,
           tr_lbr_std: sctdet.sct_lbr_tl,
@@ -3835,7 +4401,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
-          chr04:item.tr_addr,
+          chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
@@ -3849,19 +4415,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
       
     }
 
-    // const addressServiceInstance = Container.get(AddressService);
-    // const addr = await addressServiceInstance.findOne({ ad_addr: it.tr_addr,ad_domain:user_domain });
-
-    // const pdfData = {
-    //   detail: detail,
-    //   it: it,
-    //   nlot: nlot,
-    //   adr: addr,
-    // };
-
     
-    // const pdf = await generatePdf(pdfData, 'rct-unp');
-
     return res.status(200).json({ message: 'Added succesfully', data: true, /*pdf: pdf.content*/ });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -3912,6 +4466,7 @@ const issTrV = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            chr04:it.tr_addr,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -4115,8 +4670,12 @@ export default {
   findByCost,
   findByNbr,
   findByGroup,
+  findByRef,
+  findByRefs,
+  findByActivity,
   updatePrice,
   rctUnpCab,
+  rctPoCab,
   findByIss,
   reprint,
   

@@ -1,6 +1,8 @@
 import LabelService from '../../services/label';
 import SequenceService from '../../services/sequence';
 import ItemService from '../../services/item';
+import locationDetailService from '../../services/location-details';
+import locationService from '../../services/location';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
@@ -25,21 +27,34 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
-
-    const pageWidth = 284; // Width of the page in points
-    const pageHeight = 284; // Height of the page in points
+    console.log(user_domain)
+    // const pageWidth = 284; // Width of the page in points
+    // const pageHeight = 284; // Height of the page in points
+    const pageWidth = 127; // Width of the page in points
+    const pageHeight = 164; // Height of the page in points
     var labelId = null;
     let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
     labelId = req.body.lb_ref;
     if(seq == null){seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' })}
-    if(labelId == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`}
+    if(labelId == null){labelId = `${seq.seq_prefix}-${String(new Date().getFullYear())}-${Number(seq.seq_curr_val) }`}
     let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: labelId})
     const itemServiceInstance = Container.get(ItemService);
+    const locationServiceInstance = Container.get(locationService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
     const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
+    const lds = await locationDetailServiceInstance.find({ ld_ref:labelId,ld_domain:user_domain });
+    let locs : any;
+    for(let locd of lds){ locs = await locationServiceInstance.find({ loc_loc:locd.ld_loc,loc_domain:user_domain });}
+    let loc_desc:any;
+    for (let location of locs){loc_desc = location.loc_desc
+      const label = await labelServiceInstance.update(
+      { lb_cust: location.loc_desc, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { lb_ref: labelId })}
     let desc:any;
     for (let item of items){if(item.pt_draw != 'BOBINE'){desc = item.pt_desc2} else {desc = item.pt_draw + ' ' + item.pt_part_type}}
-    console.log(lab.lb_part,desc,'DESC')
+    
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    
     doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
     const image = doc.openImage('./edel.jpg');
     let time = new Date().toLocaleTimeString();
@@ -48,64 +63,54 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     //doc.image(image, 50, 0, {
     //  fit: [180, 150], // Adjust the size of the barcode image as needed
     //});
-
+    // doc
+    // .fontSize(6)
+    // .text('PRODUIT :' + req.body.lb_desc, 5, 10)
+    // .fontSize(6)
+    // .text('SERVICE:' + req.body.lb_loc, 5, 20);
+    
+    
     doc
       //  .rect(10, 80, 265, 80)
       //  .stroke()
       //  .font('Helvetica-Bold')
       //  .fontSize(12)
-      .text('FOURNISSEUR : ' + req.body.lb_cust, 20, 18)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('DATE: ' + req.body.lb_date, 20, 58);
-    //.text('ADRESSE :' + req.body.lb_addr, 20, 115)
-    //  .font('Helvetica-Bold')
-    //  .fontSize(12)
-    //  .text('TEL :' + req.body.lb_tel, 20, 140);
+    //   .text('FOURNISSEUR : ' + req.body.lb_cust, 20, 18)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('DATE: ' + req.body.lb_date, 20, 58);
+    //   .text('ADRESSE :' + req.body.lb_addr, 20, 115)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('TEL :' + req.body.lb_tel, 20, 140);
 
     // Define the second rectangle and its text lines
+   
     doc
       //  .rect(10, 170, 265, 130)
       //  .stroke()
       //  .font('Helvetica-Bold')
       //  .fontSize(12)
-      .text('PRODUIT :' + desc, 20, 78)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('CODE :' + '', 20, 118)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      //.text('MICRONAGE/ LAIZE :' + '', 20, 223)
-      //  .font('Helvetica-Bold')
-      //  .fontSize(12)
-      .text('QTE :' + req.body.lb_qty + 'KG', 20, 138)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('N° Lot:' + req.body.lb_lot, 20, 158)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('QUALITE:', 20, 178);
+    doc
+    .fontSize(10)
+    .text( req.body.lb_cust, 5, 10)
+    .text(req.body.lb_desc, 5,25)
+    .text('SN: ' +req.body.lb_lot, 5,40);
+      
 
     // Define the third rectangle and its text lines
     doc
-      //.rect(10, 310, 265, 70)
-      //.stroke()
-      //.font('Helvetica-Bold')
-      //.fontSize(12)
-      .text('BIGBAG N°:' + req.body.lb__dec01, 20, 198)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      //.text('FABRIQUE EN ALGERIE', 75, 405)
-      .text('HEURE:' + time, 180, 58);
+     
 
     bwipjs.toBuffer(
       {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
         text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
-        includetext: true, // Include the barcode text
-        height: 10,
-        width: 60,
+        includetext: false, // Include the barcode text
+        height: 15,
+        width: 45,
+        // width: 60,
       },
       function(err, png) {
         if (err) {
@@ -117,9 +122,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const image = doc.openImage(png);
 
         // Draw the barcode image on the PDF document
-        doc.image(image, 50, 223, {
-          fit: [5400, 40], // Adjust the size of the barcode image as needed
-        });
+        doc.image(image, 15, 45, {
+          fit: [280, 25], // Adjust the size of the barcode image as needed
+      });
+        // doc.image(image, 50, 223, {
+        //   fit: [5400, 40], // Adjust the size of the barcode image as needed
+        // });
         // Save the PDF document
         filenamepdf = './barcode/' + labelId + '.pdf';
    
@@ -175,10 +183,11 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     const pageHeight = 284; // Height of the page in points
     var labelId = null;
     let test = false;
+    console.log(req.body)
     let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
     
     if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
-    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${String(new Date().getFullYear())}-${Number(seq.seq_curr_val) + 1}`;}
     else {labelId = req.body.lb_ref}
     if(test == true){await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
@@ -191,8 +200,8 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
       const itemServiceInstance = Container.get(ItemService);
     const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
     let desc:any;
-    for (let item of items){desc = item.pt_desc2}
-    console.log(req.body.lb_part,desc,'DESC')
+    for (let item of items){desc = item.pt_desc1}
+    
     const label = await labelServiceInstance.create({
       ...req.body,
       lb_desc:desc,
@@ -227,12 +236,12 @@ const createProd = async (req: Request, res: Response, next: NextFunction) => {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
     var labelId = null;
-    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'CAR', seq_type: 'PL' });
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
     
     labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-      { id: seq.id, seq_type: 'PL', seq_seq: 'CAR', seq_domain: user_domain },
+      { id: seq.id, seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
     );
     const label = await labelServiceInstance.create({
       ...req.body,

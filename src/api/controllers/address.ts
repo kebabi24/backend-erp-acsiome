@@ -26,7 +26,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const addressServiceInstance = Container.get(AddressService)
-        const address = await addressServiceInstance.findOne({...req.body,ad_domain:user_domain})
+        const address = await addressServiceInstance.find({...req.body,ad_domain:user_domain})
      
         return res
             .status(200)
@@ -43,7 +43,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const addressServiceInstance = Container.get(AddressService)
-        const address = await addressServiceInstance.find({ad_domain:user_domain,ad_type:'vendor'})
+        const address = await addressServiceInstance.find({ad_domain:user_domain})
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: address })

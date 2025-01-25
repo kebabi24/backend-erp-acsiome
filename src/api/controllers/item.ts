@@ -40,7 +40,7 @@ const createDetail = async (req: Request, res: Response, next: NextFunction) => 
   const { user_domain } = req.headers;
   logger.debug('Calling Create item endpoint ');
   try {
-    const { item, itemDetail } = req.body
+    const { item, itemmethode, itemobjectif,itemprogram } = req.body
     const itemServiceInstance = Container.get(ItemService);
     const itemDetailServiceInstance = Container.get(ItemDetailService);
     const training = await itemServiceInstance.create({
@@ -51,12 +51,24 @@ const createDetail = async (req: Request, res: Response, next: NextFunction) => 
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    for (let entry of itemDetail) {
-      entry = { ...entry,ptd_domain:user_domain, ptd_part: item.pt_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+    for (let entry of itemmethode) {
+      entry = { ...entry,ptd_domain:user_domain, ptd_part: item.pt_part,chr01:'METHODE', created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
       await itemDetailServiceInstance.create(entry)
 
   
   }
+  for (let entry1 of itemobjectif) {
+    entry1 = { ...entry1,ptd_domain:user_domain, ptd_part: item.pt_part,chr01:'OBJECTIF', created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+    await itemDetailServiceInstance.create(entry1)
+
+
+}
+for (let entry2 of itemprogram) {
+  entry2 = { ...entry2,ptd_domain:user_domain, ptd_part: item.pt_part,chr01:'PROGRAMME', created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+  await itemDetailServiceInstance.create(entry2)
+
+
+}
     return res.status(201).json({ message: 'created succesfully', data: { item } });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -252,7 +264,7 @@ const findOneDet = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const { id } = req.params;
     const item = await itemServiceInstance.findOneDet({ id });
-    //console.log(item)
+    console.log(item.pt_group, item.pt_draw)
     return res.status(200).json({ message: 'fetched succesfully', data: item });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -645,6 +657,7 @@ const findJob = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(ItemService);
     const itemDetailServiceInstance = Container.get(ItemDetailService);
     const { detail } = req.body;
+    
     const itemsd = await itemDetailServiceInstance.findS({
       ...{
         ptd_domain: user_domain,
@@ -654,8 +667,10 @@ const findJob = async (req: Request, res: Response, next: NextFunction) => {
     });
     let it = []
     for (let ite of itemsd) {
-      it.push(ite.ptd_part)
+
+      if(ite.ptd_part != it){it.push(ite.ptd_part)}
     }
+    
     const items = await itemServiceInstance.find({
       ...{
         pt_domain: user_domain,
@@ -663,7 +678,7 @@ const findJob = async (req: Request, res: Response, next: NextFunction) => {
       },
          
     });
-    console.log(items)
+    
     return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);

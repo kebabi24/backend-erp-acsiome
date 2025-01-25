@@ -3,6 +3,10 @@ import LoadRequestService from '../../services/load-request';
 import UnloadRequestService from '../../services/unload-request';
 import RoleService from '../../services/role';
 import ItemService from '../../services/item';
+import addressService from '../../services/address';
+import affectEmployeService from '../../services/affect-employe';
+import affectreportService from '../../services/add-report';
+import evalservice from '../../services/quality_control';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
@@ -13,6 +17,7 @@ import PromotionService from '../../services/promotion';
 import _ from 'lodash';
 import siteService from '../../services/site';
 import _, { isNull } from 'lodash';
+
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -1222,9 +1227,12 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
     const itemServiceInstance = Container.get(ItemService);
-
+    const addressServiceInstance = Container.get(addressService);
+    const affectserviceInstance = Container.get(affectEmployeService)
+    const reportserviceInstance = Container.get(affectreportService)
+    const evalserviceInstance = Container.get(evalservice)
     const { start_date, end_date } = req.body;
-
+    
     var services_data = await userMobileServiceInstance.getServices(start_date, end_date);
     var invoices = await userMobileServiceInstance.getInvoices(start_date, end_date, [
       'invoice_code',
@@ -1239,10 +1247,10 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
       'service_code',
     ]);
     var items = await itemServiceInstance.findAll();
-
+    
     const filtered_services = _.mapValues(_.groupBy(services_data, 'role_code'));
     const filtered_services_by_day = _.mapValues(_.groupBy(services_data, 'service_period_activate_date'));
-
+    
     payments.forEach(async payment => {
       const service = await userMobileServiceInstance.getService({ service_code: payment.dataValues.service_code });
       if (service != null) {
@@ -1281,6 +1289,7 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
         sum_invoice: sum_invoice,
       });
     }
+let plans = [];
 
     // *************** 1 *******************
     let sum_visit_rate = 0;
@@ -1391,14 +1400,62 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
       // sum_nb_products_sold += 1;
       // sum_nb_clients_created += 1;
     });
+    services.forEach(service => {
+      // **************** 1 VISIT RATE
+      // CALCULATE : visit rate of each role
+      let visit_rate = parseFloat(((service.nb_visits / service.nb_clients_itin) * 100).toFixed(2));
+      
+      
+      // visit rate of roles
+      visit_rate_data.push({
+        role_code: service.role_code,
+        visit_rate: visit_rate,
+        unvisited_rate: parseFloat((100 - visit_rate).toFixed(2)),
+      });
 
+      // **************** 2 SUCCESS RATE
+
+      sucess_rate_data.push({
+        role_code: service.role_code,
+        nb_clients: service.nb_clients_itin,
+        nb_invoice: service.nb_invoice,
+        nb_visits: service.nb_visits,
+      });
+
+      // **************** 3 DISTRIBUTION RATE
+
+      distribution_rate_data.push({
+        role_code: service.role_code,
+        // nb_products_sold : 0,
+        nb_products_sold: service.nb_products_sold,
+        nb_products: items.length,
+        nb_products_loaded: service.nb_products_loaded,
+        // nb_products_loaded : 0
+      });
+
+      //****************** 4 */ later
+
+      //*****************  5 below
+      //****************** 6 */
+      service.nb_visits = 1;
+      ca_itin_data.push({
+        role_code: service.role_code,
+        ca_iti: parseFloat((sum_invoice_amount / service.nb_visits).toFixed(2)),
+      });
+
+      //****************** 7 */
+      ca_new_client_data.push({
+        role_code: service.role_code,
+        ca_new_client: parseFloat((service.sum_invoice / service.nb_clients_created).toFixed(2)),
+      });
+    });
     console.log(sum_nb_visits, sum_nb_clients);
     services.forEach(service => {
       // **************** 1 VISIT RATE
       // CALCULATE : visit rate of each role
       let visit_rate = parseFloat(((service.nb_visits / service.nb_clients_itin) * 100).toFixed(2));
 
-      console.log(visit_rate);
+     
       // visit rate of roles
       visit_rate_data.push({
         role_code: service.role_code,
@@ -1506,11 +1563,11 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
         type: product_type.dataValues.pt_part_type,
       });
 
-      // console.log(products_data)
+      
     }
 
     const filtered_types = _.mapValues(_.groupBy(products_data, 'type'));
-    // console.log(filtered_types)
+   
     for (const key in filtered_types) {
       let l = [],
         sum = 0;
@@ -1543,8 +1600,93 @@ const getDashboardAddData = async (req: Request, res: Response, next: NextFuncti
     // SORT integration_data
 
     const sortedAsc = integration_data.sort((objA, objB) => Number(new Date(objA.day)) - Number(new Date(objB.day)));
+    var planned_session = await affectserviceInstance.findspecial(
+      {where:{pme_start_date:{[Op.between]: [start_date, end_date]}},
+      attributes: [
+        
+        'pme_nbr',
+        
+        
+      ],
+      group: ['pme_nbr'],
+      raw: true,
+  })
+    let nb_session = planned_session.length
+    var employe_trained = await affectserviceInstance.findspecial(
+      {where:{pme_start_date:{[Op.between]: [start_date, end_date]}},
+      attributes: [
+        
+        'pme_employe',
+        
+        
+      ],
+      group: ['pme_employe'],
+      raw: true,
+  })
+    let nb_employe_trained = employe_trained.length
+    var employe_present = await reportserviceInstance.find(
+      {pmr_start_date:{[Op.between]: [start_date, end_date]},pmr_present:true},
+      )
+    var employe_planned = await reportserviceInstance.find(
+        {pmr_start_date:{[Op.between]: [start_date, end_date]}},
+        )
+  
+    let nb_employe_present = parseFloat((employe_present.length * 100/employe_planned.length).toFixed(2))
+    let nb_satisfied = 0
+    let nb_tested = 0
+    
+      
+    var employe_satisfied = await evalserviceInstance.find(
+      {mph_rsult:{[Op.gte]: '3'}},
+     )
+     var employe_tested = await evalserviceInstance.find(
+      {},
+     )
+     nb_satisfied = employe_satisfied.length
+     nb_tested = employe_tested.length
+     
+    nb_satisfied = parseFloat((nb_satisfied * 100/nb_tested).toFixed(2))
+    var all_session = await affectserviceInstance.find(
+      {pme_start_date:{[Op.between]: [start_date, end_date]}
+      
+  })
+  let training_cost = 0
+    let training_time = 0
+    
+  for (let session of all_session)
+  {var items = await itemServiceInstance.find({pt_part:session.pme_inst});
+for(let item of items){training_cost = training_cost + item.pt_price
+  training_time = training_time + item.pt_shelflife
+    
+}
+
+training_cost = parseFloat((training_cost/all_session.length).toFixed(2))
+training_time = parseFloat((training_time/all_session.length).toFixed(2))
+
+}
+let session_by_vendor = 0
+var vendors = await addressServiceInstance.find({ad_type:'Trainor'});
+for (let vendor of vendors){
+  var vendor_session = await affectserviceInstance.find(
+    {pme_start_date:{[Op.between]: [start_date, end_date]},
+    pme_site:vendor.ad_addr
+})
+  session_by_vendor = vendor_session.length
+  console.log(session_by_vendor)
+  sucess_rate_data.push({
+    role_code: vendor.ad_addr,
+    nb_clients: session_by_vendor,
+   
+  });
+}
 
     return res.status(200).json({
+      nb_session: nb_session,
+      nb_employe_trained:nb_employe_trained,
+      nb_employe_present:nb_employe_present,
+      nb_satisfied:nb_satisfied,
+      training_cost:training_cost,
+      training_time:training_time,
       visit_rate: visit_rate,
       visit_rate_data: visit_rate_data,
       success_rate_visit: suc_visit_rate,

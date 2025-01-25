@@ -45,7 +45,18 @@ export default class affectreportService {
             throw e
         }
     }
-
+    public async findspecial(query: any): Promise<any> {
+        try {
+            const reports = await this.addReportModel.findAll(query,
+                
+            )
+            this.logger.silly("find All reports mstr")
+            return reports
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const report = await this.addReportModel.update(data, {

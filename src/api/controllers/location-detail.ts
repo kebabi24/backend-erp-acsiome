@@ -296,7 +296,75 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findQtyOh = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
 
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const itemServiceInstance = Container.get(ItemService);
+    const locationDetails = await locationDetailServiceInstance.findfifolot( {
+     where: { ...req.body,ld_qty_oh : {[Op.gt]: 0}, ld_domain:user_domain},
+    
+      attributes: [
+        'ld_part',
+        'ld_site',
+        
+        
+        [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'qty'],
+      ],
+      group: ['ld_part', 'ld_site'],
+      
+      raw: true,
+    
+    });
+  //  console.log("here",locationDetails)
+    const result = [];
+    
+    
+    console.log(req.body)
+    for (const det of locationDetails) {
+      
+          const result_body = {
+            
+            ld_part: det.ld_part,
+            
+            ld_qty_oh: det.qty,
+           
+            ld_site: det.ld_site,
+            // ld_ref: det.ld_ref,
+          };
+          result.push(result_body);
+          
+        
+          
+        }
+        if(locationDetails.length == 0){
+          const result_body = {
+            
+            ld_part: req.body.ld_part,
+            
+            ld_qty_oh: 0,
+           
+            ld_site: req.body.ld_site,
+            // ld_ref: det.ld_ref,
+          };
+          result.push(result_body);
+          
+        }
+      
+    
+
+    //console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByFifoLot = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all locationDetail endpoint');
@@ -670,4 +738,5 @@ export default {
   findByFifoLot,
   findByWeek,
   findStatusInstance,
+  findQtyOh,
 };

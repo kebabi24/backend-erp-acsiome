@@ -93,6 +93,31 @@ export default class QualityControl {
       throw e;
     }
   }
+  public async find(query: any): Promise<any> {
+    try {
+        const reports = await this.specificationTestHistoryModel.findAll({
+            where: query,
+            
+        })
+        this.logger.silly("find All reports mstr")
+        return reports
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
+  public async findTestHistory(): Promise<any> {
+    try {
+      const specifications = await this.specificationTestHistoryModel.findAll({
+        // attributes: ['id','mph_lot','mph_mch','mph_part','mph_routing','mph_op',],
+      });
+      this.logger.silly('find categories ');
+      return specifications;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
   public async getSpecificationsDetails(query: any): Promise<any> {
     try {

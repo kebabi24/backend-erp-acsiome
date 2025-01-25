@@ -15,6 +15,8 @@ export default (app: Router) => {
   route.post('/createwopos', controller.createPosWorkOrder);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
+  route.post('/findprogram', controller.findByPrograms);
+  route.post('/findDistinct', controller.findByDistinct);
   route.post('/findbrrep', controller.findByRPBR);
   route.post('/findexrep', controller.findByEXBR);
   route.post('/findbrrecap', controller.findByRecapBR);

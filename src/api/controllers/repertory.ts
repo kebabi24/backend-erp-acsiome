@@ -3,7 +3,7 @@ import RepertoryDetailService from "../../services/repertory-detail"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import AddressService from "../../services/address"
-
+import EmployeService from '../../services/employe';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -11,12 +11,30 @@ const{user_domain} = req.headers
     logger.debug("Calling Create site endpoint")
     try {
         const repertoryServiceInstance = Container.get(RepertoryService)
-
+        const employeServiceInstance = Container.get(EmployeService);
         const {addr, repDetails} = req.body
         await repertoryServiceInstance.delete({rep_code: addr,rep_domain:user_domain})
         for (let entry of repDetails) {
-            entry = { ...entry, rep_domain:user_domain,rep_code: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryServiceInstance.create(entry)
+            if(entry.rep_type == 'Student')
+            {  
+                let count = 0;
+                 const employecount = await employeServiceInstance.find({ emp_domain: user_domain });
+            if(employecount.length == 0){count = 1}
+            else{count = employecount.length + 1}
+                const employe = await employeServiceInstance.create({
+                    emp_addr:'E' + String('000'+ String(count)).slice(-3) ,
+                    emp_fname:entry.rep_contact,
+                    emp_lname:'',
+                    emp_job:entry.chr01,
+                    emp_level:entry.rep_post,
+                    emp_site:entry.chr03,
+                    emp_domain: user_domain,
+                    created_by: user_code,
+                    last_modified_by: user_code,
+                  });
+            }
         }
        // const repertory = await repertoryServiceInstance.create({...req.body, rep_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
@@ -38,14 +56,14 @@ const{user_domain} = req.headers
         const repertoryDetailServiceInstance = Container.get(RepertoryDetailService)
 
         const {addr, repDetails,jobDetails} = req.body
-        await repertoryServiceInstance.delete({rep_code: addr,rep_domain:user_domain})
+        await repertoryServiceInstance.delete({rep_domain:user_domain})
         for (let entry of repDetails) {
-            entry = { ...entry, rep_domain:user_domain,rep_code: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryServiceInstance.create(entry)
         }
-        await repertoryDetailServiceInstance.delete({repd_code: addr,repd_domain:user_domain})
+        await repertoryDetailServiceInstance.delete({repd_domain:user_domain})
         for (let entry of jobDetails) {
-            entry = { ...entry, repd_domain:user_domain,repd_code: addr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            entry = { ...entry, repd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryDetailServiceInstance.create(entry)
         }
        // const repertory = await repertoryServiceInstance.create({...req.body, rep_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
@@ -100,7 +118,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     
     try {
-        console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+        console.log(req.body)
         const repertoryServiceInstance = Container.get(RepertoryService)
         const repertorys = await repertoryServiceInstance.find({...req.body,rep_domain: user_domain})
         return res

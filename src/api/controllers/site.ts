@@ -1,8 +1,8 @@
 import SiteService from '../../services/site';
 import ItemService from '../../services/item';
 import CostSimulationService from '../../services/cost-simulation';
-import ConfigService from '../../services/config';
 
+import ConfigService from '../../services/config';
 import crmService from '../../services/crm';
 import SequenceService from '../../services/sequence';
 
@@ -16,11 +16,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create site endpoint');
   try {
     const siteServiceInstance = Container.get(SiteService);
-    const crmServiceInstance = Container.get(crmService);
-    const sequenceServiceInstance = Container.get(SequenceService);
+    
+    
     const itemServiceInstance = Container.get(ItemService);
     const costSimulationServiceInstance = Container.get(CostSimulationService);
-    const configServiceInstance = Container.get(ConfigService);
+    
 
     const site = await siteServiceInstance.create({
       ...req.body,
@@ -32,6 +32,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     });
 
     // ADD TO AGENDA
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const configServiceInstance = Container.get(ConfigService);
+    const crmServiceInstance = Container.get(crmService);
     const config = await configServiceInstance.findOne({ cfg_crm: true });
     if (config) {
       const param = await crmServiceInstance.getParamFilterd('new_shop');

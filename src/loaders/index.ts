@@ -1121,14 +1121,14 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-//  await sequelizeConnection.sync().catch(err => { console.log(err)});
+  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {
   //     console.log('database updated');
   //   })
   //   .catch(err => {
-      
+  //     console.log('database NOT updated');
   //   });
 
   Logger.info('✌️ SYNC ALL MODELS');

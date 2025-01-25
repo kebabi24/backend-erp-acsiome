@@ -1,5 +1,8 @@
 import TrainingcalenderService from '../../services/trainingcalender';
 
+import ConfigService from '../../services/config';
+import crmService from '../../services/crm';
+import SequenceService from '../../services/sequence';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -42,6 +45,25 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
             });
+
+            // ADD TO AGENDA
+            const sequenceServiceInstance = Container.get(SequenceService);
+            const configServiceInstance = Container.get(ConfigService);
+            const crmServiceInstance = Container.get(crmService);
+            const config = await configServiceInstance.findOne({ cfg_crm: true });
+            if (config) {
+                const param = await crmServiceInstance.getParamFilterd('new_shop');
+                const paramDetails = await crmServiceInstance.getParamDetails({
+                  param_code: param.param_code,
+                  domain: user_domain,
+                });
+                const elements = await crmServiceInstance.getPopulationElements(paramDetails.population_code);
+                for (const element of elements) {
+                  const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
+                  const addLine = await crmServiceInstance.createAgendaLine(element.code_element, param, paramDetails, sequence);
+                  
+                }
+            }
           } else {
             const te = await trainingcalenderServiceInstance.update({
                 ...entry,

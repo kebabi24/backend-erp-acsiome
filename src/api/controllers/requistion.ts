@@ -1,14 +1,17 @@
 import RequisitionService from "../../services/requisition"
 import RequisitionDetailService from "../../services/requisition-detail"
 import SequenceService from "../../services/sequence"
+import ItemService from "../../services/item"
+import employeService from "../../services/employe"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { Op } from 'sequelize';
-
+// const nodemailer = require('nodemailer');
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
+    const{user_site} = req.headers
 
     logger.debug("Calling Create sequence endpoint")
     try {
@@ -17,9 +20,50 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             RequisitionDetailService
         )
         const { requisition, requisitionDetail } = req.body
+       
+         
+          
         const requi = await requisitionServiceInstance.create({...requisition, rqm_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        // send mail with defined transport object
+        // let mailto = await EmployeServiceInstance.findOne({emp_addr:entry.pme_employe})
+        // let mailobject = await itemServiceInstance.findOne({pt_part:affectEmp.pme_inst})
+        // let testAccount = await nodemailer.createTestAccount();
+        // let transporter = nodemailer.createTransport({
+        //   host: 'SMTP.TITAN.EMAIL',
+        //    port: 465,
+        //    secure: true, // true for 465, false for other ports
+        //   auth: {
+        //     user: 'abdelhak.benbouzid@acsiome.tech', // generated ethereal user
+        //     pass: 'A@123456789', // generated ethereal password
+        //   },
+        //   tls: { rejectUnauthorized: false },
+        // });
+        // verify connection configuration
+        // transporter.verify(function(error, success) {
+        //   if (error) {
+          
+        //   } else {
+        //     console.log('Server is ready to take our messages');
+        //   }
+        // });
+        // let info = await transporter.sendMail({
+        //   from: 'abdelhak.benbouzid@acsiome.tech', // sender address
+        //   to: 'mohamed.nourry@palmaryfood.com', // list of receivers
+        //   subject: 'Demande de formation !', // Subject line
+        //   text: 'Demande de formation !', // plain text body
+        //   html:
+        //     'Bonjour ' +
+            
+        //     ', une demande de formation ' + requi.rqm_nbr +', a été crée, veuillez procéder au traitment de celle-ci '  +
+        //     '<b>' +
+            
+        //     '<b>', // html body
+        // });
         for (let entry of requisitionDetail) {
-            entry = { ...entry, rqd_domain: user_domain,rqd_nbr: requi.rqm_nbr }
+            let site:any;
+            console.log(entry.rqd_part,entry.rqd_vpart)
+            if(user_site == '*'){site = 'ECOLE'}else{site = user_site}
+            entry = { ...entry, rqd_site:site,rqd_domain: user_domain,rqd_nbr: requi.rqm_nbr }
             await requisitionDetailServiceInstance.create(entry)
         }
         return res
@@ -319,11 +363,11 @@ const updatedRQD = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
-
+const EmployeServiceInstance = Container.get(employeService)
     logger.debug("Calling update one  inventoryStatus endpoint")
     try {
         const requisitionServiceInstance = Container.get(RequisitionService)
-        
+        const EmployeServiceInstance = Container.get(employeService)
         const requisitionDetailServiceInstance = Container.get(
             RequisitionDetailService
         )
@@ -333,8 +377,45 @@ const updatedRQD = async (req: Request, res: Response, next: NextFunction) => {
        //     entry = { ...entry, rqd_domain: user_domain,rqd_nbr: requisition.rqm_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await requisitionDetailServiceInstance.update({
                 ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:id})
+                
                 const reqd = await requisitionDetailServiceInstance.findOneS({ id :id}) 
                 console.log(reqd)
+                // send mail with defined transport object
+        
+        // let mailobject = await itemServiceInstance.findOne({pt_part:affectEmp.pme_inst})
+        // let testAccount = await nodemailer.createTestAccount();
+        // let transporter = nodemailer.createTransport({
+        //   host: 'SMTP.TITAN.EMAIL',
+        //    port: 465,
+        //    secure: true, // true for 465, false for other ports
+        //   auth: {
+        //     user: 'abdelhak.benbouzid@acsiome.tech', // generated ethereal user
+        //     pass: 'A@123456789', // generated ethereal password
+        //   },
+        //   tls: { rejectUnauthorized: false },
+        // });
+        // verify connection configuration
+        // transporter.verify(function(error, success) {
+        //   if (error) {
+          
+        //   } else {
+        //     console.log('Server is ready to take our messages');
+        //   }
+        // });
+        //  let mailto = await EmployeServiceInstance.findOne({emp_addr:reqd.rqd_rqby_userid})
+        // let info = await transporter.sendMail({
+        //   from: 'abdelhak.benbouzid@acsiome.tech', // sender address
+        //   to: mailto, // list of receivers
+        //   subject: 'Demande de formation !', // Subject line
+        //   text: 'Demande de formation !', // plain text body
+        //   html:
+        //     'Bonjour ' +
+            
+        //     ', votre demande de formation ' + reqd.rqd_nbr +', a été traité avec un statut'  + reqd.rqd_aprv_stat +
+        //     '<b>' +
+            
+        //     '<b>', // html body
+        // });
                 const reqdet = await requisitionDetailServiceInstance.find({ rqd_nbr : reqd.rqd_nbr ,rqd_aprv_stat: {[Op.ne]: "3"},rqd_domain: user_domain})
                 if(reqdet.length == 0) {
 
@@ -360,8 +441,10 @@ const findAllAppDet = async (req: Request, res: Response, next: NextFunction) =>
     logger.debug("Calling find all code endpoint")
     const{user_code} = req.headers 
     const{user_domain} = req.headers
+    const{user_site} = req.headers
     try {
-       
+        const ItemServiceInstance = Container.get(ItemService)
+        const EmployeServiceInstance = Container.get(employeService)
         const sequenceServiceInstance = Container.get(SequenceService)
         const requisitionServiceInstance = Container.get(RequisitionService)
         const requisitionDetailServiceInstance = Container.get(
@@ -389,7 +472,7 @@ const findAllAppDet = async (req: Request, res: Response, next: NextFunction) =>
      for (let requisition of requisitions) {
         req.push(requisition.rqm_nbr)
      }
-     console.log(req)
+     
        
           //  console.log(req)
             const details = await requisitionDetailServiceInstance.findDet({
@@ -398,10 +481,44 @@ const findAllAppDet = async (req: Request, res: Response, next: NextFunction) =>
                rqd_aprv_stat:  {[Op.not]: "3"}
             })
        
-        console.log(details)
+        
+        let result = []
+        for(let det of details)
+        {
+            const part = await ItemServiceInstance.find({pt_part:det.rqd_part,pt_domain:user_domain})
+            const emp = await EmployeServiceInstance.find({emp_addr:det.rqd_rqby_userid,emp_domain:user_domain})
+            
+            if(emp.length != 0)
+            {
+                if(part.length != 0)
+                {
+                    
+                    if(det.rqd_site == user_site ||user_site == '*')
+                    {    result.push({id:det.id,
+            rqd_nbr:det.rqd_nbr,
+            rqd_need_date:det.rqd_need_date,
+            rqd_expire:det.rqd_expire,
+            chr02:det.chr02,
+            rqd_part:det.rqd_part,
+            rqd_desc:det.rqd_desc,
+            rqd_insp_rqd:det.rqd_insp_rqd,
+            pt_phantom:part[0].pt_phantom,
+            emp_loyalty:emp[0].emp_loyalty,
+            emp_last_date:emp[0].emp_last_date,
+            emp_conf_date:emp[0].emp_conf_date,
+            rqd_aprv_stat:det.rqd_aprv_stat,
+            rqd_rqby_userid:det.rqd_rqby_userid,
+            chr01:det.chr01,
+            chr03:det.chr03,
+                        })
+                    }
+    }
+            }
+        
+        }
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: details })
+            .json({ message: "fetched succesfully", data: result })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

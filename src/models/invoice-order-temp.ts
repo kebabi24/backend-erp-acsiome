@@ -39,10 +39,7 @@ const InvoiceOrderTemp = sequelize.define(
 	
 		ith_category: {
 			type: Sequelize.STRING,
-			references: {
-			  model: 'seq_mstr',
-			  key: 'seq_seq',
-			},
+			
           },
         ith_nbr: Sequelize.STRING,
         ith_ship: Sequelize.STRING,
@@ -228,5 +225,5 @@ const InvoiceOrderTemp = sequelize.define(
 	const seq = await Sequence.findOne({ where: { seq_seq: instance.ith_category, seq_type: "IV"  } });
 	instance.ith_inv_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
 	await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: {seq_type: "IV", seq_seq: instance.ith_category } });
-	});
+	 });
 export default InvoiceOrderTemp;

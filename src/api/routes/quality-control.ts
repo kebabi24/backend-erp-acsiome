@@ -8,6 +8,7 @@ export default (app: Router) => {
 
   route.post('/createSpecification', controller.createStandardSpecification);
   route.post('/createTestsHistory', controller.createTestsHistory);
+  route.post('/GetTestsHistory', controller.getTestsHistory);
   route.post('/createTestsHistoryUpdateStatus', controller.createTestsHistoryUpdatePStatus);
   route.get('/findOneSpecificationByCode/:specification_code', controller.findOneSpecificationByCode);
   route.get('/findSpecificationWithDetails/:specification_code', controller.findOneSpecificationWithDetails);

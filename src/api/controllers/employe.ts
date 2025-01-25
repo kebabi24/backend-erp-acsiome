@@ -8,6 +8,7 @@ import EmployeTimeService from '../../services/employe-time';
 import EmployeTrainingService from '../../services/employe-training';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
+import RequisitionDetailService from "../../services/requisition-detail"
 
 import { Op } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -52,17 +53,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       };
       await employeJobServiceInstance.create(entry);
     }
-    // for (let entry of employeTrDetail) {
-    //   entry = {
-    //     ...entry,
-    //     empf_domain: user_domain,
-    //     empf_code: Employe.emp_addr,
-    //     created_by: user_code,
-    //     created_ip_adr: req.headers.origin,
-    //     last_modified_by: user_code,
-    //   };
-    //   await employeTrainingServiceInstance.create(entry);
-    // }
+    for (let entry of employeTrDetail) {
+      entry = {
+        ...entry,
+        empf_domain: user_domain,
+        empf_code: Employe.emp_addr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+      };
+      await employeTrainingServiceInstance.create(entry);
+    }
     return res.status(201).json({ message: 'created succesfully', data: employe });
   } catch (e) {
     //#
@@ -190,10 +191,54 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all code endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
+  const { user_site } = req.headers;
   try {
     const employeServiceInstance = Container.get(EmployeService);
-    const employe = await employeServiceInstance.find({ ...req.body, emp_domain: user_domain });
+    if(user_site == '*'){var employe = await employeServiceInstance.find({ ...req.body, emp_domain: user_domain });}
+    else{var employe = await employeServiceInstance.find({ ...req.body,emp_site:user_site, emp_domain: user_domain });}
     return res.status(200).json({ message: 'fetched succesfully', data: employe });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByReq = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeServiceInstance = Container.get(EmployeService);
+    const requisitionDetailServiceInstance = Container.get(
+      RequisitionDetailService
+  )
+    const employe = await employeServiceInstance.find({ emp_domain: user_domain });
+    let result = [];
+    let i = 1;
+    for (let emp of employe){
+      console.log(emp.emp_addr,req.body.training)
+      const details = await requisitionDetailServiceInstance.find({
+        rqd_domain: user_domain,
+        rqd_part: req.body.training,
+        rqd_rqby_userid:emp.emp_addr,
+        rqd_status:null,
+        rqd_aprv_stat:'3'
+    })
+    
+    if(details.length != 0){
+      console.log(details.rqd_rqby_userid)
+      result.push({
+        id: i,
+        emp_addr: emp.emp_addr,
+        emp_fname: emp.emp_fname,
+        emp_lname: emp.emp_lname,
+        emp_job:emp.emp_job,
+        emp_level:emp.emp_level
+      });
+      i = i + 1;
+    }
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -407,19 +452,19 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       };
       await employeScoreServiceInstance.create(entry);
     }
-    // await employeTrainingServiceInstance.delete({ empf_code: Employe.emp_addr, empf_domain: user_domain });
-    // for (let entry of employeTrDetail) {
-    //   entry = {
-    //     ...entry,
-    //     empf_domain: user_domain,
-    //     empf_code: Employe.emp_addr,
-    //     created_by: user_code,
-    //     created_ip_adr: req.headers.origin,
-    //     last_modified_by: user_code,
-    //     last_modified_ip_adr: req.headers.origin,
-    //   };
-    //   await employeTrainingServiceInstance.create(entry);
-    // }
+     await employeTrainingServiceInstance.delete({ empf_code: Employe.emp_addr, empf_domain: user_domain });
+    for (let entry of employeTrDetail) {
+      entry = {
+        ...entry,
+        empf_domain: user_domain,
+        empf_code: Employe.emp_addr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await employeTrainingServiceInstance.create(entry);
+    }
 
     return res.status(200).json({ message: 'fetched succesfully', data: employe });
   } catch (e) {
@@ -553,6 +598,7 @@ export default {
   findOne,
   findAll,
   findBy,
+  findByReq,
   findByTime,
   findByTimeproject,
   findByDet,

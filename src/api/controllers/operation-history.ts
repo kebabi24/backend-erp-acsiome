@@ -33,7 +33,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         if (wo.wo_line = null){operation = 0}
 
         const ro = await workroutingServiceInstance.findOne({ro_routing : wo.wo_routing,ro_op:operation,ro_domain:user_domain})
-
+       
         await operationHistoryServiceInstance.create({
           ...item,
           ...op,
@@ -52,6 +52,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
       for (const down of dwndetail) {
+        const op1 = await workroutingServiceInstance.findOne({op_wkctr : op.op_routing,op_mch:op.op_mch,op_date:op.op_date,op_type:'down',op_domain:user_domain})
+
         var elapsed = Math.abs(new Date(down.fin_cause).getTime() - new Date(down.debut_cause).getTime()) / (1000 * 60)
         // console.log('elapsed',elapsed)
         // const hms = down.fin_cause;
@@ -60,19 +62,36 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         // const hmsd = down.debut_cause;
         // const [hoursd, minutesd] = hmsd.split(':');
         // const totalSecondsd = Number(+hoursd) * 60 * 60 + Number(+minutesd) * 60 ;
-        await operationHistoryServiceInstance.create({
-          ...down,
-          ...op,
-          chr01:down.debut_cause,
-          chr02:down.fin_cause,
-          op_domain:user_domain,
-          op_type: "down", 
-          op_act_run : elapsed,
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-        });
+        if(op1){
+            await operationHistoryServiceInstance.update({
+                ...down,
+                ...op,
+                chr01:down.debut_cause,
+                chr02:down.fin_cause,
+                op_domain:user_domain,
+                op_type: "down", 
+                op_act_run : elapsed,
+                created_by: user_code,
+                created_ip_adr: req.headers.origin,
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+                },{id:op1.id});
+        }
+        else{   
+                await operationHistoryServiceInstance.create({
+                ...down,
+                ...op,
+                chr01:down.debut_cause,
+                chr02:down.fin_cause,
+                op_domain:user_domain,
+                op_type: "down", 
+                op_act_run : elapsed,
+                created_by: user_code,
+                created_ip_adr: req.headers.origin,
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+                });
+            }
         const wos = await workOrderServiceInstance.find({ wo_routing:op.op_mch,wo_rel_date:{[Op.gte]: op.op_tran_date},wo_domain: user_domain })
         for (let wo of wos)
         {
@@ -199,6 +218,32 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         const operationHistoryServiceInstance = Container.get(OperationHistoryService)
         const ops = await operationHistoryServiceInstance.find({...req.body,op_domain:user_domain})
         console.log(ops)
+        let result = []
+        let obj:any;
+        let i = 0
+        for (let op of ops)
+        {obj ={id:i,
+            op_line:i,
+            op_wkctr:op.op_wkctr,
+            op_mch:op.op_mch,
+            op_rsn_down:op.op_rsn_down,
+            debut_cause:op.chr01,
+            chr01:op.debut_cause,
+            fin_cause:op.chr02,
+            chr02:op.chr02,
+            op_domain:user_domain,
+            op_type: "down", 
+            op_act_run : op.op_act_run,
+            op_comment:op.op_comment,
+            op_site:op.op_site,
+            op_shift:op.op_shift,
+            op_dept:op.op_dept,
+            op_date:op.op_date,
+            
+
+        }
+    result.push(obj) 
+    i = i +1}
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ops })

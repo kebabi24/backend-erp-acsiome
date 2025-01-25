@@ -45,7 +45,16 @@ export default class affectEmployeService {
             throw e
         }
     }
-
+    public async findspecial(query: any): Promise<any> {
+        try {
+            const employes = await this.affectEmployeModel.findAll(query)
+            this.logger.silly("find All employes mstr")
+            return employes
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const employe = await this.affectEmployeModel.update(data, {

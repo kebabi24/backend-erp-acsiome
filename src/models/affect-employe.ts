@@ -29,7 +29,7 @@ const AffectEmploye = sequelize.define(
         pme_internal: Sequelize.BOOLEAN,
         pme_employe: Sequelize.STRING,
         pme_vend: Sequelize.STRING,
-        pme_duration:Sequelize.NUMBER,
+        pme_duration:Sequelize.INTEGER,
         pme_domain: {
             type: Sequelize.STRING,
             defaultValue: "acsiome",

@@ -1,5 +1,6 @@
 import InvoiceOrderTempService from '../../services/invoice-order-temp';
 import InvoiceOrderTempDetailService from '../../services/invoice-order-temp-detail';
+import AccountShiperService from "../../services/account-shiper"
 import InvoiceOrderService from '../../services/invoice-order';
 import InvoiceOrderDetailService from '../../services/invoice-order-detail';
 import AccountReceivableService from '../../services/account-receivable';
@@ -10,11 +11,13 @@ import PayMethDetailService from '../../services/pay-meth-detail';
 import SaleShiperService from '../../services/sale-shiper';
 import GeneralLedgerService from '../../services/general-ledger';
 import AddressService from '../../services/address';
+import codeService from '../../services/code';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { INTEGER, QueryTypes } from 'sequelize';
 import moment from 'moment';
 import { generatePdf } from '../../reporting/generator';
+import InvoiceOrder from '../../models/invoice-order';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -32,18 +35,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
 
     const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
-    const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body;
+    const { invoiceOrder, invoiceOrderDetail } = req.body;
 
     const ih = await invoiceOrderServiceInstance.create({
-      ...invoiceOrderTemp,
+      ...invoiceOrder,
       ith_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-
-    for (let entry of invoiceOrderTempDetail) {
+console.log(invoiceOrderDetail)
+    for (let entry of invoiceOrderDetail) {
       entry = {
         ...entry,
         itdh_domain: user_domain,
@@ -177,7 +180,9 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
     const generalLedgerServiceInstance = Container.get(GeneralLedgerService);
     const accountReceivableServiceInstance = Container.get(AccountReceivableService);
     const { invoiceOrder, invoiceOrderDetail, gldetail } = req.body;
-
+    const accountShiperServiceInstance = Container.get(AccountShiperService)
+    const codeServiceInstance = Container.get(codeService)
+    
     const ih = await invoiceOrderServiceInstance.create({
       ...invoiceOrder,
       ih_domain: user_domain,
@@ -186,7 +191,28 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-
+    const PayMeth = await payMethServiceInstance.findOne({
+      ct_domain: user_domain,
+      ct_code: invoiceOrder.ih_cr_terms,
+    });
+    if (PayMeth){
+      const details = await payMethDetailServiceInstance.find({
+        ctd_domain: user_domain,
+        ctd_code: PayMeth.ct_code,
+      });
+      let i = 0;
+      for (let det of details) {
+        
+        i = i + 1;
+        const effdate = new Date(invoiceOrder.ih_inv_date);
+        effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
+        const accountShiper = await accountShiperServiceInstance.create({as_nbr: ih.ih_inv_nbr + '-' + i,as_ship: ih.ih_inv_nbr,as_bill:ih.ih_bill,as_cust:ih.ih_cust,as_type:'I',as_so_nbr:ih.ih_nbr,as_effdate:ih.ih_inv_date,as_due_date:effdate,as_cr_terms:ih.ih_cr_terms,as_amt:(Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt))) / Number(det.ctd_code),as_curr:ih.ih_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        
+    } 
+  }
+    else{const accountShiper = await accountShiperServiceInstance.create({as_nbr: ih.ih_inv_nbr,as_bill:ih.ih_bill,as_cust:ih.ih_cust,as_type:'I',as_so_nbr:ih.ih_nbr,as_effdate:ih.ih_inv_date,as_cr_terms:ih.ih_cr_terms,as_amt:Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)),as_ship:ih.ih_inv_nbr,as_curr:ih.ih_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+  }
+    
     for (let entry of invoiceOrderDetail) {
       entry = {
         ...entry,
@@ -200,11 +226,8 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
       await invoiceOrderDetailServiceInstance.create(entry);
     }
 
-    const PayMeth = await payMethServiceInstance.findOne({
-      ct_domain: user_domain,
-      ct_code: invoiceOrder.ih_cr_terms,
-    });
-
+    
+console.log(PayMeth)
     if (PayMeth) {
       const details = await payMethDetailServiceInstance.find({
         ctd_domain: user_domain,
@@ -214,7 +237,7 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
       for (let det of details) {
         const effdate = new Date(invoiceOrder.ih_inv_date);
         effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
-
+console.log('ctd',invoiceOrder.ih_amt)
         await accountReceivableServiceInstance.create({
           ar_domain: user_domain,
           ar_nbr: ih.ih_inv_nbr,
@@ -233,17 +256,17 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
           ar_ex_rate: invoiceOrder.ih_ex_rate,
           ar_ex_rate2: invoiceOrder.ih_ex_rate2,
           ar_amt:
-            ((Number(invoiceOrder.ih_tot_amt)) * Number(det.ctd_pct)) / 100,
+            (Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) * Number(det.ctd_pct)) / 100,
           ar_base_amt:
-            ((((Number(invoiceOrder.ih_tot_amt)) *
-              Number(invoiceOrder.ar_ex_rate2)) /
-              Number(invoiceOrder.ar_ex_rate)) *
+            (((Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) *
+              Number(invoiceOrder.ih_ex_rate2)) /
+              Number(invoiceOrder.ih_ex_rate)) *
               Number(det.ctd_pct)) / 100,
           created_by: user_code,
           last_modified_by: user_code,
         });
       }
-    } else {
+    } else {console.log('ct', invoiceOrder.ih_amt)
       await accountReceivableServiceInstance.create({
         ar_domain: user_domain,
         ar_nbr: ih.ih_inv_nbr,
@@ -261,11 +284,11 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
         ar_curr: invoiceOrder.ih_curr,
         ar_ex_rate: invoiceOrder.ih_ex_rate,
         ar_ex_rate2: invoiceOrder.ih_ex_rate2,
-        ar_amt: Number(invoiceOrder.ih_tot_amt),
+        ar_amt: Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)),
         ar_base_amt:
-          ((Number(invoiceOrder.ih_tot_amt)) *
-            Number(invoiceOrder.ar_ex_rate2)) /
-          Number(invoiceOrder.ar_ex_rate),
+          (Number(Number(invoiceOrder.ih_amt) + Number(invoiceOrder.ih_tax_amt) + Number(invoiceOrder.ih_trl1_amt)) *
+            Number(invoiceOrder.ih_ex_rate2)) /
+          Number(invoiceOrder.ih_ex_rate),
         created_by: user_code,
         last_modified_by: user_code,
       });

@@ -115,7 +115,7 @@ const { Op } = require('sequelize')
  
         // CREATE HEADER
         const header = await crmServiceInstance.createParamHedear(paramHeaderData)
-
+console.log('header',header)
         // CREATE DETAILS 
         const param_code = paramHeaderData.param_code
         const category = paramHeaderData.category
@@ -124,7 +124,7 @@ const { Op } = require('sequelize')
             detail['category'] = category
         });
         const details = await crmServiceInstance.createParamDetails(paramDetails)
-        
+        console.log('detail',details)
         return res
             .status(200)
             .json({ message: "header created ", data: header  })

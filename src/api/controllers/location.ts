@@ -69,10 +69,15 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all location endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
+  const{user_site} = req.headers
+
 
   try {
+    
     const locationServiceInstance = Container.get(LocationService);
-    const locations = await locationServiceInstance.find({ loc_domain: user_domain });
+    var locations:any;
+    if(user_site == '*'){ locations = await locationServiceInstance.find({ loc_domain: user_domain });}
+    else{ locations = await locationServiceInstance.find({ loc_site:user_site,loc_domain: user_domain });}
     return res.status(200).json({ message: 'fetched succesfully', data: locations });
   } catch (e) {
     logger.error('🔥 error: %o', e);

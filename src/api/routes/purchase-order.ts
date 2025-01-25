@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import controller from '../controllers/purchase-order';
+const multer = require('multer');
+const upload = multer({ dest: './uploads/' });
 const route = Router();
 
 export default (app: Router) => {
@@ -19,7 +21,7 @@ export default (app: Router) => {
   route.post('/findproviderca', controller.getProviderCA);
   route.post('/findprovideractivity', controller.getProviderActivity);
   route.post('/findproviderbalance', controller.getProviderBalance);
-  route.put('/:id', controller.update);
+  route.put('/:id', upload.single('file'),controller.update);
   route.post('/findAll', controller.findByAll);
   route.post('/createposunp', controller.createPosUnp);
   route.post('/createposunpp', controller.createPosUnpp);

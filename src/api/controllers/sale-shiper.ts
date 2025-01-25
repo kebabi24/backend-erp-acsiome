@@ -162,6 +162,81 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_ip_adr: req.headers.origin,
           });
       }
+      else
+      {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_domain: user_domain,
+          ld_part: remain.psh_part,
+          ld_lot: remain.psh_serial,
+          ld_site: remain.psh_site,
+          ld_loc: remain.psh_loc,
+        });
+        if (ld)
+          {await locationDetailServiceInstance.update(
+            {
+              ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
+              ld_expire: remain.psh_expire,
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id }
+            
+          );
+          await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
+            ld_part: remain.psh_part,
+            ld_date: new Date(),
+            ld_lot: remain.psh_serial,
+            ld_site: remain.psh_site,
+            ld_loc: remain.psh_loc,
+            ld_qty_oh: (Number(remain.psh_qty_ship) * Number(remain.psh_um_conv)),
+            ld_ref:req.body.ps.psh_cust,
+            ld_expire: remain.psh_expire,
+            ld_status: remain.psh_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:req.body.ps.psh_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+        else
+        {
+          await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
+            ld_part: remain.psh_part,
+            ld_date: new Date(),
+            ld_lot: remain.psh_serial,
+            ld_site: remain.psh_site,
+            ld_loc: remain.psh_loc,
+            ld_qty_oh: (Number(remain.psh_qty_ship) * Number(remain.psh_um_conv)),
+            ld_ref:req.body.ps.psh_cust,
+            ld_expire: remain.psh_expire,
+            ld_status: remain.psh_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:req.body.ps.psh_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+      }
     }
 
     //const {as, pshnbr} = req.body; as is undefined

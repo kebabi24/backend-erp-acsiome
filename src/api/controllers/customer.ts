@@ -192,6 +192,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   
   try {
+    console.log(req.body)
     const customerServiceInstance = Container.get(CustomerService);
     const customer = await customerServiceInstance.findOne({ ...req.body , cm_domain:user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: customer });

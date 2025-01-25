@@ -130,7 +130,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
       console.log(remain.sod_part, remain.sod_site);
 
       console.log(remain.qty_oh);
-      console.log(sctdet.sct_cst_tot);
+      console.log(sctdet);
       await inventoryTransactionServiceInstance.create({
         tr_domain: user_domain,
         tr_status: remain.sod_status,
@@ -226,6 +226,79 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           });
+      }
+      else {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_domain: user_domain,
+          ld_part: remain.sod_part,
+          ld_lot: remain.sod_serial,
+          ld_site: remain.sod_site,
+          ld_loc: remain.sod_loc,
+        });
+        if (ld)
+        {
+          await locationDetailServiceInstance.update(
+            {
+              ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.sod_qty_ord) * Number(remain.sod_um_conv),
+              ld_expire: remain.sod_expire,
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id },
+          );
+          await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
+            ld_part: remain.sod_part,
+            ld_date: new Date(),
+            ld_lot: remain.sod_serial,
+            ld_site: remain.sod_site,
+            ld_loc: remain.sod_loc,
+            ld_qty_oh: (Number(remain.sod_qty_ord) * Number(remain.sod_um_conv)),
+            ld_ref :so.so_cust,
+            ld_expire: remain.sod_expire,
+            ld_status: remain.sod_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:so.so_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+        else
+         { await locationDetailServiceInstance.create({
+            ld_domain: user_domain,
+            ld_part: remain.sod_part,
+            ld_date: new Date(),
+            ld_lot: remain.sod_serial,
+            ld_site: remain.sod_site,
+            ld_loc: remain.sod_loc,
+            ld_qty_oh: -(Number(remain.sod_qty_ord) * Number(remain.sod_um_conv)),
+            ld_ref:so.so_cust,
+            ld_expire: remain.sod_expire,
+            ld_status: remain.sod_status,
+            chr01:pt.pt_draw,
+          chr02:pt.pt_break_cat,
+          chr03:pt.pt_group,
+          int01:pt.int01,
+          int02:pt.int02,
+          chr04:so.so_cust,
+            chr05:pt.pt_prod_line,
+            ld__chr02:pt.pt_part_type,
+          ld_rev:pt.pt_rev,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
       }
     }
 

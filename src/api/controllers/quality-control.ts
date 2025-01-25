@@ -6,6 +6,7 @@ import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
 import { Op, Sequelize } from 'sequelize';
 import SaleOrderService from '../../services/saleorder';
+import UserService from "../../services/user"
 
 const createStandardSpecification = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -138,6 +139,27 @@ const createTestsHistory = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+const getTestsHistory = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+
+  logger.debug('Calling Create productPage endpoint with body: %o', req.body);
+  try {
+    const specificationService = Container.get(QualityControlService);
+    // 
+
+    // const testsHistory = req.body.testsHistory;
+    // console.log(standardSpecificationHeader.mp_expire)
+    // let date2 = new Date(standardSpecificationHeader.mp_expire)
+    // console.log(date2)
+
+    const createdTestsHistory = await specificationService.findTestHistory();
+
+    return res.status(201).json({ message: 'created succesfully', data: createdTestsHistory });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -149,15 +171,15 @@ const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next
     const projectService = Container.get(ProjectService);
 
     const testsHistory = req.body.testsHistory;
-    const update_project_status = req.body.update_project_status;
-    const project_code = req.body.project_code;
+    // const update_project_status = req.body.update_project_status;
+    // const project_code = req.body.project_code;
 
     const createdTestsHistory = await specificationService.createTestsHistory(testsHistory);
 
-    if (update_project_status) {
-      const updateProject = await projectService.update({ pm_status: 'R' }, { pm_code: project_code });
-      const updateSo = await saleOrderService.update({ so_conf : true , so_conf_date : new Date()}, { so_po: project_code });
-    }
+    // if (update_project_status) {
+    //   const updateProject = await projectService.update({ pm_status: 'R' }, { pm_code: project_code });
+    //   const updateSo = await saleOrderService.update({ so_conf : true , so_conf_date : new Date()}, { so_po: project_code });
+    // }
 
     return res.status(201).json({ message: 'created succesfully', data: { createdTestsHistory } });
   } catch (e) {
@@ -169,8 +191,12 @@ const createTestsHistoryUpdatePStatus = async (req: Request, res: Response, next
 const addSensibilisationData = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const specificationService = Container.get(QualityControlService);
+  const userServiceInstance = Container.get(UserService)
   logger.debug('Calling Create productPage endpoint with body: %o', req.body);
   try {
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+
     const data = req.body;
     const mpd = data.mpd;
     for (let mp of mpd) {
@@ -183,6 +209,7 @@ const addSensibilisationData = async (req: Request, res: Response, next: NextFun
         mph_lot: data.location,
         mph_attribute: data.code_educator,
         mph_dec01: data.duration,
+        mph_domain:user_domain,
       });
     }
     return res.status(201).json({ message: 'created succesfully', data: null });
@@ -410,4 +437,5 @@ export default {
   findQualityInspectionRoutesBy,
   createQroAndQps,
   getAllQros,
+  getTestsHistory,
 };

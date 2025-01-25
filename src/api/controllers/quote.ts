@@ -44,8 +44,8 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         const quoteOrderDetailServiceInstance = Container.get(
             QuoteOrderDetailService
         )
-        const Quotes = await quoteOrderServiceInstance.find({
-            ...req.body, qo_domain: user_domain
+        const Quotes = await quoteOrderDetailServiceInstance.find({
+            ...req.body, qod_domain: user_domain
         })
         
 
@@ -103,7 +103,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         })
         if (quoteOrder) {
             const details = await quoteOrderDetailServiceInstance.find({
-                qod_domqin: user_domain,
+                qod_domain: user_domain,
                 qod_nbr: quoteOrder.qo_nbr,
             })
             return res.status(200).json({
@@ -131,8 +131,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     
     try {
         const quoteOrderServiceInstance = Container.get(QuoteOrderService)
-        const { id } = req.params
-        const quote = await quoteOrderServiceInstance.findOne({ id })
+        
+        const quote = await quoteOrderServiceInstance.find({...req.body,qo_domain:user_domain })
         const quoteOrderDetailServiceInstance = Container.get(
             QuoteOrderDetailService
         )

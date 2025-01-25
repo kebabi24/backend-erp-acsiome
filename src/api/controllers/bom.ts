@@ -2,6 +2,7 @@ import BomService from "../../services/bom"
 import ItemService from '../../services/item';
 import costSimulationService from "../../services/cost-simulation"
 import PsService from '../../services/ps';
+import codeService from "../../services/code";
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {  Op } from 'sequelize';
@@ -13,7 +14,9 @@ const{user_domain} = req.headers
     logger.debug("Calling Create code endpoint")
     try {
         const bomServiceInstance = Container.get(BomService)
+        const CodeServiceInstance = Container.get(codeService)
         const bom = await bomServiceInstance.create({...req.body, bom_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        await CodeServiceInstance.create({code_fldname:'pt_bom_code',code_value:req.body.bom_parent,code_cmmt:req.body.bom_desc, code_domain:user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         return res
             .status(201)
             .json({ message: "created succesfully", data:  bom })

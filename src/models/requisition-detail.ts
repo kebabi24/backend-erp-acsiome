@@ -24,10 +24,10 @@ const RequisitionDetail = sequelize.define(
         rqd_line: Sequelize.INTEGER,
         rqd_part: {
             type: Sequelize.STRING,
-            references:{
-                model: "pt_mstr",
-                key: "pt_part",
-            },
+            // references:{
+            //     model: "pt_mstr",
+            //     key: "pt_part",
+            // },
 
         },
         rqd_req_qty: {type: Sequelize.DECIMAL, defaultValue : 0  },

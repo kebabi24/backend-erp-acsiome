@@ -2,6 +2,7 @@ import WorkOrderService from '../../services/work-order';
 import WoroutingService from '../../services/worouting';
 import WorkroutingService from '../../services/workrouting';
 import ItemService from '../../services/item';
+
 import CodeService from '../../services/code';
 import InventoryTransactionService from '../../services/inventory-transaction';
 import OperationHistoryService from "../../services/operation-history"
@@ -29,13 +30,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   logger.debug('Calling update one  code endpoint');
   try {
-    const { detail, it, nof } = req.body;
+    const { detail, it } = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const woroutingServiceInstance = Container.get(WoroutingService);
     const workroutingServiceInstance = Container.get(WorkroutingService);
     const itemServiceInstance = Container.get(ItemService);
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
-
+    const sequenceServiceInstance = Container.get(sequenceService)
     for (const item of detail) {
       let wolot = 0;
       let draw : any;
@@ -65,7 +66,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
       console.log(item)
 if(item.woid == null || item.woid == "")
-    {    await workOrderServiceInstance
+    { const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_type: 'OF',seq_seq:'OF' });
+let nof = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+await sequenceServiceInstance.update(
+{ seq_curr_val: Number(seq.seq_curr_val) + 1 },
+{ id: seq.id, seq_type: 'OF',seq_seq:'OF',  seq_domain: user_domain },
+);   
+      
+      await workOrderServiceInstance
         .create({
           ...item,
           ...it,
@@ -95,7 +103,7 @@ else{let revision = 1
   revision = Number(wos.wo_rev) + 1
   console.log(revision)
   await workOrderServiceInstance.update(
-  { wo_rev:'', wo_queue_eff: item.line,wo_status:item.wo_status, wo_rel_date:item.wo_rel_date,wo_due_date:item.wo_due_date,wo_qty_ord:item.wo_qty_ord,chr01:item.chr01,chr02:item.chr02,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+  { wo_rev:revision, wo_queue_eff: item.line,wo_status:item.wo_status, wo_rel_date:item.wo_rel_date,wo_due_date:item.wo_due_date,wo_qty_ord:item.wo_qty_ord,wo_bo_chg:item.wo_bo_chg,chr01:item.chr01,chr02:item.chr02,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
   { id : item.woid,wo_domain: user_domain},
 );} 
 if(item.woid == null || item.woid == "")
@@ -472,7 +480,7 @@ const createDirect = async (req: Request, res: Response, next: NextFunction) => 
           ...it,
           wo_domain: user_domain,
           wo_nbr: nof,
-          wo_type : "DIRECT",
+          
           wo_status: "R",
           wo_rev: rev,
           wo_draw: draw,
@@ -695,23 +703,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find all wo endpoint');
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const codeServiceInstance = Container.get(CodeService);
-    const codes = await codeServiceInstance.findOne({ code_domain:user_domain,code_fldname: user_code });
-    if (codes == null) {const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
-    // let result=[]; 
-    // let obj;
-    // for (let wo of wos){ obj = wo
-    //                     if (wo.wo_status == 'C') {obj.wo_status = 'CLOS'} 
-    //                     else { if (wo.wo_status == 'R') {obj.wo_status = 'LANCE'} 
-    //                            else {if (wo.wo_status == 'F') {obj.wo_status = 'VALIDE'}}
-    //                          }
-    //                          result.push(obj)        
-    //                    }
-                      
-                    
-    return res.status(200).json({ message: 'fetched succesfully', data: wos });}
-    else{const wos = await workOrderServiceInstance.find({wo_domain: user_domain,wo_routing: codes.code_value});
-    return res.status(200).json({ message: 'fetched succesfully', data: wos });}
+    
+    
+      const wos = await workOrderServiceInstance.find({wo_domain: user_domain});
+      return res.status(200).json({ message: 'fetched succesfully', data: wos });
+    
+    
     
     
   } catch (e) {
@@ -722,11 +719,63 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  logger.debug('Calling find by  all wo endpoint');
+  logger.debug('Calling find by  SOME wo endpoint');
   const { user_domain } = req.headers;
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const wos = await workOrderServiceInstance.find({ ...req.body , wo_domain: user_domain});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByPrograms = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  SOME wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+        const workOrderServiceInstance = Container.get(WorkOrderService);
+        const wos = await workOrderServiceInstance.find({ ...req.body,wo_queue_eff: 1 , wo_domain: user_domain});
+        let result= []
+        let obj
+        let i = 0
+        for (let wo of wos){
+          console.log('wo',wo.wo_so_job,wos.length)
+          const ofs = await workOrderServiceInstance.find({wo_so_job:wo.wo_so_job , wo_domain: user_domain});
+          const firstof = await workOrderServiceInstance.findOne({wo_so_job:wo.wo_so_job ,wo_queue_eff:1, wo_domain: user_domain});
+          
+          let qty_ord = 0
+          let qty_comp = 0
+          let qty_rjct = 0
+          let last_date= new Date()
+          let last_hour:any;
+          for (let of of ofs){
+            qty_ord = Number(qty_ord) + Number(of.wo_qty_ord)
+            qty_comp = Number(qty_comp) + Number(of.wo_qty_comp)
+            qty_rjct = Number(qty_rjct) + Number(of.wo_qty_rjct)
+            last_date = of.wo_due_date
+            last_hour = of.chr02
+          }
+          obj = {id : i,wo_so_job:wo.wo_so_job,wo_rev:wo.wo_rev,wo_queue_eff:ofs.length,wo_qty_ord:qty_ord,wo_qty_comp:qty_comp,wo_qty_rjct:qty_rjct,wo_rel_date:firstof.wo_rel_date,wo_due_date:last_date,chr01:firstof.chr01,chr02:last_hour,wo_routing:firstof.wo_routing}
+          result.push(obj)
+          i = i + 1
+        }
+        
+      
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByDistinct = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const wos = await workOrderServiceInstance.find({ ...req.body ,wo_queue_eff:1, wo_domain: user_domain});
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -775,7 +824,7 @@ try {
     const ofs = await workOrderServiceInstance.find({wo_domain: user_domain,wo_nbr: of.wo_nbr,wo_queue_eff:{[Op.gte]:req.body.wo_queue_eff},id:{[Op.ne]:id}});
     for (let wos of ofs){ 
       let jours = Number(Number(req.body.wo_qty_ord) / (Number(ro.ro_run) * 24))
-         echeance.setDate(lancement.getDate() + jours)
+        //  echeance.setDate(lancement.getDate() + jours)
          passage = passage + 1
          const otherwo = await workOrderServiceInstance.update({ wo_rel_date:lancement,wo_due_date:echeance,wo_queue_eff:passage, wo__log01: true,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },{ wo_nbr:wos.wo_nbr,wo_queue_eff:wos.wo_queue_eff,id:{[Op.ne]:id},wo__log01:{[Op.ne]:true} });
          lancement = echeance
@@ -1063,25 +1112,31 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all wo endpoint');
   const { user_domain } = req.headers;
   try {
-    const {site,date,date1} = req.body;
+    const {site,gamme,date,date1,start_time,end_time} = req.body;
     const workOrderServiceInstance = Container.get(WorkOrderService);
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const wos = await workOrderServiceInstance.find({ wo_rel_date : { [Op.between]: [date, date1]} , wo_site: site, wo_type : "BR",wo_domain: user_domain});
+    const wos = await workOrderServiceInstance.find({ wo_routing:gamme,wo_ord_date : { [Op.between]: [date, date1]} , wo_site: site, wo_type : "BR",wo_domain: user_domain});
    
     let result = []
     let i = 1
     let obj
-    for(let wo of wos) {
-    
-      const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
-      const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+    for(let wo of wos) 
+    {
+      
+      if(new Date(wo.updatedAt).toLocaleDateString() < new Date(date1).toLocaleDateString()  && new Date(wo.updatedAt).toLocaleDateString() > new Date(date).toLocaleDateString())   
+      {
+        console.log(date,start_time,wo.wo_ord_date,wo.wo_nbr,new Date(wo.updatedAt).toLocaleDateString(),new Date(wo.updatedAt).toLocaleTimeString(),date1,end_time)
+        const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
+        const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
    
-    for (let tr of rctwo) {
+        for (let tr of rctwo) 
+        {
       ;
-          } 
+        } 
     
     
-      if(rctwo.length > isswo.length) {
+        if(rctwo.length > isswo.length)  
+        {
 
         for (var j=0;j< rctwo.length; j++) {
           
@@ -1095,12 +1150,12 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               equipe: (j==0) ?  wo.wo__chr01 : "",
               gamme: (j==0) ? wo.wo_routing : "",
               nbr: (j==0) ?  wo.wo_nbr: "",
-              rctpart: rctwo[j].item.pt_desc1,
+              rctpart: rctwo[j].item.pt_draw,
               rctcolor: rctwo[j].item.pt_break_cat,
               rctqty : rctwo[j].tr_qty_loc,
               rctserial : rctwo[j].tr_serial,
               rctpal : rctwo[j].tr_ref,
-              isspart: isswo[j].item.pt_desc1,
+              isspart: isswo[j].item.pt_draw,
               isscolor: isswo[j].item.pt_break_cat,
               // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
@@ -1115,13 +1170,13 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               equipe: (j==0) ?  wo.wo__chr01 : "",
               gamme: (j==0) ? wo.wo_routing : "",
               nbr: (j==0) ?  wo.wo_nbr: "",
-              rctpart: rctwo[j].item.pt_desc1,
+              rctpart: rctwo[j].item.pt_draw,
               rctcolor: rctwo[j].item.pt_break_cat,
               rctqty : rctwo[j].tr_qty_loc,
               rctserial : rctwo[j].tr_serial,
               rctpal : rctwo[j].tr_ref,
               isspart: "",
-              isscolor: "",
+              isscolor: null,
               issorigin: "",
               issqty : "",
               issserial : "",
@@ -1133,8 +1188,9 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
           i = i + 1
         }
 
-      } else {
-        for (var j = 0;j < isswo.length; j++) {
+        } else 
+        {
+          for (var j = 0;j < isswo.length; j++) {
           
           const labelServiceInstance = Container.get(LabelService);
           // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
@@ -1146,12 +1202,12 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               equipe: (j==0) ?  wo.wo__chr01 : "",
               gamme: (j==0) ? wo.wo_routing : "",
               nbr: (j==0) ?  wo.wo_nbr: "",
-              rctpart: rctwo[j].item.pt_desc1,
+              rctpart: rctwo[j].item.pt_draw,
               rctcolor: rctwo[j].item.pt_break_cat,
               rctqty : rctwo[j].tr_qty_loc,
               rctserial : rctwo[j].tr_serial,
               rctpal : rctwo[j].tr_ref,
-              isspart: isswo[j].item.pt_desc1,
+              isspart: isswo[j].item.pt_draw,
               isscolor: isswo[j].item.pt_break_cat,
               // issorigin:orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
@@ -1171,7 +1227,7 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
               rctqty : "",
               rctserial : "",
               rctpal : "",
-              isspart: isswo[j].item.pt_desc1,
+              isspart: isswo[j].item.pt_draw,
               isscolor: isswo[j].item.pt_break_cat,
               // issorigin: orgpal.lb_cust,
               issqty : -isswo[j].tr_qty_loc,
@@ -1182,12 +1238,371 @@ const findByRPBR = async (req: Request, res: Response, next: NextFunction) => {
           }
           result.push(obj)
           i = i + 1
+          }
+
         }
-
       }
-
-    }
+      
+      if(new Date(date1).toLocaleDateString() == new Date(date).toLocaleDateString() && new Date(wo.updatedAt).toLocaleDateString() == new Date(date1).toLocaleDateString()  && new Date(wo.updatedAt).toLocaleTimeString() <= end_time && new Date(wo.updatedAt).toLocaleTimeString() >= start_time)   
+          {
+            console.log(date,start_time,wo.wo_ord_date,wo.wo_nbr,new Date(wo.updatedAt).toLocaleDateString(),new Date(wo.updatedAt).toLocaleTimeString(),date1,end_time)
+            const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
+            const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+       
+            for (let tr of rctwo) 
+            {
+          ;
+            } 
+        
+        
+            if(rctwo.length > isswo.length)  
+            {
     
+            for (var j=0;j< rctwo.length; j++) {
+              
+              const labelServiceInstance = Container.get(LabelService);
+              // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+    
+              if(j < isswo.length) {
+                 obj = {
+                  id:i,
+                  date: (j==0) ? wo.wo_rel_date : "",
+                  equipe: (j==0) ?  wo.wo__chr01 : "",
+                  gamme: (j==0) ? wo.wo_routing : "",
+                  nbr: (j==0) ?  wo.wo_nbr: "",
+                  rctpart: rctwo[j].item.pt_draw,
+                  rctcolor: rctwo[j].item.pt_break_cat,
+                  rctqty : rctwo[j].tr_qty_loc,
+                  rctserial : rctwo[j].tr_serial,
+                  rctpal : rctwo[j].tr_ref,
+                  isspart: isswo[j].item.pt_draw,
+                  isscolor: isswo[j].item.pt_break_cat,
+                  // issorigin: orgpal.lb_cust,
+                  issqty : -isswo[j].tr_qty_loc,
+                  issserial : isswo[j].tr_serial,
+                  isspal : isswo[j].tr_ref,
+                  isstime: isswo[j].tr_program,
+                }
+              } else {
+                 obj = {
+                  id:i,
+                  date: (j==0) ? wo.wo_rel_date : "",
+                  equipe: (j==0) ?  wo.wo__chr01 : "",
+                  gamme: (j==0) ? wo.wo_routing : "",
+                  nbr: (j==0) ?  wo.wo_nbr: "",
+                  rctpart: rctwo[j].item.pt_draw,
+                  rctcolor: rctwo[j].item.pt_break_cat,
+                  rctqty : rctwo[j].tr_qty_loc,
+                  rctserial : rctwo[j].tr_serial,
+                  rctpal : rctwo[j].tr_ref,
+                  isspart: "",
+                  isscolor: null,
+                  issorigin: "",
+                  issqty : "",
+                  issserial : "",
+                  isspal : "",
+                  isstime:""
+                }
+              }
+              result.push(obj)
+              i = i + 1
+            }
+    
+            } else 
+            {
+              for (var j = 0;j < isswo.length; j++) {
+              
+              const labelServiceInstance = Container.get(LabelService);
+              // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+         
+              if(j < rctwo.length) {
+                 obj = {
+                  id:i,
+                  date: (j==0) ? wo.wo_rel_date : "",
+                  equipe: (j==0) ?  wo.wo__chr01 : "",
+                  gamme: (j==0) ? wo.wo_routing : "",
+                  nbr: (j==0) ?  wo.wo_nbr: "",
+                  rctpart: rctwo[j].item.pt_draw,
+                  rctcolor: rctwo[j].item.pt_break_cat,
+                  rctqty : rctwo[j].tr_qty_loc,
+                  rctserial : rctwo[j].tr_serial,
+                  rctpal : rctwo[j].tr_ref,
+                  isspart: isswo[j].item.pt_draw,
+                  isscolor: isswo[j].item.pt_break_cat,
+                  // issorigin:orgpal.lb_cust,
+                  issqty : -isswo[j].tr_qty_loc,
+                  issserial : isswo[j].tr_serial,
+                  isspal : isswo[j].tr_ref,
+                  isstime: isswo[j].tr_program,
+                }
+              } else {
+                 obj = {
+                  id:i,
+                  date: (j==0) ? wo.wo_rel_date : "",
+                  equipe: (j==0) ?  wo.wo__chr01 : "",
+                  gamme: (j==0) ? wo.wo_routing : "",
+                  nbr: (j==0) ?  wo.wo_nbr: "",
+                  rctpart: "",
+                  rctcolor: "",
+                  rctqty : "",
+                  rctserial : "",
+                  rctpal : "",
+                  isspart: isswo[j].item.pt_draw,
+                  isscolor: isswo[j].item.pt_break_cat,
+                  // issorigin: orgpal.lb_cust,
+                  issqty : -isswo[j].tr_qty_loc,
+                  issserial : isswo[j].tr_serial,
+                  isspal : isswo[j].tr_ref,
+                  isstime:""
+                }
+              }
+              result.push(obj)
+              i = i + 1
+              }
+    
+            }
+      }
+        
+      if(new Date(date1).toLocaleDateString() != new Date(date).toLocaleDateString() && (new Date(wo.updatedAt).toLocaleDateString() == new Date(date).toLocaleDateString()  && new Date(wo.updatedAt).toLocaleTimeString() >= start_time) )   
+            {
+              console.log(date,start_time,wo.wo_ord_date,wo.wo_nbr,new Date(wo.updatedAt).toLocaleDateString(),new Date(wo.updatedAt).toLocaleTimeString(),date1,end_time)
+              const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
+              const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+         
+              for (let tr of rctwo) 
+              {
+            ;
+              } 
+          
+          
+              if(rctwo.length > isswo.length)  
+              {
+      
+              for (var j=0;j< rctwo.length; j++) {
+                
+                const labelServiceInstance = Container.get(LabelService);
+                // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+      
+                if(j < isswo.length) {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin: orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime: isswo[j].tr_program,
+                  }
+                } else {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: "",
+                    isscolor: null,
+                    issorigin: "",
+                    issqty : "",
+                    issserial : "",
+                    isspal : "",
+                    isstime:""
+                  }
+                }
+                result.push(obj)
+                i = i + 1
+              }
+      
+              } else 
+              {
+                for (var j = 0;j < isswo.length; j++) {
+                
+                const labelServiceInstance = Container.get(LabelService);
+                // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+           
+                if(j < rctwo.length) {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin:orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime: isswo[j].tr_program,
+                  }
+                } else {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: "",
+                    rctcolor: "",
+                    rctqty : "",
+                    rctserial : "",
+                    rctpal : "",
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin: orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime:""
+                  }
+                }
+                result.push(obj)
+                i = i + 1
+                }
+      
+              }
+      }
+      if(new Date(date1).toLocaleDateString() != new Date(date).toLocaleDateString() && (new Date(wo.updatedAt).toLocaleDateString() == new Date(date1).toLocaleDateString()  && new Date(wo.updatedAt).toLocaleTimeString() <= end_time) )   
+            {
+              console.log(date,start_time,wo.wo_ord_date,wo.wo_nbr,new Date(wo.updatedAt).toLocaleDateString(),new Date(wo.updatedAt).toLocaleTimeString(),date1,end_time)
+              const isswo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "ISS-WO"})
+              const rctwo = await inventoryTransactionServiceInstance.finditem({tr_domain: user_domain, tr_nbr: wo.wo_nbr, tr_type: "RCT-WO"})
+         
+              for (let tr of rctwo) 
+              {
+            ;
+              } 
+          
+          
+              if(rctwo.length > isswo.length)  
+              {
+      
+              for (var j=0;j< rctwo.length; j++) {
+                
+                const labelServiceInstance = Container.get(LabelService);
+                // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+      
+                if(j < isswo.length) {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin: orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime: isswo[j].tr_program,
+                  }
+                } else {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: "",
+                    isscolor: null,
+                    issorigin: "",
+                    issqty : "",
+                    issserial : "",
+                    isspal : "",
+                    isstime:""
+                  }
+                }
+                result.push(obj)
+                i = i + 1
+              }
+      
+              } else 
+              {
+                for (var j = 0;j < isswo.length; j++) {
+                
+                const labelServiceInstance = Container.get(LabelService);
+                // const orgpal = await labelServiceInstance.findOne({ lb_ref:isswo[j].tr_ref })
+           
+                if(j < rctwo.length) {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: rctwo[j].item.pt_draw,
+                    rctcolor: rctwo[j].item.pt_break_cat,
+                    rctqty : rctwo[j].tr_qty_loc,
+                    rctserial : rctwo[j].tr_serial,
+                    rctpal : rctwo[j].tr_ref,
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin:orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime: isswo[j].tr_program,
+                  }
+                } else {
+                   obj = {
+                    id:i,
+                    date: (j==0) ? wo.wo_rel_date : "",
+                    equipe: (j==0) ?  wo.wo__chr01 : "",
+                    gamme: (j==0) ? wo.wo_routing : "",
+                    nbr: (j==0) ?  wo.wo_nbr: "",
+                    rctpart: "",
+                    rctcolor: "",
+                    rctqty : "",
+                    rctserial : "",
+                    rctpal : "",
+                    isspart: isswo[j].item.pt_draw,
+                    isscolor: isswo[j].item.pt_break_cat,
+                    // issorigin: orgpal.lb_cust,
+                    issqty : -isswo[j].tr_qty_loc,
+                    issserial : isswo[j].tr_serial,
+                    isspal : isswo[j].tr_ref,
+                    isstime:""
+                  }
+                }
+                result.push(obj)
+                i = i + 1
+                }
+      
+              }
+      }
+      
+    }
 
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
@@ -1907,6 +2322,8 @@ export default {
   findOne,
   findAll,
   findBy,
+  findByPrograms,
+  findByDistinct,
   findByOne,
   update,
   deleteOne,

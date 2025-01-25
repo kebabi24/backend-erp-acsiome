@@ -17,6 +17,8 @@ import BkhService from '../../services/bkh';
 import AddressService from '../../services/address';
 
 import { generatePdf } from '../../reporting/generator';
+const multer = require('multer');
+const upload = multer({ dest: './uploads/' });
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -955,8 +957,12 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const { id } = req.params;
     
+    
+    const filedata = req.file;
+    console.log(req.file)
+    
     const purchaseOrder = await purchaseOrderServiceInstance.update(
-      { ...req.body, last_modified_by: user_code },
+      { po_stat:req.body['po_stat'],po_app_owner:filedata.path, last_modified_by: user_code },
       { id },
     );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
@@ -964,13 +970,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
     for (const po of pos) {
       const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
-        { pod_stat: req.body.po_stat, last_modified_by: user_code },
+        { pod_stat: req.body['po_stat'], last_modified_by: user_code },
         { id: po.id },
       );
     }
     return res.status(200).json({ message: 'fetched succesfully', data: purchaseOrder });
   } catch (e) {
-    logger.error('ðŸ”¥ error: %o', e);
+    logger.error('error: %o', e);
     return next(e);
   }
 };

@@ -8,7 +8,7 @@ export default (app: Router) => {
 
     route.get("/", controller.findAll)
     route.post("/", controller.create)
-    route.post("/session", controller.createsession)
+    
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
     route.put("/:id", controller.update)

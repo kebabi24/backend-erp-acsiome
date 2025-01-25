@@ -541,7 +541,7 @@ const findAssignedEmpOfProject = async (req: Request, res: Response, next: NextF
     const projectServiceInstance = Container.get(ProjectService);
     const { project_code } = req.params;
     const employees = await projectServiceInstance.findAllProjectDetails({
-      pme_pm_code: project_code,
+      pme_nbr: project_code,
       pme_domain: user_domain,
     });
 
