@@ -226,6 +226,12 @@ declare global {
     export type EmployeTrainingModel = S.Model;
     export type TrainingcalenderModel = S.Model;
     export type PopulationemployeModel = S.Model;
+    export type DecompteModel = S.Model;
+    export type ChariotModel = S.Model;
+    export type ChariotDetailModel = S.Model;
+    export type AccountOrderModel = S.Model;
+    export type PriceListQuantityModel = S.Model;
+    export type PriceListQuantityDetailModel = S.Model;
    
   }
 }

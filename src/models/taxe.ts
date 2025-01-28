@@ -19,7 +19,7 @@ const Taxe = sequelize.define(
             primaryKey: true,
             unique: true
         },
-        tx2_tax_pct: {type: Sequelize.DECIMAL, defaultValue : 0  },
+        tx2_tax_pct: {type: Sequelize.DECIMAL, defaultValue : 0.00  },
         tx2_trl_taxable: {type: Sequelize.BOOLEAN, defaultValue : false  },
         tx2_effdate: Sequelize.DATEONLY,
         tx2_max: {type: Sequelize.DECIMAL, defaultValue : 0  },

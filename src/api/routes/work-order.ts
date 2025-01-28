@@ -15,6 +15,9 @@ export default (app: Router) => {
   route.post('/createwopos', controller.createPosWorkOrder);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
+  route.post('/findbroyage', controller.findBybroyage);
+  route.post('/findextrusion', controller.findByextrusion);
+  route.post('/findthermoformage', controller.findBythermo);
   route.post('/findprogram', controller.findByPrograms);
   route.post('/findDistinct', controller.findByDistinct);
   route.post('/findbrrep', controller.findByRPBR);

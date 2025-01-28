@@ -1,2 +1,2 @@
-cd "C:\Users\DELL\projects\backend-erp-acsiome"
+cd "D:\ERP-AXIOM\backend"
 npm start

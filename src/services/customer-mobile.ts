@@ -28,7 +28,7 @@ export default class customersMobileSercice {
     try {
       const customer = await this.customerMobileModel.findOne({ where: query });
       this.logger.silly('find one customer mstr');
-      console.log(customer);
+      // console.log(customer);
       return customer;
     } catch (e) {
       this.logger.error(e);

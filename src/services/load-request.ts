@@ -48,7 +48,7 @@ export default class LoadRequestService {
 
   public async createMultipleLoadRequestsLines(data: any): Promise<any> {
     try {
-      console.log(data);
+     // console.log(data);
       const loadRequestsLines = await this.loadRequestLineModel.bulkCreate(data);
       this.logger.silly('created load requests lines');
       return loadRequestsLines;
@@ -116,6 +116,16 @@ export default class LoadRequestService {
     }
   }
 
+  public async findLoadRequestsByRoleCode(load_requests_codes: any): Promise<any> {
+    try {
+      const loadRequests = await this.loadReuestModel.findOne({ where: { load_request_code: load_requests_codes } });
+      this.logger.silly('find all loadRequests');
+      return loadRequests;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findAllLoadRequests40ByRoleCode(role_code: any): Promise<any> {
     try {
       const loadRequests = await this.loadReuestModel.findAll({ where: { role_code: role_code, status: 40 } });
@@ -402,6 +412,16 @@ export default class LoadRequestService {
     }
   }
 
+  public async findLoadsRequestDetail(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestDetailsModel.findAll({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async getLotsOfProduct(ld_loc: any, ld_site: any, product_code: any): Promise<any> {
     try {
       const lots = await this.locationDetailModel.findAll({
@@ -854,6 +874,22 @@ export default class LoadRequestService {
     }
   }
 
+  public async updateLoadRequestStatusTo20(load_request_codes: any, x: any): Promise<any> {
+    try {
+      console.log('xxxxxxxxxxxxxxxxx', x);
+      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
+      const loadRequest = await this.loadReuestModel.update(
+        { status: x ,date_charge: new Date()},
+        { where: { load_request_code: load_request_codes } },
+      );
+
+      this.logger.silly('load request status updated to ' + x);
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findAllLoadRequest20Details(load_request_code: any): Promise<any> {
     try {
       const loadRequestDetails = await this.loadRequestDetailsModel.findAll({
@@ -1237,6 +1273,28 @@ export default class LoadRequestService {
       });
 
       return pages_codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+
+  public async findLoadRequestLineBy(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({ where: query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async findLoadRequestLineBysum(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadRequestLineModel.findAll({ ...query });
+      this.logger.silly('find one loadRequest');
+      return loadRequest;
     } catch (e) {
       this.logger.error(e);
       throw e;

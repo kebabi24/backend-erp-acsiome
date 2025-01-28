@@ -44,12 +44,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
     const lds = await locationDetailServiceInstance.find({ ld_ref:labelId,ld_domain:user_domain });
     let locs : any;
-    for(let locd of lds){ locs = await locationServiceInstance.find({ loc_loc:locd.ld_loc,loc_domain:user_domain });}
+    for(let locd of lds){ locs = await locationServiceInstance.find({ loc_loc:locd.ld_loc,loc_domain:user_domain });
     let loc_desc:any;
     for (let location of locs){loc_desc = location.loc_desc
       const label = await labelServiceInstance.update(
       { lb_cust: location.loc_desc, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
-      { lb_ref: labelId })}
+      { lb_ref: labelId })}}
+    
     let desc:any;
     for (let item of items){if(item.pt_draw != 'BOBINE'){desc = item.pt_desc2} else {desc = item.pt_draw + ' ' + item.pt_part_type}}
     

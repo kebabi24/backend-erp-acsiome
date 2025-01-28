@@ -20,11 +20,10 @@ export default class ProductPageService {
         }
     }
 
-    public async createProductPageProducts(productPageCode: any, productCode: any): Promise<any> {
+    public async createProductPageProducts(data: any): Promise<any> {
         try {
-            const product_page_code = productPageCode.productPageCode
-            const product_code = productCode.productCode
-            const productPageDetails = await this.productPageDetailsModel.create({ product_page_code, product_code })
+           
+            const productPageDetails = await this.productPageDetailsModel.create({ ...data })
             this.logger.silly("productPageDetails created ", productPageDetails)
             return productPageDetails
         } catch (e) {
@@ -69,7 +68,9 @@ export default class ProductPageService {
             for (const pageCode of pagesCodes) {
                 const addProfilePage = await this.profileProductPageModel.create({
                     profile_code: profile_code,
-                    product_page_code: pageCode,
+                    product_page_code: pageCode.product_page_code,
+                    rank:pageCode.rank,
+                   
                 })
                 addProfilePages.push(addProfilePage)
             }
@@ -86,7 +87,7 @@ export default class ProductPageService {
         try {
 
 
-            const productPageDetails = await this.productPageDetailsModel.findAll({ where: { product_page_code: productPageCode }, ttributes: ['product_code'] })
+            const productPageDetails = await this.productPageDetailsModel.findAll({ where: { product_page_code: productPageCode }, attributes: ['product_code'] })
             this.logger.silly("productPageDetails created ", productPageDetails)
             return productPageDetails
         } catch (e) {
@@ -95,6 +96,18 @@ export default class ProductPageService {
         }
     }
 
+    public async getPageAllProducts(productPageCode: any): Promise<any> {
+        try {
+
+
+            const productPageDetails = await this.productPageDetailsModel.findAll({ where: { product_page_code: productPageCode } })
+            this.logger.silly("productPageDetails created ", productPageDetails)
+            return productPageDetails
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async updateProductPageProducts(profileCode: any, pagesCodesList: any): Promise<any> {
         try {
             const profile_code = profileCode.profileCode
@@ -119,6 +132,25 @@ export default class ProductPageService {
             throw e
         }
     }
-
+    public async delete(query: any): Promise<any> {
+        try {
+            const pricelist = await this.productPageDetailsModel.destroy({ where: query })
+            this.logger.silly("delete one pricelist mstr")
+            return pricelist
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async update(data: any, query: any): Promise<any> {
+        try {
+          const page = await this.productPageModel.update(data, { where: query });
+          this.logger.silly('update one profile mstr');
+          return page;
+        } catch (e) {
+          this.logger.error(e);
+          throw e;
+        }
+      }
 
 }

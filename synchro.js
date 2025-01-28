@@ -1,9 +1,41 @@
-const {  Client } = require("pg");
-const { Pool } = require("mssql");
+// const {  Client } = require("pg");
+const { Pool } = require("pg");
 
 var pool;
 var local;
 const sql = require("mssql");
+//const pool = require("pg")
+
+// const connectDb = async () => {
+
+//     try {
+//         this.pool = new Pool({
+//             user: 'admin',
+//             host: '146.59.157.107',
+//             database: 'abraa',
+//             password: 'admin',
+//             port: 5432,
+//         });
+//         await this.pool.connect()
+
+//         console.log("server connected")
+//         this.local = new Pool({
+//             user: 'postgres',
+//             host: 'localhost',
+//             database: 'abracadabra',
+//             password: 'adm@axiom',
+//             port: 5432,
+//         });
+
+
+//         await this.local.connect()
+//         console.log("local connected")
+//         synchro(this.pool, this.local)
+//     } catch (error) {
+//         console.log(error)
+//     }
+
+//}
 const connectDb = async () => {
 
 
@@ -11,10 +43,10 @@ const connectDb = async () => {
 
     try {
         var config = {
-            "user": "hht", // Database username
-            "password": "hht", // Database password
+            "user": "sa", // Database username
+            "password": "admin", // Database password
             "server": "localhost", // Server IP address
-            "database": "Assabil", // Database name
+            "database": "test", // Database name
             "options": {
                 "encrypt": false // Disable encryption
             }
@@ -26,8 +58,21 @@ const connectDb = async () => {
                 throw err;
             }
             console.log("Connection Successful!");
-            synchro()
+         
         });
+
+        this.local = new Pool({
+            user: 'postgres',
+            host: 'localhost',
+            database: 'AxiomRH',
+            password: 'admin',
+            port: 5433,
+        });
+
+
+        await this.local.connect()
+        console.log("local connected")
+        synchro()
     } catch (error) {
         console.log(error)
     }
@@ -37,370 +82,250 @@ const synchro = async () => {
 
     try {
         // console.log(new Date())
-        console.log("ld")
+        //console.log("ld")
         // // synchro ld_det***************************************
 
-        const res = await sql.query("SELECT * FROM role ")
-       // await this.pool.query("DELETE FROM ld_det WHERE ld_site='1601'")
-        console.log(res)
+        const res = await sql.query("SELECT * FROM Utilisateur ")
+        const emps = res.recordset
+      //  console.log(emps)
+        for (let item of emps) {
+         const  idemp = item.Matricule
+       const employe = await this.local.query("SELECT * FROM emp_mstr  where emp_addr = " + "'" + idemp + "'" + "");
+      if (employe.rows.length >0) { //console.log(employe.rows)
+    /*update*/
+
+    var adr = (item.Adresse !=null) ? item.Adresse.replace("'", ' ') : null
+    var date = item.DateNaissance
+    let day = date.getDate();
+    if (day < 10) {
+        day = "0" + day
+    }
+
+    let month = date.getMonth();
+  //  console.log(month)
+    if (month < 9) {
+        month = month + 1
+        month = "0" + month
+    } else {
+        month = month + 1
+    }
+
+    let year = date.getFullYear();
+    let datebirth = `${year}-${month}-${day}`;
+
+
+    var date1 = item.DateDebut
+    let day1 = date1.getDate();
+    if (day1 < 10) {
+        day1 = "0" + day1
+    }
+
+    let month1 = date1.getMonth();
+    if (month1 < 9) {
+        month1 = month1 + 1
+        month1 = "0" + month1
+    } else {
+        month1 = month1 + 1
+    }
+
+    let year1 = date1.getFullYear();
+    let DateDebut = `${year1}-${month1}-${day1}`;
+
+    var DateFin = `2900-01-01`
+  if(item.DateFin != null) {  
+    var date2 = item.DateFin
+    let day2 = date1.getDate();
+    if (day2 < 10) {
+        day2 = "0" + day2
+    }
+
+    let month2 = date2.getMonth();
+    if (month2 < 9) {
+        month2 = month2 + 1
+        month2 = "0" + month2
+    } else {
+        month2 = month2 + 1
+    }
+
+    let year2 = date2.getFullYear();
+     DateFin = `${year2}-${month2}-${day2}`;
+} 
+
+var DateFinPeriodeEssai = `2900-01-01`
+if(item.DateFinPeriodeEssai != null) {  
+    var date3 = item.DateFinPeriodeEssai
+    let day3 = date1.getDate();
+    if (day3 < 10) {
+        day3 = "0" + day3
+    }
+
+    let month3 = date3.getMonth();
+    if (month3 < 9) {
+        month3 = month3 + 1
+        month3 = "0" + month3
+    } else {
+        month3 = month3 + 1
+    }
+
+    let year3 = date3.getFullYear();
+    DateFinPeriodeEssai = `${year3}-${month3}-${day3}`;
+}
+
+var DateRupture = `2900-01-01`
+if(item.DateRupture!=null){
+   // console.log("hounaaaaaaa")
+    var date4 = item.DateRupture
+    let day4 = date1.getDate();
+    if (day4 < 10) {
+        day4 = "0" + day4
+    }
+
+    let month4 = date4.getMonth();
+    if (month4 < 9) {
+        month4 = month4 + 1
+        month4 = "0" + month4
+    } else {
+        month4 = month4 + 1
+    }
+
+    let year4 = date4.getFullYear();
+     DateRupture = `${year4}-${month4}-${day4}`;
+} 
+
+    await this.local.query("UPDATE emp_mstr SET emp_lname=" + "'" +  item.Nom +  "'" + "," +  "emp_fname=" + "'" +  item.Prenom + "'" +   "," + "emp_birth_date=" + "'" +  datebirth + "'" +  "," +
+    "emp_sex=" + "'" +  item.Sexe + "'"  + "," +
+    "emp_mail=" + "'" +  item.Email + "'" + "," +
+
+    "emp_line1=" + "'" +  adr + "'" + "," +
+    "emp_first_date=" + "'" +  DateDebut + "'" + "," +
+    "emp_last_date=" + "'" + DateFin + "'" + "," +
+
+    "emp_ss_id=" + "'" +  item.NumSecuriteSociale + "'" + "," +
+    "emp_upper=" + "'" +  item.Responsable1 + "'" + "," +
+    "emp_familysit=" + "'" + item.SituationFamiliale + "'" + "," +
+
+    "emp_site=" + "'" +  item.Affectation + "'" + "," +
+    "emp_conf_date=" + "'" +  DateFinPeriodeEssai + "'" + "," +
+    "emp_dism_date=" + "'" + DateRupture + "'"  
+
+
+    + "where emp_addr=" + "'" +  item.Matricule + "'" + "") 
+
+
+    
+
+    /*update*/
+            }
+            else {
+
+var adr = (item.Adresse !=null) ? item.Adresse.replace("'", ' ') : null
+                var date = item.DateNaissance
+                let day = date.getDate();
+                if (day < 10) {
+                    day = "0" + day
+                }
+    
+                let month = date.getMonth();
+               // console.log(month)
+                if (month < 9) {
+                    month = month + 1
+                    month = "0" + month
+                } else {
+                    month = month + 1
+                }
+    
+                let year = date.getFullYear();
+                let datebirth = `${year}-${month}-${day}`;
+
+
+                var date1 = item.DateDebut
+                let day1 = date1.getDate();
+                if (day1 < 10) {
+                    day1 = "0" + day1
+                }
+    
+                let month1 = date1.getMonth();
+                if (month1 < 9) {
+                    month1 = month1 + 1
+                    month1 = "0" + month1
+                } else {
+                    month1 = month1 + 1
+                }
+    
+                let year1 = date1.getFullYear();
+                let DateDebut = `${year1}-${month1}-${day1}`;
+
+                var DateFin = `2900-01-01`
+              if(item.DateFin != null) {  
+                var date2 = item.DateFin
+                let day2 = date1.getDate();
+                if (day2 < 10) {
+                    day2 = "0" + day2
+                }
+    
+                let month2 = date2.getMonth();
+                if (month2 < 9) {
+                    month2 = month2 + 1
+                    month2 = "0" + month2
+                } else {
+                    month2 = month2 + 1
+                }
+    
+                let year2 = date2.getFullYear();
+                 DateFin = `${year2}-${month2}-${day2}`;
+            } 
+
+            var DateFinPeriodeEssai = `2900-01-01`
+            if(item.DateFinPeriodeEssai != null) {  
+                var date3 = item.DateFinPeriodeEssai
+                let day3 = date1.getDate();
+                if (day3 < 10) {
+                    day3 = "0" + day3
+                }
+    
+                let month3 = date3.getMonth();
+                if (month3 < 9) {
+                    month3 = month3 + 1
+                    month3 = "0" + month3
+                } else {
+                    month3 = month3 + 1
+                }
+    
+                let year3 = date3.getFullYear();
+                DateFinPeriodeEssai = `${year3}-${month3}-${day3}`;
+            }
+
+            var DateRupture = `2900-01-01`
+            if(item.DateRupture!=null){
+             //   console.log("hounaaaaaaa")
+                var date4 = item.DateRupture
+                let day4 = date1.getDate();
+                if (day4 < 10) {
+                    day4 = "0" + day4
+                }
+    
+                let month4 = date4.getMonth();
+                if (month4 < 9) {
+                    month4 = month4 + 1
+                    month4 = "0" + month4
+                } else {
+                    month4 = month4 + 1
+                }
+    
+                let year4 = date4.getFullYear();
+                 DateRupture = `${year4}-${month4}-${day4}`;
+            } else {
+              //  console.log("hhhhhhhhhhhhhhh")
+            }
+                await this.local.query("INSERT INTO  emp_mstr(emp_addr,emp_lname,emp_fname,emp_birth_date,emp_sex,emp_mail,emp_line1,emp_first_date,emp_last_date,emp_ss_id,emp_upper,emp_familysit,emp_site,emp_conf_date,emp_dism_date,emp_domain) VALUES ('" + item.Matricule + "', '" + item.Nom + "', '" + item.Prenom + "','" + datebirth + "', '" + item.Sexe + "', '" + item.Email + "', '" + adr + "', '" + DateDebut + "', '" + DateFin + "' , '" + item.NumSecuriteSociale  + "' , '" + item.Responsable1 + "' , '" + item.SituationFamiliale + "' , '" + item.Affectation + "' , '" + DateFinPeriodeEssai + "' , '" + DateRupture + "' , '" +"palmary" +"')") 
+            }
+        }
+        console.log("Success Synchro")
+
     } catch (error) {
         console.log(error)
     }
-//         for (const item of ld) {
-
-//             var date = item.ld_date
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let format4 = `${year}-${month}-${day}`;
-//             await this.pool.query("INSERT INTO  ld_det(ld_loc, ld_part,ld_date,ld_qty_oh, ld_site, ld_status, last_modified_by) VALUES ('" + item.ld_loc + "', '" + item.ld_part + "', '" + format4 + "','" + item.ld_qty_oh + "', '" + item.ld_site + "', '" + item.ld_status + "', '" + item.last_modified_by + "')")
-
-//         }
-//         console.log("kemel")
-
-
-
-//         // // // synchro pos_order***************************************
-
-//         // const ordery = await this.local.query("SELECT * FROM bb_order_pos WHERE bool05=false AND usrd_site='1601' ORDER BY id")
-
-//         // const pos_orderyy = ordery.rows
-
-//         // for (const item of pos_orderyy) {
-//         //     var date = item.created_date
-
-//         //     let day = date.getDate();
-//         //     if (day < 10) {
-//         //         day = "0" + day
-//         //     }
-
-//         //     let month = date.getMonth();
-//         //     if (month < 10) {
-//         //         month = month + 1
-//         //         month = "0" + month
-//         //     } else {
-//         //         month = month + 1
-//         //     }
-
-//         //     let year = date.getFullYear();
-//         //     let date0 = `${year}-${month}-${day}`;
-//         //     // const pos_order_server = await this.pool.query("SELECT * FROM bb_order_pos WHERE created_date=" + "'" + date0 + "'" + " AND usrd_site='1601' AND order_code=" + "'" + item.order_code + "'" + " ORDER BY id")
-//         //     // const pos_order_server_rows = pos_order_server.rows
-//         //     // console.log(pos_order_server_rows.length)
-//         //     // if (pos_order_server_rows.length > 0 && pos_order_server_rows[0].status === 'N') {
-//         //     //     // await this.pool.query("DELETE FROM bb_order_pos WHERE bool05=true WHERE usrd_site='1601'AND order_code=" + "'" + pos_order_server_rows[0].order_code + "'" + " AND created_date=" + "'" + date0 + "'" + "")
-//         //     //     // await this.pool.query("INSERT INTO  bb_order_pos(order_code, customer, site_loc, order_emp, status, loy_num, disc_amt, del_comp,usrd_site,plateforme, total_price, created_date) Values ('" + item.order_code + "', '" + item.customer + "' ,'" + item.site_loc + "','" + item.order_emp + "', '" + item.status + "', '" + item.loy_num + "', '" + Number(item.disc_amt) + "', '" + item.del_comp + "','" + item.usrd_site + "', '" + item.plateforme + "', '" + Number(item.total_price) + "', '" + date0 + "')")
-//         //     //     await this.pool.query("UPDATE bb_order_pos SET status=" + "'" + item.status + "'" + " WHERE usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date0 + "'" + " AND total_price=" + "'" + item.total_price + "'" + "")
-
-//         //     // } else {
-//         //     //     console.log('payés')
-//         //     // }
-//         //     await this.pool.query("INSERT INTO  bb_order_pos(order_code, customer, site_loc, order_emp, status, loy_num, disc_amt, del_comp,usrd_site,plateforme, total_price, created_date) Values ('" + item.order_code + "', '" + item.customer + "' ,'" + item.site_loc + "','" + item.order_emp + "', '" + item.status + "', '" + item.loy_num + "', '" + Number(item.disc_amt) + "', '" + item.del_comp + "','" + item.usrd_site + "', '" + item.plateforme + "', '" + Number(item.total_price) + "', '" + date0 + "')")
-//         //     await this.local.query("UPDATE bb_order_pos SET bool05=true WHERE bool05=false AND usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date0 + "'" + "")
-//         // }
-
-
-
-
-
-//         // //synchro pos_order_detail***************************************
-
-//         // const bb_order_pos_detail = await this.local.query("SELECT * FROM bb_order_pos_detail_product WHERE bool05=false AND usrd_site='1601'")
-
-//         // const pos_order_detail = bb_order_pos_detail.rows
-
-//         // for (const item of pos_order_detail) {
-//         //     var date = item.created_date
-//         //     let day = date.getDate();
-//         //     if (day < 10) {
-//         //         day = "0" + day
-//         //     }
-
-//         //     let month = date.getMonth();
-//         //     if (month < 10) {
-//         //         month = month + 1
-//         //         month = "0" + month
-//         //     } else {
-//         //         month = month + 1
-//         //     }
-
-//         //     let year = date.getFullYear();
-//         //     let date1 = `${year}-${month}-${day}`;
-//         //     await this.pool.query("INSERT INTO  bb_order_pos_detail_product(order_code, pt_part, line, pt_article, pt_bom_code, pt_formule, pt_desc1, pt_desc2,pt_loc, pt_size,pt_qty_ord_pos, pt_price_pos, usrd_site,created_date) Values ('" + item.order_code + "', '" + item.pt_part + "' ,'" + item.line + "','" + item.pt_article + "', '" + item.pt_bom_code + "', '" + item.pt_formule + "', '" + item.pt_desc1 + "', '" + item.pt_desc2 + "','" + item.pt_loc + "', '" + item.pt_size + "', '" + item.pt_qty_ord_pos + "', '" + Number(item.pt_price_pos) + "', '" + item.usrd_site + "', '" + date1 + "')")
-//         //     await this.local.query("UPDATE bb_order_pos_detail_product SET bool05=true WHERE bool05=false AND usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date1 + "'" + " AND pt_part=" + "'" + item.pt_part + "'" + "")
-
-//         // }
-//         // //synchro pos_order_detail_ing***************************************
-
-//         // const bb_order_pos_detail_ing = await this.local.query("SELECT * FROM bb_order_pos_detail_product_ing WHERE bool05=false AND usrd_site='1601' ORDER BY id")
-
-//         // const pos_order_detail_ing = bb_order_pos_detail_ing.rows
-
-//         // for (const item of pos_order_detail_ing) {
-//         //     var date = item.created_date
-//         //     let day = date.getDate();
-//         //     if (day < 10) {
-//         //         day = "0" + day
-//         //     }
-
-//         //     let month = date.getMonth();
-//         //     if (month < 10) {
-//         //         month = month + 1
-//         //         month = "0" + month
-//         //     } else {
-//         //         month = month + 1
-//         //     }
-
-//         //     let year = date.getFullYear();
-//         //     let date2 = `${year}-${month}-${day}`;
-//         //     await this.pool.query("INSERT INTO  bb_order_pos_detail_product_ing(order_code, pt_part,pt_pt_part,pt_bom_code, pt_desc1,pt_loc, pt_desc2, pt_price,line, usrd_site, created_date) Values ('" + item.order_code + "', '" + item.pt_part + "' ,'" + item.pt_pt_part + "','" + item.pt_bom_code + "', '" + item.pt_desc1 + "', '" + item.pt_loc + "', '" + item.pt_desc2 + "','" + Number(item.pt_price) + "', '" + item.line + "','" + item.usrd_site + "', '" + date2 + "')")
-//         //     await this.local.query("UPDATE bb_order_pos_detail_product_ing SET bool05=true WHERE bool05=false AND usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date2 + "'" + " AND pt_part=" + "'" + item.pt_part + "'" + " AND pt_pt_part=" + "'" + item.pt_pt_part + "'" + "")
-
-
-//         // }
-
-
-//         // // synchro bkh***************************************
-
-//         const bk = await this.local.query("SELECT * FROM bkh_hist WHERE bool05=false AND bkh_site='1601' ORDER BY id")
-//         console.log("bkh")
-//         const bkh = bk.rows
-//         console.log(bkh)
-//         for (const item of bkh) {
-
-//             var date = item.bkh_effdate
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let bkhdate = `${year}-${month}-${day}`;
-//             console.log(item.id)
-//             await this.pool.query("INSERT INTO  bkh_hist(bkh_code,bkh_num_doc,bkh_date, bkh_balance, bkh_type, dec01, bkh_site, bkh_effdate) Values ('" + item.bkh_code + "', '" + item.bkh_num_doc + "' , '" + bkhdate + "' ,'" + item.bkh_balance + "','" + item.bkh_type + "', '" + item.dec01 + "','" + item.bkh_site + "', '" + bkhdate + "')")
-//             await this.local.query("UPDATE bkh_hist SET bool05=true WHERE bool05=false AND bkh_site='1601' AND id=" + "'" + item.id + "'" + "")
-//         }
-
-//         // synchro pos_order***************************************
-
-//         // const bb_order_posa = await this.local.query("SELECT * FROM bb_order_pos WHERE usrd_site='1601' ORDER BY id")
-
-//         // const pos_ordera = bb_order_posa.rows
-
-//         // for (const item of pos_ordera) {
-//         //     var date = item.created_date
-
-//         //     let day = date.getDate();
-//         //     if (day < 10) {
-//         //         day = "0" + day
-//         //     }
-
-//         //     let month = date.getMonth();
-//         //     if (month < 10) {
-//         //         month = month + 1
-//         //         month = "0" + month
-//         //     } else {
-//         //         month = month + 1
-//         //     }
-
-//         //     let year = date.getFullYear();
-//         //     let date0 = `${year}-${month}-${day}`;
-//         //     const pos_order_server = await this.pool.query("SELECT * FROM bb_order_pos WHERE created_date=" + "'" + date0 + "'" + " AND usrd_site='1601' AND order_code=" + "'" + item.order_code + "'" + " ORDER BY id")
-//         //     const pos_order_server_rows = pos_order_server.rows
-//         //     console.log(pos_order_server_rows.length)
-//         //     if (pos_order_server_rows.length > 0 && pos_order_server_rows[0].status === 'N') {
-//         //         // await this.pool.query("DELETE FROM bb_order_pos WHERE bool05=true WHERE usrd_site='1601'AND order_code=" + "'" + pos_order_server_rows[0].order_code + "'" + " AND created_date=" + "'" + date0 + "'" + "")
-//         //         // await this.pool.query("INSERT INTO  bb_order_pos(order_code, customer, site_loc, order_emp, status, loy_num, disc_amt, del_comp,usrd_site,plateforme, total_price, created_date) Values ('" + item.order_code + "', '" + item.customer + "' ,'" + item.site_loc + "','" + item.order_emp + "', '" + item.status + "', '" + item.loy_num + "', '" + Number(item.disc_amt) + "', '" + item.del_comp + "','" + item.usrd_site + "', '" + item.plateforme + "', '" + Number(item.total_price) + "', '" + date0 + "')")
-//         //         await this.pool.query("UPDATE bb_order_pos SET status=" + "'" + item.status + "'" + " WHERE usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date0 + "'" + " AND total_price=" + "'" + item.total_price + "'" + "")
-
-//         //     } else {
-//         //         console.log('payés')
-//         //     }
-//         //     // await this.pool.query("INSERT INTO  bb_order_pos(order_code, customer, site_loc, order_emp, status, loy_num, disc_amt, del_comp,usrd_site,plateforme, total_price, created_date) Values ('" + item.order_code + "', '" + item.customer + "' ,'" + item.site_loc + "','" + item.order_emp + "', '" + item.status + "', '" + item.loy_num + "', '" + Number(item.disc_amt) + "', '" + item.del_comp + "','" + item.usrd_site + "', '" + item.plateforme + "', '" + Number(item.total_price) + "', '" + date0 + "')")
-//         //     // await this.local.query("UPDATE bb_order_pos SET bool05=true WHERE bool05=false AND usrd_site='1601'AND order_code=" + "'" + item.order_code + "'" + " AND created_date=" + "'" + date0 + "'" + "")
-//         // }
-
-
-//         // new synchro pos_order***************************************
-//         const service = await this.local.query("SELECT * FROM aa_service WHERE service_site='1601' and service_open=true LIMIT 1")
-//         if (service.rows.length > 0) {
-//             console.log("cyrr")
-//             const currentService = service.rows[0]
-//             console.log(currentService)
-//             var date_service0 = currentService.service_period_activate_date
-
-//             let day = date_service0.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date_service0.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date_service0.getFullYear();
-//             var date_service1 = `${year}-${month}-${day}`;
-//             console.log(date_service1)
-//         } else {
-//             console.log('makesh')
-//         }
-
-//         const bb_order_pos = await this.local.query("SELECT * FROM bb_order_pos WHERE usrd_site='1601' and created_date=" + "'" + date_service1 + "'" + "ORDER BY id")
-//         const pos_order = bb_order_pos.rows
-//         console.log('makesh')
-//         await this.pool.query("DELETE FROM bb_order_pos WHERE usrd_site='1601'AND created_date=" + "'" + date_service1 + "'" + "")
-//         for (const item of pos_order) {
-//             var date = item.created_date
-
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let date0 = `${year}-${month}-${day}`;
-
-//             await this.pool.query("INSERT INTO  bb_order_pos(order_code, customer, site_loc, order_emp, status, loy_num, disc_amt, del_comp,usrd_site,plateforme, total_price, created_date) Values ('" + item.order_code + "', '" + item.customer + "' ,'" + item.site_loc + "','" + item.order_emp + "', '" + item.status + "', '" + item.loy_num + "', '" + Number(item.disc_amt) + "', '" + item.del_comp + "','" + item.usrd_site + "', '" + item.plateforme + "', '" + Number(item.total_price) + "', '" + date0 + "')")
-//             console.log('makesh2')
-//         }
-//         const bb_order_pos_detail = await this.local.query("SELECT * FROM bb_order_pos_detail_product WHERE usrd_site='1601' and created_date=" + "'" + date_service1 + "'" + "ORDER BY id")
-//         const pos_order_detail = bb_order_pos_detail.rows
-//         await this.pool.query("DELETE FROM bb_order_pos_detail_product WHERE usrd_site='1601'AND created_date=" + "'" + date_service1 + "'" + "")
-//         for (const item of pos_order_detail) {
-//             var date = item.created_date
-
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let date0 = `${year}-${month}-${day}`;
-//             await this.pool.query("INSERT INTO  bb_order_pos_detail_product(order_code, pt_part, line, pt_article, pt_bom_code, pt_formule, pt_desc1, pt_desc2,pt_loc, pt_size,pt_qty_ord_pos, pt_price_pos, usrd_site,created_date, pt_part_type, pt_dsgn_grp, pt_promo, pt_group ) Values ('" + item.order_code + "', '" + item.pt_part + "' ,'" + item.line + "','" + item.pt_article + "', '" + item.pt_bom_code + "', '" + item.pt_formule + "', '" + item.pt_desc1 + "', '" + item.pt_desc2 + "','" + item.pt_loc + "', '" + item.pt_size + "', '" + item.pt_qty_ord_pos + "', '" + Number(item.pt_price_pos) + "', '" + item.usrd_site + "', '" + date0 + "', '" + item.pt_part_type + "', '" + item.pt_dsgn_grp + "', '" + item.pt_promo + "', '" + item.pt_group + "')")
-
-//         }
-//         const bb_order_pos_ing = await this.local.query("SELECT * FROM bb_order_pos_detail_product_ing WHERE usrd_site='1601' and created_date=" + "'" + date_service1 + "'" + "ORDER BY id")
-//         const pos_order_detail_ing = bb_order_pos_ing.rows
-//         // await this.pool.query("DELETE FROM bb_order_pos_detail_product_ing WHERE usrd_site='1601'AND created_date=" + "'" + date_service1 + "'" + "")
-//         for (const item of pos_order_detail_ing) {
-//             var date = item.created_date
-
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let date0 = `${year}-${month}-${day}`;
-//             await this.pool.query("INSERT INTO  bb_order_pos_detail_product_ing(order_code, pt_part,pt_pt_part,pt_bom_code, pt_desc1,pt_loc, pt_desc2, pt_price,line, usrd_site, created_date) Values ('" + item.order_code + "', '" + item.pt_part + "' ,'" + item.pt_pt_part + "','" + item.pt_bom_code + "', '" + item.pt_desc1 + "', '" + item.pt_loc + "', '" + item.pt_desc2 + "','" + Number(item.pt_price) + "', '" + item.line + "','" + item.usrd_site + "', '" + date0 + "')")
-
-//         }
-
-//         const bb_order_pos_sauce = await this.local.query("SELECT * FROM bb_order_pos_detail_product_sauce WHERE usrd_site='1601' and created_date=" + "'" + date_service1 + "'" + "ORDER BY id")
-//         const pos_order_detail_sauce = bb_order_pos_sauce.rows
-//         // await this.pool.query("DELETE FROM bb_order_pos_detail_product_ing WHERE usrd_site='1601'AND created_date=" + "'" + date_service1 + "'" + "")
-//         for (const item of pos_order_detail_sauce) {
-//             var date = item.created_date
-
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let date0 = `${year}-${month}-${day}`;
-//             await this.pool.query("INSERT INTO  bb_order_pos_detail_product_sauce(order_code, pt_part,pt_pt_part,pt_bom_code,pt_loc, pt_desc2, pt_price,line, usrd_site, created_date) Values ('" + item.order_code + "', '" + item.pt_part + "' ,'" + item.pt_pt_part + "','" + item.pt_bom_code + "', '" + item.pt_loc + "', '" + item.pt_desc2 + "','" + Number(item.pt_price) + "', '" + item.line + "','" + item.usrd_site + "', '" + date0 + "')")
-
-//         }
-
-
-//         // synchro tr_hist***************************************
-
-//         const tr = await this.local.query("SELECT * FROM tr_hist WHERE bool05=false AND tr_site='1601' ORDER BY id")
-//         const trhist = tr.rows
-//         console.log("tr")
-//         for (const item of trhist) {
-//             var date = item.tr_effdate
-
-//             let day = date.getDate();
-//             if (day < 10) {
-//                 day = "0" + day
-//             }
-
-//             let month = date.getMonth();
-//             if (month < 10) {
-//                 month = month + 1
-//                 month = "0" + month
-//             } else {
-//                 month = month + 1
-//             }
-
-//             let year = date.getFullYear();
-//             let format5 = `${year}-${month}-${day}`;
-
-//             await this.pool.query("INSERT INTO  tr_hist(tr_part,tr_date,tr_lot, tr_type, tr_loc, tr_loc_begin, tr_qty_chg, tr_um_conv, tr_nbr,tr_addr, tr_mtl_std, tr_price, tr_gl_amt, tr_qty_loc, tr_effdate, tr_site, tr_domain) Values ('" + item.tr_part + "', '" + format5 + "' , '" + item.tr_lot + "' ,'" + item.tr_type + "','" + item.tr_loc + "', '" + item.tr_loc_begin + "', '" + item.tr_qty_chg + "', '" + item.tr_um_conv + "', '" + item.tr_nbr + "', '" + item.tr_addr + "', '" + item.tr_mtl_std + "', '" + item.tr_price + "', '" + item.tr_gl_amt + "', '" + item.tr_qty_loc + "' ,'" + format5 + "' , '" + item.tr_site + "', '" + item.tr_domain + "')")
-//             await this.local.query("UPDATE tr_hist SET bool05=true WHERE bool05=false AND tr_site='1601' AND id=" + "'" + item.id + "'" + "")
-//         }
-
-//     } catch (error) {
-//         console.log(error)
-
-//     }
+    process.exit()
 
  }
 

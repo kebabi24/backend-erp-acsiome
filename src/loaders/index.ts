@@ -32,15 +32,7 @@ export default async ({ expressApp }) => {
   await dependencyInjectorLoader({
     models: [
       testModel,
-      { name: 'repertoryModel', model: require('../models/repertory').default },
-      { name: 'addressModel', model: require('../models/address').default },
-      { name: 'providerModel', model: require('../models/provider').default },
-      { name: 'customerModel', model: require('../models/customer').default },
-      { name: 'productLineModel', model: require('../models/product-line').default },
-      { name: 'codeModel', model: require('../models/code').default },
-      { name: 'accountModel', model: require('../models/account').default },
-      { name: 'subaccountModel', model: require('../models/subaccount').default },
-      { name: 'subaccountDetailModel', model: require('../models/subaccount-detail').default },
+     
       { name: 'taxeModel', model: require('../models/taxe').default },
       { name: 'siteModel', model: require('../models/site').default },
       { name: 'locationModel', model: require('../models/location').default },
@@ -229,7 +221,23 @@ export default async ({ expressApp }) => {
       { name: 'employeTrainingModel', model: require('../models/employe-training').default },
       { name: 'TrainingcalenderModel', model: require('../models/trainingcalender').default },
       { name: 'populationemployeModel', model: require('../models/populationemploye').default },
+      { name: 'decompteModel', model: require('../models/mobile_models/decompte').default },
+      { name: 'repertoryModel', model: require('../models/repertory').default },
+      { name: 'addressModel', model: require('../models/address').default },
+      { name: 'providerModel', model: require('../models/provider').default },
+      { name: 'customerModel', model: require('../models/customer').default },
+      { name: 'productLineModel', model: require('../models/product-line').default },
+      { name: 'codeModel', model: require('../models/code').default },
+      { name: 'accountModel', model: require('../models/account').default },
+      { name: 'subaccountModel', model: require('../models/subaccount').default },
+      { name: 'subaccountDetailModel', model: require('../models/subaccount-detail').default },
+
+      { name: 'chariotModel', model: require('../models/chariot').default },
+      { name: 'chariotDetailModel', model: require('../models/chariot-detail').default },
+      { name: 'accountOrderModel', model: require('../models/account-order').default },
       
+      { name: 'priceListQuantityModel', model: require('../models/mobile_models/price-list-quantity').default },
+      { name: 'priceListQuantityDetailModel', model: require('../models/mobile_models/price-list-quantity-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1035,21 +1043,21 @@ export default async ({ expressApp }) => {
   });
 
   require('../models/patient').default.hasOne(require('../models/audiometry').default, {
-    foreignKey: 'aud_pat_code',
+    foreignKey: 'audio_pat_code',
     sourceKey: 'pat_code',
   });
   require('../models/audiometry').default.belongsTo(require('../models/patient').default, {
-    foreignKey: 'aud_pat_code',
+    foreignKey: 'audio_pat_code',
     targetKey: 'pat_code',
   });
 
   require('../models/audiometry').default.hasOne(require('../models/audiogram').default, {
     foreignKey: 'audd_code',
-    sourceKey: 'aud_code',
+    sourceKey: 'audio_code',
   });
   require('../models/audiogram').default.belongsTo(require('../models/audiometry').default, {
     foreignKey: 'audd_code',
-    targetKey: 'aud_code',
+    targetKey: 'audio_code',
   });
 
   require('../models/site').default.hasOne(require('../models/item-model').default, {
@@ -1116,7 +1124,14 @@ export default async ({ expressApp }) => {
     sourceKey: 'tc_vend',
   });
 
-
+  require('../models/customer').default.hasMany(require('../models/account-order').default, {
+    foreignKey: 'ao_cust',
+    sourceKey: 'cm_addr',
+  });
+  require('../models/account-order').default.belongsTo(require('../models/customer').default, {
+    foreignKey: 'ao_cust',
+    targetKey: 'cm_addr',
+  });
   
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');

@@ -1,4 +1,6 @@
 import MobileSettingsService from "../../services/mobile-settings"
+import ProfileMobileService from "../../services/profile-mobile"
+import ProductPageService from "../../services/product-page"
 import RoleService from "../../services/role"
 import { Router, Request, NextFunction, Response } from "express"
 import { Container } from "typedi"
@@ -269,7 +271,38 @@ const getAllPriceList = async (req: Request, res: Response, next: NextFunction) 
 }
 
 
+const getPPProfile = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling get visit list  endpoint")
 
+    const profileMobileServiceInstanse = Container.get(ProfileMobileService)
+    const productPageServiceInstanse = Container.get(ProductPageService)
+    
+    try{    
+        console.log(req.body)
+            const pages = await profileMobileServiceInstanse.findPPP({...req.body, })
+            let result=[]
+            for(let pp of pages) {
+                const product_page_code = pp.product_page_code
+                const page = await productPageServiceInstanse.findOneByCode(product_page_code)
+            result.push({id:pp.id,profile_code:pp.profile_code,product_page_code: pp.product_page_code,description:page.description,rank:pp.rank})
+                
+
+            }
+   // console.log(result)
+                return res
+                    .status(202)
+                    .json({
+                        data:result
+                    })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
 
 
 
@@ -283,5 +316,6 @@ export default {
     createPaymentMethods,
     getPriceList,
     getAllPriceList,
-    createPriceList
+    createPriceList,
+    getPPProfile,
 }

@@ -191,5 +191,14 @@ export default class UnloadRequestService {
         }
     }
 
-    
+    public async findOne(query: any): Promise<any> {
+        try {
+            const loadRequests = await this.unloadRequestModel.findOne({ where: query})
+            this.logger.silly("find all unloadRequests")
+            return loadRequests
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
 }

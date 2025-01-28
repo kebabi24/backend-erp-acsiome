@@ -117,6 +117,9 @@ import barecodeInfos from './routes/barecode_infos'
 import financialcharge from './routes/financialcharge'
 import populationemploye from './routes/populationemploye'
 import trainingcalender from './routes/trainingcalender';
+import decompte from './routes/decompte';
+import accountOrder from './routes/account-order';
+import priceListQuantity from './routes/price-list-quantity';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -237,6 +240,8 @@ export default () => {
   financialcharge(app);
   populationemploye(app);
   trainingcalender(app)
-  
+  decompte(app)
+  accountOrder(app)
+  priceListQuantity(app)
   return app;
 };

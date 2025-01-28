@@ -13,4 +13,5 @@ export default (app: Router) => {
     route.get("/getNotifications", controller.getNotifications)
     route.get("/getWilayasCommunes", controller.getWilayasCommunes)
     route.get("/getValidePromo", controller.getValidePromo)
+    route.post("/loginMobile", controller.loginMobile)
 }

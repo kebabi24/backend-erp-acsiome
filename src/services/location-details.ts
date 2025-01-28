@@ -134,4 +134,14 @@ export default class locationDetailService {
       throw e;
     }
   }
+  public async findprice(query: any): Promise<any> {
+    try {
+      const locationDetail = await this.locationDetailModel.findAll(query,{include: this.itemModel},);
+      this.logger.silly('find All inventoryTransactions mstr');
+      return locationDetail;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

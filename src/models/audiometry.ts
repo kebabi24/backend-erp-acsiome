@@ -14,11 +14,11 @@ const Audiometry = sequelize.define(
       unique: true,
     },
 
-    aud_code: {
+    audio_code: {
         type: Sequelize.STRING,
         unique: true,
     },
-    aud_pat_code: {
+    audio_pat_code: {
         type: Sequelize.STRING,
         references: {
             model: "pat_mstr",
@@ -27,12 +27,12 @@ const Audiometry = sequelize.define(
     },
 
 
-    aud_date: Sequelize.DATEONLY, 
+    audio_date: Sequelize.DATEONLY, 
     
     ...base,
     },
     {
-    tableName: 'aud_mstr',
+    tableName: 'audio_mstr',
     },
 );
 export default Audiometry;

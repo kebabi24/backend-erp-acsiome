@@ -11,5 +11,6 @@ export default (app: Router) => {
     route.get("/getPageProducts/:product_page_code", controller.findPageProductsByPageCode)
     route.get("/", controller.findAllProductPages)
     route.post("/updateProfileProductsPages", controller.updateProfileProductPages)
+    route.put("/:product_page_code", controller.updatePage)
    
 }

@@ -19,8 +19,8 @@ const Audiogram = sequelize.define(
     audd_code: {
         type: Sequelize.STRING,
         references: {
-            model: "aud_mstr",
-            key: "aud_code",
+            model: "audio_mstr",
+            key: "audio_code",
         },
     },
 

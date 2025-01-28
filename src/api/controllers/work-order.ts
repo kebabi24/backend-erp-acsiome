@@ -730,6 +730,45 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findBybroyage = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  SOME wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const wos = await workOrderServiceInstance.find({ wo_routing:{[Op.startsWith]:'B'} , wo_domain: user_domain});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByextrusion = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  SOME wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const wos = await workOrderServiceInstance.find({ wo_routing:{[Op.startsWith]:'U'} , wo_domain: user_domain});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBythermo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  SOME wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    const wos = await workOrderServiceInstance.find({ wo_routing:{[Op.startsWith]:'M'} , wo_domain: user_domain});
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByPrograms = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  SOME wo endpoint');
@@ -2322,6 +2361,9 @@ export default {
   findOne,
   findAll,
   findBy,
+  findBybroyage,
+  findByextrusion,
+  findBythermo,
   findByPrograms,
   findByDistinct,
   findByOne,

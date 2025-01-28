@@ -58,6 +58,7 @@ const Role = sequelize.define(
     device_id: { type: Sequelize.STRING },
     pricelist_code : { type :Sequelize.STRING}, 
     role_domain: { type: Sequelize.STRING },
+    solde:{ type: Sequelize.DECIMAL, defaultValue: 0 },
     // role_loc_from , string   , stock details - ld_det , stock info  - loc_mstr
     // ...base,
   },

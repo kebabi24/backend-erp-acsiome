@@ -25,8 +25,11 @@ export default (app: Router) => {
   route.post('/findbankgrp', controller.findBkhGrp);
   route.post('/addbkhtransfert', controller.bkhTr);
   route.post('/addbkhpayment', controller.bkhP);
+  route.post('/addbkhpaymentdet', controller.bkhPDet);
   route.post('/addbkhtransfertc', controller.bkhTrC);
+  route.post('/addbkhtransfertcdet', controller.bkhTrCDet);
   route.post('/findbkh', controller.findBKHBy);
+  route.post('/findbkhtr', controller.findBKHTRBy);
   
   route.get('/', controller.findAll);
   

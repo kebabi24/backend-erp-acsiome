@@ -2,12 +2,14 @@ import BankService from '../../services/bank';
 import BankDetailService from '../../services/bank-detail';
 import BkhService from '../../services/bkh';
 import PosOrder from '../../services/pos-order';
-
+import DecompteService from '../../services/decompte';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import sequenceService from '../../services/sequence';
 import serviceMobile from '../../services/mobile-service';
 import { Op, Sequelize } from 'sequelize';
+import SequenceService from '../../services/sequence';
+import RoleService from '../../services/role';
 'use strict';
 const nodemailer = require('nodemailer');
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -63,7 +65,7 @@ const bkhTr = async (req: Request, res: Response, next: NextFunction) => {
       bkh_effdate: req.body.date,
       bkh_type: 'T',
       bkh_balance: req.body.amt_tr,
-      bk_2000: req.body.amt_rl,
+      bkh_amt: req.body.amt_rl,
       bkh_site: req.body.site,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -125,16 +127,16 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
         await bankServiceInstance.update(
           {
             bk_balance: bank.bk_balance,
-            bk_2000: bank.bk_2000,
-            bk_1000: bank.bk_1000,
-            bk_0500: bank.bk_0500,
-            bk_0200: bank.bk_0200,
-            bk_p200: bank.bk_p200,
-            bk_p100: bank.bk_p100,
-            bk_p050: bank.bk_p050,
-            bk_p020: bank.bk_p020,
-            bk_p010: bank.bk_p010,
-            bk_p005: bank.bk_p005,
+            bkh_2000: bank.bkh_2000,
+            bkh_1000: bank.bkh_1000,
+            bkh_0500: bank.bkh_0500,
+            bkh_0200: bank.bkh_0200,
+            bkh_p200: bank.bkh_p200,
+            bkh_p100: bank.bkh_p100,
+            bkh_p050: bank.bkh_p050,
+            bkh_p020: bank.bkh_p020,
+            bkh_p010: bank.bkh_p010,
+            bkh_p005: bank.bkh_p005,
           },
           { bk_code: bank.bk_code, bk_domain: user_domain },
         );
@@ -145,16 +147,16 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           bkh_balance: bank.bk_balance,
           bkh_date: new Date(),
           bkh_type: 'O',
-          bk_2000: bank.bk_2000,
-          bk_1000: bank.bk_1000,
-          bk_0500: bank.bk_0500,
-          bk_0200: bank.bk_0200,
-          bk_p200: bank.bk_p200,
-          bk_p100: bank.bk_p100,
-          bk_p050: bank.bk_p050,
-          bk_p020: bank.bk_p020,
-          bk_p010: bank.bk_p010,
-          bk_p005: bank.bk_p005,
+          bkh_2000: bank.bkh_2000,
+          bkh_1000: bank.bkh_1000,
+          bkh_0500: bank.bkh_0500,
+          bkh_0200: bank.bkh_0200,
+          bkh_p200: bank.bkh_p200,
+          bkh_p100: bank.bkh_p100,
+          bkh_p050: bank.bkh_p050,
+          bkh_p020: bank.bkh_p020,
+          bkh_p010: bank.bkh_p010,
+          bkh_p005: bank.bkh_p005,
           bkh_effdate: currentService.service_period_activate_date,
         });
       }
@@ -171,16 +173,16 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           {
             bkh_domain: user_domain,
             bk_balance: bank.bk_balance,
-            bk_2000: bank.bk_2000,
-            bk_1000: bank.bk_1000,
-            bk_0500: bank.bk_0500,
-            bk_0200: bank.bk_0200,
-            bk_p200: bank.bk_p200,
-            bk_p100: bank.bk_p100,
-            bk_p050: bank.bk_p050,
-            bk_p020: bank.bk_p020,
-            bk_p010: bank.bk_p010,
-            bk_p005: bank.bk_p005,
+            bkh_2000: bank.bkh_2000,
+            bkh_1000: bank.bkh_1000,
+            bkh_0500: bank.bkh_0500,
+            bkh_0200: bank.bkh_0200,
+            bkh_p200: bank.bkh_p200,
+            bkh_p100: bank.bkh_p100,
+            bkh_p050: bank.bkh_p050,
+            bkh_p020: bank.bkh_p020,
+            bkh_p010: bank.bkh_p010,
+            bkh_p005: bank.bkh_p005,
           },
           { bk_code: bank.bk_code, bk_domain: user_domain },
         );
@@ -191,16 +193,16 @@ const Bk = async (req: Request, res: Response, next: NextFunction) => {
           bkh_balance: bank.bk_balance,
           bkh_date: new Date(),
           bkh_type: 'C',
-          bk_2000: bank.bk_2000,
-          bk_1000: bank.bk_1000,
-          bk_0500: bank.bk_0500,
-          bk_0200: bank.bk_0200,
-          bk_p200: bank.bk_p200,
-          bk_p100: bank.bk_p100,
-          bk_p050: bank.bk_p050,
-          bk_p020: bank.bk_p020,
-          bk_p010: bank.bk_p010,
-          bk_p005: bank.bk_p005,
+          bkh_2000: bank.bkh_2000,
+          bkh_1000: bank.bkh_1000,
+          bkh_0500: bank.bkh_0500,
+          bkh_0200: bank.bkh_0200,
+          bkh_p200: bank.bkh_p200,
+          bkh_p100: bank.bkh_p100,
+          bkh_p050: bank.bkh_p050,
+          bkh_p020: bank.bkh_p020,
+          bkh_p010: bank.bkh_p010,
+          bkh_p005: bank.bkh_p005,
           bkh_effdate: currentService.service_period_activate_date,
         });
         const service = await ServiceInstance.update(
@@ -689,7 +691,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
     const bkhServiceInstance = Container.get(BkhService);
     const bankServiceInstance = Container.get(BankService);
     const serviceMobileServiceInstance = Container.get(serviceMobile);
-    
+    const decompteService = Container.get(DecompteService)
    
     const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
     const bk = await bkhServiceInstance.create({
@@ -702,7 +704,7 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
       bkh_bank: req.body.bank,
       bkh_type: 'P',
       bkh_balance: banks.bk_balance,
-      bk_2000: req.body.amt_tr,
+      bkh_amt: req.body.amt_tr,
       bkh_site: req.body.site,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -710,7 +712,11 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
 
-    
+    const decompte = await decompteService.create({dec_code:req.body.service_code,dec_role:req.body.role,dec_desc:"Versement",dec_amt:req.body.amt_tr,dec_type:"P",dec_effdate:new Date(),dec_domain:user_domain,
+    created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin, });
     await bankServiceInstance.update(
       {
         bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
@@ -734,6 +740,105 @@ const bkhP = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const bkhPDet = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService);
+    const serviceMobileServiceInstance = Container.get(serviceMobile);
+    const decompteService = Container.get(DecompteService)
+    const  roleServiceInstance = Container.get(RoleService)
+    const sequenceServiceInstance = Container.get(SequenceService)
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AR', seq_type: 'AR' });
+        let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { id: seq.id, seq_type: 'AR', seq_seq: 'AR', seq_domain: user_domain },
+    );
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
+    const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_code: nbr,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank,
+      bkh_type: 'P',
+      bkh_balance: Number(banks.bk_balance),
+      bkh_amt: req.body.amt_tr,
+      bkh_site: req.body.site,
+      bkh_2000: req.body.bkh_2000,
+      bkh_1000: req.body.bkh_1000,
+      bkh_0500: req.body.bkh_0500,
+      bkh_0200: req.body.bkh_0200,
+      bkh_p200: req.body.bkh_p200,
+      bkh_p100: req.body.bkh_p100,
+      bkh_p050: req.body.bkh_p050,
+      bkh_p020: req.body.bkh_p020,
+      bkh_p010: req.body.bkh_p010,
+      bkh_p005: req.body.bkh_p005,
+      bkh_bon:  req.body.bkh_bon,
+      bkh_rmks: req.body.bkh_rmks, 
+      bkh_terms: req.body.bkh_terms,
+      bkh_cheque: req.body.bkh_cheque,
+      
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    const decompte = await decompteService.create({dec_code:nbr,dec_role:req.body.role,dec_desc:"Versement",dec_amt:req.body.amt_tr,dec_type:"P",dec_effdate:new Date(),dec_domain:user_domain,
+    created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin, });
+    
+            const role = await roleServiceInstance.findOne({ role_code: req.body.role});
+  
+            await roleServiceInstance.updated(   {solde: role.solde - Number(req.body.amt_tr)},{role_code:req.body.role})      
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
+        bk_2000: Number(banks.bk_2000) + Number(req.body.bkh_2000),
+        bk_1000: Number(banks.bk_1000) + Number(req.body.bkh_1000),
+        bk_0500: Number(banks.bk_0500) + Number(req.body.bkh_0500),
+        bk_0200: Number(banks.bk_0200) + Number(req.body.bkh_0200),
+        bk_p200: Number(banks.bk_p200) + Number(req.body.bkh_p200),
+        bk_p100: Number(banks.bk_p100) + Number(req.body.bkh_p100),
+        bk_p050: Number(banks.bk_p050) + Number(req.body.bkh_p050),
+        bk_p020: Number(banks.bk_p020) + Number(req.body.bkh_p020),
+        bk_p010: Number(banks.bk_p010) + Number(req.body.bkh_p010),
+        bk_p005: Number(banks.bk_p005) + Number(req.body.bkh_p005),
+        bk_bon:  Number(banks.bk_bon)  + Number(req.body.bkh_bon),
+        bk_cheque:  Number(banks.bk_cheque)  + Number(req.body.bkh_cheque),
+      },
+      {id: banks.id},
+    );
+    if(req.body.service_code != null) {
+    const service = await serviceMobileServiceInstance.findOne({ service_code: req.body.service_code });
+   
+    await serviceMobileServiceInstance.update(
+      {
+        sum_versement:  Number(req.body.amt_tr),
+        service_versement_open: false
+      },
+      {id: service.id},
+    );
+    }
+    return res.status(201).json({ message: 'created succesfully', data: nbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
@@ -756,7 +861,7 @@ const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
       chr02: req.body.bank_dest,
       bkh_type: 'ISS',
       bkh_balance: banks.bk_balance,
-      bk_2000: - Number(req.body.amt_tr),
+      bkh_amt: - Number(req.body.amt_tr),
       bkh_site: req.body.site,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -785,7 +890,7 @@ const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
       chr02: req.body.bank,
       bkh_type: 'RCT',
       bkh_balance: bankdets.bk_balance,
-      bk_2000:  Number(req.body.amt_tr),
+      bkh_amt:  Number(req.body.amt_tr),
       bkh_site: req.body.site,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -808,6 +913,139 @@ const bkhTrC = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService);
+    const sequenceServiceInstance = Container.get(SequenceService)
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AR', seq_type: 'AR' });
+        let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { id: seq.id, seq_type: 'AR', seq_seq: 'AR', seq_domain: user_domain },
+    );
+  
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
+    const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_code: nbr,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank,
+      chr02: req.body.bank_dest,
+      chr03: req.body.chr03,
+      bkh_type: 'ISS',
+      bkh_balance: banks.bk_balance,
+      bkh_amt: - Number(req.body.amt_tr),
+      bkh_site: req.body.site,
+      bkh_2000: req.body.bkh_2000,
+      bkh_1000: req.body.bkh_1000,
+      bkh_0500: req.body.bkh_0500,
+      bkh_0200: req.body.bkh_0200,
+      bkh_p200: req.body.bkh_p200,
+      bkh_p100: req.body.bkh_p100,
+      bkh_p050: req.body.bkh_p050,
+      bkh_p020: req.body.bkh_p020,
+      bkh_p010: req.body.bkh_p010,
+      bkh_p005: req.body.bkh_p005,
+      bkh_bon:  req.body.bkh_bon,
+      bkh_cheque: req.body.bkh_cheque,
+      
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+   
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) - Number(req.body.amt_tr),
+        bk_2000: Number(banks.bk_2000) - Number(req.body.bkh_2000),
+        bk_1000: Number(banks.bk_1000) - Number(req.body.bkh_1000),
+        bk_0500: Number(banks.bk_0500) - Number(req.body.bkh_0500),
+        bk_0200: Number(banks.bk_0200) - Number(req.body.bkh_0200),
+        bk_p200: Number(banks.bk_p200) - Number(req.body.bkh_p200),
+        bk_p100: Number(banks.bk_p100) - Number(req.body.bkh_p100),
+        bk_p050: Number(banks.bk_p050) - Number(req.body.bkh_p050),
+        bk_p020: Number(banks.bk_p020) - Number(req.body.bkh_p020),
+        bk_p010: Number(banks.bk_p010) - Number(req.body.bkh_p010),
+        bk_p005: Number(banks.bk_p005) - Number(req.body.bkh_p005),
+        bk_bon:  Number(banks.bk_bon)  - Number(req.body.bkh_bon),
+        bk_cheque: Number(banks.bk_cheque)  - Number(req.body.bkh_cheque),
+       
+      },
+      {id: banks.id},
+    );
+    const bankdets = await bankServiceInstance.findOne({ bk_code: req.body.bank_dest,  bk_domain: user_domain });
+    
+    const bkd = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_code: nbr,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank_dest,
+      chr02: req.body.bank,
+      chr03: req.body.chr03,
+      bkh_type: 'RCT',
+      bkh_balance: bankdets.bk_balance,
+      bkh_amt:  Number(req.body.amt_tr),
+      bkh_site: req.body.site,
+      bkh_2000: req.body.bkh_2000,
+      bkh_1000: req.body.bkh_1000,
+      bkh_0500: req.body.bkh_0500,
+      bkh_0200: req.body.bkh_0200,
+      bkh_p200: req.body.bkh_p200,
+      bkh_p100: req.body.bkh_p100,
+      bkh_p050: req.body.bkh_p050,
+      bkh_p020: req.body.bkh_p020,
+      bkh_p010: req.body.bkh_p010,
+      bkh_p005: req.body.bkh_p005,
+      bkh_bon:  req.body.bkh_bon,
+      bkh_cheque: req.body.bkh_cheque,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(bankdets.bk_balance) + Number(req.body.amt_tr),
+        bk_2000: Number(bankdets.bk_2000) + Number(req.body.bkh_2000),
+        bk_1000: Number(bankdets.bk_1000) + Number(req.body.bkh_1000),
+        bk_0500: Number(bankdets.bk_0500) + Number(req.body.bkh_0500),
+        bk_0200: Number(bankdets.bk_0200) + Number(req.body.bkh_0200),
+        bk_p200: Number(bankdets.bk_p200) + Number(req.body.bkh_p200),
+        bk_p100: Number(bankdets.bk_p100) + Number(req.body.bkh_p100),
+        bk_p050: Number(bankdets.bk_p050) + Number(req.body.bkh_p050),
+        bk_p020: Number(bankdets.bk_p020) + Number(req.body.bkh_p020),
+        bk_p010: Number(bankdets.bk_p010) + Number(req.body.bkh_p010),
+        bk_p005: Number(bankdets.bk_p005) + Number(req.body.bkh_p005),
+        bk_bon:  Number(bankdets.bk_bon)  + Number(req.body.bkh_bon),
+        bk_cheque:  Number(bankdets.bk_cheque)  + Number(req.body.bkh_cheque),
+      },
+      {id: bankdets.id},
+    );
+
+    return res.status(201).json({ message: 'created succesfully', data: nbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findBKHBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -820,6 +1058,31 @@ const findBKHBy = async (req: Request, res: Response, next: NextFunction) => {
    
     const bkhs = await bkhServiceInstance.find({
       ...req.body,
+      bkh_domain: user_domain,
+    });
+    
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBKHTRBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'P'},
       bkh_domain: user_domain,
     });
     
@@ -874,7 +1137,10 @@ export default {
   findBkhGrp,
   bkhTr,
   bkhP,
+  bkhPDet,
   bkhTrC,
+  bkhTrCDet,
   findBKHBy,
+  findBKHTRBy,
   findTransfertBy
 };

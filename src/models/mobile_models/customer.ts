@@ -89,7 +89,11 @@ const CustomerMobile = sequelize.define(
     },
     pricelist_code: Sequelize.STRING,
     payment_method_code:Sequelize.STRING,
-    limit_credit: {type: Sequelize.FLOAT, defaultValue:0}
+    limit_credit: {type: Sequelize.FLOAT, defaultValue:0},
+    nif: Sequelize.STRING,
+    nis: Sequelize.STRING,
+    ai : Sequelize.STRING,
+    rc : Sequelize.STRING,
     // ...base,
   },
   {

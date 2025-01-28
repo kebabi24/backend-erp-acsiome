@@ -21,8 +21,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   
     const audiom = await audiometryServiceInstance.create({
       ...audiometry,
-      aud_domain : user_domain,
-      aud_date: new Date(),
+      audio_domain : user_domain,
+      audio_date: new Date(),
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -32,7 +32,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     for (let entry of audiogram) {
     const audiog = await audiogramServiceInstance.create({
       ...entry,
-      audd_code: audiometry.aud_code,
+      audd_code: audiometry.audio_code,
       audd_domain : user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -71,7 +71,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const audiometryServiceInstance = Container.get(AudiometryService);
-    const audiometrys = await audiometryServiceInstance.findall({aud_domain:user_domain});
+    const audiometrys = await audiometryServiceInstance.findall({audio_domain:user_domain});
 
     return res.status(200).json({ message: 'fetched succesfully', data: audiometrys });
   } catch (e) {
@@ -88,7 +88,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const audiometryServiceInstance = Container.get(AudiometryService);
-    const audiometrys = await audiometryServiceInstance.find({ ...req.body,aud_domain:user_domain });
+    const audiometrys = await audiometryServiceInstance.find({ ...req.body,audio_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: audiometrys });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -103,7 +103,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const audiometryServiceInstance = Container.get(AudiometryService);
-    const audiometrys = await audiometryServiceInstance.findOne({ ...req.body,aud_domain:user_domain });
+    const audiometrys = await audiometryServiceInstance.findOne({ ...req.body,audio_domain:user_domain });
     return res.status(200).json({ message: 'fetched succesfully', data: audiometrys });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -121,7 +121,7 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const audiometryServiceInstance = Container.get(AudiometryService);
 
     const audiometrys = await audiometryServiceInstance.find({
-      ...req.body,aud_domain:user_domain,
+      ...req.body,audio_domain:user_domain,
     });
     return res.status(202).json({
       message: 'sec',

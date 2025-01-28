@@ -32,9 +32,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const dealServiceInstance = Container.get(DealService);
     const itemServiceInstance = Container.get(itemService);
     const locationServiceInstance = Container.get(LocationService);
-    const { Project, ProjectDetails, docs_codes } = req.body;
+    const { Project, ProjectDetails } = req.body;
     const pj = await projectServiceInstance.create({
       ...Project,
+      pm_status:'R',
       pm_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -42,34 +43,34 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     /*creation location*/
-    const loc = await locationServiceInstance.create({
-      loc_loc : Project.pm_code,
-      loc_site: Project.pm_site,
-      loc_project : Project.pm_code,
-      loc_status : "CONFORME",
-      loc_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
+    // const loc = await locationServiceInstance.create({
+    //   loc_loc : Project.pm_code,
+    //   loc_site: Project.pm_site,
+    //   loc_project : Project.pm_code,
+    //   loc_status : "CONFORME",
+    //   loc_domain: user_domain,
+    //   created_by: user_code,
+    //   created_ip_adr: req.headers.origin,
+    //   last_modified_by: user_code,
+    //   last_modified_ip_adr: req.headers.origin,
+    // });
   
     /*creation location*/
     /* creation specification documents*/
 
     const project_code = Project.pm_code;
     let data = [];
-    docs_codes.forEach(doc => {
-      console.log('*************************');
-      console.log(doc);
-      data.push({
-        pjd_nbr: project_code,
-        mp_nbr: doc.code_doc,
-        pjd_trigger: doc.trigger,
-        pjd_domain: user_domain,
-      });
-    });
-    const pjDetails = await projectServiceInstance.createDocsDetails(data);
+    // docs_codes.forEach(doc => {
+    //   console.log('*************************');
+    //   console.log(doc);
+    //   data.push({
+    //     pjd_nbr: project_code,
+    //     mp_nbr: doc.code_doc,
+    //     pjd_trigger: doc.trigger,
+    //     pjd_domain: user_domain,
+    //   });
+    // });
+    // const pjDetails = await projectServiceInstance.createDocsDetails(data);
 
     for (let entry of ProjectDetails) {
       entry = {
@@ -97,81 +98,81 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       }
     }
     /*so*/
-    let cr_terms: String;
-    const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
-    cr_terms = customer.cm_cr_terms;
+    // let cr_terms: String;
+    // const customer = await customerServiceInstance.findOne({ cm_addr: Project.pm_cust });
+    // cr_terms = customer.cm_cr_terms;
 
-    if (Project.pm_deal != null) {
-      const deal = await dealServiceInstance.findOne({ deal_code: Project.pm_deal });
+    // if (Project.pm_deal != null) {
+    //   const deal = await dealServiceInstance.findOne({ deal_code: Project.pm_deal });
 
-      cr_terms = deal.deal_pay_meth;
-    }
+    //   cr_terms = deal.deal_pay_meth;
+    // }
 
-    let SaleOrder = {
-      so_category: 'SO',
-      so_cust: Project.pm_cust,
-      so_ord_date: Project.pm_ord_date,
-      so_due_date: Project.pm_ord_date,
-      so_po: Project.pm_code,
-      so_amt: Project.pm_amt,
-      so_cr_terms: cr_terms,
-      so_curr: customer.cm_curr,
-      so_taxable: customer.address.ad_taxable,
-      so_taxc: customer.address.ad_taxc,
-      so_ex_rate: 1,
-      so_ex_rate2: 1,
-    };
-    let sodataset = [];
-    let type: String;
-    for (let data of ProjectDetails) {
-      const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
-      if (pt.pt_phantom) {
-        type = 'M';
-      } else {
-        type = null;
-      }
-      sodataset.push({
-        sod_line: data.pmd_line,
-        sod_part: pt.pt_part,
-        sod_um: pt.pt_um,
-        sod__chr01: data.pmd_task,
-        sod__chr02: data.pmd_bom_code,
-        sod_qty_ord: data.pmd_qty,
-        sod_qty_ret: data.int01,
-        sod_qty_cons: 0,
-        sod_desc: pt.pt_desc1,
-        sod_site: pt.pt_site,
-        sod_loc: pt.pt_loc,
-        sod_um_conv: 1,
-        sod_type: type,
-        sod_price: pt.pt_price,
-        sod_disc_pct: 0,
-        sod_tax_code: pt.pt_taxc,
-        sod_taxc: pt.taxe.tx2_tax_pct,
-        sod_taxable: pt.pt_taxable,
-      });
-    }
+    // let SaleOrder = {
+    //   so_category: 'SO',
+    //   so_cust: Project.pm_cust,
+    //   so_ord_date: Project.pm_ord_date,
+    //   so_due_date: Project.pm_ord_date,
+    //   so_po: Project.pm_code,
+    //   so_amt: Project.pm_amt,
+    //   so_cr_terms: cr_terms,
+    //   so_curr: customer.cm_curr,
+    //   so_taxable: customer.address.ad_taxable,
+    //   so_taxc: customer.address.ad_taxc,
+    //   so_ex_rate: 1,
+    //   so_ex_rate2: 1,
+    // };
+    // let sodataset = [];
+    // let type: String;
+    // for (let data of ProjectDetails) {
+    //   const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: data.pmd_part });
+    //   if (pt.pt_phantom) {
+    //     type = 'M';
+    //   } else {
+    //     type = null;
+    //   }
+    //   sodataset.push({
+    //     sod_line: data.pmd_line,
+    //     sod_part: pt.pt_part,
+    //     sod_um: pt.pt_um,
+    //     sod__chr01: data.pmd_task,
+    //     sod__chr02: data.pmd_bom_code,
+    //     sod_qty_ord: data.pmd_qty,
+    //     sod_qty_ret: data.int01,
+    //     sod_qty_cons: 0,
+    //     sod_desc: pt.pt_desc1,
+    //     sod_site: pt.pt_site,
+    //     sod_loc: pt.pt_loc,
+    //     sod_um_conv: 1,
+    //     sod_type: type,
+    //     sod_price: pt.pt_price,
+    //     sod_disc_pct: 0,
+    //     sod_tax_code: pt.pt_taxc,
+    //     sod_taxc: pt.taxe.tx2_tax_pct,
+    //     sod_taxable: pt.pt_taxable,
+    //   });
+    // }
 
-    const so = await saleOrderServiceInstance.create({
-      ...SaleOrder,
-      so_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-      last_modified_ip_adr: req.headers.origin,
-    });
-    for (let entry of sodataset) {
-      entry = {
-        ...entry,
-        sod_domain: user_domain,
-        sod_nbr: so.so_nbr,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      };
-      await saleOrderDetailServiceInstance.create(entry);
-    }
+    // const so = await saleOrderServiceInstance.create({
+    //   ...SaleOrder,
+    //   so_domain: user_domain,
+    //   created_by: user_code,
+    //   created_ip_adr: req.headers.origin,
+    //   last_modified_by: user_code,
+    //   last_modified_ip_adr: req.headers.origin,
+    // });
+    // for (let entry of sodataset) {
+    //   entry = {
+    //     ...entry,
+    //     sod_domain: user_domain,
+    //     sod_nbr: so.so_nbr,
+    //     created_by: user_code,
+    //     created_ip_adr: req.headers.origin,
+    //     last_modified_by: user_code,
+    //     last_modified_ip_adr: req.headers.origin,
+    //   };
+    //   await saleOrderDetailServiceInstance.create(entry);
+    // }
 
     /*so*/
 

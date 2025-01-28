@@ -5,6 +5,7 @@ import SaleShiperService from '../../services/sale-shiper';
 import InvoiceOrderService from '../../services/invoice-order';
 import AccountReceivableService from '../../services/account-receivable';
 import accountShiperService from '../../services/account-shiper';
+import AccountOrderService from '../../services/account-order';
 import costSimulationService from '../../services/cost-simulation';
 import AddressService from '../../services/address';
 import itemService from '../../services/item';
@@ -31,9 +32,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create sequence endpoint');
 
   try {
+    console.log(req.body.saleOrder.so_category)
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    
+    const accountOrderServiceInstance = Container.get(AccountOrderService);
+    const customerServiceInstance = Container.get(CustomerService)
     const { saleOrder, saleOrderDetail } = req.body;
     
     const so = await saleOrderServiceInstance.create({
@@ -44,7 +47,31 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    const cm = await customerServiceInstance.findOne({cm_addr: saleOrder.so_cust,cm_domain : user_domain,})
+    if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+         
+    const ao = await accountOrderServiceInstance.create({
+      ao_so_nbr:so.so_nbr,
+      ao_nbr : so.so_nbr,
+      ao_cust: saleOrder.so_cust,
+      ao_type:"I",
+      ao_amt:Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt), 
 
+      ao_po : saleOrder.so_po,
+
+      ao_rmks : saleOrder.so_rmks,
+      ao_curr : saleOrder.so_curr,
+      ao_ex_rate : saleOrder.so_ex_rate,
+      ao_ex_rate2 : saleOrder.so_ex_rate2,
+      ao_cr_terms : saleOrder.so_cr_terms,
+      
+      
+      ao_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
     //console.log(saleOrderDetail)
     for (let entry of saleOrderDetail) {
       entry = {
