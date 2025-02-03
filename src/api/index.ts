@@ -120,6 +120,7 @@ import trainingcalender from './routes/trainingcalender';
 import decompte from './routes/decompte';
 import accountOrder from './routes/account-order';
 import priceListQuantity from './routes/price-list-quantity';
+import timbre from './routes/timbre';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -243,5 +244,6 @@ export default () => {
   decompte(app)
   accountOrder(app)
   priceListQuantity(app)
+  timbre(app)
   return app;
 };

@@ -238,6 +238,7 @@ export default async ({ expressApp }) => {
       
       { name: 'priceListQuantityModel', model: require('../models/mobile_models/price-list-quantity').default },
       { name: 'priceListQuantityDetailModel', model: require('../models/mobile_models/price-list-quantity-detail').default },
+      { name: 'timbreModel', model: require('../models/timbre').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');

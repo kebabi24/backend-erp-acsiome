@@ -589,6 +589,22 @@ const findJob = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findAllTraining = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const trainings = await itemServiceInstance.findtraining({ where : {pt_domain:user_domain,pt_part_type:'FORMATION'},
+    attributes: ['id','pt_part','pt_desc1','pt_dsgn_grp','pt_draw','pt_group','pt_shelflife'],
+  });
+    return res.status(200).json({ message: 'fetched succesfully', data: trainings });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -609,4 +625,5 @@ export default {
   findByDetTr,
   updateDet,
   findJob,
+  findAllTraining,
 };
