@@ -36,6 +36,8 @@ async function startServer() {
     `);
   });
 
+ 
+
   const io = require('socket.io')(server);
   io.on('connection',userMobileController.getDataBack)
   // io.on('connection', socket => {
