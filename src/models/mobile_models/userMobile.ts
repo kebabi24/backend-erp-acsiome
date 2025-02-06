@@ -35,7 +35,7 @@ const UserMobile = sequelize.define(
         hold :   {type:Sequelize.BOOLEAN},
         user_phone : {type : Sequelize.STRING},
         solde:{ type: Sequelize.DECIMAL, defaultValue: 0 },
-
+        domain : Sequelize.STRING,
         // ...base,
     },
     {

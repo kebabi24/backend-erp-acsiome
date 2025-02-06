@@ -24,11 +24,13 @@ const moment = require('moment');
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { username } = req.headers;
+  const { user_domain } = req.headers;
   logger.debug('Calling Create user endpoint');
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
     const user = await userMobileServiceInstance.create({
       ...req.body,
+      domain:user_domain,
       // created_by:username,
       // created_ip_adr: req.headers.origin,
       // last_modified_by:username,
