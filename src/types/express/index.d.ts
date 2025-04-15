@@ -233,6 +233,7 @@ declare global {
     export type PriceListQuantityModel = S.Model;
     export type PriceListQuantityDetailModel = S.Model;
     export type TimbreModel = S.Model;
+    export type EndlocationDetailModel = S.Model;
    
   }
 }

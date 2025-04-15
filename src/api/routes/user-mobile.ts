@@ -16,6 +16,8 @@ export default (app: Router) => {
   route.get('/findvisits', controller.findAllVisits)
   route.get('/testHash', controller.testHash)
   route.post('/getDashboardData', controller.getDashboardAddData)
+
+  route.post('/getSalesDashboardData', controller.getSalesDashboardAddData)
   
   route.get('/:user_mobile_code', controller.findOne);
   route.get('/getPassword/:user_mobile_code', controller.findUserPassword);
@@ -40,6 +42,7 @@ export default (app: Router) => {
   route.post('/getAllInvoicesRole', controller.findAllInvoiceRole);
   route.post('/findallca', controller.findAllCA);
   route.post('/findsalestype', controller.findSalesType);
+  route.post('/findallsalesrole', controller.findAllSalesRoles)
   
   
 };

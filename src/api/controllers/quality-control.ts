@@ -107,6 +107,7 @@ const findOneSpecificationWithDetails = async (req: Request, res: Response, next
   logger.debug('Calling find one  code endpoint');
   try {
     const specificationService = Container.get(QualityControlService);
+    console.log(req.params)
     const { specification_code } = req.params;
     const specification = await specificationService.findSpecificationByCode(specification_code);
     const specificationDetails = await specificationService.findSpecificationDetailsByCode(specification_code);
@@ -119,20 +120,23 @@ const findOneSpecificationWithDetails = async (req: Request, res: Response, next
 
 const createTestsHistory = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-
-  logger.debug('Calling Create productPage endpoint with body: %o', req.body);
+  const{user_domain} = req.headers
+  logger.debug('Calling Create TestHistory endpoint with body: %o');
   try {
     const specificationService = Container.get(QualityControlService);
     // 
-
+//console.log("reqqq.",req.body)
     const testsHistory = req.body.testsHistory;
+    for(let test of testsHistory) {
+      test.mph_domain = user_domain
+    }
     // console.log(standardSpecificationHeader.mp_expire)
     // let date2 = new Date(standardSpecificationHeader.mp_expire)
     // console.log(date2)
 
     const createdTestsHistory = await specificationService.createTestsHistory(testsHistory);
-
-    return res.status(201).json({ message: 'created succesfully', data: { createdTestsHistory } });
+// console.log(createdTestsHistory)
+    return res.status(201).json({ message: 'created succesfully', data:  {createdTestsHistory}  });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

@@ -239,6 +239,8 @@ export default async ({ expressApp }) => {
       { name: 'priceListQuantityModel', model: require('../models/mobile_models/price-list-quantity').default },
       { name: 'priceListQuantityDetailModel', model: require('../models/mobile_models/price-list-quantity-detail').default },
       { name: 'timbreModel', model: require('../models/timbre').default },
+      { name: 'endlocationDetailModel', model: require('../models/mobile_models/endlocationdetail').default },
+      
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -710,9 +712,9 @@ export default async ({ expressApp }) => {
     foreignKey: 'ar_cust',
     sourceKey: 'cm_addr',
   });
-  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, {
+  require('../models/account-receivable').default.belongsTo(require('../models/address').default, {
     foreignKey: 'ar_cust',
-    targetKey: 'cm_addr',
+    targetKey: 'ad_addr',
   });
 
   require('../models/taxe').default.hasOne(require('../models/saleorder-detail').default, {
@@ -1137,15 +1139,15 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
-    await sequelizeConnection
-    .sync({ alter: true })
-    .then(() => {
-      console.log('database updated');
-    })
-    .catch(err => {
+    // await sequelizeConnection.sync().catch(err => { console.log(err)});
+    // await sequelizeConnection
+    // .sync({ alter: true })
+    // .then(() => {
+    //   console.log('database updated');
+    // })
+    // .catch(err => {
       
-    });
+    // });
 
   Logger.info('✌️ SYNC ALL MODELS');
   await expressLoader({ app: expressApp });

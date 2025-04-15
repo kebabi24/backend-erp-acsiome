@@ -78,6 +78,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const MobileServiceInstance = Container.get(MobileService);
     const services = await MobileServiceInstance.find({});
+   
     return res.status(200).json({ message: 'fetched succesfully', data: services });
   } catch (e) {
     logger.error('🔥 error: %o', e);

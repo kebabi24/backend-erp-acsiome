@@ -38,7 +38,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const RoleServiceInstance = Container.get(RoleService);
     const { id } = req.body;
-    
+    console.log('hjhjhj')
     const role = await RoleServiceInstance.findOne({ role_code: id });
     console.log('hello');
     return res.status(200).json({ message: 'fetched succesfully', data: role });
@@ -170,6 +170,7 @@ const findOneByDeviceId = async (req: Request, res: Response, next: NextFunction
   const logger = Container.get('logger');
   logger.debug('Calling find one  role endpoint');
   try {
+    console.log('jjjjjjjjjjjjjjjjjjj')
     const RoleServiceInstance = Container.get(RoleService);
     const { device_id } = req.params;
     const role = await RoleServiceInstance.findOne({ device_id });
@@ -181,6 +182,27 @@ const findOneByDeviceId = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+const findRoleFilter = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all roles endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhheeeeeeeeeeeeeeeeee")
+    const RoleServiceInstance = Container.get(RoleService);
+    const roles = await RoleServiceInstance.findS({order: [['id', 'ASC']],});
+    console.log(roles)
+    var data = [];
+    for (let role of roles) {
+      data.push({ value: role.role_code, label: role.role_code });
+    }
+    
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -192,4 +214,5 @@ export default {
   deleteOne,
   findOneByDeviceId,
   findBySomething,
+  findRoleFilter
 };

@@ -128,7 +128,7 @@ const updateUnoadRequestStauts20 = async (req: Request, res: Response, next: Nex
         let tot = 0
      
         for (let unloadrequest of unload_request_data) {
-            tot = tot +( Number(unloadrequest.pt_price) * Number(unloadrequest.qt_effected) * Number(1.2019))
+            tot = tot +( Number(unloadrequest.pt_price) * Number(unloadrequest.qt_effected) * Number(1.2138))
             const ld = await locationDetailService.findOne({ld_site:unload.role_site,ld_loc:unload.role_loc,ld_part:unloadrequest.product_code,
             ld_lot:unloadrequest.lot
             })

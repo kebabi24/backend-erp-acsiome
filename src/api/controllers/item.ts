@@ -13,6 +13,9 @@ import sequelize from '../../loaders/sequelize';
 import { isNull } from 'lodash';
 import { cpuUsage } from 'process';
 import ItemDetailService from '../../services/item-detail';
+import DecompteService from '../../services/decompte';
+import RoleService from '../../services/role';
+import locationService from '../../services/location';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -605,6 +608,79 @@ const findAllTraining = async (req: Request, res: Response, next: NextFunction) 
     return next(e);
   }
 };
+const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling update one  job endpoint');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const decompteServiceInstance = Container.get(DecompteService);
+    const locationServiceInstance = Container.get(locationService);
+    const roleServiceInstance = Container.get(RoleService);
+    
+    const { Details } = req.body;
+    
+    const locs = await locationServiceInstance.find({loc_domain: user_domain})
+
+      for(let loc of locs) {
+       // console.log(loc.loc_loc)
+        const locdets = await locationDetailServiceInstance.find({ld_loc:loc.loc_loc, ld_site: loc.loc_site, ld_qty_oh: {[Op.gt]: 0},ld_domain: user_domain})
+       let  amt = 0
+        for(let locdet of locdets) {
+          const indexpart =  Details.findIndex(({ part }) => part == locdet.ld_part);
+         // console.log(indexpart, locdet.ld_part, locdet.ld_qty_oh)
+          if(indexpart >= 0) {
+            amt = amt + ((Details[indexpart].new_price *  1.2138) -(Details[indexpart].old_price  * 1.19)) * locdet.ld_qty_oh
+          }
+
+        }
+       // console.log(amt,loc.loc_loc)
+        const role = await roleServiceInstance.findOne({role_loc: loc.loc_loc, role_domain : user_domain,role_site:loc.loc_site})
+        if(role != null) {
+      //  console.log(role.role_code)
+        const decompte = await decompteServiceInstance.create({dec_code:"Ajust Prix",dec_role:role.role_code,dec_desc:"Ajustement Prix",dec_amt:amt,dec_type:"A",dec_effdate:new Date(),dec_domain:user_domain})
+        
+        await roleServiceInstance.updated(   {solde: Number(role.solde) + Number(amt)},{role_code:role.role_code})      
+        }
+    
+
+      }
+         for(let det of Details) {
+          const it = await itemServiceInstance.update(
+            { pt_price: det.new_price, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+            { pt_part: det.part },
+          );
+         }
+    
+    return res.status(200).json({ message: 'fetched succesfully', /*data: it*/ });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findPart = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const codes = await itemServiceInstance.find({ pt_domain:user_domain});
+   
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.pt_part, label: code.pt_desc1 });
+    }
+   
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -626,4 +702,6 @@ export default {
   updateDet,
   findJob,
   findAllTraining,
+  updatePrice,
+  findPart
 };

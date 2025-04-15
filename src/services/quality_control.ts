@@ -109,6 +109,7 @@ export default class QualityControl {
 
   public async createTestsHistory(data: any): Promise<any> {
     try {
+      //console.log(data)
       const testsHistory = await this.specificationTestHistoryModel.bulkCreate(data);
       this.logger.silly('testsHistory created ', testsHistory);
       return testsHistory;

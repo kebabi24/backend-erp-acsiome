@@ -10,6 +10,10 @@ import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
 import ChariotService from '../../services/chariot';
 import ChariotDetailService from '../../services/chariot-detail';
+import locationDetailService from '../../services/location-details';
+import {QueryTypes} from 'sequelize'
+
+
 const findAllRoles = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  code endpoint');
@@ -405,12 +409,60 @@ const findAllLoadRequeusts40 = async (req: Request, res: Response, next: NextFun
 const updateLoadRequests4O = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find one  code endpoint');
+  const { user_domain } = req.headers;
+  const { user_code } = req.headers;
   try {
+   
     const loadRequestService = Container.get(LoadRequestService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
     const codeService = Container.get(CodeService);
     const loadRequestsCodes = req.body.load_requests_codes;
-    const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequestsCodes, 40);
+    const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequestsCodes, 30);
 
+    /*updqte ld_det */
+    const LoadRequeust = await loadRequestService.findLoadRequest({load_request_code:loadRequestsCodes});
+
+   const loadRequestDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(loadRequestsCodes);
+    console.log(loadRequestDetails)
+
+    for(let lrdet of loadRequestDetails) {
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_part: lrdet.product_code,
+        ld_lot: lrdet.lot,
+        ld_site: LoadRequeust.role_site,
+        ld_loc: LoadRequeust.role_loc,
+        //ld_ref:item.tr_ref,
+        ld_domain:user_domain,
+      });
+      if (ld) {
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(lrdet.qt_effected),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      } else {
+        await locationDetailServiceInstance.create({
+          ld_part: lrdet.product_code,
+          ld_lot: lrdet.lot,
+          ld_site: LoadRequeust.role_site,
+          ld_loc: LoadRequeust.role_loc,
+         // ld_date: new Date(),
+          ld_qty_oh: Number(lrdet.qt_effected),
+          
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+          ld_domain: user_domain,
+          
+        });
+      }
+    }
+
+    /*updqte ld_det */
 /* export */
 
     const code = await codeService.findOne({code_fldname:"export-chargement",code_value:"chg"});
@@ -670,7 +722,7 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     let tot = 0
     for (let line of loadLine) {
 console.log(line.pt_price,line.qt_effected)
-      tot = tot +( Number(line.pt_price) * Number(line.qt_effected) * Number(1.2019))
+      tot = tot +( Number(line.pt_price) * Number(line.qt_effected) * Number(1.2138))
     }
 
     const lr = await loadRequestService.findLoadRequestsByRoleCode(load_request_code);
@@ -1106,6 +1158,134 @@ const getLoadRequest = async (req: Request, res: Response, next: NextFunction) =
     return next(e);
   }
 };
+const createUnLoadRequestDetailsScan = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const itemServiceInstance = Container.get(ItemService);
+    const chariotDetailServiceInstance = Container.get(ChariotDetailService);
+    const chariotServiceInstance = Container.get(ChariotService);
+//console.log("req.body",req.body)
+    const load_request_details = req.body.load_request_details;
+    const load_request_code = load_request_details[0].load_request_code
+    const load_request_lines = req.body.load_request_lines;
+    const chariotdetail = req.body.chariotdetail
+     console.log("chariotdetail",chariotdetail);
+     const char = await chariotServiceInstance.find({load_request_code:load_request_code})
+     console.log(char.length)
+     let nchar = 0 
+     if(char.length > 0) {
+      nchar = char.length + 1 
+     } else { nchar = 1}
+     const chariot = await chariotServiceInstance.create({chariot_nbr:nchar,load_request_code:load_request_code,chariot_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+     for (let detchar of chariotdetail) {
+       const chariotdet = await chariotDetailServiceInstance.create({...detchar,load_request_code:load_request_code,chariot_nbr: nchar,chariot_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    }
+    
+    for (const line of load_request_lines) {
+     // console.log("line",line)
+      if(line.qt_effected != 0) {
+       // console.log("yawhnahnawelamakch")
+      const elem = await loadRequestService.findLoadRequestLine({
+        load_request_code: line.load_request_code,
+        product_code: line.product_code,
+      });
+      //  console.log('elem', elem);
+      if (elem !== null) {
+        const loadLineUpdated = await loadRequestService.updateLoadRequestLineQtAffected(
+          line.load_request_code,
+          line.product_code,
+          line.qt_effected,
+        );
+      } else {
+     //   console.log('creatioon', line);
+        const maxLine = await loadRequestService.findLoadRequestMaxLine({
+          load_request_code: line.load_request_code,
+        });
+       // console.log('maaaaaaaaaaaaaaaax', maxLine);
+       const ptpart = await itemServiceInstance.findOne({
+        pt_part: line.product_code,
+      });
+      console.log("line",line)
+        const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
+          ...line,
+          date_creation: maxLine.date_creation,
+          line: maxLine.line + 1,
+          date_charge: new Date(),
+          qt_request: 0,
+          qt_validated: 0,
+          pt_price: ptpart.pt_price,
+        });
+      }
+    }
+    }
+    for (const detail of load_request_details) {
+      if(detail.qt_effected != 0) {
+      const elemDet = await loadRequestService.findLoadRequestDetail({
+        load_request_code: detail.load_request_code,
+        product_code: detail.product_code,
+        lot: detail.lot,
+      });
+     // console.log('elemDet', elemDet);
+      if (elemDet !== null) {
+        console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
+        const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
+          elemDet.load_request_code,
+          elemDet.product_code,
+          detail.qt_effected,
+          elemDet.lot,
+        );
+      } else {
+        const loadRequestsDetails = await loadRequestService.createMultipleLoadRequestsDetails2(detail);
+      }
+    }
+    }
+    return res.status(201).json({ message: 'created succesfully', data: nchar });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+const findLoadGrp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const itemServiceInstance = Container.get(ItemService);
+    const sequelize = Container.get("sequelize")
+    console.log(req.body)
+    const loads = await loadRequestService.findS({ where :{status:{[Op.or]: [30,50]},date_charge: { [Op.between]: [req.body.date, req.body.date1]} }});
+ let lrl = []
+ for (let load of loads) {lrl.push(load.load_request_code)}
+for(let load of loads) {
+ console.log(load.load_request_code,load.date_charge)}
+    const lrs =await sequelize.query("SELECT product_code, sum(qt_effected) as qty, sum(qt_effected * pt_price) as amt  FROM   PUBLIC.aa_loadrequestdetails where load_request_code IN ? GROUP BY public.aa_loadrequestdetails.product_code ORDER BY product_code ASC ", { replacements: [[lrl]], type: QueryTypes.SELECT });
+      let result = [] 
+      let i = 0
+    for (let lr of lrs ) {
+      const pt = await itemServiceInstance.findOne({ pt_part:lr.product_code });
+result.push(
+  {
+    id:i,
+    product_code: lr.product_code,
+    designation : pt.pt_desc1,
+    qty: lr.qty,
+    amt: Number(lr.amt) * 1.2138
+  }
+)
+   i = i + 1 }
+//console.log(result)
+    return res.status(200).json({ message: 'found all lr', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -1137,7 +1317,9 @@ export default {
   findBychariot,
   findBychariotDet,
   exportLoadRequest,
-  getLoadRequest
+  getLoadRequest,
+  createUnLoadRequestDetailsScan,
+  findLoadGrp
 };
 
 // validation 0-10
