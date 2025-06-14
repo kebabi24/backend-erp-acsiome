@@ -979,7 +979,7 @@ const bkhTrCDet = async (req: Request, res: Response, next: NextFunction) => {
         bk_p010: Number(banks.bk_p010) - Number(req.body.bkh_p010),
         bk_p005: Number(banks.bk_p005) - Number(req.body.bkh_p005),
         bk_bon:  Number(banks.bk_bon)  - Number(req.body.bkh_bon),
-        bk_cheque: Number(banks.bk_cheque)  - Number(req.body.bkh_cheque),
+        bk_cheque: Number(banks.bk_cheque)  - Number(req.body.bk_cheque),
        
       },
       {id: banks.id},

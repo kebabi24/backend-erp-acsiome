@@ -396,6 +396,7 @@ const findTypes = async (req: Request, res: Response, next: NextFunction) => {
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
   try {
+    
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.findsome({ code_domain:user_domain,code_fldname: 'pt_draw',bool01:true });
    

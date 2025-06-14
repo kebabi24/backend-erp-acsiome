@@ -120,7 +120,9 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
            }
            const effdate = new Date(accountReceivable.ar_effdate)
            for (let entry of gldetail) {
-        
+            let debit = 0;
+            let credit = 0
+            if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
             await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                 glt_domain: user_domain,
                 glt_addr: accountReceivable.ar_bill,
@@ -133,6 +135,8 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
                 glt_effdate: accountReceivable.ar_effdate,
                 glt_entity: accountReceivable.ar_entity,
                 glt_year: effdate.getFullYear(),
+                dec01:debit,
+                dec02:credit,
                 //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ar_ex_rate2) /  Number(accountPayable.ar_ex_rate)   ,
                 glt_date: date, created_by: user_code, last_modified_by: user_code})
            
@@ -210,7 +214,9 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
            }
            const effdate = new Date(accountReceivable.ar_effdate)
            for (let entry of gldetail) {
-         
+            let debit = 0;
+            let credit = 0
+            if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
             await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                 glt_domain: user_domain,
                 glt_addr: accountReceivable.ar_bill,
@@ -223,6 +229,8 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
                 glt_effdate: accountReceivable.ar_effdate,
                 glt_entity: accountReceivable.ar_entity,
                 glt_year: effdate.getFullYear(),
+                dec01:debit,
+                dec02:credit,
                 //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ar_ex_rate2) /  Number(accountPayable.ar_ex_rate)   ,
                 glt_date: date, created_by: user_code, last_modified_by: user_code})
            

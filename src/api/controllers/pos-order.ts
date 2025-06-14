@@ -643,10 +643,10 @@ const createCALLCenterORDER = async (req: Request, res: Response, next: NextFunc
     // ADD TO AGENDA
     const crmServiceInstance = Container.get(crmService);
     const sequenceServiceInstance = Container.get(SequenceService);
-    const param = await crmServiceInstance.getParamFilterd('pos_call_order');
+    const param = await crmServiceInstance.getParamFilterd('pos_call_order','');
     const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
     const sequence_event = await sequenceServiceInstance.getCRMEVENTSeqNB();
-    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num, param, paramDetails, sequence_event);
+    const addLine = await crmServiceInstance.createAgendaLine(cart.loy_num, param, paramDetails, sequence_event,'');
 
     return res.status(201).json({ message: 'created succesfully', data: true });
   } catch (e) {

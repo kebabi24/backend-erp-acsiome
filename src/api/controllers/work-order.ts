@@ -162,7 +162,7 @@ if(item.woid == null || item.woid == "")
       for (const ro of ros) {
           await woroutingServiceInstance.create({
         wr_domain: user_domain,
-        wr_nbr: nof,
+        wr_nbr: item.wo_nbr,
         wr_lot: wolot,
         wr_start: item.wo_rel_date,
         wr_routing: ro.ro_routing,
@@ -183,7 +183,7 @@ if(item.woid == null || item.woid == "")
       for (const ro of ros) {
         await woroutingServiceInstance.create({
           wr_domain: user_domain,
-          wr_nbr: nof,
+          wr_nbr: item.wo_nbr,
           wr_lot: wolot,
           wr_start: item.wo_rel_date,
           wr_routing: ro.ro_routing,
@@ -783,7 +783,7 @@ const findByPrograms = async (req: Request, res: Response, next: NextFunction) =
           console.log('wo',wo.wo_so_job,wos.length)
           const ofs = await workOrderServiceInstance.find({wo_so_job:wo.wo_so_job , wo_domain: user_domain});
           const firstof = await workOrderServiceInstance.findOne({wo_so_job:wo.wo_so_job ,wo_queue_eff:1, wo_domain: user_domain});
-          
+          console.log(new Date(firstof.wo_rel_date).toLocaleTimeString())
           let qty_ord = 0
           let qty_comp = 0
           let qty_rjct = 0
@@ -796,7 +796,7 @@ const findByPrograms = async (req: Request, res: Response, next: NextFunction) =
             last_date = of.wo_due_date
             last_hour = of.chr02
           }
-          obj = {id : i,wo_so_job:wo.wo_so_job,wo_rev:wo.wo_rev,wo_queue_eff:ofs.length,wo_qty_ord:qty_ord,wo_qty_comp:qty_comp,wo_qty_rjct:qty_rjct,wo_rel_date:firstof.wo_rel_date,wo_due_date:last_date,chr01:firstof.chr01,chr02:last_hour,wo_routing:firstof.wo_routing}
+          obj = {id : i,wo_so_job:wo.wo_so_job,wo_rev:wo.wo_rev,wo_queue_eff:ofs.length,wo_qty_ord:qty_ord,wo_qty_comp:qty_comp,wo_qty_rjct:qty_rjct,wo_rel_date:firstof.wo_rel_date,wo_due_date:last_date,chr01:new Date(firstof.wo_rel_date).toLocaleTimeString(),chr02:last_hour,wo_routing:firstof.wo_routing}
           result.push(obj)
           i = i + 1
         }
@@ -860,7 +860,7 @@ try {
     if (of.wo_qty_comp != 0){diff2 = Number(Number(of.wo_qty_rjct) / Number(Number(of.wo_qty_rjct) + Number(of.wo_qty_comp)))}
     const wo = await workOrderServiceInstance.update({ ...req.body, wo_rev: version, wo_qty_chg: diff1, wo_yield_pct: diff2, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin},{ id });
     result.push(wo);
-    const ofs = await workOrderServiceInstance.find({wo_domain: user_domain,wo_nbr: of.wo_nbr,wo_queue_eff:{[Op.gte]:req.body.wo_queue_eff},id:{[Op.ne]:id}});
+    const ofs = await workOrderServiceInstance.find({wo_domain: user_domain,wo_so_job: of.wo_so_job,wo_queue_eff:{[Op.gte]:req.body.wo_queue_eff},id:{[Op.ne]:id}});
     for (let wos of ofs){ 
       let jours = Number(Number(req.body.wo_qty_ord) / (Number(ro.ro_run) * 24))
         //  echeance.setDate(lancement.getDate() + jours)

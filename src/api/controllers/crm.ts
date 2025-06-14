@@ -1,7 +1,8 @@
 
 import CRMService from "../../services/crm"
 import codeService from '../../services/code';
-import customersSercice from '../../services/customer';
+import customersService from '../../services/customer';
+import itemService from '../../services/item';
 import SequenceService from '../../services/sequence';
 import ProfileService from "../../services/profile"
 import UserService from "../../services/user"
@@ -141,7 +142,7 @@ console.log('header',header)
 
         const crmServiceInstance = Container.get(CRMService)
         const codeServiceInstance = Container.get(codeService)
-        const customerServiceInstance = Container.get(customersSercice)
+        const customerServiceInstance = Container.get(customersService)
 
         // BEFORE RETURNING EVENTS , CREATE EVENTS OF BIRTHDAYS
         const calls = await codeServiceInstance.getCRMSelfCall()
@@ -158,13 +159,13 @@ console.log('header',header)
         // BIRTHDAYS : CLIENTS
         if(birthdays){
             const clients = await customerServiceInstance.findCustomersBirthdate()
-            const param = await crmServiceInstance.getParamFilterd("birthdays")
+            const param = await crmServiceInstance.getParamFilterd("birthdays",'')
             if(param != null && clients.length > 0){
                 const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
                 for(const client of clients ){
                     const sequenceServiceInstance = Container.get(SequenceService);
                     const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence)   
+                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
                     
                 }
             }
@@ -173,13 +174,13 @@ console.log('header',header)
         // BIRTHDAYS2 : ORDER
         if(birthdays2){
              const clients = await customerServiceInstance.findCustomersBirthdateFirstOrder()
-             const param = await crmServiceInstance.getParamFilterd("birthdays_2")
+             const param = await crmServiceInstance.getParamFilterd("birthdays_2",'')
             if(param != null && clients.length > 0){
                 const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
                 for(const client of clients ){
                     const sequenceServiceInstance = Container.get(SequenceService);
                     const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence)   
+                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
                     
                 }
             }
@@ -189,13 +190,13 @@ console.log('header',header)
         if(absence){
             const absence_days = await codeServiceInstance.getAbsenceDayParam()
             const clients = await customerServiceInstance.findCustomersAbsent(absence_days)
-            const param = await crmServiceInstance.getParamFilterd("absence")
+            const param = await crmServiceInstance.getParamFilterd("absence",'')
             if(param != null && clients.length > 0){
                 const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
                 for(const client of clients ){
                            const sequenceServiceInstance = Container.get(SequenceService);
                            const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-                           const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence)   
+                           const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
                     
                        }
             }
@@ -205,7 +206,7 @@ console.log('header',header)
         // RANDOM
         if(random){
              const sequenceServiceInstance = Container.get(SequenceService);
-             const param = await crmServiceInstance.getParamFilterd("random")
+             const param = await crmServiceInstance.getParamFilterd("random",'')
              const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
              const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
              
@@ -216,7 +217,7 @@ console.log('header',header)
             for(const index of selected_random_indexes ){
                 const element = elements[index]
                 const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-                const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence)   
+                const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence,'')   
             }
              
         }
@@ -226,6 +227,219 @@ console.log('header',header)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: events  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
+   const findEvents = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getEventsByDay endpoint")
+    try {
+
+        const crmServiceInstance = Container.get(CRMService)
+        const codeServiceInstance = Container.get(codeService)
+        const customerServiceInstance = Container.get(customersService)
+        
+        const itemsServiceInstance = Container.get(itemService)
+        // BEFORE RETURNING EVENTS , CREATE EVENTS OF BIRTHDAYS
+        const calls = await codeServiceInstance.getCRMSelfCall()
+        const indexBirthdays = calls.findIndex(call =>{return call.code_value === "birthdays"})
+        const indexBirthdays2 = calls.findIndex(call =>{return call.code_value === "birthdays_2"})
+        const indexAbsence = calls.findIndex(call =>{return call.code_value === "absence"})
+        const indexRandom = calls.findIndex(call =>{return call.code_value === "random"})
+
+        const birthdays = calls[indexBirthdays].dataValues.bool01
+        const birthdays2 = calls[indexBirthdays2].dataValues.bool01
+        const absence = calls[indexAbsence].dataValues.bool01
+        const random = calls[indexRandom].dataValues.bool01
+
+        // BIRTHDAYS : CLIENTS
+        if(birthdays){
+            const clients = await customerServiceInstance.findCustomersBirthdate()
+            const param = await crmServiceInstance.getParamFilterd("birthdays",'')
+            if(param != null && clients.length > 0){
+                const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+                for(const client of clients ){
+                    const sequenceServiceInstance = Container.get(SequenceService);
+                    const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
+                    
+                }
+            }
+        }
+
+        // BIRTHDAYS2 : ORDER
+        if(birthdays2){
+             const clients = await customerServiceInstance.findCustomersBirthdateFirstOrder()
+             const param = await crmServiceInstance.getParamFilterd("birthdays_2",'')
+            if(param != null && clients.length > 0){
+                const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+                for(const client of clients ){
+                    const sequenceServiceInstance = Container.get(SequenceService);
+                    const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                    const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
+                    
+                }
+            }
+        }
+
+        // ABSENCE
+        if(absence){
+            const absence_days = await codeServiceInstance.getAbsenceDayParam()
+            const clients = await customerServiceInstance.findCustomersAbsent(absence_days)
+            const param = await crmServiceInstance.getParamFilterd("absence",'')
+            if(param != null && clients.length > 0){
+                const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+                for(const client of clients ){
+                           const sequenceServiceInstance = Container.get(SequenceService);
+                           const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                           const addLine = await crmServiceInstance.createAgendaLine(client,param,paramDetails, sequence,'')   
+                    
+                       }
+            }
+             
+        }
+
+        // RANDOM
+        if(random){
+             const sequenceServiceInstance = Container.get(SequenceService);
+             const param = await crmServiceInstance.getParamFilterd("random",'')
+             const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
+             const elements  = await crmServiceInstance.getPopulationElements(paramDetails.population_code)
+             
+             const max_value = elements.length 
+             const nb = paramDetails.dataValues.population_nb
+             let selected_random_indexes = selectRandomIndexes(max_value, nb) 
+            
+            for(const index of selected_random_indexes ){
+                const element = elements[index]
+                const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
+                const addLine = await crmServiceInstance.createAgendaLine(element.code_element,param,paramDetails, sequence,'')   
+            }
+             
+        }
+
+        const { user_code } = req.headers;
+        const events = await crmServiceInstance.getEventsAll(user_code)
+        let result = []
+        for (let event of events)
+        {   let it:any;
+            
+            if (event.item != null){it = event.item 
+                let ev = event.code_event
+                
+                const pt = await itemsServiceInstance.findOne({ pt_part: it }); 
+                const cm = await customerServiceInstance.findOne({cm_addr: event.code_client})
+                const lines = await crmServiceInstance.getAgendaExecutionLinesBy(ev)
+                let mt_etude = 0
+                let mt_offre = 0
+                let mt_traitement = 0
+                let mt_facture = 0
+                let mt_perdu = 0
+
+
+                if(event.price == 0)
+                {
+                if(event.status == 'O'){mt_etude = pt.pt_price}
+                else{
+                    if(event.status == 'A'){mt_perdu = pt.pt_price}
+                    else{
+                        if(event.status == 'Q'){mt_offre = pt.pt_price}
+                        else{
+                            if(event.status == 'T'){mt_traitement = pt.pt_price}
+                            else{
+                                if(event.status =='F'){mt_facture = pt.pt_price}
+                            }
+                        }
+                    }
+                }
+                }
+                else{
+                    if(event.status == 'O'){mt_etude = event.price}
+                    else{
+                            if(event.status == 'A'){mt_perdu = event.price}
+                            else{
+                                if(event.status == 'Q'){mt_offre = event.price}
+                                else{
+                                    if(event.status == 'T'){mt_traitement = event.price}
+                                    else{
+                                        if(event.status =='F'){mt_facture = event.price}
+                                    }
+                                }
+                            }
+                        }
+                }   
+                    
+                
+console.log(event.id,event.status,event.price)
+                if(lines.length ==0){
+                result.push({
+                    id : event.id,
+                    code_event:event.code_event,
+                    order:event.order,
+                    code_client:event.code_client,
+                    nom_client:cm.address.ad_name,
+                    phone:cm.address.ad_phone,
+                    mail:cm.address.ad_ext,
+                    category:'Formation',
+                    event_day:event.event_day,
+                    phone_to_call:cm.address.ad_phone,
+                    status:event.status,
+                    resultat:'',
+                    duration:event.duration,
+                    action:event.action,
+                    method:event.method,
+                    item:event.item,
+                    desc:pt.pt_desc1,
+                    reponse:'',
+                    etude:mt_etude,
+                    offre:mt_offre,
+                    encours:mt_traitement,
+                    facture:mt_facture,
+                    perdu:mt_perdu,
+                    event_nbr:1,
+                    profile_code:event.profile_code,
+                    param_code:event.param_code
+                })
+                }
+                else{
+                    const event_results = await codeServiceInstance.find({code_fldname:'crm_event_result',code_value:lines[lines.length -1].event_result})
+                
+                    result.push({
+                    id : event.id,
+                    code_event:event.code_event,
+                    order:event.order,
+                    code_client:event.code_client,
+                    nom_client:cm.address.ad_name,
+                    phone:cm.address.ad_phone,
+                    mail:cm.address.ad_ext,
+                    category:'Formation',
+                    event_day:event.event_day,
+                    phone_to_call:cm.address.ad_phone,
+                    status:event.status,
+                    resultat:event_results[0].code_desc,
+                    duration:event.duration,
+                    action:event.action,
+                    method:event.method,
+                    item:event.item,
+                    desc:pt.pt_desc1,
+                    etude:mt_etude,
+                    offre:mt_offre,
+                    encours:mt_traitement,
+                    facture:mt_facture,
+                    perdu:mt_perdu,
+                    event_nbr:lines.length + 1,
+                    profile_code:event.profile_code,
+                    param_code:event.param_code
+
+                })
+                }
+            }
+        }
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result  })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
@@ -360,7 +574,38 @@ console.log('header',header)
         return next(e)
     }
   }
+const getParams = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling getEventsByDay endpoint")
+    try {
+        const crmServiceInstance = Container.get(CRMService)
+        
+        const params = await crmServiceInstance.getParams()
 
+        // EXTRACT POPULATIONS DATA
+        // let populatiosData = []
+        // populations.forEach(population => {
+        //     populatiosData.push(population.dataValues)
+        // });
+
+        // FILTER UNIQUE POPULATIONS
+        
+        // const unique = Array.from(new Set(populatiosData.map(pop =>pop.population_code ))).map(code=>{
+        //     return{
+        //         population_code : code,
+        //         population_desc : populatiosData.find(elem => elem.population_code === code).population_desc
+        //     }
+        // })
+        
+       
+        return res
+            .status(200)
+            .json({ message: "populations found succesfully", data: params  })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+  }
   const getPopulationByCode = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling getPopulationByCode endpoint")
@@ -411,7 +656,7 @@ console.log('header',header)
             const param = await crmServiceInstance.getParamByCode(eventHeader.param_code)
             const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
             const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-            const addLine = await crmServiceInstance.createAgendaLine(executionLine.phone_to_call,param,paramDetails, sequence)  
+            const addLine = await crmServiceInstance.createAgendaLine(executionLine.phone_to_call,param,paramDetails, sequence,'')  
 
         }
 
@@ -548,7 +793,7 @@ console.log('header',header)
         let executionLine = {}
         
         // CREATE EVENT 0 IN AGENDA 
-        const param = await crmServiceInstance.getParamFilterd(category_code)
+        const param = await crmServiceInstance.getParamFilterd(category_code,'')
         let addLine;
         if(param){
             const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
@@ -582,11 +827,11 @@ console.log('header',header)
             // }
         }
         if(category_code != "pos_call_order" && category_code != "complaint"  ){
-            const param = await crmServiceInstance.getParamFilterd(category_code)
+            const param = await crmServiceInstance.getParamFilterd(category_code,'')
             if(param){
                 const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
                 const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-                addLine = await crmServiceInstance.createAgendaLine(phone,param,paramDetails, sequence)   
+                addLine = await crmServiceInstance.createAgendaLine(phone,param,paramDetails, sequence,'')   
             }
         }
         const executionLineSaved = await crmServiceInstance.createAgendaExecutionLineForEventZero(executionLine)
@@ -686,10 +931,12 @@ export default {
     getTimeUnits,
     getActionTypes,
     getMethods,
-    getEventsByDay,    
+    getEventsByDay, 
+    findEvents,   
     getCustomers,
     createPopulation,
     getPopulations,
+    getParams,
     getPopulationByCode,
     getEventResults,
     getCustomerData,

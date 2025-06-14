@@ -13,8 +13,9 @@ const{user_domain} = req.headers
         const repertoryServiceInstance = Container.get(RepertoryService)
         const employeServiceInstance = Container.get(EmployeService);
         const {addr, repDetails} = req.body
-        await repertoryServiceInstance.delete({rep_code: addr,rep_domain:user_domain})
+        
         for (let entry of repDetails) {
+            await repertoryServiceInstance.delete({rep_domain:user_domain,rep_contact:entry.rep_contact})
             entry = { ...entry, rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryServiceInstance.create(entry)
             if(entry.rep_type == 'Student')

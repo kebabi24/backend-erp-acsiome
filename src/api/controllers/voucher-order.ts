@@ -129,7 +129,9 @@ console.log(vh_inv_nbr)
         for (let entr of apDetail) {
             entr = { ...entr, apd_domain: user_domain,apd_nbr: vh.vh_inv_nbr }
             await accountPayableDetailServiceInstance.create({...entr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
-
+            let debit = 0;
+            let credit = 0
+            if(Number(entr.apd_amt) < 0){credit = -Number(entr.apd_amt)}else{debit = Number(entr.apd_amt)}
             await generalLedgerServiceInstance.create({
                 glt_domain: user_domain,
                 glt_ref: ref,
@@ -152,7 +154,8 @@ console.log(vh_inv_nbr)
                 glt_doc: vh_inv_nbr,
                 glt_effdate: voucherOrder.vh_inv_date,
                 glt_year: effdate.getFullYear(),
-                  
+                dec01:debit,
+                dec02:credit,  
                 //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
                 glt_date: date, created_by: user_code, last_modified_by: user_code})
            i = i + 1

@@ -28,31 +28,64 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
     console.log(user_domain)
-    // const pageWidth = 284; // Width of the page in points
-    // const pageHeight = 284; // Height of the page in points
-    const pageWidth = 127; // Width of the page in points
-    const pageHeight = 164; // Height of the page in points
-    var labelId = null;
-    let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
-    labelId = req.body.lb_ref;
-    if(seq == null){seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' })}
-    if(labelId == null){labelId = `${seq.seq_prefix}-${String(new Date().getFullYear())}-${Number(seq.seq_curr_val) }`}
-    let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: labelId})
+    const pageWidth = 284; // Width of the page in points
+    const pageHeight = 284; // Height of the page in points
+    // const pageWidth = 127; // Width of the page in points
+    // const pageHeight = 164; // Height of the page in points
     const itemServiceInstance = Container.get(ItemService);
     const locationServiceInstance = Container.get(locationService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
-    const lds = await locationDetailServiceInstance.find({ ld_ref:labelId,ld_domain:user_domain });
-    let locs : any;
-    for(let locd of lds){ locs = await locationServiceInstance.find({ loc_loc:locd.ld_loc,loc_domain:user_domain });
-    let loc_desc:any;
-    for (let location of locs){loc_desc = location.loc_desc
-      const label = await labelServiceInstance.update(
-      { lb_cust: location.loc_desc, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
-      { lb_ref: labelId })}}
+    
     
     let desc:any;
-    for (let item of items){if(item.pt_draw != 'BOBINE'){desc = item.pt_desc2} else {desc = item.pt_draw + ' ' + item.pt_part_type}}
+    let draw:any;
+    for (let item of items){if(item.pt_draw != 'BOBINE'){draw = item.pt_draw, desc = item.pt_desc2} else {draw = item.pt_draw, desc = item.pt_draw + ' ' + item.pt_part_type}}
+    
+
+    var labelId = null;
+    let test = false;
+    
+    let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
+    labelId = req.body.lb_ref;
+    if(draw == 'SQUELETTE'){
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'SQUELETTE', seq_type: 'PL' });}
+      if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)}`;}
+      else {labelId = req.body.lb_ref}
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)}`;}
+    else {labelId = req.body.lb_ref}
+    
+    }
+    else{
+      if(draw == 'COLORANT'){
+        if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'COL', seq_type: 'PL' });}
+        if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)}`;}
+        else {labelId = req.body.lb_ref}
+        if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+      if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val)}`;}
+      else {labelId = req.body.lb_ref}
+      
+      }
+      else{
+        if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+        if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) }`;}
+        else {labelId = req.body.lb_ref}
+        
+      }
+    }
+    
+    
+    const lds = await locationDetailServiceInstance.find({ ld_ref:labelId,ld_domain:user_domain });
+    // let locs : any;
+    // for(let locd of lds){ locs = await locationServiceInstance.find({ loc_loc:locd.ld_loc,loc_domain:user_domain });
+    // let loc_desc:any;
+    // for (let location of locs){loc_desc = location.loc_desc
+    //   const label = await labelServiceInstance.update(
+    //   { lb_cust: location.loc_desc, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+    //   { lb_ref: labelId })}}
+    
+    let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: labelId})
     
     const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
     
@@ -60,6 +93,94 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const image = doc.openImage('./edel.jpg');
     let time = new Date().toLocaleTimeString();
     if(lab !=null){time = new Date(lab.createdAt).toLocaleTimeString()}
+    
+//     // BOBINE
+    if(draw == 'BOBINE')
+    {
+    doc.text('MACHINE : ' + req.body.lb_cust + '      GROUPE: ' + req.body.lb_grp, 20, 18)
+    .font('Helvetica-Bold')
+    .fontSize(12)
+    .text('DATE: ' + req.body.lb_date, 20, 38);
+
+ doc
+     .text('PRODUIT :' + req.body.lb_desc, 20, 58)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+     .text('MIC/LAI :' + req.body.lb_type, 20, 78)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+     .text('COULEUR :' + req.body.lb_ray, 20, 98)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+     .text('SILICONE :' + req.body.lb_rmks, 20, 118)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+
+     .text('QTE :' + req.body.lb_qty + 'KG', 20, 138)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+     .text('CLIENT:' + req.body.lb__chr02, 20, 158)
+     .font('Helvetica-Bold')
+     .fontSize(12)
+     .text('QUALITE:', 20, 178);
+// // FIN BOBINE
+}
+else
+{
+// PLASTIQUE
+doc.text('FOURNISSEUR : ' + req.body.lb_cust + '      GROUPE: ' + req.body.lb_grp, 20, 18)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+              .text('DATE: ' + req.body.lb_date, 20, 58);
+
+          doc
+
+              .text('PRODUIT :' + req.body.lb_desc, 20, 78)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+              .text('CODE :' + req.body.lb_rmks, 20, 118)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+
+              .text('QTE :' + req.body.lb_qty + 'KG', 20, 138)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+              .text('N° Lot:' + req.body.lb_lot, 20, 158)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+              .text('QUALITE:', 20, 178);
+
+          // Define the third rectangle and its text lines
+          doc
+
+              .text('BIGBAG N°:' + req.body.lb__dec01, 20, 198)
+              .font('Helvetica-Bold')
+              .fontSize(12)
+
+              .text('HEURE:' + time, 180, 58);
+
+          const filenamepdf = 'lb.lb_ref' + '.pdf';
+          // FIN PLASTIQUE
+          }
+// Define the third rectangle and its text lines
+doc
+
+    .text('BIGBAG N°:' + req.body.lb__dec01, 20, 198)
+    .font('Helvetica-Bold')
+    .fontSize(12)
+
+    .text('HEURE:' + time, 180, 38);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Draw the barcode image on the PDF document
     //doc.image(image, 50, 0, {
     //  fit: [180, 150], // Adjust the size of the barcode image as needed
@@ -92,11 +213,11 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       //  .stroke()
       //  .font('Helvetica-Bold')
       //  .fontSize(12)
-    doc
-    .fontSize(10)
-    .text( req.body.lb_cust, 5, 10)
-    .text(req.body.lb_desc, 5,25)
-    .text('SN: ' +req.body.lb_lot, 5,40);
+    // doc
+    // .fontSize(10)
+    // .text( req.body.lb_cust, 5, 10)
+    // .text(req.body.lb_desc, 5,25)
+    // .text('SN: ' +req.body.lb_lot, 5,40);
       
 
     // Define the third rectangle and its text lines
@@ -108,9 +229,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         bcid: 'code128', // Barcode type (replace with the desired barcode format)
         text: labelId, // Barcode data
         scale: 3, // Scaling factor for the barcode image
-        includetext: false, // Include the barcode text
-        height: 15,
-        width: 45,
+        includetext: true, // Include the barcode text
+        height: 10,
+        width: 60,
         // width: 60,
       },
       function(err, png) {
@@ -123,12 +244,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const image = doc.openImage(png);
 
         // Draw the barcode image on the PDF document
-        doc.image(image, 15, 45, {
-          fit: [280, 25], // Adjust the size of the barcode image as needed
-      });
-        // doc.image(image, 50, 223, {
-        //   fit: [5400, 40], // Adjust the size of the barcode image as needed
-        // });
+      //   doc.image(image, 15, 45, {
+      //     fit: [280, 25], // Adjust the size of the barcode image as needed
+      // });
+        doc.image(image, 50, 223, {
+          fit: [5400, 40], // Adjust the size of the barcode image as needed
+        });
         // Save the PDF document
         filenamepdf = './barcode/' + labelId + '.pdf';
    
@@ -167,7 +288,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const createlAB = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  const { user_domain } = req.headers;
+  const { user_domain} = req.headers;
   
 
   // doc.rect(0, 0, doc.page.width, doc.page.height).fill('black');
@@ -186,22 +307,61 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     let test = false;
     console.log(req.body)
     let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
-    
-    if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
-    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${String(new Date().getFullYear())}-${Number(seq.seq_curr_val) + 1}`;}
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
+    let desc:any;
+    let draw:any;
+    for (let item of items){desc = item.pt_desc1,
+      draw = item.pt_draw
+    }
+    if(draw == 'SQUELETTE'){
+      test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'SQUELETTE', seq_type: 'PL' });
+      if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+      else {labelId = req.body.lb_ref}
+      
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
     else {labelId = req.body.lb_ref}
     if(test == true){await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-      { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+      { seq_type: 'PL', seq_seq: 'SQUELETTE', seq_domain: user_domain },
     );}
     else{await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
       { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
     
-      const itemServiceInstance = Container.get(ItemService);
-    const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
-    let desc:any;
-    for (let item of items){desc = item.pt_desc1}
+    }
+    else{
+      if(draw == 'COLORANT'){
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'COL', seq_type: 'PL' });}
+      if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+      else {labelId = req.body.lb_ref}
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+    else {labelId = req.body.lb_ref}
+    if(test == true){await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: 'COL', seq_domain: user_domain },
+    );}
+    else{await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
+    
+       }
+      else{
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+      if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+      else {labelId = req.body.lb_ref}
+      if(test == true){await sequenceServiceInstance.update(
+        { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+        { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+      );}
+      else{await sequenceServiceInstance.update(
+        { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+        { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
+      
+      }
+    }
+    
     
     const label = await labelServiceInstance.create({
       ...req.body,

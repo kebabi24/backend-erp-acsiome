@@ -15,7 +15,8 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import { DATE, Op, Sequelize } from 'sequelize';
-
+import PayMethService from '../../services/pay-meth';
+import PayMethDetailService from '../../services/pay-meth-detail';
 import { generatePdf } from '../../reporting/generator';
 import ItemService from '../../services/item';
 import LocationDetail from '../../models/location-detail';
@@ -120,6 +121,9 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     const itemServiceInstance = Container.get(itemService);
+    const accountshiperServiceInstance = Container.get(accountShiperService);
+    const payMethServiceInstance = Container.get(PayMethService);
+        const payMethDetailServiceInstance = Container.get(PayMethDetailService);
     const { saleOrder, saleOrderDetail } = req.body;
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
@@ -129,7 +133,13 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    let part:any;
+    let loc:any;
+    let lot:any;
     for (let entry of saleOrderDetail) {
+      part = entry.sod_part
+      loc=entry.sod_loc
+      lot=entry.sod_serial
       entry = {
         ...entry,
         sod_domain: user_domain,
@@ -141,6 +151,29 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
       };
       await saleOrderDetailServiceInstance.create(entry);
     }
+    const PayMeth = await payMethServiceInstance.findOne({
+      ct_domain: user_domain,
+      ct_code: saleOrder.so_cr_terms,
+    });
+    if (PayMeth){
+      const details = await payMethDetailServiceInstance.find({
+        ctd_domain: user_domain,
+        ctd_code: PayMeth.ct_code,
+      });
+      let i = 0;
+      for (let det of details) {
+        
+        i = i + 1;
+        const effdate = new Date(saleOrder.so_ord_date);
+        effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
+        const accountShiper = await accountshiperServiceInstance.create({as_nbr: so.so_nbr + '-' + i,as_ship: so.so_nbr,as_bill:so.so_bill,as_cust:so.so_cust,as_type:'I',as_so_nbr:so.so_nbr,as_effdate:so.so_ord_date,as_due_date:effdate,as_cr_terms:so.so_cr_terms,as_sales_amt:(Number(Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt))) / Number(det.ctd_code),as_curr:so.so_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,chr01:part,chr02:loc,chr03:lot})
+        
+    } 
+  }
+    else{const accountShiper = await accountshiperServiceInstance.create({as_nbr: so.so_nbr + '-01',as_ship: so.so_nbr,as_bill:so.so_bill,as_cust:so.so_cust,as_type:'I',as_so_nbr:so.so_nbr,as_effdate:so.so_ord_date,as_cr_terms:so.so_cr_terms,as_sales_amt:Number(Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)) ,as_amt:Number(Number(saleOrder.so_prepaid)),as_curr:so.so_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,chr01:part,chr02:loc,chr03:lot})
+  }
+       
+    
 
     /*kamel*/
     console.log(so.so_nbr);
@@ -244,6 +277,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:so.so_cust,
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
@@ -289,6 +323,7 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:so.so_cust,
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
@@ -688,6 +723,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+     const accountshiperServiceInstance = Container.get(accountShiperService);
     const { id } = req.params;
     const { saleOrder, saleOrderDetail } = req.body;
     console.log(id);
@@ -696,6 +732,9 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       { id },
     );
     console.log(saleOrderDetail);
+    const accountShipers = await accountshiperServiceInstance.find({as_ship:saleOrder.so_nbr,as_domain: user_domain})
+    let count = accountShipers.length + 1
+    const accountShiper = await accountshiperServiceInstance.create({as_nbr: saleOrder.so_nbr + '-0' + String(count),as_ship: saleOrder.so_nbr,as_bill:saleOrder.so_bill,as_cust:saleOrder.so_cust,as_type:'I',as_so_nbr:saleOrder.so_nbr,as_effdate:saleOrder.so_ord_date,as_cr_terms:saleOrder.so_cr_terms,as_sales_amt:Number(Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)) ,as_amt:Number(Number(saleOrder.dec01)),as_curr:so.so_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
     await saleOrderDetailServiceInstance.delete({ sod_domain: user_domain, sod_nbr: saleOrder.so_nbr });
     for (let entry of saleOrderDetail) {
       entry = {
@@ -949,7 +988,7 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const sos = await sequelize.query(
-      'SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
+      'SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det, PUBLIC.as_mstr  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and  PUBLIC.as_mstr.as_domain =  PUBLIC.sod_det.sod_domain and  PUBLIC.as_mstr.as_ship = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
       { replacements: [user_domain], type: QueryTypes.SELECT },
     );
 

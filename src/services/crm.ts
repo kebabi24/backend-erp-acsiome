@@ -145,6 +145,37 @@ export default class CRMService {
         throw e
     }
   }
+  public async getEventsAll(profile_code): Promise<any> {
+    try {
+        let date =  Date.now()
+        let today = new Date(date)
+        const dt = today.getFullYear().toString()+'-'+(today.getMonth()+1).toString()+'-'+(today.getDate()).toString()
+        let events:any;
+        if(profile_code=='admin'){
+           events = await this.agendaModel.findAll({
+            where:{
+              // order:'1',
+              //  profile_code : profile_code
+              // event_day :  {[Op.eq]:new Date(dt)}      
+            }
+        })
+        }
+        else{
+         events = await this.agendaModel.findAll({
+            where:{
+              // order:'1',
+               profile_code : profile_code
+              // event_day :  {[Op.eq]:new Date(dt)}      
+            }
+        })
+      }
+        this.logger.silly("found events ")
+        return events
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
 
   public async getCustomers(query: any): Promise<any> {
     try {
@@ -211,19 +242,33 @@ export default class CRMService {
     }
   }
 
-  public async getParamFilterd( category : any): Promise<any> {
+  public async getParamFilterd( category : any,code:any): Promise<any> {
     try {
       let today = new Date();
       let searchDate = new Date(today.getFullYear(),today.getMonth(),today.getDate())
 
       const dt = searchDate.getFullYear().toString()+'-'+(searchDate.getMonth()+1).toString()+'-'+(searchDate.getDate()).toString()
-      const param = await this.paramHeaderModel.findOne({
+      let param
+      if(code == '')
+      {
+         param = await this.paramHeaderModel.findOne({
+        where:{
+                param_code:code,
+                category : category,
+                validity_date_start :  {[Op.lte]:new Date(dt)}  ,    
+                validity_date_end :  {[Op.gte]:new Date(dt)}   
+              }
+        })
+      }
+      else{
+        param = await this.paramHeaderModel.findOne({
         where:{
                 category : category,
                 validity_date_start :  {[Op.lte]:new Date(dt)}  ,    
                 validity_date_end :  {[Op.gte]:new Date(dt)}   
               }
         })
+      }
         this.logger.silly("found param ")
         return param
     } catch (e) {
@@ -246,7 +291,7 @@ export default class CRMService {
     }
   }
 
-  public async createAgendaLine(phone:any , paramHeader : any , paramDetails : any, eventSequence:any): Promise<any> {
+  public async createAgendaLine(phone:any , paramHeader : any , paramDetails : any, eventSequence:any,Item:any): Promise<any> {
     try {
        let today = new Date();
       
@@ -281,6 +326,9 @@ export default class CRMService {
         {
           code_event : code_event,
           code_client : phone,
+          item:Item,
+          nbr:1,
+          price:0,
           category : paramDetails.category,
           event_day : date0.getFullYear() + '-' + (date0.getMonth()+1) + '-' + date0.getDate() , 
           hh : date0.getHours(),
@@ -299,6 +347,9 @@ export default class CRMService {
         {
           code_event : code_event,
           code_client : phone,
+          item:Item,
+          nbr:1,
+          price:0,
           category : paramDetails.category,
           event_day : date1.getFullYear() + '-' + (date1.getMonth()+1) + '-' + date1.getDate() , 
           hh : date1.getHours(),
@@ -310,13 +361,16 @@ export default class CRMService {
           action : r1.action,
           method: r1.method,
           order:2,
-          visibility:false,
+          visibility:true,
           param_code : paramHeader.param_code ,
           profile_code : paramHeader.profile_code,
         },
         {
           code_event : code_event,
           code_client :phone,
+          item:Item,
+          nbr:1,
+          price:0,
           category : paramDetails.category,
           event_day : date2.getFullYear() + '-' + (date2.getMonth()+1) + '-' + date2.getDate() , 
           hh : date2.getHours(),
@@ -328,13 +382,16 @@ export default class CRMService {
           action : r2.action,
           method: r2.method,
           order:3,
-          visibility:false,
+          visibility:true,
           param_code : paramHeader.param_code ,
           profile_code : paramHeader.profile_code
         },
         {
           code_event : code_event,
           code_client : phone,
+          item:Item,
+          nbr:1,
+          price:0,
           category : paramDetails.category,
           event_day : date3.getFullYear() + '-' + (date3.getMonth()+1) + '-' + date3.getDate() , 
           hh : date3.getHours(),
@@ -346,14 +403,14 @@ export default class CRMService {
           action : r3.action,
           method: r3.method,
           order:4,
-          visibility:false,
+          visibility:true,
           param_code : paramHeader.param_code ,
           profile_code : paramHeader.profile_code
         },
       )
 
       // console.log(agendaLines)
-
+console.log(agendaLines)
 
       const lines = await this.agendaModel.bulkCreate(agendaLines)
         this.logger.silly("created agenda lines ")
@@ -392,7 +449,7 @@ export default class CRMService {
           action : r0.action,
           method: r0.method,
           order:0,
-          visibility:false,
+          visibility:true,
           param_code : paramHeader.param_code ,
           profile_code : paramHeader.profile_code
         }
@@ -437,12 +494,28 @@ export default class CRMService {
      
       const populations = await this.populationModel.findAll({
         attributes: [
-            // [Sequelize.fn('DISTINCT', Sequelize.col('population_code')) ],
+            //  [Sequelize.fn('DISTINCT', Sequelize.col('population_code')) ],
              "id","population_code","population_desc"
           ],
          })        
         this.logger.silly("found populations ")
         return populations
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+  public async getParams(): Promise<any> {
+    try {
+     
+      const params = await this.paramHeaderModel.findAll({
+        attributes: [
+            //  [Sequelize.fn('DISTINCT', Sequelize.col('population_code')) ],
+             "id","param_code","description"
+          ],
+         })        
+        this.logger.silly("found populations ")
+        return params
     } catch (e) {
         this.logger.error(e)
         throw e
@@ -491,26 +564,21 @@ export default class CRMService {
      
       const agendaExecutionLine = await this.agendaExecutionModel.create(executionLine)
 
-       if(executionLine.status == "T"){
-          const updatedAgendaLine = await this.agendaModel.update(
-            {status : "T",visibility:false},
-            {where :{
-              code_event : eventHeader.code_event,
-            }})
-       }else{
+       
          // EVENT NOT TERMINATED
          if(eventHeader.order === 4 ){
           const updatedAgendaLine = await this.agendaModel.update(
-            {status : "All Executed but not Done",visibility:false},
+            {event_day:eventHeader.event_day,status : executionLine.status,action:executionLine.action,method:executionLine.method,nbr:eventHeader.nbr,price:eventHeader.price},
             {where :{
               code_event : eventHeader.code_event,
+              
             }})
          }else{
           const updatedAgendaLine = await this.agendaModel.update(
-            {status : executionLine.status , visibility:false},
+            {event_day:eventHeader.event_day,hh:eventHeader.hh,mm:eventHeader.mm,ss:eventHeader.ss,status : executionLine.status,action:executionLine.action,method:executionLine.method,nbr:eventHeader.nbr,price:eventHeader.price},
             {where :{
               code_event : eventHeader.code_event,
-              order : eventHeader.order
+              
             }})
 
             const updatedAgendaLine2 = await this.agendaModel.update(
@@ -520,7 +588,7 @@ export default class CRMService {
                 order : eventHeader.order+1
               }})
          }
-       }
+       
 
         
         this.logger.silly("created agendaExecutionLine ")
@@ -554,7 +622,19 @@ export default class CRMService {
         throw e
     }
   }
-
+  public async getAgendaExecutionLinesBy(event:any): Promise<any> {
+    try {  
+      const agendaExecutionLines = await this.agendaExecutionModel.findAll({
+        where:{event_code:event}
+      })
+        this.logger.silly("got by agendaExecutionLines")
+        return agendaExecutionLines
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+  }
+ 
   // UPDATE ALL 4 SUB EVENT OF AN EVENT VISIBILITY TO FALSE
   public async updateEventStatus(codeEvent : any ): Promise<any> {
     try {

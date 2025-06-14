@@ -19,6 +19,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const customerServiceInstance = Container.get(CustomerService);
     const customer = await customerServiceInstance.create({
       ...req.body,
+      
       cm_domain:user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
@@ -381,9 +382,9 @@ const createComplaint = async (req: Request, res: Response, next: NextFunction) 
       let searchDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   
       const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
-      const param = await crmServiceInstance.getParamFilterd("complaint")
+      const param = await crmServiceInstance.getParamFilterd("complaint",'')
       const paramDetails = await crmServiceInstance.getParamDetails({ param_code: param.param_code });
-      const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone, param, paramDetails, sequence);
+      const addLine = await crmServiceInstance.createAgendaLine(complaint.customer_phone, param, paramDetails, sequence,'');
 
 
       

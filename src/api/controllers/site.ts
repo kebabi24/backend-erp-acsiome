@@ -1,5 +1,6 @@
 import SiteService from '../../services/site';
 import ItemService from '../../services/item';
+import LocationService from '../../services/location';
 import CostSimulationService from '../../services/cost-simulation';
 
 import ConfigService from '../../services/config';
@@ -16,7 +17,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create site endpoint');
   try {
     const siteServiceInstance = Container.get(SiteService);
-    
+    const locationServiceInstance = Container.get(LocationService);
     
     const itemServiceInstance = Container.get(ItemService);
     const costSimulationServiceInstance = Container.get(CostSimulationService);
@@ -30,14 +31,37 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-
+if(req.body.int01!=0){
+  if(req.body.int02!=0){
+    for (let i = 1; i <= req.body.int01;i++ )
+    {
+      for (let j = 1; j <= req.body.int02;j++ )
+        {
+          const loc = await locationServiceInstance.create({
+            loc_site:req.body.si_site,
+            loc_loc:i + '-' + j,
+            loc_desc:'BLOC ' + i + ' ' + 'ETAGE ' + j,
+            loc_phys_addr:j,
+            chr01:i,
+            loc_default:false,
+            loc_status:'CONFORME',
+            loc_domain: user_domain,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+        }
+    }
+  }
+}
     // ADD TO AGENDA
     const sequenceServiceInstance = Container.get(SequenceService);
     const configServiceInstance = Container.get(ConfigService);
     const crmServiceInstance = Container.get(crmService);
     const config = await configServiceInstance.findOne({ cfg_crm: true });
     if (config) {
-      const param = await crmServiceInstance.getParamFilterd('new_shop');
+      const param = await crmServiceInstance.getParamFilterd('new_shop','');
       const paramDetails = await crmServiceInstance.getParamDetails({
         param_code: param.param_code,
         domain: user_domain,
@@ -45,7 +69,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const elements = await crmServiceInstance.getPopulationElements(paramDetails.population_code);
       for (const element of elements) {
         const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB();
-        const addLine = await crmServiceInstance.createAgendaLine(element.code_element, param, paramDetails, sequence);
+        const addLine = await crmServiceInstance.createAgendaLine(element.code_element, param, paramDetails, sequence,'');
         
       }
     }

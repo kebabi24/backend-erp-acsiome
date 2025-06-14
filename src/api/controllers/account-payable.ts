@@ -75,7 +75,9 @@ const{user_domain} = req.headers
        }
        const effdate = new Date(accountPayable.ap_effdate)       
        for (let entry of gldetail) {
-       
+       let debit = 0;
+       let credit = 0
+       if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
         await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
             glt_domain:user_domain,
             glt_addr: accountPayable.ap_vend,
@@ -87,7 +89,8 @@ const{user_domain} = req.headers
             glt_doc: nbr,
             glt_effdate: accountPayable.ap_effdate,
             glt_year: effdate.getFullYear(),
-              
+            dec01:debit,
+            dec02:credit,  
             //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
             glt_date: date, created_by: user_code, last_modified_by: user_code})
        
@@ -121,8 +124,8 @@ const{user_domain} = req.headers
         
         const { accountPayable, accountPayableDetail, gldetail } = req.body
         
-       
-        const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountPayable.ap_bank, bkd_module: "AP", bkd_pay_method: accountPayable.ap_cr_terms,bkd_domain:user_domain})
+       console.log(accountPayable.ap_bank,accountPayable.ap_cr_terms)
+        const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountPayable.ap_bank, bkd_module: "AP",bkd_domain:user_domain})
         let nextck = bkd.bkd_next_ck
         const bkdup = await bankDetailServiceInstance.update ({bkd_next_ck: Number(bkd.bkd_next_ck) + 1},{id:bkd.id})
         let nbr = nextck + " " + accountPayable.ap_vend
@@ -166,7 +169,9 @@ const{user_domain} = req.headers
                 }
                 const effdate = new Date(accountPayable.ap_effdate)
                 for (let entry of gldetail) {
-               
+                    let debit = 0;
+                    let credit = 0
+                    if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
                 await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                     glt_domain: user_domain,
                     glt_addr: accountPayable.ap_vend,
@@ -179,7 +184,11 @@ const{user_domain} = req.headers
                     glt_entity: accountPayable.ap_entity,
                     glt_effdate: accountPayable.ap_effdate,
                     glt_year: effdate.getFullYear(),
-                    //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+                    // glt_amt:entry.glt_amt,
+                   
+                    dec01:debit,
+                    dec02:credit,
+                    glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
                     glt_date: date, created_by: user_code, last_modified_by: user_code})
                 
                 }
@@ -255,7 +264,9 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
                  }
                  const effdate = new Date(accountPayable.ap_effdate)
                  for (let entry of gldetail) {
-                
+                    let debit = 0;
+                    let credit = 0
+                    if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
                   await generalLedgerServiceInstance.create({...entry,glt_ref: ref,
                       glt_domain: user_domain,
                       glt_addr: accountPayable.ap_vend,
@@ -268,6 +279,8 @@ const createUP = async (req: Request, res: Response, next: NextFunction) => {
                       glt_effdate: accountPayable.ap_effdate,
                       glt_entity: accountPayable.ap_entity,
                       glt_year: effdate.getFullYear(),
+                      dec01:debit,
+                      dec02:credit,
                       //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
                       glt_date: date, created_by: user_code, last_modified_by: user_code})
                  

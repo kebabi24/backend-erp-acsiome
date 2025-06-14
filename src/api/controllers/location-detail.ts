@@ -5,6 +5,7 @@ import InventoryTransactionService from '../../services/inventory-transaction';
 import costSimulationService from '../../services/cost-simulation';
 import itemService from '../../services/item';
 import LabelService from '../../services/label';
+import Location from '../../models/location';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { localeData } from 'moment';
@@ -13,7 +14,11 @@ import { Op, Sequelize } from 'sequelize';
 import ItemService from '../../services/item';
 import LoadRequestService from '../../services/load-request';
 import RoleService from '../../services/role';
-
+import locationService from '../../services/location';
+import SaleOrderDetailService from '../../services/saleorder-detail';
+import SaleOrderService from '../../services/saleorder';
+import AccountShiperService from '../../services/account-shiper';
+import addressService from '../../services/address';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -112,67 +117,134 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const itemServiceInstance = Container.get(ItemService);
     const labelServiceInstance = Container.get(LabelService);
+    const locationServiceInstance = Container.get(locationService)
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService)
+    const saleOrderServiceInstance = Container.get(SaleOrderService)
+    const accountShiper = Container.get(AccountShiperService)
+    const addressServiceInstance = Container.get(addressService)
     const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
-   // console.log(locationDetails)
-  //  const result = []
-  //  for (let det of locationDetails) {
-  //   let part = await itemServiceInstance.findOne({pt_part: det.ld_part, pt_domain: user_domain})
-  //   let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: det.ld_ref})
-      
-  //      if(lab == null){
-  //       const result_body = {
-  //         id:det.id,
-  //         ld_loc: det.ld_loc,
-  //         ld_part: det.ld_part,
-  //         pt_desc1: part.pt_desc1,
-  //         pt_um: part.pt_um,
-  //         pt_break_cat:part.pt_break_cat,
-  //         pt_draw:part.pt_draw,
-  //         pt_group:part.pt_group,
-  //         pt_part_type:part.pt_part_type,
-  //         pt_prod_line:part.pt_prod_line,
-  //         pt_rev:part.pt_rev,
-  //         lb_cust:'',
-  //         ld_qty_oh: det.ld_qty_oh,
-  //         ld_lot: det.ld_lot,
-  //         ld_site: det.ld_site,
-  //         ld_ref: det.ld_ref,
-  //         ld_status:det.ld_status,
-  //         created_by:det.created_by,
-  //         last_modified_by:det.last_modified_by,
-  //         ld_date:det.ld_date,
-
-  //       };
-  //       result.push(result_body);
-  //      }
-  //      else{
-  //       const result_body = {
-  //         id:det.id,
-  //         ld_loc: det.ld_loc,
-  //         ld_part: det.ld_part,
-  //         pt_desc1: part.pt_desc1,
-  //         pt_um: part.pt_um,
-  //         pt_break_cat:part.pt_break_cat,
-  //         pt_draw:part.pt_draw,
-  //         pt_group:part.pt_group,
-  //         pt_part_type:part.pt_part_type,
-  //         pt_prod_line:part.pt_prod_line,
-  //         pt_rev:part.pt_rev,
-  //         lb_cust:lab.lb_cust,
-  //         ld_qty_oh: det.ld_qty_oh,
-  //         ld_lot: det.ld_lot,
-  //         ld_site: det.ld_site,
-  //         ld_ref: det.ld_ref,
-  //         ld_status:det.ld_status,
-  //         created_by:det.created_by,
-  //         last_modified_by:det.last_modified_by,
-  //         ld_date:det.ld_date,
-  //       };
-  //       result.push(result_body);
-  //     }
        
-  //     }
-   {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
+    //  console.log(locationDetails)
+   const result = []
+   for (let det of locationDetails) {
+    let part = await itemServiceInstance.findOne({pt_part: det.ld_part, pt_domain: user_domain})
+    const locations = await locationServiceInstance.findOne({loc_domain:user_domain,loc_site:det.ld_site,loc_loc:det.ld_loc});
+    const sod = await saleOrderDetailServiceInstance.findOne({sod_domain:user_domain,sod_part:det.ld_part,sod_serial:det.ld_lot,sod_site:det.ld_site,sod_loc:det.ld_loc});
+    
+    
+      if(locations !=null){    
+        if(sod != null){
+      const so =  await saleOrderServiceInstance.findOne({so_domain:user_domain,so_nbr:sod.sod_nbr});
+    const as = await accountShiper.find({as_type:'I',as_domain:user_domain,as_so_nbr:so.so_nbr,});
+    const addr = await addressServiceInstance.findOne({ad_addr:so.so_cust,ad_domain:user_domain,});
+    
+    let open_amt = 0
+    let paid_amt = 0
+    for(let shiper of as){
+     open_amt = Number(open_amt) + Number(shiper.as_amt) - Number(shiper.as_applied)
+     paid_amt = Number(paid_amt) + Number(shiper.as_applied)
+    }
+    // let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: det.ld_ref})
+      let ref:any;
+      let fact:any;
+      if (det.ld_ref == null){ref = 'LIBRE'}else{ref = addr.ad_name}
+      if(so.so_inv_nbr == null){fact = ''}else{fact = so.so_inv_nbr}
+       
+        const result_body = {
+          id:det.id,
+          ld_site: det.ld_site,
+          bloc:locations.chr01,
+          fact:fact,
+          ld_lot: det.ld_lot,
+          door:det.ld__chr01,
+          level:locations.loc_phys_addr,
+          ld_ref: ref,
+          pt_part_type:part.pt_part_type,
+          pt_size:part.pt_size,
+          un_amt:so.so_amt / part.pt_size,
+          amt:so.so_amt,
+          ovs:so.so_prepaid,
+          notaire:det.ld_grade,
+          paid_amt:paid_amt,
+          paid_pct : paid_amt * 100/ so.so_amt,
+          open_amt:open_amt,
+          open_pct:open_amt * 100 /so.so_amt,
+          ap:'',
+          pr:'',
+          rc:'',
+          as:'',
+
+          ld_loc: det.ld_loc,
+          ld_part: det.ld_part,
+          pt_desc1: part.pt_desc1,
+          pt_draw:part.pt_draw,
+          pt_group:part.pt_group,
+          pt_prod_line:part.pt_prod_line,
+          ld_qty_oh: det.ld_qty_oh,
+          ld_status:det.ld_status,
+          created_by:det.created_by,
+          last_modified_by:det.last_modified_by,
+          ld_date:det.ld_date,
+          };
+        result.push(result_body);
+       
+       
+       
+        }
+        else{
+    
+    let open_amt = 0
+    let paid_amt = 0
+    // let lab = await labelServiceInstance.findOne({lb_domain: user_domain, lb_ref: det.ld_ref})
+      let ref:any;
+      let fact:any;
+      if (det.ld_ref == null){ref = 'LIBRE'}else{ref = det.ld_ref}
+       
+        const result_body = {
+          id:det.id,
+          ld_site: det.ld_site,
+          bloc:locations.chr01,
+          fact:'',
+          ld_lot: det.ld_lot,
+          door:det.ld__chr01,
+          level:locations.loc_phys_addr,
+          ld_ref: ref,
+          pt_part_type:part.pt_part_type,
+          pt_size:part.pt_size,
+          un_amt:part.pt_price ,
+          amt:part.pt_price * part.pt_size,
+          ovs:0,
+          notaire:det.ld_grade,
+          paid_amt:paid_amt,
+          paid_pct : paid_amt * 100/ 1,
+          open_amt:open_amt,
+          open_pct:open_amt * 100 /1,
+          ap:'',
+          pr:'',
+          rc:'',
+          as:'',
+
+          ld_loc: det.ld_loc,
+          ld_part: det.ld_part,
+          pt_desc1: part.pt_desc1,
+          pt_draw:part.pt_draw,
+          pt_group:part.pt_group,
+          pt_prod_line:part.pt_prod_line,
+          ld_qty_oh: det.ld_qty_oh,
+          ld_status:det.ld_status,
+          created_by:det.created_by,
+          last_modified_by:det.last_modified_by,
+          ld_date:det.ld_date,
+          };
+        result.push(result_body);
+       
+       
+       
+        }
+      }      
+    }
+    
+   {return res.status(200).json({ message: 'fetched succesfully', data: result });}
  
   } catch (e) {
     logger.error('🔥 error: %o', e);

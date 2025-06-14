@@ -11,6 +11,9 @@ import { round } from 'lodash';
 import { QueryTypes } from 'sequelize';
 import { generatePdf } from '../../reporting/generator';
 import { domain } from 'process';
+import ItemService from '../../services/item';
+import addressService from '../../services/address';
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -307,11 +310,72 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
     console.log(distinct);
     const pshs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.psh_hist.psh_shiper, PUBLIC.psh_hist.psh_cust, PUBLIC.psh_hist.psh_ship_date  FROM   PUBLIC.psh_hist where PUBLIC.psh_hist.psh_domain = ? and PUBLIC.psh_hist.psh_invoiced = 'false' and  PUBLIC.psh_hist.psh_cust = ? ",
+      "SELECT DISTINCT PUBLIC.psh_hist.psh_shiper, PUBLIC.psh_hist.psh_cust, PUBLIC.psh_hist.psh_ship_date, PUBLIC.psh_hist.psh_shipto,PUBLIC.psh_hist.psh_xinvoice,PUBLIC.psh_hist.psh_ship  FROM   PUBLIC.psh_hist where PUBLIC.psh_hist.psh_domain = ? and PUBLIC.psh_hist.psh_invoiced = 'false' and  PUBLIC.psh_hist.psh_cust = ? ",
       { replacements: [user_domain,distinct], type: QueryTypes.SELECT },
     );
     console.log(pshs);
     return res.status(200).json({ message: 'fetched succesfully', data: pshs });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findBydet = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    
+    const saleShiperServiceInstance = Container.get(SaleShiperService);
+    const itemServiceInstance = Container.get(ItemService);
+    const addressServiceInstance = Container.get(addressService);
+    const saleOrderServiceInstance = Container.get(saleOrderDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    
+
+    const shiper = await saleShiperServiceInstance.find({ ...req.body, psh_domain: user_domain });
+    
+    let result = [];
+    let i = 1;
+    
+    for(let emp of shiper)
+      {const item = await itemServiceInstance.findOne({pt_domain:user_domain, pt_part:emp.psh_part}) 
+       const addresse = await addressServiceInstance.findOne({ad_domain:user_domain, ad_addr:emp.psh_cust})
+       const so = await saleOrderServiceInstance.findOne({sod_domain:user_domain, sod_nbr:emp.psh_nbr,sod_part:emp.psh_part})
+       const tr = await inventoryTransactionServiceInstance.findOne({tr_domain:user_domain, tr_serial:emp.psh_serial,tr_part:emp.psh_part,tr_type:{ [Op.startsWith]: 'RCT' },})
+      console.log(emp.psh_part, emp.psh_serial)
+      
+      result.push({
+      id: i,
+      psh_part:emp.psh_part,
+      desc:item.pt_desc1,
+      psh_nbr:emp.psh_nbr,
+      psh_shiper:emp.psh_shiper,
+      psh_ship_date:emp.psh_ship_date,
+      psh_cust:emp.psh_cust,
+      name:addresse.ad_name,
+      sod_qty_ord:so.sod_qty_ord,
+      psh_qty_ship:emp.psh_qty_ship,
+      psh_um:emp.psh_um,
+      psh_serial:emp.psh_serial,
+      psh_price:emp.psh_price,
+      vamt:Number(Number(emp.psh_price)*Number(emp.psh_qty_ship)),
+      fournisseur:tr.tr_addr,
+      pur_price:tr.tr_price,
+      pamt:Number(Number(emp.psh_qty_ship)*Number(tr.tr_price)),
+      ecart:Number(Number(emp.psh_price)*Number(emp.psh_qty_ship)) - Number(Number(emp.psh_qty_ship)*Number(tr.tr_price))
+    
+          });
+    i = i + 1
+  }
+
+
+
+
+
+
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -325,15 +389,22 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     
     const saleShiperServiceInstance = Container.get(SaleShiperService);
+  
+
     const shiper = await saleShiperServiceInstance.find({ ...req.body, psh_domain: user_domain });
-    console.log(shiper);
+   
+
+
+
+
+
+
     return res.status(200).json({ message: 'fetched succesfully', data: shiper });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
 };
-
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -373,6 +444,7 @@ export default {
   findAll,
   findAllDistinct,
   findBy,
+  findBydet,
   update,
   deleteOne,
 };

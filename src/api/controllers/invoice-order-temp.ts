@@ -309,7 +309,9 @@ console.log('ctd',invoiceOrder.ih_amt)
     }
     const effdate = new Date(invoiceOrder.ih_inv_date);
     for (let entry of gldetail) {
-
+      let debit = 0;
+      let credit = 0
+      if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
       await generalLedgerServiceInstance.create({
         ...entry,
         glt_ref: ref,
@@ -328,6 +330,8 @@ console.log('ctd',invoiceOrder.ih_amt)
         glt_date: date,
         created_by: user_code,
         last_modified_by: user_code,
+        dec01:debit,
+        dec02:credit
       });
     }
     /***************GL *************/

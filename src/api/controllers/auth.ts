@@ -100,10 +100,10 @@ const createCustomer = async (req: Request, res: Response, next: NextFunction) =
         // ADD TO AGENDA 
         const crmServiceInstance = Container.get(crmService)
         const sequenceServiceInstance = Container.get(SequenceService);
-        const param = await crmServiceInstance.getParamFilterd("new_client")
+        const param = await crmServiceInstance.getParamFilterd("new_client",'')
         const paramDetails  = await crmServiceInstance.getParamDetails({param_code : param.param_code})
         const sequence = await sequenceServiceInstance.getCRMEVENTSeqNB()
-        const addLine = await crmServiceInstance.createAgendaLine(data.phone,param,paramDetails, sequence)   
+        const addLine = await crmServiceInstance.createAgendaLine(data.phone,param,paramDetails, sequence,'')   
         
         
 

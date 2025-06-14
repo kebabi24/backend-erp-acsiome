@@ -865,32 +865,32 @@ export default async ({ expressApp }) => {
     targetKey: 'pt_part',
   });
 
-  require('../models/customer').default.hasOne(require('../models/project').default, {
-    foreignKey: 'pm_cust',
-    sourceKey: 'cm_addr',
-  });
-  require('../models/project').default.belongsTo(require('../models/customer').default, {
-    foreignKey: 'pm_cust',
-    targetKey: 'cm_addr',
-  });
+  // require('../models/customer').default.hasOne(require('../models/project').default, {
+  //   foreignKey: 'pm_cust',
+  //   sourceKey: 'cm_addr',
+  // });
+  // require('../models/project').default.belongsTo(require('../models/customer').default, {
+  //   foreignKey: 'pm_cust',
+  //   targetKey: 'cm_addr',
+  // });
 
-  require('../models/item').default.hasOne(require('../models/project-detail').default, {
-    foreignKey: 'pmd_part',
-    sourceKey: 'pt_part',
-  });
-  require('../models/project-detail').default.belongsTo(require('../models/item').default, {
-    foreignKey: 'pmd_part',
-    targetKey: 'pt_part',
-  });
+  // require('../models/item').default.hasOne(require('../models/project-detail').default, {
+  //   foreignKey: 'pmd_part',
+  //   sourceKey: 'pt_part',
+  // });
+  // require('../models/project-detail').default.belongsTo(require('../models/item').default, {
+  //   foreignKey: 'pmd_part',
+  //   targetKey: 'pt_part',
+  // });
 
-  require('../models/task').default.hasOne(require('../models/project-detail').default, {
-    foreignKey: 'pmd_task',
-    sourceKey: 'tk_code',
-  });
-  require('../models/project-detail').default.belongsTo(require('../models/task').default, {
-    foreignKey: 'pmd_task',
-    targetKey: 'tk_code',
-  });
+  // require('../models/task').default.hasOne(require('../models/project-detail').default, {
+  //   foreignKey: 'pmd_task',
+  //   sourceKey: 'tk_code',
+  // });
+  // require('../models/project-detail').default.belongsTo(require('../models/task').default, {
+  //   foreignKey: 'pmd_task',
+  //   targetKey: 'tk_code',
+  // });
 
   require('../models/employe').default.hasOne(require('../models/employe-availability').default, {
     foreignKey: 'empd_addr',
@@ -1136,7 +1136,7 @@ export default async ({ expressApp }) => {
 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
+  //   await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

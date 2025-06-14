@@ -174,7 +174,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
       const pricelistServiceInstance = Container.get(PricelistService);
       const { part, promo,cust,classe, date,qty,um,curr,type } = req.body;
       
-      console.log(date)
+      console.log(req.body)
       const pricelist = await pricelistServiceInstance.min({
         pi_part_code: { [Op.or] : [part,promo]},
         pi_cs_code: { [Op.or] : [cust,classe]},

@@ -22,21 +22,35 @@ async function startServer() {
    **/
   await require('./loaders').default({ expressApp: app });
 
-  const server = app.listen(config.port, err => {
-    if (err) {
-      Logger.error(err);
+  // var server = app.listen(config.port, err => {
+  //   if (err) {
+  //     Logger.error(err);
 
-      process.exit(1);
-      return;
-    }
-    Logger.info(`
-      ################################################ 
-      🛡️  Server listening on port: ${config.port} 🛡️ 
-      ################################################
-    `);
-  });
+  //     process.exit(1);
+  //     return;
+  //   }
+  //   Logger.info(`
+  //     ################################################ 
+  //     🛡️  Server listening on port: ${config.port} 🛡️ 
+  //     ################################################
+  //   `);
+  // });
+  var fs = require('fs');
+  var http = require('http');
+  var https = require('https');
+  // var privatekey =fs.readFileSync('sslcert/server.key','utf8');
+  // var certificate = fs.readFileSync('sslcert/server.crt','utf8');
+  // var credentials = {key:'Palmary',cert:certificate};
+  //your express configuration here
+  var httpserver = http.createServer(app).listen(config.port);
+  var server =https.createServer(app).listen(3000);
+  Logger.info(`
+         ################################################ 
+         🛡️  Server listening on port: ${config.port} 🛡️ 
+         ################################################
+       `);
 
-  const io = require('socket.io')(server);
+  const io = require('socket.io')(httpserver);
   io.on('connection',userMobileController.getDataBack)
   // io.on('connection', socket => {
   

@@ -20,6 +20,9 @@ const Agenda = sequelize.define(
         code_event :{type:Sequelize.STRING}, // from seq 
         order:{type:Sequelize.INTEGER}, 
         code_client : {type:Sequelize.STRING} ,
+        item : {type:Sequelize.STRING} ,
+        nbr:{type:Sequelize.INTEGER},
+        price:{type:Sequelize.DECIMAL},
         category : {type:Sequelize.STRING} , // from reclamation ,satisfaction ... 
         
         event_day : {type:Sequelize.DATEONLY},

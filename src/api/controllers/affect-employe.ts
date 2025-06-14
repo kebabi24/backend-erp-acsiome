@@ -27,9 +27,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const { affectEmp, empDetail } = req.body;
     
     for (let entry of empDetail) {
-      console.log(affectEmp.chr04.length,affectEmp.pme_start_time)
+      // console.log(affectEmp.chr04.length,affectEmp.pme_start_time)
       let weekday='';
-      for(let j = 0; j<affectEmp.chr04.length;j++){weekday = weekday+affectEmp.chr04[j]+','}
+      if (affectEmp.chr04 != null){for(let j = 0; j<affectEmp.chr04.length;j++){weekday = weekday+affectEmp.chr04[j]+','}}
       const found =  await affectEmployeServiceInstance.findOne({pme_nbr:affectEmp.pme_nbr,int01: affectEmp.int01,pme_employe:entry.pme_employe})
       
       if(found)
@@ -179,7 +179,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       
       if(Number(eff_date.getDate) > 10){nbr  = nbr - 1}
       if(entry.livre == true) {
-        const part = await itemServiceInstance.findOne({pt_part:'LIVRE',pt_domain:user_domain})
+        const part = await itemServiceInstance.findOne({pt_part_type:'LIVRE',pt_domain:user_domain})
           console.log(part.pt_price)
         const accountShiper = await accountShiperServiceInstance.create({as_entity:user_site,as_app_owner:entry.fname + ' ' + entry.lname,as_nbr: affectEmp.pme_nbr + '-' + 'LIVRE' + '-' + entry.pme_employe,as_ship: affectEmp.pme_nbr + '-LIVRE' + '-' + entry.pme_employe,as_bill:'CL006',as_cust:'CL006',as_type:'I',as_so_nbr:'',as_effdate:date2,as_due_date:eff_date,as_cr_terms:entry.chr05,as_amt:part.pt_price,as_curr:'DA',as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
       }

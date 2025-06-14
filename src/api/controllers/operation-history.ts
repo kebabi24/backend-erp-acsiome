@@ -52,7 +52,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
       }
       for (const down of dwndetail) {
-        const op1 = await workroutingServiceInstance.findOne({op_wkctr : op.op_routing,op_mch:op.op_mch,op_date:op.op_date,op_type:'down',op_domain:user_domain})
+        const op1 = await operationHistoryServiceInstance.findOne({op_wkctr : op.op_wkctr,op_mch:op.op_mch,op_date:op.op_date,op_type:'down',op_domain:user_domain})
 
         var elapsed = Math.abs(new Date(down.fin_cause).getTime() - new Date(down.debut_cause).getTime()) / (1000 * 60)
         // console.log('elapsed',elapsed)

@@ -120,11 +120,11 @@ export default class UserService {
 
       const addr = await this.addressModel.findOne({
         where: { ad_addr: data },
-        attributes: ['ad_line1', 'ad_line2', 'ad_ref', 'ad_ext'],
+        attributes: ['ad_name','ad_line1', 'ad_line2', 'ad_ref', 'ad_ext'],
       });
 
       if(addr){
-
+        customer_data.dataValues.name = addr.ad_name
         customer_data.dataValues.wilaya = addr.ad_line1
         customer_data.dataValues.commune = addr.ad_line2
         customer_data.dataValues.email = addr.ad_ext

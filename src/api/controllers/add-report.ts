@@ -66,21 +66,21 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         last_modified_ip_adr: req.headers.origin,
       });
       console.log(entry.pmr_employe)
-      let empfdet = {
+    //   let empfdet = {
         
-        empf_domain: user_domain,
-        empf_code: entry.pmr_employe,
-        empf_part:addReport.pmr_inst,
-        empf_beging_date:entry.pmr_start_date,
-        empf_end_date:entry.pmr_end_date,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-      };
-      const empf = await employeTrainingServiceInstance.findOne({empf_code:entry.pmr_employe,empf_part:addReport.pmr_inst, empf_beging_date:entry.pmr_start_date,
-        empf_end_date:entry.pmr_end_date,empf_domain: user_domain,})
-      if(empf){console.log("formé")} else {console.log(empfdet);await employeTrainingServiceInstance.create(empfdet);}
-    }
+    //     empf_domain: user_domain,
+    //     empf_code: entry.pmr_employe,
+    //     empf_part:addReport.pmr_inst,
+    //     empf_beging_date:entry.pmr_start_date,
+    //     empf_end_date:entry.pmr_end_date,
+    //     created_by: user_code,
+    //     created_ip_adr: req.headers.origin,
+    //     last_modified_by: user_code,
+    //   };
+    //   const empf = await employeTrainingServiceInstance.findOne({empf_code:entry.pmr_employe,empf_part:addReport.pmr_inst, empf_beging_date:entry.pmr_start_date,
+    //     empf_end_date:entry.pmr_end_date,empf_domain: user_domain,})
+    //   if(empf){console.log("formé")} else {console.log(empfdet);await employeTrainingServiceInstance.create(empfdet);}
+     }
 
     for (const item of cnsDetail) {
       const sct = await costSimulationServiceInstance.findOne({

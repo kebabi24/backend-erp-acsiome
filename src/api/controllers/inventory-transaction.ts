@@ -27,7 +27,8 @@ import LocationDetailService from '../../services/location-details';
 import AccountUnplanifedService from '../../services/account-unplanifed';
 import ProviderService from '../../services/provider';
 import { DECIMAL } from 'sequelize';
-
+import GeneralLedgerService from "../../services/general-ledger"
+import ProductLineService from "../../services/product-line"
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -76,7 +77,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const devise = await inventoryTransactionServiceInstance.find({tr_domain:user_domain});
-    console.log(devise)
+ 
     return res.status(200).json({ message: 'fetched succesfully', data: devise });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -139,7 +140,7 @@ const findByRef = async (req: Request, res: Response, next: NextFunction) => {
         tr_loc:tr.tr_loc,
         tr_domain:user_domain
       });
-      console.log(tr.amt,inv[inv.length-1].tr_nbr,inv[inv.length-1].tr__chr01)
+    
       //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
       const effdate = new Date(tr.tr_effdate);
       result.push({
@@ -226,7 +227,7 @@ const inv = await inventoryTransactionServiceInstance.find({
         });
       if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString())
       { 
-console.log(1,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+
        
         //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
         const effdate = new Date(tr.tr_effdate);
@@ -261,7 +262,7 @@ console.log(1,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeStr
       
         if(new Date(date1).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(inv[0].createdAt).toLocaleTimeString() >= time1 && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
         { 
-console.log(2,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+
          
           //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
           const effdate = new Date(tr.tr_effdate);
@@ -295,7 +296,7 @@ console.log(2,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeStr
         }
           if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date1).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() >= time1)
           { 
-console.log(3,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString())
+
            
             //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
             const effdate = new Date(tr.tr_effdate);
@@ -330,7 +331,7 @@ console.log(3,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeStr
             if(new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
               {
                 
-console.log(4,tr.tr_lot,tr.tr_effdate,new Date(inv[0].createdAt).toLocaleTimeString(),time2)
+
                 //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
                 const effdate = new Date(tr.tr_effdate);
                 result.push({
@@ -418,7 +419,7 @@ const findByActivity = async (req: Request, res: Response, next: NextFunction) =
         tr_loc:tr.tr_loc,
         tr_domain:user_domain
       });
-      console.log(inv.length)
+  
       //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
       const effdate = new Date(tr.tr_effdate);
       if (tr.tr_type == 'RCT-UNP'){rctunp = tr.amt}
@@ -508,13 +509,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const updateTrans = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
-  console.log('AVANT TRY')
+  
   logger.debug('Calling update one  locationDetail endpoint');
   try {
     
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     let refid = req.body.id;
-    console.log(refid)
+   
      const locationDetail = await inventoryTransactionServiceInstance.update(
       { tr_rev: 'CHANGED', last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id : refid},
@@ -665,6 +666,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
@@ -701,6 +703,7 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
+        int03:pt.pt_size,
         dec01:Number(new Date(it.tr_effdate).getFullYear()),
         dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
         tr_program:new Date().toLocaleTimeString(),
@@ -802,6 +805,7 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
+        int03:pt.pt_size,
         created_by: user_code,
         created_ip_adr: req.headers.origin,
         last_modified_by: user_code,
@@ -844,7 +848,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
     const statusServiceInstance = Container.get(statusService);
 
     for (const item of detail) {
-      console.log(item)
+     
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
         sct_site: it.tr_site,
@@ -902,7 +906,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
         created_by: user_code,
         created_ip_adr: req.headers.origin,
@@ -955,6 +959,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           chr03:ld.chr03,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:(ld) ? ld.chr04 : null,
           chr05:pt.pt_prod_line,
           ld_grade:(ld) ? ld.ld_grade : null,
@@ -999,7 +1004,7 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-       
+        int03:pt.pt_size,
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
       });
     }
@@ -1090,7 +1095,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
        
     });
    
@@ -1146,7 +1151,7 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-       
+        int03:pt.pt_size,
     });
   }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
@@ -1698,6 +1703,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
@@ -1720,16 +1726,16 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         sct_sim: 'STD-CG',
       });
       
-      const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+      const wo = await workOrderServiceInstance.findOne({ wo_nbr: it.tr_nbr });
         let routing : any;
         let emp: any;
         let stat: any;
         // for  (let ofs of wo){routing = ofs.wo_routing, emp = ofs.wo_user1}
         routing = wo.wo_routing
         emp = wo.wo_user1
-        console.log(wo.wo_qty_comp, '>', wo.wo_qty_ord)
+       
         if (Number(Number(wo.wo_qty_comp) + Number(item.tr_qty_loc)) >= Number(wo.wo_qty_ord)){stat = 'C'} else {stat = 'R'}
-        console.log(stat)
+      
       if (wo)
        
         await workOrderServiceInstance.update(
@@ -1774,7 +1780,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         // tr_program:new Date().toLocaleTimeString(),
       
           });
@@ -1854,6 +1860,7 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           created_by: user_code,
@@ -1923,6 +1930,7 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
+        int03:pt.pt_size,
        
         // tr_program:new Date().toLocaleTimeString(),
         
@@ -2019,7 +2027,7 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         });
         await locationDetailServiceInstance.delete({
           ld_lot: item.tr_nbr,
@@ -2231,7 +2239,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         });
 
         if (remain.ld_rev != 'M') {
@@ -2272,6 +2280,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
               chr03:pt.pt_group,
               int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:'INVENTAIRE',
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
@@ -2396,7 +2405,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-       
+        int03:pt.pt_size,
         });
 
         if (remain.ld_rev != 'M') {
@@ -2438,6 +2447,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               chr03:pt.pt_group,
               int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:'INVENTAIRE',
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
@@ -2599,7 +2609,7 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-    console.log(req.body.date,req.body.date1)
+   
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
@@ -2661,7 +2671,7 @@ const findtrDateAddr = async (req: Request, res: Response, next: NextFunction) =
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-    console.log(req.body.tr_addr,req.body.date)
+   
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec({
       tr_domain:user_domain,
@@ -3202,7 +3212,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
     const workOrderServiceInstance = Container.get(workOrderService);
 
     for (const item of detail) {
-      console.log(item.old)
+      
       if (item.old != true){
       const sct = await costSimulationServiceInstance.findOne({
         sct_part: item.tr_part,
@@ -3231,7 +3241,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
           },
           { id: ld.id },
         );
-        const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
+        const wo = await workOrderServiceInstance.findOne({ id: item.tr_lot });
         let routing : any;
         let emp: any;
         let locbegin : any;
@@ -3243,8 +3253,9 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         if (ld){locbegin = ld.ld_qty_oh;chr01 = ld.ld__chr01;grade = ld.ld_grade}else{locbegin = 0;chr01=null;grade=null}
         if (wo)
         {  await inventoryTransactionServiceInstance.create({
-         ...item,
+         
          ...it,
+         ...item,
          tr_domain: user_domain,
          tr_addr:routing,
          tr_user1:emp,
@@ -3279,7 +3290,7 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
           });
         }  
         if( !isNaN(item.wodid)) {
@@ -3301,8 +3312,8 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
         }else {
 
           await workOrderDetailServiceInstance.create({
-            wod_nbr     : it.tr_nbr,
-            wod_lot     : it.tr_lot,
+            wod_nbr     : item.tr_nbr,
+            wod_lot     : item.tr_lot,
             wod_part    : item.tr_part,
             wod_qty_req : 0,
             wod_qty_iss : item.tr_qty_loc,
@@ -3365,7 +3376,7 @@ const retissWo = async (req: Request, res: Response, next: NextFunction) => {
           ld_loc: item.tr_loc,
           ld_ref: item.tr_so_job,
         });
-        console.log(ld.ld_part)
+       
         
          
         
@@ -3396,6 +3407,7 @@ const retissWo = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:ld.chr04,
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
@@ -3443,7 +3455,7 @@ const retissWo = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
       });
   if( !isNaN(item.wodid)) {
         const wod = await workOrderDetailServiceInstance.findOne({ id: item.wodid});
@@ -3559,7 +3571,7 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
     });
    
       const status = await statusServiceInstance.findOne({
@@ -3612,7 +3624,7 @@ const issChlRef = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-       
+        int03:pt.pt_size,
     });
   }
     return res.status(200).json({ message: 'deleted succesfully', data: true });
@@ -3689,7 +3701,7 @@ const reprint = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
     });
    
       // const status = await statusServiceInstance.findOne({
@@ -3892,7 +3904,7 @@ const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const {user_domain} = req.headers;
-console.log(user_domain)
+
   logger.debug('Calling update one  code endpoint');
   try {
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -4038,7 +4050,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
      // tot = +10 * +100.020
       
     }
-    // if (it.tr_addr != null) {console.log(it.tr_addr,nlot)
+    // if (it.tr_addr != null) {
     // const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
     // if(aufind) {
     // const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
@@ -4056,7 +4068,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
       //   sct_site: item.tr_site,
       //   sct_sim: 'STD-CG',
       // });
-      console.log(item.tr_oldpart,item.tr_part,item.tr_site)
+    
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
       const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
@@ -4111,7 +4123,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         });
         await locationDetailServiceInstance.update(
           {
@@ -4160,7 +4172,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-       
+        int03:pt.pt_size,
         });
         await locationDetailServiceInstance.create({
           ld_part: item.tr_part,
@@ -4181,6 +4193,7 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
@@ -4229,7 +4242,8 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
     const statusServiceInstance = Container.get(statusService);
     const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
     const providerServiceInstance = Container.get(ProviderService);
-
+    const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
+    const productLineServiceInstance = Container.get(ProductLineService)
     let tot = 0.00  
     for (const data of detail) {
     
@@ -4237,7 +4251,8 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
      // tot = +10 * +100.020
       
     }
-    if (it.tr_addr != null) {console.log(it.tr_addr,nlot)
+   
+    if (it.tr_addr != null) {
     const aufind = await accountUnplanifedServiceInstance.findOne({au_nbr: nlot,au_domain : user_domain,})
     if(aufind) {
     const accountUnplanifed = await accountUnplanifedServiceInstance.update({au_amt : Number(aufind.au_amt) + Number(tot) ,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:aufind.id})
@@ -4255,7 +4270,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
       //   sct_site: item.tr_site,
       //   sct_sim: 'STD-CG',
       // });
-      console.log(item.tr_oldpart,item.tr_part)
+    
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part , pt_domain: user_domain});
 
       const lds = await locationDetailServiceInstance.find({ ld_part: item.tr_part, ld_site: item.tr_site,  ld_domain:user_domain });
@@ -4310,7 +4325,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         });
         await locationDetailServiceInstance.update(
           {ld_part: item.tr_part,
@@ -4329,6 +4344,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
             chr03:pt.pt_group,
             int01:pt.int01,
             int02:pt.int02,
+            int03:pt.pt_size,
             chr04:it.tr_addr,
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
@@ -4380,6 +4396,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
+        int03:pt.pt_size,
        
         });
         await locationDetailServiceInstance.create({
@@ -4401,6 +4418,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
           chr03:pt.pt_group,
           int01:pt.int01,
           int02:pt.int02,
+          int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
@@ -4411,6 +4429,79 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
               last_modified_ip_adr: req.headers.origin,
         });
       }
+      const pl = await productLineServiceInstance.findOne({pl_domain : user_domain,pl_prod_line: pt.pt_prod_line})
+                        
+                        const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: new Date()})
+                        if(gl) {
+                          var seqgl =  gl.glt_ref.substring(10, 18)
+                       var d = Number(seqgl) + 1
+                       
+                       var seqchar = ("000000" + d).slice(-6);
+                       
+                       var ref = "ST" + moment().format('YYYYMMDD') + seqchar ;
+                       } else {
+                
+                           
+                           var ref = "ST"  + moment().format('YYYYMMDD') + "000001" ;
+                          // return year +  month + day;
+                         
+                
+                       }
+                       const effdate = new Date(item.tr_effdate)
+                       
+                       
+                      
+                        await generalLedgerServiceInstance.create({glt_ref: ref,
+                          glt_line:1,
+                            glt_domain: user_domain,
+                            glt_addr: item.tr_vend,
+                            glt_curr: 'DA',
+                            glt_tr_type: 'TR',
+                            glt_dy_code: 'TR',
+                            glt_ex_rate: 1,
+                            glt_ex_rate2: 1,
+                            glt_doc: nlot,
+                            glt_doc_type:'RC',
+                            glt_effdate: new Date(item.tr_effdate),
+                            glt_entity: item.tr_site,
+                            glt_year: new Date(item.tr_effdate).getFullYear(),
+                            gl_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                            glt_curr_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                            glt_acct:pl.pl_inv_acct,
+                            glt_desc:'STOCK MARCHANDISE',
+                            glt_src_desc:'',
+                            dec01:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                            dec02:0,
+                            //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+                            glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
+                        await generalLedgerServiceInstance.create({glt_ref: ref,
+                              glt_line:2,
+                                glt_domain: user_domain,
+                                glt_addr: item.tr_vend,
+                                glt_curr: 'DA',
+                                glt_tr_type: 'TR',
+                                glt_dy_code: 'TR',
+                                glt_ex_rate: 1,
+                                glt_ex_rate2: 1,
+                                glt_doc: nlot,
+                                glt_doc_type:'RC',
+                                glt_effdate: new Date(item.tr_effdate),
+                                glt_entity: item.tr_site,
+                                glt_year: new Date(item.tr_effdate).getFullYear(),
+                                gl_amt: - Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                                glt_curr_amt:- Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                                glt_acct:pl.pl_pur_acct,
+                                glt_desc:'ACHAT MARCHANDISE STOCKEES',
+                                glt_src_desc:'',
+                                dec01:0,
+                                dec02:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+                                //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+                                glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
+                           
+                       
+                            
+
+                  
       
       
     }
@@ -4504,7 +4595,7 @@ const issTrV = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
       });
 
@@ -4590,7 +4681,7 @@ const issTrV = async (req: Request, res: Response, next: NextFunction) => {
         tr__chr04:pt.pt_part_type,
         int01:pt.int01,
         int02:pt.int02,
-        
+        int03:pt.pt_size,
         tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
       });
     }
@@ -4621,7 +4712,7 @@ const findByIss = async (req: Request, res: Response, next: NextFunction) => {
     
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const trs = await inventoryTransactionServiceInstance.find({ tr_ref:req.body.tr_ref,tr_domain:user_domain,tr_type:{ [Op.startsWith]: 'ISS' },  });
-    // console.log(trs.data.tr_ref)
+
     
     return res.status(200).json({ message: 'fetched succesfully', data: trs });
   } catch (e) {

@@ -33,10 +33,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
        }
        const effdate = new Date(generalLedger.glt_effdate)
        for (let entry of Detail) {
-
+        let debit = 0
+        let credit = 0
+if (entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
         await generalLedgerServiceInstance.create({...generalLedger,glt_domain:user_domain,glt_ref: ref,...entry,
             glt_curr_amt: (Number(entry.glt_amt)) * Number(generalLedger.glt_ex_rate2) /  Number(generalLedger.glt_ex_rate)   ,
-            
+            dec01:debit,
+            dec02:credit,
             glt_year: effdate.getFullYear(),
               
             glt_date: date, created_by: user_code, last_modified_by: user_code})
@@ -111,6 +114,38 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findBy50 = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const generalLedgerServiceInstance = Container.get(GeneralLedger)
+        const gl = await generalLedgerServiceInstance.find({...req.body,glt_domain:user_domain})
+        let result = [];
+        
+        for (var i=1; i < 85; i++)
+        {
+            result.push({
+                id: i,
+                code:'',
+                desc:'',
+                CA:0,
+                CAE:0,
+                CAI:0,
+                amt:0,
+              });
+              i = i + 1;
+        }
+
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -125,7 +160,10 @@ const{user_domain} = req.headers
 
         await generalLedgerServiceInstance.delete({glt_ref: id})
         for (let entry of Detail) {
-            entry = { ...entry, ...generalLedger, cglt_domain:user_domain,reated_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            let debit = 0;
+       let credit = 0
+       if(entry.glt_amt < 0){credit = -entry.glt_amt}else{debit = entry.glt_amt}
+            entry = { ...entry, ...generalLedger, glt_domain:user_domain,reated_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,dec01:debit,dec02:credit }
             await generalLedgerServiceInstance.create(entry)
         }
         return res
@@ -193,6 +231,7 @@ export default {
     findOne,
     findAll,
     findBy,
+    findBy50,
     update,
     deleteOne,
     findNewId
