@@ -135,14 +135,14 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const RoleItineraryServiceInstance = Container.get(RoleItineraryService);
 
     const { id } = req.params;
-    
+    console.log(req.body)
     const roleup = await RoleServiceInstance.updated(
       { ...role, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
     );
     await RoleItineraryServiceInstance.delete({ role_code: role.role_code });
     for (let entry of itinerary) {
-      entry = { itinerary_code: entry, role_code: role.role_code };
+      entry = { itinerary_code: entry.itinerary_code, role_code: role.role_code };
       await RoleItineraryServiceInstance.create(entry);
     }
     return res.status(200).json({ message: 'fetched succesfully', data: roleup });

@@ -13,6 +13,8 @@ import { QueryTypes } from 'sequelize';
 import { generatePdf } from '../../reporting/generator';
 import { domain } from 'process';
 import { Op, Sequelize } from 'sequelize';
+import CodeService from '../../services/code';
+import saleShiperService from '../../services/sale-shiper';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -26,6 +28,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const costSimulationServiceInstance = Container.get(costSimulationService);
     const saleOrderDetailServiceInstance = Container.get(saleOrderDetailService);
     const itemServiceInstance = Container.get(itemService);
+    const codeService = Container.get(CodeService);
 
     //const lastId = await saleShiperServiceInstance.max('psh_nbr');
 
@@ -150,6 +153,55 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     //const {as, pshnbr} = req.body; as is undefined
     const { detail, ps, pshnbr, tot } = req.body;
+
+    /* export */
+    const fs = require('node:fs');
+    const content = 'Some content!';
+    let str = ``
+    var days: String
+    var months : String
+    var year : String
+    let date= new Date()
+    let day = date.getDate();
+    console.log(day)
+if (day < 10) {
+    days = "0" + String(day)
+}
+else {days = String(day)}
+console.log(days)
+let month = date.getMonth();
+console.log(month)
+if (month < 9) {
+    month = month + 1
+    months = "0" + month
+} else {
+    months = String(month + 1)
+}
+
+let years = date.getFullYear();
+let datelr = `${days}/${months}/${years}`;
+
+    const code = await codeService.findOne({code_fldname:"export-chargement",code_value:"bl"});
+
+    if(code != null) {
+      for (const item of req.body.detail) {
+
+    
+          str += `${item.psh_nbr}|${req.body.pshnbr}|${datelr}|${item.psh_cust}|${item.psh_site}|${item.psh_loc}|${item.psh_part}|${item.psh_serial}|${item.psh_qty_ship}|\n`;
+  
+       
+      let filename = code.code_cmmt +  'BL-' + req.body.pshnbr + '.txt'
+      console.log("filename :",filename)
+        try {
+          fs.writeFileSync(filename, str);
+          // file written successfully
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    }
+/*export end*/        
+
     // console.log('\n\n ps ', ps);
     // const addressServiceInstance = Container.get(AddressService);
     // const addr = await addressServiceInstance.findOne({ ad_domain: user_domain,ad_addr: ps.psh_cust });
@@ -315,6 +367,7 @@ const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
     customer_name: cm.address.ad_name,
     pt_part_type: pt.pt_part_type,
     psh_part : shiper.psh_part,
+    psh_serial : shiper.psh_serial,
     designation : pt.pt_desc1,
     psh_invoiced: shiper.psh_invoiced,
     psh_qty_ship: shiper.psh_qty_ship,

@@ -32,7 +32,7 @@ export default class RoleItineraryService {
 
     public async find(query: any): Promise<any> {
         try {
-            const itn = await this.roleItineraryModel.findAll({ where: query })
+            const itn = await this.roleItineraryModel.findAll({ where: query ,include:this.ItineraryModel})
             this.logger.silly("find All role-itn mstr")
             return itn
         } catch (e) {

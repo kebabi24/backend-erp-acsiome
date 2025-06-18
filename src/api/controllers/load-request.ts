@@ -417,52 +417,53 @@ const updateLoadRequests4O = async (req: Request, res: Response, next: NextFunct
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const codeService = Container.get(CodeService);
     const loadRequestsCodes = req.body.load_requests_codes;
-    const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequestsCodes, 30);
+    console.log("loadRequestsCodes",loadRequestsCodes)
+    const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequestsCodes, 40);
 
-    /*updqte ld_det */
-    const LoadRequeust = await loadRequestService.findLoadRequest({load_request_code:loadRequestsCodes});
+  //   /*updqte ld_det */
+  //   const LoadRequeust = await loadRequestService.findLoadRequest({load_request_code:loadRequestsCodes});
 
-   const loadRequestDetails = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(loadRequestsCodes);
-    console.log(loadRequestDetails)
+  //  const loadRequestDetails = await loadRequestService.findLoadRequestsDetailsByLoadRequestsCode(loadRequestsCodes);
+  //   console.log(loadRequestDetails)
 
-    for(let lrdet of loadRequestDetails) {
-      const ld = await locationDetailServiceInstance.findOne({
-        ld_part: lrdet.product_code,
-        ld_lot: lrdet.lot,
-        ld_site: LoadRequeust.role_site,
-        ld_loc: LoadRequeust.role_loc,
-        //ld_ref:item.tr_ref,
-        ld_domain:user_domain,
-      });
-      if (ld) {
-        await locationDetailServiceInstance.update(
-          {
-            ld_qty_oh: Number(ld.ld_qty_oh) + Number(lrdet.qt_effected),
-            last_modified_by: user_code,
-            last_modified_ip_adr: req.headers.origin,
-          },
-          { id: ld.id },
-        );
-      } else {
-        await locationDetailServiceInstance.create({
-          ld_part: lrdet.product_code,
-          ld_lot: lrdet.lot,
-          ld_site: LoadRequeust.role_site,
-          ld_loc: LoadRequeust.role_loc,
-         // ld_date: new Date(),
-          ld_qty_oh: Number(lrdet.qt_effected),
+  //   for(let lrdet of loadRequestDetails) {
+  //     const ld = await locationDetailServiceInstance.findOne({
+  //       ld_part: lrdet.product_code,
+  //       ld_lot: lrdet.lot,
+  //       ld_site: LoadRequeust.role_site,
+  //       ld_loc: LoadRequeust.role_loc,
+  //       //ld_ref:item.tr_ref,
+  //       ld_domain:user_domain,
+  //     });
+  //     if (ld) {
+  //       await locationDetailServiceInstance.update(
+  //         {
+  //           ld_qty_oh: Number(ld.ld_qty_oh) + Number(lrdet.qt_effected),
+  //           last_modified_by: user_code,
+  //           last_modified_ip_adr: req.headers.origin,
+  //         },
+  //         { id: ld.id },
+  //       );
+  //     } else {
+  //       await locationDetailServiceInstance.create({
+  //         ld_part: lrdet.product_code,
+  //         ld_lot: lrdet.lot,
+  //         ld_site: LoadRequeust.role_site,
+  //         ld_loc: LoadRequeust.role_loc,
+  //        // ld_date: new Date(),
+  //         ld_qty_oh: Number(lrdet.qt_effected),
           
-          created_by: user_code,
-          created_ip_adr: req.headers.origin,
-          last_modified_by: user_code,
-          last_modified_ip_adr: req.headers.origin,
-          ld_domain: user_domain,
+  //         created_by: user_code,
+  //         created_ip_adr: req.headers.origin,
+  //         last_modified_by: user_code,
+  //         last_modified_ip_adr: req.headers.origin,
+  //         ld_domain: user_domain,
           
-        });
-      }
-    }
+  //       });
+  //     }
+  //   }
 
-    /*updqte ld_det */
+  //   /*updqte ld_det */
 /* export */
 
     const code = await codeService.findOne({code_fldname:"export-chargement",code_value:"chg"});
@@ -740,6 +741,9 @@ console.log(line.pt_price,line.qt_effected)
     // UPDATE LOAD REQUEST STATUS TO 20
     // console.log('codeeeeeeeeeeeeeeeeee', load_request_code);
     const loadRequest = await loadRequestService.updateLoadRequestStatusTo20(load_request_code, 20);
+
+
+   /* hna ndir stock*/
 
 
     return res.status(201).json({ message: 'created succesfully', data: loadRequest });
@@ -1286,6 +1290,33 @@ result.push(
   }
 };
 
+const findBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  code endpoint');
+  try {
+    const loadRequestService = Container.get(LoadRequestService);
+    const itemServiceInstance = Container.get(ItemService);
+    const sequelize = Container.get("sequelize")
+   
+    const loads = await loadRequestService.find({ where :{status : req.body.status},  attributes: {
+      include: [[Sequelize.literal('status'), 'chg']]}});
+      let result = []
+ for(let load of loads) {
+  const det = await loadRequestService.findAllLoadRequestsDetailsByLoadRequestsCode(load.load_request_code);
+  let chg = false
+ 
+  if (det.length ==0) {chg=false  } else {chg = true}
+  result.push({id:load.id,load_request_code:load.load_request_code,date_creation:load.date_creation,date_charge:load.date_charge,user_mobile_code:load.user_mobile_code,role_code:load.role_code,status:load.status,chg:chg})
+
+ }
+// console.log(loads)
+    return res.status(200).json({ message: 'found all lr', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   findAllLoadRequeusts,
   findAllRoles,
@@ -1319,7 +1350,8 @@ export default {
   exportLoadRequest,
   getLoadRequest,
   createUnLoadRequestDetailsScan,
-  findLoadGrp
+  findLoadGrp,
+  findBy,
 };
 
 // validation 0-10

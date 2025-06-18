@@ -81,6 +81,7 @@
     "sequelize": "^6.3.3",
     "socket.io": "^4.5.1",
     "steam": "^1.4.1",
+    "systeminformation": "^5.25.11",
     "typedi": "^0.8.0",
     "usb": "^1.9.2",
     "winston": "^3.2.1"

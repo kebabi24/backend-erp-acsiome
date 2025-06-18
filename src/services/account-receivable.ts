@@ -52,7 +52,7 @@ export default class AccountReceivableService {
     }
     public async findS(query: any): Promise<any> {
         try {
-            const accountReceivables = await this.accountReceivableModel.findAll(  query)
+            const accountReceivables = await this.accountReceivableModel.findAll(query)
             this.logger.silly("find All Codes mstr")
             return accountReceivables
         } catch (e) {

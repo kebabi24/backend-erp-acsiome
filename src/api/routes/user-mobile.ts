@@ -40,9 +40,14 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/getAllInvoicesRole', controller.findAllInvoiceRole);
+  route.post('/getAllCreditsRole', controller.findAllCreditRole);
+  route.post('/getAllCredits', controller.findAllCredit);
   route.post('/findallca', controller.findAllCA);
   route.post('/findsalestype', controller.findSalesType);
   route.post('/findallsalesrole', controller.findAllSalesRoles)
-  
-  
+  route.post('/getAllInvoicesdetInv', controller.findAllInvoicewithDetailsToinv);
+  route.post('/adddinv', controller.addDinvoices);
+  route.post('/getAllInvoicesAcc', controller.findAllInvoiceAcc);
+  route.post('/getInvoiceLinesAcc', controller.findByInvoiceLineAcc);
+  route.post('/getAllInvoicesdetAcc', controller.findAllInvoicewithDetailsAcc);
 };

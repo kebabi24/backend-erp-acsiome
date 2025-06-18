@@ -1,5 +1,6 @@
 import ItineraryService from '../../services/itinerary';
 import CustomerItineraryService from '../../services/customer-itinerary';
+import CustomerMobileService from '../../services/customer-mobile';
 import ServiceMobileService from '../../services/mobile-service';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -96,6 +97,36 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByCust = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all itn endpoint');
+
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const ItineraryServiceInstance = Container.get(ItineraryService);
+    const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService);
+    const CustomerMobileServiceInstance = Container.get(CustomerMobileService);
+    const itn = await ItineraryServiceInstance.findOne({ ...req.body, domain: user_domain });
+    // console.log(itn)
+    let result = []
+if(itn!= null) {
+ var customers = await CustomerItineraryServiceInstance.find({itinerary_code:itn.itinerary_code});
+ let i=1
+ for (let cust of customers) {
+  const custom = await CustomerMobileServiceInstance.findOne({customer_code:cust.customer_code});
+ 
+  result.push({id : i, customer_code: custom.customer_code,customer_name:custom.customer_name,bare_code: custom.customer_barcode})
+  i++
+ }
+//  console.log(result)
+}
+    return res.status(200).json({ message: 'fetched succesfully', data: {itn,result }});
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -143,6 +174,7 @@ export default {
   findAll,
   getAllServices,
   findBy,
+  findByCust,
   update,
   deleteOne,
 };

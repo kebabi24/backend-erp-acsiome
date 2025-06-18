@@ -234,6 +234,8 @@ declare global {
     export type PriceListQuantityDetailModel = S.Model;
     export type TimbreModel = S.Model;
     export type EndlocationDetailModel = S.Model;
+    export type DdinvoiceModel = S.Model;
+    export type DdinvoiceLineModel = S.Model;
    
   }
 }

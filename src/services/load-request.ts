@@ -220,6 +220,18 @@ export default class LoadRequestService {
     }
   }
 
+  public async findLoadRequestsDetailsByLoadRequestsCode(load_requests_codes: any): Promise<any> {
+    try {
+      const loadRequestsDetails = await this.loadRequestDetailsModel.findAll({
+        where: { load_request_code: load_requests_codes },
+      });
+      this.logger.silly('find all load requests details');
+      return loadRequestsDetails;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async updateLoadRequestLine(load_request_code: any, product_code: any, qntValidated: any): Promise<any> {
     try {
       // console.log(load_request_code);
@@ -1306,6 +1318,18 @@ export default class LoadRequestService {
       const loadRequest = await this.loadReuestModel.findAll(query);
       this.logger.silly('find all load requests details');
       return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async find(query: any): Promise<any> {
+    try {
+      const labels = await this.loadReuestModel.findAll(
+        query,
+      );
+      this.logger.silly('find All labels mstr');
+      return labels;
     } catch (e) {
       this.logger.error(e);
       throw e;

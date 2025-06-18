@@ -1,4 +1,5 @@
 import PricelistService from "../../services/pricelist"
+import CodeService from "../../services/code"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { DATE, Op } from 'sequelize';
@@ -56,7 +57,7 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
         const pricelistServiceInstance = Container.get(PricelistService)
         const {id} = req.params
         const pricelist = await pricelistServiceInstance.findOne({id})
-        const details = await pricelistServiceInstance.find({pi_list: pricelist.pi_list,pi_domain:user_domain})
+        const details = await pricelistServiceInstance.find({id:id,pi_list: pricelist.pi_list,pi_domain:user_domain})
         console.log(pricelist.pi_list)
         return res
             .status(200)
@@ -75,7 +76,12 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   
     try {
         const pricelistServiceInstance = Container.get(PricelistService)
+        const codeServiceInstance = Container.get(CodeService)
         const pricelists = await pricelistServiceInstance.find({pi_domain:user_domain})
+        for(let pricelist of pricelists) {
+            const code = await codeServiceInstance.findOne({code_fldname:'pt_promo',code_value:pricelist.pi_part_code})
+          if(code != null) { pricelist.chr01 = code.code_cmmt } 
+        }
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: pricelists })
@@ -132,7 +138,7 @@ const{user_domain} = req.headers
         console.log(pricelist)
         const pricelistServiceInstance = Container.get(PricelistService)
         
-        const price = await pricelistServiceInstance.delete({pi_list: pricelist.pi_list,pi_domain:user_domain })
+        const price = await pricelistServiceInstance.delete({id:pricelist.id,pi_list: pricelist.pi_list,pi_domain:user_domain })
         for (const item of detail) {
             
             const price = await pricelistServiceInstance.create({...item,...pricelist,pi_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code })
@@ -197,7 +203,7 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
         pi_domain:user_domain,
 
       });
-      console.log(pricelist)
+      console.log("pricelist",pricelist)
       return res.status(200).json({ message: 'fetched succesfully', data: pricelist });
     } catch (e) {
       logger.error('🔥 error: %o', e);
