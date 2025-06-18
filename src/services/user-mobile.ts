@@ -808,6 +808,11 @@ for (let cu of custs) {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          'pt_prod_line',
+          'pt_promo',
+          'pt_dsgn_grp',
+
+
           
         ],
       });
@@ -876,6 +881,9 @@ for (let cu of custs) {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          'pt_prod_line',
+          'pt_promo',
+          'pt_dsgn_grp',
           
         ],
       });
