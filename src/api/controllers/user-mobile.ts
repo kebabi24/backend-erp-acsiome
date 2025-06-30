@@ -212,7 +212,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       // these data is the same for both response cases
       const site = await siteServiceInstance.findOne({ si_site: role.role_site });
       const user_mobile_code = role.user_mobile_code;
+      
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
+      // console.log(userMobile)
+     
       var users = [];
       var profiles = [];
       var priceList = [];
@@ -242,7 +245,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const barCodesInfo = await userMobileServiceInstanse.findAllBarCodes();
       var role_controller = {};
       var profile_controller = {};
-
+// console.log(invoiceLine)
       const domain = await userMobileServiceInstanse.getDomain({ dom_domain: role.role_domain });
 
       const promos = await promoServiceInstanse.getValidePromos(role.role_site);
@@ -339,7 +342,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date);
         });
       }
-//console.log("invoice",invoice)
+      if (invoiceLine.length > 0) {
+        invoiceLine.forEach(invoiceLine => {
+          invoiceLine.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoiceLine.period_active_date);
+        });
+      }
+// console.log("invoice",invoiceLine)
       // service created on backend
       if (parameter[index].hold === true) {
         let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
@@ -938,7 +946,10 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
           // line.pt_dsgn_grp = item.pt_dsgn_grp
           // line.pt_rev = item.pt_rev
           // line.period_active_date = inv.period_active_date
-                  if (line.invoice_code === inv.invoice_code) { invoicesLinesToCreate.push(line); }
+                  if (line.invoice_code === inv.invoice_code) { 
+                    line.period_active_date = formatDateOnlyFromMobileToBack(line.period_active_date);
+                    invoicesLinesToCreate.push(line);console.log(line) 
+                  }
                 }
           }
           const invoicesLiness = await userMobileServiceInstanse.createInvoicesLines(invoicesLinesToCreate);
@@ -2128,7 +2139,7 @@ const findAllCA = async (req: Request, res: Response, next: NextFunction) => {
       console.log(req.body)
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
     
-      var invs =await Sequelize.query("SELECT PUBLIC.aa_customer.id,PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis, SUM(PUBLIC.aa_invoice.horstax_amount) as horstax, SUM(PUBLIC.aa_invoice.taxe_amount) as tax,SUM(PUBLIC.aa_invoice.stamp_amount) as stamp,SUM(PUBLIC.aa_invoice.amount) as amount,SUM(PUBLIC.aa_invoice.due_amount) as due_amount FROM PUBLIC.aa_customer, PUBLIC.aa_invoice WHERE PUBLIC.aa_customer.customer_code = PUBLIC.aa_invoice.customer_code and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ?  and  PUBLIC.aa_invoice.canceled = false GROUP BY PUBLIC.aa_customer.id, PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis ORDER BY PUBLIC.aa_customer.customer_code", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT PUBLIC.aa_customer.id,PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis, SUM(PUBLIC.aa_invoice.horstax_amount) as horstax, SUM(PUBLIC.aa_invoice.taxe_amount) as tax,SUM(PUBLIC.aa_invoice.stamp_amount) as stamp,SUM(PUBLIC.aa_invoice.amount) as amount,SUM(PUBLIC.aa_invoice.due_amount) as due_amount , SUM(PUBLIC.aa_invoice.amount - PUBLIC.aa_invoice.due_amount) as credit FROM PUBLIC.aa_customer, PUBLIC.aa_invoice WHERE PUBLIC.aa_customer.customer_code = PUBLIC.aa_invoice.customer_code and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ?  and  PUBLIC.aa_invoice.canceled = false GROUP BY PUBLIC.aa_customer.id, PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis ORDER BY PUBLIC.aa_customer.customer_code", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     
    // console.log("iiiiiiiiiiiiiiii",invs)

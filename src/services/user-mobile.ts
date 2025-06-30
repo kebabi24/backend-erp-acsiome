@@ -811,6 +811,7 @@ for (let cu of custs) {
           'pt_prod_line',
           'pt_promo',
           'pt_dsgn_grp',
+          'pt_draw'
 
 
           
@@ -884,6 +885,7 @@ for (let cu of custs) {
           'pt_prod_line',
           'pt_promo',
           'pt_dsgn_grp',
+          'pt_draw',
           
         ],
       });
@@ -1400,7 +1402,7 @@ public async getInvoiceLineByAcc(query: any): Promise<any> {
       //  console.log("exist",exist)
         if (exist!=null) {
           // UPDATE
-         console.log('element',element);
+        //  console.log('element',element);
           const invupdate = await this.invoiceModel.update(element, {
             where: { invoice_code: element.invoice_code },
           });

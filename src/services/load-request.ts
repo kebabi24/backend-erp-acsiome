@@ -62,7 +62,7 @@ export default class LoadRequestService {
     try {
       const loadRequestsDetails = await this.loadRequestDetailsModel.bulkCreate(data);
       this.logger.silly('created load requests details');
-      console.log(loadRequestsDetails);
+      //console.log(loadRequestsDetails);
       return loadRequestsDetails;
     } catch (e) {
       this.logger.error(e);
@@ -72,7 +72,7 @@ export default class LoadRequestService {
 
   public async createMultipleLoadRequestsLines2(data: any): Promise<any> {
     try {
-      console.log(data);
+    //  console.log(data);
       const loadRequestsLines = await this.loadRequestLineModel.create(data);
       this.logger.silly('created load requests lines');
       return loadRequestsLines;
@@ -86,7 +86,7 @@ export default class LoadRequestService {
     try {
       const loadRequestsDetails = await this.loadRequestDetailsModel.create(data);
       this.logger.silly('created load requests details');
-      console.log(loadRequestsDetails);
+   //   console.log(loadRequestsDetails);
       return loadRequestsDetails;
     } catch (e) {
       this.logger.error(e);
@@ -258,7 +258,7 @@ export default class LoadRequestService {
   ): Promise<any> {
     try {
       const qt_validated = qntValidated;
-      console.log("hounahounahouna",load_request_code,product_code,qntValidated)
+    //  console.log("hounahounahouna",load_request_code,product_code,qntValidated)
       const lineQt = await this.loadRequestLineModel.findOne({
         where: { load_request_code: load_request_code, product_code: product_code },
       });
@@ -637,7 +637,7 @@ export default class LoadRequestService {
                 element.product_code,
                 element.dataValues.lot,
               );
-              console.log(qnt);
+             // console.log(qnt);
               lots.push({
                 lot_code: element.dataValues.lot,
                 qnt_lot: qnt.dataValues.ld_qty_oh,
@@ -760,7 +760,7 @@ export default class LoadRequestService {
 
           // PRODUCT EXIST
           if (index != -1) {
-            console.log('hereeeeeeeeeeeeeeeeeee');
+           // console.log('hereeeeeeeeeeeeeeeeeee');
             const load_request_line = loadRequesLines[index].dataValues;
             // CHECK IF IT EXIST IN LOAD REQUEST DETAILS
             // const details = await this.findAllLoadRequestDetailsForLots(
@@ -770,7 +770,7 @@ export default class LoadRequestService {
             const details = await this.locationDetailModel.findAll({
               where: { ld_part: load_request_line.product_code, ld_loc: load_request.role_loc_from, ld_site: site },
             });
-            console.log(details);
+          //  console.log(details);
             let lots = [];
             let qt_eff = 0;
             for (const element of details) {
@@ -780,7 +780,7 @@ export default class LoadRequestService {
                 element.dataValues.ld_lot,
                 element.dataValues.ld_part,
               );
-              console.log('qnt', qnt);
+            //  console.log('qnt', qnt);
               lots.push({
                 lot_code: element.dataValues.ld_lot,
                 qnt_lot: element.dataValues.ld_qty_oh,
@@ -871,8 +871,8 @@ export default class LoadRequestService {
 
   public async updateLoadRequestStatusToX(load_request_codes: any, x: any): Promise<any> {
     try {
-      console.log('xxxxxxxxxxxxxxxxx', x);
-      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
+     // console.log('xxxxxxxxxxxxxxxxx', x);
+    //  console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
       const loadRequest = await this.loadReuestModel.update(
         { status: x },
         { where: { load_request_code: load_request_codes } },
@@ -888,8 +888,8 @@ export default class LoadRequestService {
 
   public async updateLoadRequestStatusTo20(load_request_codes: any, x: any): Promise<any> {
     try {
-      console.log('xxxxxxxxxxxxxxxxx', x);
-      console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
+    //  console.log('xxxxxxxxxxxxxxxxx', x);
+    //  console.log('rrrrrrrrrrrrrrrrrrr', load_request_codes);
       const loadRequest = await this.loadReuestModel.update(
         { status: x ,date_charge: new Date()},
         { where: { load_request_code: load_request_codes } },
@@ -1164,7 +1164,7 @@ export default class LoadRequestService {
         where: { role_code: role_code },
         include: [{ model: this.userMobileModel, required: true, attributes: ['profile_code'] }],
       });
-      console.log(role_codes);
+     // console.log(role_codes);
       const pages_codes = await this.profileProductPageModel.findAll({
         where: { profile_code: role_codes.userMobile.profile_code },
         attributes: ['product_page_code'],

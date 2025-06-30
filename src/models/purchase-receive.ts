@@ -101,7 +101,7 @@ const PurchaseReceive = sequelize.define(
         prh_tax_env: Sequelize.STRING,
         prh_tax_usage: Sequelize.STRING,
         prh_tax_in: {type: Sequelize.BOOLEAN, defaultValue : false  },
-        prh_taxc: Sequelize.STRING,
+        prh_taxc: {type: Sequelize.DECIMAL, defaultValue : 0  },
         prh_vend_lot: Sequelize.STRING,
         prh_ship_date: Sequelize.DATEONLY,
         prh_ex_rate2: {type: Sequelize.DECIMAL, defaultValue : 0  },

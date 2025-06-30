@@ -417,7 +417,7 @@ const updateLoadRequests4O = async (req: Request, res: Response, next: NextFunct
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const codeService = Container.get(CodeService);
     const loadRequestsCodes = req.body.load_requests_codes;
-    console.log("loadRequestsCodes",loadRequestsCodes)
+    //console.log("loadRequestsCodes",loadRequestsCodes)
     const updateLoadRequeust = await loadRequestService.updateLoadRequestStatusToX(loadRequestsCodes, 40);
 
   //   /*updqte ld_det */
@@ -482,14 +482,14 @@ const updateLoadRequests4O = async (req: Request, res: Response, next: NextFunct
         var year : String
         let date= new Date()
         let day = date.getDate();
-        console.log(day)
+       // console.log(day)
     if (day < 10) {
         days = "0" + String(day)
     }
     else {days = String(day)}
 console.log(days)
     let month = date.getMonth();
-    console.log(month)
+  //  console.log(month)
     if (month < 9) {
         month = month + 1
         months = "0" + month
@@ -506,7 +506,7 @@ console.log(days)
       }
        
       let filename = code.code_cmmt +  'IN-' + load.load_request_code + '.txt'
-      console.log("filename :",filename)
+    //  console.log("filename :",filename)
         try {
           fs.writeFileSync(filename, str);
           // file written successfully
@@ -607,9 +607,9 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
     const chariotdetail = req.body.chariotdetail
-     console.log("chariotdetail",chariotdetail);
+    // console.log("chariotdetail",chariotdetail);
      const char = await chariotServiceInstance.find({load_request_code:load_request_code})
-     console.log(char.length)
+   //  console.log(char.length)
      let nchar = 0 
      if(char.length > 0) {
       nchar = char.length + 1 
@@ -643,7 +643,7 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
        const ptpart = await itemServiceInstance.findOne({
         pt_part: line.product_code,
       });
-      console.log("line",line)
+    //  console.log("line",line)
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -665,7 +665,7 @@ const createLoadRequestDetailsScan = async (req: Request, res: Response, next: N
       });
      // console.log('elemDet', elemDet);
       if (elemDet !== null) {
-        console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
+      //  console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
           elemDet.product_code,
@@ -722,12 +722,12 @@ const createLoadRequestDetailsChangeStatus = async (req: Request, res: Response,
     );
     let tot = 0
     for (let line of loadLine) {
-console.log(line.pt_price,line.qt_effected)
+//console.log(line.pt_price,line.qt_effected)
       tot = tot +( Number(line.pt_price) * Number(line.qt_effected) * Number(1.2138))
     }
 
     const lr = await loadRequestService.findLoadRequestsByRoleCode(load_request_code);
-    console.log(lr)
+   // console.log(lr)
     const decompte = await decompteService.create({dec_code:load_request_code,dec_role:lr.role_code,dec_desc:"Chargement",dec_amt:tot,dec_type:"C",dec_effdate:new Date(),dec_domain:user_domain,
     
     created_by: user_code,
@@ -1067,7 +1067,7 @@ const findBychariotDet = async (req: Request, res: Response, next: NextFunction)
         price : char.price,
       })
     }
-    console.log(result)
+    //console.log(result)
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -1100,14 +1100,14 @@ const exportLoadRequest = async (req: Request, res: Response, next: NextFunction
         var year : String
         let date= new Date()
         let day = date.getDate();
-        console.log(day)
+       // console.log(day)
     if (day < 10) {
         days = "0" + String(day)
     }
     else {days = String(day)}
-console.log(days)
+//console.log(days)
     let month = date.getMonth();
-    console.log(month)
+ //   console.log(month)
     if (month < 9) {
         month = month + 1
         months = "0" + month
@@ -1124,7 +1124,7 @@ console.log(days)
       }
        
       let filename = code.code_cmmt +  'IN-' + load.load_request_code + '.txt'
-      console.log("filename :",filename)
+      //console.log("filename :",filename)
         try {
           fs.writeFileSync(filename, str);
           // file written successfully
@@ -1176,9 +1176,9 @@ const createUnLoadRequestDetailsScan = async (req: Request, res: Response, next:
     const load_request_code = load_request_details[0].load_request_code
     const load_request_lines = req.body.load_request_lines;
     const chariotdetail = req.body.chariotdetail
-     console.log("chariotdetail",chariotdetail);
+    // console.log("chariotdetail",chariotdetail);
      const char = await chariotServiceInstance.find({load_request_code:load_request_code})
-     console.log(char.length)
+   //  console.log(char.length)
      let nchar = 0 
      if(char.length > 0) {
       nchar = char.length + 1 
@@ -1212,7 +1212,7 @@ const createUnLoadRequestDetailsScan = async (req: Request, res: Response, next:
        const ptpart = await itemServiceInstance.findOne({
         pt_part: line.product_code,
       });
-      console.log("line",line)
+    //  console.log("line",line)
         const loadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines2({
           ...line,
           date_creation: maxLine.date_creation,
@@ -1234,7 +1234,7 @@ const createUnLoadRequestDetailsScan = async (req: Request, res: Response, next:
       });
      // console.log('elemDet', elemDet);
       if (elemDet !== null) {
-        console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
+        //console.log("hhhhhhhhhhhhhhere ",detail.qt_effected)
         const loadLineUpdated = await loadRequestService.updateLoadRequestDetailQtAffected(
           elemDet.load_request_code,
           elemDet.product_code,
@@ -1261,12 +1261,12 @@ const findLoadGrp = async (req: Request, res: Response, next: NextFunction) => {
     const loadRequestService = Container.get(LoadRequestService);
     const itemServiceInstance = Container.get(ItemService);
     const sequelize = Container.get("sequelize")
-    console.log(req.body)
+  //  console.log(req.body)
     const loads = await loadRequestService.findS({ where :{status:{[Op.or]: [30,50]},date_charge: { [Op.between]: [req.body.date, req.body.date1]} }});
  let lrl = []
  for (let load of loads) {lrl.push(load.load_request_code)}
-for(let load of loads) {
- console.log(load.load_request_code,load.date_charge)}
+// for(let load of loads) {
+//  console.log(load.load_request_code,load.date_charge)}
     const lrs =await sequelize.query("SELECT product_code, sum(qt_effected) as qty, sum(qt_effected * pt_price) as amt  FROM   PUBLIC.aa_loadrequestdetails where load_request_code IN ? GROUP BY public.aa_loadrequestdetails.product_code ORDER BY product_code ASC ", { replacements: [[lrl]], type: QueryTypes.SELECT });
       let result = [] 
       let i = 0

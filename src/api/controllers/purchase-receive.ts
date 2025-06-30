@@ -549,7 +549,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
           prh_part: value.prh_part,
           prh_serial: value.prh_serial,
           prh_taxable: value.prh_taxable,
-          prh_tqxc: value.prh_taxc,
+          prh_taxc: value.prh_taxc,
           prh_tax_code: value.prh_tax_code,
           prh_um: value.prh_um,
           prh_um_conv: value.prh_um_conv,
@@ -593,6 +593,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
 
     var i = 1;
     for (const arr of result) {
+      console.log(arr)
       await purchaseReceiveServiceInstance.create({
         prh_domain: user_domain,
         prh_receiver: req.body.prhnbr,
