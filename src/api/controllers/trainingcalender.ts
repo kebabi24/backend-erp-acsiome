@@ -83,6 +83,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                 if(entry.chr04!=null){data04=entry.chr04.split(",")}
                 let data05:any;
                 if(entry.chr05!=null){data05=entry.chr05.split(",")}
+                let data06:any;
+                if(entry.tc_pop!=null){data06=entry.tc_pop.split(",")}
                 if(entry.chr02 != null){
                   if(entry.chr03 != null){
                     
@@ -104,18 +106,22 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                 }
                 console.log(customers)
                 let elements :any;
-                if(entry.chr04 == null){elements = customers}
+                if(entry.chr05 == null){elements = customers}
                 else{
                   for (let cust of customers){
-                    if(cust.address.ad_state == data04 ){
+                    if(cust.address.ad_state == data05 ){
                       elements.push(cust)
                     }
                   }
                 }
                 let repertorys:any[];
-                if(entry.chr05!=null){
-                  repertorys = await repertoryServiceInstance.find({rep_cust:'',chr01:data05,rep_domain: user_domain})
+                if(entry.chr04!=null){
+                  if(entry.tc_pop != null){repertorys = await repertoryServiceInstance.find({rep_cust:'',chr01:data04,rep_post:data06,rep_domain: user_domain})}
+                  else{repertorys = await repertoryServiceInstance.find({rep_cust:'',chr01:data04,rep_domain: user_domain})}
         
+                }
+                else{
+                  if(entry.tc_pop != null){repertorys = await repertoryServiceInstance.find({rep_cust:'',rep_post:data06,rep_domain: user_domain})}
                 }
               console.log(elements)
                 for (const element of elements) {
