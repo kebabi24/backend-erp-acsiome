@@ -984,19 +984,26 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
     const { id } = req.params;
-    
+    const {purchaseOrder, detail} = req.body
     // const purchaseOrder = await purchaseOrderServiceInstance.update(
     //   { ...req.body, last_modified_by: user_code },
     //   { id },
     // );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
     console.log(purchase.po_nbr);
-    const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
-    for (const pod of req.body.detail) {
-      const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
-        { pod_qty_ord: pod.pod_qty_ord, pod_price: pod.pod_price, last_modified_by: user_code },
-        { id: pod.id },
-      );
+    const purchaseOrderDetail = await purchaseOrderServiceInstance.update(
+      { ...purchaseOrder,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
+      { id: id },
+    );
+  
+    await purchaseOrderDetailServiceInstance.delete({pod_nbr: purchase.po_nbr,pod_domain:user_domain})
+    // const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
+
+    for (let entry of detail) {
+      // const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
+        entry = { ...entry, pod_domain:user_domain,pod_nbr: purchase.po_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await purchaseOrderDetailServiceInstance.create(entry)
+      
     }
     return res.status(200).json({ message: 'fetched succesfully', data: id });
   } catch (e) {
