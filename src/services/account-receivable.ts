@@ -3,8 +3,9 @@ import { Service, Inject } from "typedi"
 @Service()
 export default class AccountReceivableService {
     constructor(
-        @Inject("accountReceivableModel") private accountReceivableModel: Models.accountReceivableModel,
+        @Inject("accountReceivableModel") private accountReceivableModel: Models.AccountReceivableModel,
         @Inject("addressModel") private addressModel: Models.AddressModel,
+        @Inject("customerModel") private customerModel: Models.CustomerModel,
         @Inject("logger") private logger
     ) {}
 
@@ -31,7 +32,7 @@ export default class AccountReceivableService {
     public async findwithadress(query: any): Promise<any> {
         
         try {
-            const accountReceivables = await this.accountReceivableModel.findAll({ where: query,include: this.addressModel, order : [['id', 'ASC']] })
+            const accountReceivables = await this.accountReceivableModel.findAll({ where: query,include: this.customerModel, order : [['id', 'ASC']] })
             this.logger.silly("find All Codes mstr")
             return accountReceivables
         } catch (e) {
@@ -49,7 +50,16 @@ export default class AccountReceivableService {
             throw e
         }
     }
-
+    public async findS(query: any): Promise<any> {
+        try {
+            const accountReceivables = await this.accountReceivableModel.findAll(  query)
+            this.logger.silly("find All Codes mstr")
+            return accountReceivables
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const accountReceivable = await this.accountReceivableModel.update(data, { where: query })

@@ -48,6 +48,17 @@ export default class invoiceOrderService {
         }
     }
 
+    public async findS(query: any): Promise<any> {
+        try {
+            const invoiceOrders = await this.invoiceOrderModel.findAll(query)
+            this.logger.silly("find All invoiceOrders mstr")
+            return invoiceOrders
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+
     public async update(data: any, query: any): Promise<any> {
         try {
             const invoiceOrder = await this.invoiceOrderModel.update(data, {

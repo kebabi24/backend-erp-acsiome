@@ -18,15 +18,8 @@ const AccountUnplanifed = sequelize.define(
             type: Sequelize.STRING,
             unique: true,
         },
-        au_vend: {
-            type: Sequelize.STRING,
-            references:{
-                model: "vd_mstr",
-                key: "vd_addr",
-            },
-
-        },
-       
+        au_vend: Sequelize.STRING,
+           
     au_type: Sequelize.STRING, 
     au_so_nbr: Sequelize.STRING, 
     au_xcomm_pct: {type: Sequelize.DECIMAL, defaultValue : 0  }, 

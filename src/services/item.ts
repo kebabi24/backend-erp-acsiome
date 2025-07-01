@@ -169,4 +169,16 @@ export default class ItemService {
     }
   }
 
+  public async findtraining(query:any): Promise<any> {
+    try {
+      const items = await this.itemModel.findAll(query);
+      this.logger.silly('findAll items mstr');
+      return items;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  
 }

@@ -41,6 +41,16 @@ export default class RoleService {
       throw e;
     }
   }
+  public async findS(query: any): Promise<any> {
+    try {
+      const roles = await this.roleModel.findAll(query);
+      this.logger.silly('find All roles mstr');
+      return roles;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
   public async update(data: any, query: any): Promise<any> {
     try {

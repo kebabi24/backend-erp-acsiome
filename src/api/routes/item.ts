@@ -7,6 +7,8 @@ export default (app: Router) => {
   app.use('/items', route);
 
   route.get('/', controller.findAll);
+  route.get("/findpart", controller.findPart)
+  route.get('/training/', controller.findAllTraining);
   route.post('/', controller.create);
   route.post('/find', controller.findBy);
   route.post('/findwithperte', controller.findBywithperte);
@@ -26,4 +28,7 @@ export default (app: Router) => {
   route.post("/finddettr", controller.findByDetTr);
   route.put('/updated/:id', controller.updateDet);
   route.post('/findjob', controller.findJob);
+  route.post('/updateprice', controller.updatePrice);
+ 
+  
 };

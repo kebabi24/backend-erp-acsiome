@@ -14,11 +14,10 @@ import Payment from '../../models/mobile_models/payment';
 import { Op, Sequelize } from 'sequelize';
 import CryptoJS from '../../utils/CryptoJS';
 import PromotionService from '../../services/promotion';
-import _ from 'lodash';
+
 import siteService from '../../services/site';
 import CustomersMobileSercice from '../../services/customer-mobile';
 import _, { isNull } from 'lodash';
-
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -29,11 +28,13 @@ const moment = require('moment');
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { username } = req.headers;
+  const { user_domain } = req.headers;
   logger.debug('Calling Create user endpoint');
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
     const user = await userMobileServiceInstance.create({
       ...req.body,
+      domain:user_domain,
       // created_by:username,
       // created_ip_adr: req.headers.origin,
       // last_modified_by:username,
@@ -221,7 +222,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       } else {
         priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code });
       }
-
+//console.log("priceList",priceList)
       const invoice = await userMobileServiceInstanse.getInvoice(role.role_code);
       let invoicecode= []
       for (let inv of invoice) {
@@ -628,6 +629,15 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
       console.log('CREATING SERVICE END');
     }
 
+    
+    //TOKEN SERIE
+    if (data.tokenSerie) {
+      console.log('UPDATING TOKEN SERIE');
+      const token = data.tokenSerie;
+      const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token, { token_code: token.token_code });
+      console.log('UPDATING TOKEN END');
+    }
+
     //  USER MOBILE
     if (data.userMobile) {
       console.log('UPDATING USER MOBILE');
@@ -639,7 +649,64 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
       console.log('UPDATING USER MOBILE END');
     }
 
-    // CUSTOMERS
+   
+
+    let dataend: any[]=[]
+    if (data.locationsDetails) {
+      for (let ld of data.locationsDetails) {
+        ld.ld_domain = role.role_domain
+        ld.chr01 = service.service_code
+        dataend.push(ld)
+      
+      }
+      //const dataa = data.locationsDetails;
+     // console.log('data', dataa);
+      // console.log('data', dataa);
+      dataend.forEach(ld => {
+      //  console.log('ld', ld.ld_expire);
+        if (isNull(ld.ld_expire)) {
+       //   console.log('something here');
+        } else {
+      //    console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
+          formatDateOnlyFromMobileToBack(ld.ld_expire);
+          ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
+          // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
+        }
+
+      });
+    //  console.log('dataaaa', dataa);
+      // console.log('dataaaa', dataa);
+      const endlocationdDetails = await userMobileServiceInstanse.CreateEndLocationDetails(dataend);
+    }
+     // LOCATION DETAILS
+     let dataa: any[]=[]
+     if (data.locationsDetails) {
+       for (let ld of data.locationsDetails) {
+         ld.ld_domain = role.role_domain
+         dataa.push(ld)
+       
+       }
+       //const dataa = data.locationsDetails;
+      // console.log('data', dataa);
+       // console.log('data', dataa);
+       dataa.forEach(ld => {
+       //  console.log('ld', ld.ld_expire);
+         if (isNull(ld.ld_expire)) {
+        //   console.log('something here');
+         } else {
+       //    console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
+           formatDateOnlyFromMobileToBack(ld.ld_expire);
+           ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
+           // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
+         }
+ 
+       });
+     //  console.log('dataaaa', dataa);
+       // console.log('dataaaa', dataa);
+       const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
+     }
+ 
+      // CUSTOMERS
     if (data.customers.length > 0) {
       console.log('CUSTOMERS CREATION ');
       for (const customer of data.customers) {
@@ -669,14 +736,101 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
       }
     }
 
-    //TOKEN SERIE
-    if (data.tokenSerie) {
-      console.log('UPDATING TOKEN SERIE');
-      const token = data.tokenSerie;
-      const udpatedCustomer = await userMobileServiceInstanse.updateTokenSerie(token, { token_code: token.token_code });
-      console.log('UPDATING TOKEN END');
-    }
-
+     // loadRequests
+     if (data.loadRequests) {
+       console.log('CREATING LOAD REQUESTS');
+       const loadRequests = data.loadRequests;
+       const loadRequestsLines = data.loadRequestsLines;
+ 
+       const loadRequestService = Container.get(LoadRequestService);
+       let loadRequest0 = [];
+       let loadRequestLines0 = [];
+       let loadRequest50 = [];
+       let loadRequestM10 = [];
+ 
+       for (const load of loadRequests) {
+          console.log(load)
+         // CREATION
+         if (load.status == 0) {
+           const laod_code = load.load_request_code;
+           const role_code = load.role_code;
+ 
+           delete load.id;
+           const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
+ 
+           load.date_creation = formatDateOnlyFromMobileToBack(load.date_creation);
+           load.role_loc = role.role_loc;
+           load.role_site = role.role_site;
+           load.role_loc_from = role.role_loc_from;
+           loadRequest0.push(load);
+ 
+           // GET LOAD REQUEST CODE LINES THAT HAS STATUS = 0
+ 
+           loadRequestsLines.forEach(line => {
+             if (line.load_request_code == laod_code) {
+               delete line.line_code;
+               line.date_creation = formatDateOnlyFromMobileToBack(line.date_creation);
+               line.date_charge = null;
+               loadRequestLines0.push(line);
+             }
+           });
+         } else if (load.status == 50) {
+           const laod_code = load.load_request_code;
+           loadRequest50.push(laod_code);
+         } else if (load.status == -10) {
+           const laod_code = load.load_request_code;
+           loadRequestM10.push(laod_code);
+         }
+       }
+ 
+       console.log('LOAD REQUESTS END');
+       const createdLoadRequestes = await loadRequestService.createMultipleLoadRequests(loadRequest0);
+       console.log('LOAD REQUESTS LINES CREATION');
+       const createdloadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines(loadRequestLines0);
+       console.log('LOAD REQUESTS LINES CREATION END');
+       console.log('LOAD REQUESTS STATUS 50 UPDATE');
+       if (loadRequest50.length > 0) {
+         for (const load of loadRequest50) {
+           const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, 50);
+         }
+       }
+       console.log('LOAD REQUESTS STATUS 50 UPDATE END');
+       console.log('LOAD REQUESTS STATUS -10 UPDATE');
+       if (loadRequestM10.length > 0) {
+         for (const load of loadRequestM10) {
+           const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, -10);
+         }
+       }
+       console.log('LOAD REQUESTS STATUS -10 UPDATE END ');
+     }
+ 
+     console.log('CREATING UNLOAD REQUESTS AND THEIR DETAILS');
+     if (data.unloadRequests) {
+       const unloadRequestes = data.unloadRequests;
+       const unloadRequestsDetails = data.unloadRequestsDetails;
+       unloadRequestes.forEach(load => {
+         load.date_creation = formatDateFromMobileToBackAddTimezone(load.date_creation);
+       });
+       unloadRequestsDetails.forEach(detail => {
+         if (detail.date_expiration != null || detail.date_expiration != '') {
+           detail.date_expiration = formatDateOnlyFromMobileToBack(detail.date_expiration);
+         }
+       });
+       const loadRequestService = Container.get(UnloadRequestService);
+       for (let unloadRequestsDetail of unloadRequestsDetails) {
+         unloadRequestsDetail.date_expiration = null
+       }
+       const createdUnloadRequests = await loadRequestService.createMultipleUnoadRequests(unloadRequestes);
+       if (createdUnloadRequests) {
+         console.log(createdUnloadRequests)
+         console.log(unloadRequestsDetails)
+         const createdUnloadRequestsDetails = await loadRequestService.createMultipleUnoadRequestsDetails(
+           unloadRequestsDetails,
+         );
+       }
+     }
+     console.log('CREATING UNLOAD REQUESTS AND THEIR DETAILS END ');
+ 
     //VISITS
     if (data.visits) {
       const dataa = data.visits;
@@ -781,129 +935,7 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
       const payments = await userMobileServiceInstanse.createPayments(dataa);
     }
 
-    // LOCATION DETAILS
-    let dataa: any[]=[]
-    if (data.locationsDetails) {
-      for (let ld of data.locationsDetails) {
-        ld.ld_domain = role.role_domain
-        dataa.push(ld)
-      
-      }
-      //const dataa = data.locationsDetails;
-     // console.log('data', dataa);
-      // console.log('data', dataa);
-      dataa.forEach(ld => {
-      //  console.log('ld', ld.ld_expire);
-        if (isNull(ld.ld_expire)) {
-       //   console.log('something here');
-        } else {
-      //    console.log("here ana moha" ,formatDateOnlyFromMobileToBack(ld.ld_expire))
-          formatDateOnlyFromMobileToBack(ld.ld_expire);
-          ld.ld_expire=formatDateOnlyFromMobileToBack(ld.ld_expire);
-          // console.log(' date expire '+formatDateOnlyFromMobileToBack(ld.ld_expire))
-        }
-
-      });
-    //  console.log('dataaaa', dataa);
-      // console.log('dataaaa', dataa);
-      const locationdDetails = await userMobileServiceInstanse.updateCreateLocationDetails(dataa);
-    }
-
-    // loadRequests
-    if (data.loadRequests) {
-      console.log('CREATING LOAD REQUESTS');
-      const loadRequests = data.loadRequests;
-      const loadRequestsLines = data.loadRequestsLines;
-
-      const loadRequestService = Container.get(LoadRequestService);
-      let loadRequest0 = [];
-      let loadRequestLines0 = [];
-      let loadRequest50 = [];
-      let loadRequestM10 = [];
-
-      for (const load of loadRequests) {
-        // console.log(load)
-        // CREATION
-        if (load.status == 0) {
-          const laod_code = load.load_request_code;
-          const role_code = load.role_code;
-
-          delete load.id;
-          const role = await userMobileServiceInstanse.getRole({ role_code: role_code });
-
-          load.date_creation = formatDateOnlyFromMobileToBack(load.date_creation);
-          load.role_loc = role.role_loc;
-          load.role_site = role.role_site;
-          load.role_loc_from = role.role_loc_from;
-          loadRequest0.push(load);
-
-          // GET LOAD REQUEST CODE LINES THAT HAS STATUS = 0
-
-          loadRequestsLines.forEach(line => {
-            if (line.load_request_code == laod_code) {
-              delete line.line_code;
-              line.date_creation = formatDateOnlyFromMobileToBack(line.date_creation);
-              line.date_charge = null;
-              loadRequestLines0.push(line);
-            }
-          });
-        } else if (load.status == 50) {
-          const laod_code = load.load_request_code;
-          loadRequest50.push(laod_code);
-        } else if (load.status == -10) {
-          const laod_code = load.load_request_code;
-          loadRequestM10.push(laod_code);
-        }
-      }
-
-      console.log('LOAD REQUESTS END');
-      const createdLoadRequestes = await loadRequestService.createMultipleLoadRequests(loadRequest0);
-      console.log('LOAD REQUESTS LINES CREATION');
-      const createdloadRequestsLines = await loadRequestService.createMultipleLoadRequestsLines(loadRequestLines0);
-      console.log('LOAD REQUESTS LINES CREATION END');
-      console.log('LOAD REQUESTS STATUS 50 UPDATE');
-      if (loadRequest50.length > 0) {
-        for (const load of loadRequest50) {
-          const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, 50);
-        }
-      }
-      console.log('LOAD REQUESTS STATUS 50 UPDATE END');
-      console.log('LOAD REQUESTS STATUS -10 UPDATE');
-      if (loadRequestM10.length > 0) {
-        for (const load of loadRequestM10) {
-          const updatedLoad = await loadRequestService.updateLoadRequestStatusToX(load, -10);
-        }
-      }
-      console.log('LOAD REQUESTS STATUS -10 UPDATE END ');
-    }
-
-    console.log('CREATING UNLOAD REQUESTS AND THEIR DETAILS');
-    if (data.unloadRequests) {
-      const unloadRequestes = data.unloadRequests;
-      const unloadRequestsDetails = data.unloadRequestsDetails;
-      unloadRequestes.forEach(load => {
-        load.date_creation = formatDateFromMobileToBackAddTimezone(load.date_creation);
-      });
-      unloadRequestsDetails.forEach(detail => {
-        if (detail.date_expiration != null || detail.date_expiration != '') {
-          detail.date_expiration = formatDateOnlyFromMobileToBack(detail.date_expiration);
-        }
-      });
-      const loadRequestService = Container.get(UnloadRequestService);
-      for (let unloadRequestsDetail of unloadRequestsDetails) {
-        unloadRequestsDetail.date_expiration = null
-      }
-      const createdUnloadRequests = await loadRequestService.createMultipleUnoadRequests(unloadRequestes);
-      if (createdUnloadRequests) {
-        console.log(createdUnloadRequests)
-        console.log(unloadRequestsDetails)
-        const createdUnloadRequestsDetails = await loadRequestService.createMultipleUnoadRequestsDetails(
-          unloadRequestsDetails,
-        );
-      }
-    }
-    console.log('CREATING UNLOAD REQUESTS AND THEIR DETAILS END ');
-
+   
     // INVENTORY & INVENTORY LINE
     if (data.inventaires) {
       console.log('INVENTORIES CREATION');
@@ -1112,7 +1144,7 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
       });
       for (let inv of invoices) {
         const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
-        console.log(customer)
+       // console.log(customer)
           inv.Nom = customer.customer_name
   
       }
@@ -1126,11 +1158,11 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
     }
     for (let inv of invoices) {
       const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
-      console.log(customer.customer_name)
+     // console.log(customer.customer_name)
         inv.sdelivery_note_code = customer.customer_name
 
     }
-    console.log(invoices)
+   // console.log(invoices)
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
   } catch (e) {
@@ -1902,7 +1934,7 @@ const findPaymentByService = async (req: Request, res: Response, next: NextFunct
       raw: true,
     });
 
-    console.log('invoices', invoices);
+   // console.log('invoices', invoices);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
@@ -1926,11 +1958,11 @@ const findAllInvoicewithDetails = async (req: Request, res: Response, next: Next
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline, PUBLIC.aa_customer FROM   PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation, PUBLIC.pt_mstr.pt_part_type  FROM     PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity * 1.2019) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity * 1.19) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline, PUBLIC.aa_customer, PUBLIC.pt_mstr  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ?  ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
    //  console.log("inv",invs)
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
@@ -1961,17 +1993,17 @@ const findAllInvoicewithDetailsRole = async (req: Request, res: Response, next: 
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.2019) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation   FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline , PUBLIC.aa_customer where PUBLIC.aa_invoice.role_code IN ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code  ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [[req.body.role],req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline , PUBLIC.aa_customer, PUBLIC.pt_mstr where PUBLIC.aa_invoice.role_code IN ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [[req.body.role],req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.2019) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation   FROM   PUBLIC.aa_invoice, PUBLIC.aa_invoiceline ,  PUBLIC.aa_customer where PUBLIC.aa_invoice.role_code IN ? and  PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements:[[req.body.role],req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation  , PUBLIC.pt_mstr.pt_part_type FROM   PUBLIC.aa_invoice, PUBLIC.aa_invoiceline ,  PUBLIC.aa_customer , PUBLIC.pt_mstr where PUBLIC.aa_invoice.role_code IN ? and  PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements:[[req.body.role],req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
    // console.log(invs)
     }
-    console.log(invs[1])
+  //  console.log(invs[1])
       return res
           .status(200)
           .json({ message: "fetched succesfully", data: invs })
@@ -1994,7 +2026,7 @@ const findPaymentByRole = async (req: Request, res: Response, next: NextFunction
     console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
-        period_active_date: { role_code:req.body.role,[Op.between]: [req.body.date, req.body.date1] },
+        role_code:req.body.role, period_active_date: { [Op.between]: [req.body.date, req.body.date1] },
       });
     } else {
       var invoices = await userMobileServiceInstance.getPaymentsBy({
@@ -2003,7 +2035,7 @@ const findPaymentByRole = async (req: Request, res: Response, next: NextFunction
         period_active_date: { [Op.between]: [req.body.date, req.body.date1] },
       });
     }
-    console.log('invoices', invoices);
+  //  console.log('invoices', invoices);
 
     //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
     return res.status(200).json({ message: 'fetched succesfully', data: invoices });
@@ -2093,7 +2125,7 @@ const findSalesType = async (req: Request, res: Response, next: NextFunction) =>
       var invs =await Sequelize.query("SELECT PUBLIC.pt_mstr.id,PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_desc1, PUBLIC.pt_mstr.pt_part_type, PUBLIC.code_mstr.code_cmmt, SUM(PUBLIC.aa_invoiceline.quantity) as quantity, SUM(PUBLIC.aa_invoiceline.price * PUBLIC.aa_invoiceline.quantity) as price FROM PUBLIC.pt_mstr, PUBLIC.code_mstr ,PUBLIC.aa_invoiceline WHERE PUBLIC.pt_mstr.pt_part = PUBLIC.aa_invoiceline.product_code and  PUBLIC.code_mstr.code_fldname = 'pt_part_type' and PUBLIC.code_mstr.code_value = PUBLIC.pt_mstr.pt_part_type and PUBLIC.aa_invoiceline.invoice_code in(select invoice_code from PUBLIC.aa_invoice where  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? and  PUBLIC.aa_invoice.canceled = false) GROUP BY PUBLIC.pt_mstr.id, PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_part_type,PUBLIC.code_mstr.code_cmmt,PUBLIC.pt_mstr.pt_desc1 ORDER BY PUBLIC.pt_mstr.pt_part_type ASC, PUBLIC.pt_mstr.pt_part ASC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     
-   console.log("iiiiiiiiiiiiiiii",invs)
+  // console.log("iiiiiiiiiiiiiiii",invs)
       return res
           .status(200)
           .json({ message: "fetched succesfully", data: invs })
@@ -2105,6 +2137,245 @@ const findSalesType = async (req: Request, res: Response, next: NextFunction) =>
   } 
 }
 
+
+
+
+const getSalesDashboardAddData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling getSalesDashboardAddDataendpoint');
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
+    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
+    const bkhServiceInstance = Container.get(BkhService);
+    const accountReceivableServiceInstance = Container.get(AccountReceivableService);
+    const codeServiceInstance = Container.get(CodeService);
+    const itemServiceInstance = Container.get(ItemService);
+    const roleServiceInstance = Container.get(RoleService)
+    const userServiceInstance = Container.get(UserService)
+    const addressServiceInstance = Container.get(AddressService)
+    const { start_date, end_date } = req.body;
+   let cadist = 0
+   let cadd = 0
+   let rvdd= 0
+   let rvdist = 0
+    var invoices = await userMobileServiceInstance.getAllInvoice({
+      where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
+      attributes: 
+      [[Sequelize.fn('sum', Sequelize.col('amount')), 'amount' ]],
+      raw: true,
+  })
+
+//console.log(invoices.length , invoices)
+if(invoices[0].amount == null) { cadd = 0} else {  cadd = invoices[0].amount}
+  //console.log(cadd)
+
+  var ihs = await invoiceOrderServiceInstance.findS({
+    where: {ih_inv_date: { [Op.between]: [start_date, end_date]}},
+    attributes: 
+    [[Sequelize.fn('sum', Sequelize.col('ih_tot_amt')), 'amt' ]],
+    raw: true,
+})
+   
+    if(ihs[0].amt == null) { cadist = 0} else {  cadist = ihs[0].amt}
+  
+
+    var bkhs = await bkhServiceInstance.findq({
+      where: {  bkh_effdate: { [Op.between]: [start_date, end_date]},bkh_type:'P'},
+      attributes: 
+      [[Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'bkhamt' ]],
+      raw: true,
+  })
+
+//console.log(invoices.length , invoices)
+
+if(bkhs[0].bkhamt == null) { rvdd = 0} else {  rvdd = Number(bkhs[0].bkhamt)}
+
+
+var ars = await accountReceivableServiceInstance.findS({
+  where: {ar_effdate: { [Op.between]: [start_date, end_date]},ar_type :"P"},
+  attributes: 
+  [[Sequelize.fn('sum', Sequelize.col('ar_base_amt')), 'aramt' ]],
+  raw: true,
+})
+  // var payments = await userMobileServiceInstance.getPaymentsByDates(start_date, end_date, [
+  //   'customer_code',
+  //   'role_code',
+  //   'amount',
+  //   'service_code',
+  // ]);
+  // var items = await itemServiceInstance.findAll();
+
+  if(ars[0].aramt == null) { rvdist = 0} else {  rvdist = - Number(ars[0].aramt)}
+const  ihss = await invoiceOrderServiceInstance.findS({
+  where: {ih_inv_date: { [Op.between]: [start_date, end_date]}},
+  
+})
+let ihsss = []
+for (let ih of ihss) {ihsss.push(ih.ih_inv_nbr)}
+let types = []
+  const typs = await codeServiceInstance.find({code_fldname:'pt_part_type'})
+  for (let typ of typs) {
+    let its = []
+    const items = await itemServiceInstance.find({pt_part_type : typ.code_value})
+        for(let item of items) { its.push(item.pt_part)}
+        const idhs = await invoiceOrderDetailServiceInstance.findS({
+          where: {idh_part: its,idh_inv_nbr : ihsss},
+          attributes: 
+          [[Sequelize.fn('sum', Sequelize.col('idh_qty_inv')), 'qtyinv' ]],
+          raw: true,
+
+
+        })
+        types.push({type:typ.code_cmmt,qty:(idhs[0].qtyinv != 0)? idhs[0].qtyinv : 0})
+  }
+
+
+
+let mihsss = []
+for (let ih of ihss) {mihsss.push(ih.ih_inv_nbr)}
+let mtypes = []
+  const mtyps = await codeServiceInstance.find({code_fldname:'pt_part_type'})
+  for (let mtyp of mtyps) {
+    let mits = []
+    const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
+        for(let item of items) { mits.push(item.pt_part)}
+        const midhs = await invoiceOrderDetailServiceInstance.findS({
+          where: {idh_part: mits,idh_inv_nbr : ihsss},
+          attributes: 
+          [[Sequelize.literal( 'idh_qty_inv * idh_price'), 'amtinv' ]],
+          raw: true,
+
+
+        })
+        //console.log("midhs",midhs)
+        mtypes.push({type:mtyp.code_cmmt,amt:(midhs.length != 0)? midhs[0].amtinv : 0})
+  }
+
+
+/* kamel*/
+let invds = []
+var ddinvoices = await userMobileServiceInstance.getAllInvoice({
+  where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
+ 
+})
+for (let ddinv of ddinvoices) {invds.push(ddinv.invoice_code)}
+let ddqtypes = []
+let ddatypes = []
+ // console.log(mtyps)
+  for (let mtyp of mtyps) {
+    let ddmits = []
+    const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
+        for(let item of items) { ddmits.push(item.pt_part)}
+        const mils = await userMobileServiceInstance.getInvoiceLineS({
+          where: {product_code: ddmits,invoice_code : invds},
+          attributes: 
+          [[Sequelize.fn('sum', Sequelize.col('price')), 'ddamt' ],
+           [Sequelize.fn('sum', Sequelize.col('quantity')), 'ddqty' ]
+        ],
+          raw: true,
+
+
+        })
+        ddqtypes.push({type:mtyp.code_cmmt,qty:(mils[0].ddqty != null)? mils[0].ddqty : 0})
+        ddatypes.push({type:mtyp.code_cmmt,amt:(mils[0].ddamt != null)? mils[0].ddamt : 0})
+  }
+
+
+let cazone = []
+
+const  sups = await roleServiceInstance.findS({
+ 
+  attributes: ['upper_role_code'],
+  group: ['upper_role_code'],
+  raw: true,
+})
+
+
+let datasup = []
+
+for(let sup of sups) {
+  const usr = await userServiceInstance.findOne({usrd_code : sup.upper_role_code})
+  let roles = []
+  const role = await await roleServiceInstance.findS({ where :{upper_role_code : sup.upper_role_code}})
+  for(let r of role) { roles.push(r.role_code)}
+
+  var cainvoices = await userMobileServiceInstance.getAllInvoice({
+    where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false,role_code : roles},
+    attributes: 
+    [[Sequelize.fn('sum', Sequelize.col('amount')), 'amount' ]],
+    raw: true,
+  })
+  if(cainvoices[0].amount != null ) /*{ cazone.push({sup:usr.usrd_name,ca:0})} else*/ { cazone.push({sup:usr.usrd_name,ca:cainvoices[0].amount})}
+
+}
+// console.log(cazone)
+const ihbs = await invoiceOrderServiceInstance.findS({
+  where: {ih_inv_date: { [Op.between]: [start_date, end_date]}},
+  attributes: 
+  ['ih_bill',[Sequelize.fn('sum', Sequelize.col('ih_tot_amt')), 'amt' ]],
+  group: ['ih_bill'],
+  raw: true,
+})
+// console.log(ihbs)
+let ihamt = []
+for(let ihb of ihbs) {
+  const customer = await addressServiceInstance.findOne({ad_addr:ihb.ih_bill})
+
+  ihamt.push({name:customer.ad_name,amt:(ihb.amt != null) ? ihb.amt:0})
+}
+
+let ca_roles= []
+const  roles = await roleServiceInstance.findS({ order: [['role_code', 'ASC']],})
+for(let role of roles ) {
+const   caroles = await userMobileServiceInstance.getAllInvoice({
+  where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false,role_code : role.role_code},
+  attributes: 
+  [[Sequelize.fn('sum', Sequelize.col('amount')), 'amount' ]],
+  raw: true,
+})
+// console.log(caroles[0].amount)
+if(caroles[0].amount != null) {
+ca_roles.push({role_code:role.role_code,ca: caroles[0].amount})}
+}
+// console.log(ca_roles)
+// console.log(ihamt)
+    return res.status(200).json({
+      ca_dist: cadist,
+      ca_dd: cadd,
+      rv_dd : rvdd,
+      rv_dist: rvdist,
+      qty_type_data:types,
+      amt_type_data: mtypes,
+      ddqty_type_data:ddqtypes,
+      ddamt_type_data: ddatypes,
+      ca_zone_data : cazone,
+      ca_bill: ihamt,
+      ca_role: ca_roles
+      
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllSalesRoles = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+      
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+     
+      var invs =await Sequelize.query("select ROW_NUMBER() OVER (ORDER BY public.aa_role.role_code)  id, public.aa_role.role_code,public.aa_role.role_name,public.pt_mstr.pt_part_type,public.aa_invoiceline.product_code, public.pt_mstr.pt_desc1, sum(quantity) as quantity, sum(price) as price from public.aa_role,public.aa_invoiceline, public.pt_mstr,public.aa_invoice where public.aa_invoice.role_code =public.aa_role.role_code and public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoiceline.product_code = public.pt_mstr.pt_part and public.aa_invoice.period_active_date >= ? and public.aa_invoice.period_active_date <= ? group by public.aa_role.role_code,public.aa_role.role_name,public.pt_mstr.pt_part_type,public.aa_invoiceline.product_code, public.pt_mstr.pt_desc1 order by public.aa_role.role_code ASC , public.pt_mstr.pt_part_type ASC , public.aa_invoiceline.product_code ASC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
 
 export default {
   create,
@@ -2128,6 +2399,7 @@ export default {
   findUserPassword,
   testHash,
   getDashboardAddData,
+  getSalesDashboardAddData,
   findPaymentByService,
   findAllInvoicewithDetails,
   findAllInvoicewithDetailsRole,
@@ -2137,5 +2409,6 @@ export default {
   findVisitByRole,
   findAllCA,
   findAllSalesRole,
-  findSalesType
+  findSalesType,
+  findAllSalesRoles,
 };

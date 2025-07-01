@@ -6,7 +6,7 @@ import CodeService from "../../services/code"
 import UserMobileService from '../../services/user-mobile';
 import crmService from '../../services/crm';
 import SequenceService from '../../services/sequence';
-
+import EmployeService from "../../services/employe"
 
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
@@ -257,6 +257,7 @@ const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
     try {
         
         const userServiceInstance = Container.get(UserMobileService)
+        const employeServiceInstance = Container.get(EmployeService)
         // const domainServiceInstance = Container.get(DomainService)\
         console.log(req.body)
         const { userName, password } = req.body
@@ -275,12 +276,13 @@ const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
             
             const token = jwt.sign({ user: user.id }, "acsiome")
             const menus = await userServiceInstance.getMenus({ profile_code: user.profile_code });
+            const employe = await employeServiceInstance.findOne({ emp_userid: user.user_mobile_code });
             // const domain = await domainServiceInstance.findOne({
             //     dom_domain: user.usrd_domain,
             // })
             return res
                 .status(200)
-                .json({ message: "succesfully", data: { user, token,menus } })
+                .json({ message: "succesfully", data: { user, token,menus,employe } })
         } else
             return res
                 .status(401)

@@ -238,6 +238,9 @@ export default async ({ expressApp }) => {
       
       { name: 'priceListQuantityModel', model: require('../models/mobile_models/price-list-quantity').default },
       { name: 'priceListQuantityDetailModel', model: require('../models/mobile_models/price-list-quantity-detail').default },
+      { name: 'timbreModel', model: require('../models/timbre').default },
+      { name: 'endlocationDetailModel', model: require('../models/mobile_models/endlocationdetail').default },
+      
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -709,9 +712,9 @@ export default async ({ expressApp }) => {
     foreignKey: 'ar_cust',
     sourceKey: 'cm_addr',
   });
-  require('../models/account-receivable').default.belongsTo(require('../models/customer').default, {
+  require('../models/account-receivable').default.belongsTo(require('../models/address').default, {
     foreignKey: 'ar_cust',
-    targetKey: 'cm_addr',
+    targetKey: 'ad_addr',
   });
 
   require('../models/taxe').default.hasOne(require('../models/saleorder-detail').default, {

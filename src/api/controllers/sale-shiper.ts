@@ -1,4 +1,5 @@
 import SaleShiperService from '../../services/sale-shiper';
+import CustomerService from '../../services/customer';
 import locationDetailService from '../../services/location-details';
 import inventoryTransactionService from '../../services/inventory-transaction';
 import costSimulationService from '../../services/cost-simulation';
@@ -59,13 +60,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             last_modified_ip_adr: req.headers.origin,
           },
           { id: sod.id },
-        );}
+        );} 
+        console.log(remain.psh_part,remain.psh_site)
       const sctdet = await costSimulationServiceInstance.findOne({
         sct_domain: user_domain,
         sct_part: remain.psh_part,
         sct_site: remain.psh_site,
         sct_sim: 'STD-CG',
       });
+      console.log(sctdet)
       const pt = await itemServiceInstance.findOne({ pt_domain: user_domain,pt_part: remain.psh_part });
       //console.log(remain.psh_part, remain.psh_site)
 
@@ -433,6 +436,63 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const shiper = await saleShiperServiceInstance.delete({ id });
     return res.status(200).json({ message: 'deleted succesfully', data: id });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findAllBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    
+    const saleShiperServiceInstance = Container.get(SaleShiperService);
+    const customerServiceInstance = Container.get(CustomerService);
+    const itemServiceInstance = Container.get(itemService);
+    var shipers 
+    console.log(req.body)
+    if(req.body.site == "*") {
+       shipers = await saleShiperServiceInstance.findS({  
+        where: { psh_ship_date: { [Op.between]: [req.body.calc_date, req.body.calc_date1]},psh_domain: user_domain},
+         });
+   
+    } else {
+     shipers = await saleShiperServiceInstance.findS({ 
+      where: { psh_site: req.body.site,psh_ship_date: { [Op.between]: [req.body.date, req.body.date1]},psh_domain: user_domain},
+      
+      });
+    
+    }
+    //console.log(shipers.length)
+    let result = []
+    let i = 1
+    for(let shiper of shipers ) {
+      const cm = await customerServiceInstance.findOne({cm_addr: shiper.psh_cust,cm_domain : user_domain,})
+      const pt = await itemServiceInstance.findOne({pt_part: shiper.psh_part,pt_domain : user_domain,})
+   result.push({
+    id : i,
+    psh_site: shiper.psh_site,
+    psh_ship_date: shiper.psh_ship_date,
+    psh_nbr: shiper.psh_nbr,
+    psh_shiper: shiper.psh_shiper,
+    customer_code: cm.cm_addr,
+    customer_name: cm.address.ad_name,
+    pt_part_type: pt.pt_part_type,
+    psh_part : shiper.psh_part,
+    designation : pt.pt_desc1,
+    psh_invoiced: shiper.psh_invoiced,
+    psh_qty_ship: shiper.psh_qty_ship,
+    psh_price: Number(shiper.psh_price) * Number(shiper.psh_qty_ship)
+
+   })
+    i++
+    
+  }
+  //console.log(result)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

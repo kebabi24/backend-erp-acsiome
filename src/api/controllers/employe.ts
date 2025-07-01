@@ -537,7 +537,7 @@ const findChild = async (req: Request, res: Response, next: NextFunction) => {
     const employe = await employeServiceInstance.find({ emp_domain: user_domain ,});
     //console.log(employe) emp_upper :{ [Op.ne]: null }
     for (let emp of employe) {
-      console.log("emp.emp_addr",emp.emp_addr)
+      // console.log("emp.emp_addr",emp.emp_addr)
       const childs = await employeServiceInstance.find({ emp_upper: emp.emp_addr,emp_domain: user_domain });
     //  console.log(childs)
   let ch=[]
@@ -551,7 +551,7 @@ const findChild = async (req: Request, res: Response, next: NextFunction) => {
 
     }
 
-   // console.log(list)
+    // console.log(list)
     function findAllChildren(element,is_root,childerens) {
       if(is_root==false&&element!=undefined){
           childerens.push(element);   
@@ -569,7 +569,7 @@ const findChild = async (req: Request, res: Response, next: NextFunction) => {
   
   var childerens=[];
   findAllChildren(addr,true,childerens);
-  console.log("childerens==>",childerens);
+  // console.log("childerens==>",childerens);
   childerens.push(addr)
   const employes = await employeServiceInstance.find({ emp_addr:childerens,emp_domain: user_domain ,});
     return res.status(200).json({ message: 'fetched succesfully', data: employes });

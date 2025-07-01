@@ -1300,4 +1300,15 @@ export default class LoadRequestService {
       throw e;
     }
   }
+
+  public async findS(query: any): Promise<any> {
+    try {
+      const loadRequest = await this.loadReuestModel.findAll(query);
+      this.logger.silly('find all load requests details');
+      return loadRequest;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

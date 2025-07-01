@@ -5,7 +5,11 @@ import CustomerService from "../../services/customer"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import GeneralLedgerService from "../../services/general-ledger"
+import SequenceService from "../../services/sequence"
+import BkhService from '../../services/bkh';
+import BankService from "../../services/bank"
 import moment from 'moment';
+import { Op, Sequelize } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -73,15 +77,16 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
         )
         const customerServiceInstance = Container.get(CustomerService)
         const generalLedgerServiceInstance = Container.get(GeneralLedgerService)
-        
+        const bkhServiceInstance = Container.get(BkhService);
+        const bankServiceInstance = Container.get(BankService)
         const { accountReceivable, accountReceivableDetail , gldetail} = req.body
         
-       
+       console.log(accountReceivable)
         const bkd = await bankDetailServiceInstance.findOne({bkd_bank: accountReceivable.ar_bank, bkd_domain :user_domain, bkd_module: "AR", bkd_pay_method: accountReceivable.ar_cr_terms})
         let nextck = bkd.bkd_next_ck
         const bkdup = await bankDetailServiceInstance.update ({bkd_next_ck: Number(bkd.bkd_next_ck) + 1},{id:bkd.id})
         let nbr = nextck + " " + accountReceivable.ar_bill
-        const ar = await accountReceivableServiceInstance.create({...accountReceivable, ar_domain : user_domain,ar_nbr: nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const ar = await accountReceivableServiceInstance.create({...accountReceivable,ar_cust: accountReceivable.ar_bill,ar_date:new Date(), ar_domain : user_domain,ar_nbr: nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
         
         const cm = await customerServiceInstance.findOne ({cm_addr: accountReceivable.ar_bill,cm_domain : user_domain,})
             
@@ -100,6 +105,37 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
             const arInv = await accountReceivableServiceInstance.update ({ar_applied: Number(arI.ar_applied) + Number(entry.ard_amt), ar_base_applied: Number(arI.ar_base_applied) + (Number(entry.ard_amt) * Number(entry.ard_ex_rate2) / Number(entry.ard_ex_rate)), ar_open : bool},{id:arI.id})
             }
         }
+        /*detail paiement*/
+        const banks = await bankServiceInstance.findOne({ bk_code: accountReceivable.ar_bank, bk_domain: user_domain });
+   
+        const bk = await bkhServiceInstance.create({
+            bkh_domain: user_domain,
+            bkh_code: nbr,
+            bkh_effdate: accountReceivable.ar_effdate,
+            bkh_date: new Date(),
+            bkh_num_doc : nbr,
+            bkh_addr : accountReceivable.ar_bill,
+            bkh_bank: accountReceivable.ar_bank,
+            bkh_type: 'RCT',
+            bkh_balance: banks.bk_balance,
+            bkh_amt: - Number(accountReceivable.ar_base_amt),
+            bkh_terms:accountReceivable.ar_cr_terms,
+            bkh_site: accountReceivable.ar_site,
+            created_by: user_code,
+            created_ip_adr: req.headers.origin,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          });
+          await bankServiceInstance.update(
+            {
+              bk_balance: Number(banks.bk_balance)  - Number(accountReceivable.ar_base_amt),
+  
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id:banks.id, bk_domain: user_domain },
+          );
+        /*detail paiement*/
          /***************GL *************/
          if(gldetail.length > 0) {
             const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: date})
@@ -321,8 +357,10 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_code} = req.headers 
     const{user_domain} = req.headers 
     try {
+        console.log(req.body)
         const AccountReceivableServiceInstance = Container.get(AccountReceivableService)
         const accountReceivables = await AccountReceivableServiceInstance.find({...req.body,ar_domain:user_domain})
+       console.log(accountReceivables)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: accountReceivables })
@@ -366,6 +404,66 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findByRange = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+        console.log(req.body)
+        const AccountReceivableServiceInstance = Container.get(AccountReceivableService)
+        const arb = await AccountReceivableServiceInstance.findS({
+            where: {  ar_bill:req.body.cust,ar_effdate: { [Op.lte]: req.body.date}},
+            attributes: 
+            ['ar_bill', [Sequelize.fn('sum', Sequelize.col('ar_base_amt')), 'soldinit' ]],
+            group: ['ar_bill'],
+            raw: true,
+        })
+// console.log(arb[0].soldinit)
+let soldinit = (arb.length > 0 ) ? Number(arb[0].soldinit) : 0
+ console.log(soldinit)
+ result.push({
+    id : i,
+    bill : req.body.cust,
+    nbr:"Solde Initial",
+    solde : soldinit,
+    debit: 0,
+    credit:0
+ })
+ i = i + 1
+        const accountReceivables = await AccountReceivableServiceInstance.findS({
+            where: {  ar_bill:req.body.cust,ar_effdate: { [Op.between]: [req.body.date, req.body.date1]}},
+            order: [['id', 'ASC']],
+
+        })
+        let sold = Number(soldinit)
+        for (let ar of accountReceivables ) {
+            sold = sold + Number(ar.ar_base_amt)
+            result.push({
+                id: i,
+                bill  : req.body.cust,
+                nbr : ar.ar_nbr,
+                po : ar.ar_po,
+                date : ar.ar_effdate,
+                debit:(ar.ar_type == 'I') ? Number(ar.ar_base_amt) : 0,
+                credit:(ar.ar_type == 'P') ? Number(ar.ar_base_amt) : 0,
+                type : ar.ar_type,
+                solde : sold
+            })
+            i ++
+        }
+
+     //  console.log(result)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     createP,
@@ -376,6 +474,7 @@ export default {
     findByOne,
     findAll,
     findBy,
+    findByRange,
     update,
     deleteOne
 }

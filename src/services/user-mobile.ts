@@ -46,6 +46,8 @@ export default class UserMobileService {
     @Inject('domainModel') private domainModel: Models.DomainModel,
     @Inject('barecodeInfosModel') private barecodeInfosModel: Models.barecodeInfosModel,
     @Inject('codeModel') private codeModel: Models.CodeModel,
+    @Inject('endlocationDetailModel') private endlocationDetailModel: Models.EndlocationDetailModel,
+    
 
     @Inject('logger') private logger,
   ) {}
@@ -951,6 +953,7 @@ for (let cu of custs) {
         where: {
           ld_loc: ld_loc,
           ld_site: ld_site,
+          ld_qty_oh: {[Op.gt]: 0},
         },
         attributes: ['id', 'ld_loc', 'ld_site', 'ld_part', 'ld_qty_oh', 'ld_lot', 'ld_expire'],
       });
@@ -1046,7 +1049,7 @@ for (let cu of custs) {
   // ******************** GET INVOICE    **************************
   public async getInvoice(role:any): Promise<any> {
     try {
-      const invoice = await this.invoiceModel.findAll({ where: { role_code:role,closed: false } });
+      const invoice = await this.invoiceModel.findAll({ where: { role_code:role,closed: false,canceled:false } });
       return invoice;
     } catch (e) {
    
@@ -1059,6 +1062,16 @@ for (let cu of custs) {
   public async getInvoiceLine(query:any): Promise<any> {
     try {
       const invoice_line = await this.invoiceLineModel.findAll({where:query});
+      return invoice_line;
+    } catch (e) {
+
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async getInvoiceLineS(query:any): Promise<any> {
+    try {
+      const invoice_line = await this.invoiceLineModel.findAll(query);
       return invoice_line;
     } catch (e) {
 
@@ -1508,6 +1521,38 @@ for (let cu of custs) {
       this.logger.silly('find All barCodes ');
       return barCodes;
     } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  
+  // ******************** UPDATE CREATE LOCATION DETAILS  **************************
+  public async CreateEndLocationDetails(data: any): Promise<any> {
+    try {
+      var endlocationCreated = [];
+      for (const element of data) {
+        if (element.id) delete element.id;
+        let obj = {
+         eld_site : element.ld_site,
+         eld_loc : element.ld_loc,
+         eld_part : element.ld_part,
+         eld_lot : element.ld_lot,
+         eld_service_code : element.chr01,
+         eld_date : element.ld_date,
+         eld_expire : element.ld_expire,
+         eld_qty_oh : element.ld_qty_oh,
+         eld_domain : element.ld_domain,
+         eld_ref: element.ld_ref,
+        
+        }
+          // CREATE
+          console.log(' create LocationDetails ')
+          const endlocation = await this.endlocationDetailModel.create(obj);
+          endlocationCreated.push(endlocation);
+             }
+      return endlocationCreated;
+    } catch (e) {
+     
       this.logger.error(e);
       throw e;
     }

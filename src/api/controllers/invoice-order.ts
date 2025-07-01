@@ -186,6 +186,32 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const findByOne = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find one  invoiceOrder endpoint")
+    const{user_domain} = req.headers
+
+    try {
+        const invoiceOrderServiceInstance = Container.get(InvoiceOrderService)
+      // const  ih_inv_nbr  = req.params
+        const invoiceOrder = await invoiceOrderServiceInstance.findOne({ ...req.body })
+        const invoiceOrderDetailServiceInstance = Container.get(
+            InvoiceOrderDetailService
+        )
+        const details = await invoiceOrderDetailServiceInstance.find({
+            idh_domain:user_domain,
+            idh_inv_nbr: invoiceOrder.ih_inv_nbr,
+        })
+
+        return res.status(200).json({
+            message: "fetched succesfully",
+            data: { invoiceOrder, details },
+        })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     
@@ -262,14 +288,14 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     const logger = Container.get("logger")
     const sequelize = Container.get("sequelize")
     const{user_domain} = req.headers
-
+console.log(req.body)
     logger.debug("Calling find all invoiceOrder endpoint")
     try {
         let result = []
         //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
 
-        const ihs =await sequelize.query("SELECT *  FROM   PUBLIC.ih_hist, PUBLIC.pt_mstr, PUBLIC.idh_det  where PUBLIC.idh_det.idh_inv_nbr = PUBLIC.ih_hist.ih_inv_nbr and PUBLIC.idh_det.idh_part = PUBLIC.pt_mstr.pt_part and PUBLIC.ih_hist.ih_domain = and PUBLIC.idh_det.idh_domain and PUBLIC.ih_hist.ih_domain = PUBLIC.pt_mstr.pt_domain and PUBLIC.ih_hist.ih_domain = ? ORDER BY PUBLIC.idh_det.id DESC", { replacements: [user_domain], type: QueryTypes.SELECT });
-       
+        const ihs =await sequelize.query("SELECT PUBLIC.idh_det.id,PUBLIC.idh_det.idh_ship,PUBLIC.idh_det.idh_um,PUBLIC.idh_det.idh_part, PUBLIC.idh_det.idh_qty_inv,PUBLIC.idh_det.idh_price,PUBLIC.ih_hist.ih_inv_nbr,PUBLIC.ih_hist.ih_bill,PUBLIC.ih_hist.ih_inv_date,PUBLIC.pt_mstr.pt_desc1, PUBLIC.ad_mstr.ad_name, (PUBLIC.idh_det.idh_price * PUBLIC.idh_det.idh_qty_inv) as montant   FROM   PUBLIC.ih_hist, PUBLIC.pt_mstr, PUBLIC.idh_det , PUBLIC.ad_mstr where PUBLIC.ih_hist.ih_inv_date >= ? and PUBLIC.ih_hist.ih_inv_date <= ? and PUBLIC.idh_det.idh_inv_nbr = PUBLIC.ih_hist.ih_inv_nbr and PUBLIC.ad_mstr.ad_addr = PUBLIC.ih_hist.ih_bill and PUBLIC.idh_det.idh_part = PUBLIC.pt_mstr.pt_part and PUBLIC.ih_hist.ih_domain = ? ORDER BY PUBLIC.idh_det.id ASC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+     //  console.log("ihs",ihs)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: ihs })
@@ -287,6 +313,7 @@ export default {
     findBy,
     findByAll,
     findOne,
+    findByOne,
     findAll,
     update,
     findAllwithDetails,

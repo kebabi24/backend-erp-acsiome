@@ -1082,8 +1082,8 @@ const findBKHTRBy = async (req: Request, res: Response, next: NextFunction) => {
    
    
     const bkhs = await bkhServiceInstance.findbetween({
-      where: { bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'P'},
-      bkh_domain: user_domain,
+      where: { bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'P',bkh_domain: user_domain,},
+      
     });
     
       return res.status(200).json({
@@ -1096,6 +1096,35 @@ const findBKHTRBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findBKHTR = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+   //console.log(req.body)
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_bank: req.body.bank,bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      order: [
+        ['id', 'ASC'],
+        
+      ],
+         });
+    //console.log(bkhs)
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findTransfertBy = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1119,6 +1148,79 @@ const findTransfertBy = async (req: Request, res: Response, next: NextFunction) 
     return next(e);
   }
 };
+const findBKHRCTBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'RCT'},
+      bkh_domain: user_domain,
+    });
+    
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+   //console.log(req.body)
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      attributes: 
+      ['chr01', [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'Montant' ]],
+      group: ['chr01'],
+      raw: true,
+      order: [
+        ['chr01', 'ASC'],
+        
+      ],
+         });
+      
+         const dep = await bkhServiceInstance.findbetween({
+          where: { bkh_type:'ISS', bkh_code:{[Op.like]:'DP%'},bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+          attributes: 
+          [ [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'Montant' ]],
+         
+          raw: true,
+         
+             });    
+         
+             if(dep.length !=0) {
+    bkhs.push({chr01:"Dépense",Montant:dep[0].Montant})} 
+    else {bkhs.push({chr01:"Dépense",Montant:0})}
+    console.log(bkhs)
+    console.log(dep)
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  {bkhs,dep} ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   findBy,
@@ -1142,5 +1244,9 @@ export default {
   bkhTrCDet,
   findBKHBy,
   findBKHTRBy,
-  findTransfertBy
+  findTransfertBy,
+  findBKHRCTBy,
+  findBKHTR,
+  findBKHTRGRP, 
+
 };

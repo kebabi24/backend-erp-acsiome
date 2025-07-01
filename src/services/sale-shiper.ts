@@ -50,7 +50,16 @@ export default class saleShiperService {
             throw e
         }
     }
-
+    public async findS(query: any): Promise<any> {
+        try {
+            const saleShipers = await this.saleShiperModel.findAll(query)
+            this.logger.silly("find All saleShipers mstr")
+            return saleShipers
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const saleShiper = await this.saleShiperModel.update(data, { where: query })

@@ -23,6 +23,7 @@ export default (app: Router) => {
     route.get("/trans", controller.findTrans)
     route.get("/verify", controller.findVerify)
     route.get("/types", controller.findTypes)
+    route.get("/parttypes", controller.findPartTypes)
     route.get("/colors", controller.findColors)
     route.get("/etats", controller.findEtats)
     route.get("/disease", controller.finddisease)

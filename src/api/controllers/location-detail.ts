@@ -812,7 +812,7 @@ result.push({
   desc: data.item.pt_desc1,
   lot:data.ld_lot,
   qty: data.ld_qty_oh,
-  amt: Number(data.ld_qty_oh) * Number(data.item.pt_price) * 1.2019
+  amt: Number(data.ld_qty_oh) * Number(data.item.pt_price) * 1.2138
 })
 i++
     }
