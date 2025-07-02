@@ -62,8 +62,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         for (let entry of requisitionDetail) {
             let site:any;
             console.log(entry.rqd_part,entry.rqd_vpart)
-            if(user_site == '*'){site = 'ECOLE'}else{site = user_site}
-            entry = { ...entry, rqd_site:site,rqd_domain: user_domain,rqd_nbr: requi.rqm_nbr }
+            // if(user_site == '*'){site = 'ECOLE'}else{site = user_site}
+            entry = { ...entry, rqd_site:user_site,rqd_domain: user_domain,rqd_nbr: requi.rqm_nbr }
             await requisitionDetailServiceInstance.create(entry)
         }
         return res
@@ -249,6 +249,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
             })
             result.push({id: req.id ,req, details})
         }
+        console.log(result)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: result })
@@ -339,9 +340,10 @@ const updatedet = async (req: Request, res: Response, next: NextFunction) => {
         const requisitionDetailServiceInstance = Container.get(
             RequisitionDetailService
         )
+       
         const {requisition, details} = req.body
         const { id } = req.params
-        
+        console.log(req.params)
         const requ = await requisitionServiceInstance.update(
             { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
