@@ -19,6 +19,6 @@ export default async (): Promise<any> => {
             
 //   },)
     await sequelize.authenticate()
-console.log(config.database,config.user,config.host,config.password)
+// console.log(config.database,config.user,config.host,config.password)
     return sequelize
 }

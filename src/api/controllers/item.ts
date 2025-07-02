@@ -116,6 +116,23 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByPurchase = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({   [Op.or]:[{pt_dea : true},{pt_pm_code:'P'}] ,pt_domain:user_domain });
+    
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBywithperte = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all item endpoint');
@@ -781,6 +798,7 @@ export default {
   create,
   findBySpec,
   findBy,
+  findByPurchase,
   findBywithperte,
   findByOp,
   findBySupp,
