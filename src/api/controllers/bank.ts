@@ -384,7 +384,7 @@ const findAP = async (req: Request, res: Response, next: NextFunction) => {
         bkd_module: 'AP',
         bkd_domain: user_domain,
       });
-
+console.log(bank, details)
       return res.status(200).json({
         message: 'fetched succesfully',
         data: { bank, details },
