@@ -25,8 +25,10 @@ async function startServer() {
   let macip = ''
   
   si.networkInterfaces().then(data => {macip = data[0].mac+'axiom1983'
+
     const fs = require('node:fs');
     const keydata = fs.readFileSync('key.key', 'utf8');
+    
 // if(macip == '14:ab:c5:08:78:ed') {
   //macip = '$argon2id$v=19$m=4096,t=3,p=1$MTIzNDU2Nzg$Kchj5gqWurdXjFpRixxbx3avltQhdWhkEPnszad/6Po'
 
