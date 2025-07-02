@@ -17,7 +17,7 @@ export default (app: Router) => {
     route.post("/findAll", controller.findByAll)
    
     route.put("/:id", controller.update)
-    route.put("/ids", controller.updatedet)
+    route.put("/URQD/:id", controller.updatedet)
     route.put('/RQD/:id', controller.updatedRQD);
 }
     
