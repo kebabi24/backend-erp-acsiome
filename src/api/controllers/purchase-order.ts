@@ -958,11 +958,11 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     
     
-    const filedata = req.file;
-
+    // const filedata = req.file;
+    // console.log(req.file)
     
     const purchaseOrder = await purchaseOrderServiceInstance.update(
-      { po_stat:req.body['po_stat'],po_app_owner:'', last_modified_by: user_code },
+      { po_stat:req.body['po_stat'],/*po_app_owner:filedata.path*/ last_modified_by: user_code },
       { id },
     );
     const purchase = await purchaseOrderServiceInstance.findOne({ id });
