@@ -47,7 +47,8 @@ export default class UserMobileService {
     @Inject('barecodeInfosModel') private barecodeInfosModel: Models.barecodeInfosModel,
     @Inject('codeModel') private codeModel: Models.CodeModel,
     @Inject('endlocationDetailModel') private endlocationDetailModel: Models.EndlocationDetailModel,
-    
+    @Inject('ddinvoiceModel') private ddinvoiceModel: Models.DdinvoiceModel,
+    @Inject('ddinvoiceLineModel') private ddinvoiceLineModel: Models.DdinvoiceLineModel,
 
     @Inject('logger') private logger,
   ) {}
@@ -807,6 +808,12 @@ for (let cu of custs) {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          'pt_prod_line',
+          'pt_promo',
+          'pt_dsgn_grp',
+          'pt_draw'
+
+
           
         ],
       });
@@ -875,6 +882,10 @@ for (let cu of custs) {
           'pt_loadable',
           'pt_promotion',
           'pt_desc2',
+          'pt_prod_line',
+          'pt_promo',
+          'pt_dsgn_grp',
+          'pt_draw',
           
         ],
       });
@@ -1057,7 +1068,16 @@ for (let cu of custs) {
       throw e;
     }
   }
-
+  public async getOneInvoice(query:any): Promise<any> {
+    try {
+      const invoice = await this.invoiceModel.findOne({where:query});
+      return invoice;
+    } catch (e) {
+   
+      this.logger.error(e);
+      throw e;
+    }
+  }
   // ******************** GET INVOICE LINE    **************************
   public async getInvoiceLine(query:any): Promise<any> {
     try {
@@ -1079,6 +1099,16 @@ for (let cu of custs) {
       throw e;
     }
   }
+  public async getOneInvoiceLine(query:any): Promise<any> {
+    try {
+      const invoice_line = await this.invoiceLineModel.findOne({where:query});
+      return invoice_line;
+    } catch (e) {
+
+      this.logger.error(e);
+      throw e;
+    }
+  }
   // ******************** GET INVOICE LINE query   **************************
   public async getInvoiceLineBy(query: any): Promise<any> {
     try {
@@ -1090,11 +1120,33 @@ for (let cu of custs) {
       throw e;
     }
   }
-
+// ******************** GET INVOICE LINE Acc query   **************************
+public async getInvoiceLineByAcc(query: any): Promise<any> {
+  try {
+    const invoice_line = await this.ddinvoiceLineModel.findAll(query);
+    return invoice_line;
+  } catch (e) {
+ 
+    this.logger.error(e);
+    throw e;
+  }
+}
   // ******************** GET ALL INVOICE     **************************
   public async getAllInvoice(query: any): Promise<any> {
     try {
       const invoice = await this.invoiceModel.findAll(query);
+     //const invoice = await this.invoiceModel.findAll({where:query,include:[this.customerMobileModel]});
+      return invoice;
+    } catch (e) {
+      console.log('Error from service- getInvoice');
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  // ******************** GET ALL INVOICE Acc    **************************
+  public async getAllInvoiceAcc(query: any): Promise<any> {
+    try {
+      const invoice = await this.ddinvoiceModel.findAll(query);
      //const invoice = await this.invoiceModel.findAll({where:query,include:[this.customerMobileModel]});
       return invoice;
     } catch (e) {
@@ -1350,7 +1402,7 @@ for (let cu of custs) {
       //  console.log("exist",exist)
         if (exist!=null) {
           // UPDATE
-         // console.log(element);
+        //  console.log('element',element);
           const invupdate = await this.invoiceModel.update(element, {
             where: { invoice_code: element.invoice_code },
           });

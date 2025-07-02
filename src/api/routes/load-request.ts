@@ -39,4 +39,5 @@ export default (app: Router) => {
   route.get('/getLoadRequest/:load_request_code', controller.getLoadRequest);
   route.post('/createUnLoadRequestDetailsScan/', controller.createUnLoadRequestDetailsScan);
   route.post('/findload/', controller.findLoadGrp);
+  route.post('/find', controller.findBy);
 };

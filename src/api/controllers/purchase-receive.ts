@@ -562,7 +562,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
           prh_part: value.prh_part,
           prh_serial: value.prh_serial,
           prh_taxable: value.prh_taxable,
-          prh_tqxc: value.prh_taxc,
+          prh_taxc: value.prh_taxc,
           prh_tax_code: value.prh_tax_code,
           prh_um: value.prh_um,
           prh_um_conv: value.prh_um_conv,
@@ -606,6 +606,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
 
     var i = 1;
     for (const arr of result) {
+      console.log(arr)
       await purchaseReceiveServiceInstance.create({
         prh_domain: user_domain,
         prh_receiver: req.body.prhnbr,
@@ -1422,7 +1423,7 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     let result = [];
     const { liste, distinct } = req.params;
     //console.log(distinct, "disting")
-    console.log(liste, 'disting');
+    console.log(distinct,liste, 'disting');
 
     const prhs = await sequelize.query(
       "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",

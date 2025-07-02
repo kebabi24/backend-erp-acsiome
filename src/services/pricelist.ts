@@ -51,7 +51,7 @@ export default class pricelistService {
 
     public async find(query: any): Promise<any> {
         try {
-            const pricelists = await this.pricelistModel.findAll({ where: query })
+            const pricelists = await this.pricelistModel.findAll({ where: query , order: [['pi_part_code', 'ASC']]})
             this.logger.silly("find All pricelists mstr")
             return pricelists
         } catch (e) {

@@ -18,6 +18,9 @@ import { INTEGER, QueryTypes } from 'sequelize';
 import moment from 'moment';
 import { generatePdf } from '../../reporting/generator';
 import InvoiceOrder from '../../models/invoice-order';
+import ConfigService from "../../services/config"
+import CustomerService from "../../services/customer"
+import ItemService from "../../services/item"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -112,6 +115,7 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
     const saleShiperServiceInstance = Container.get(SaleShiperService);
 
     const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
+    const itemServiceInstance = Container.get(ItemService);
     
     const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
     const payMethServiceInstance = Container.get(PayMethService);
@@ -193,6 +197,11 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
       });
   
       for (let entry of invoiceOrderTempDetail) {
+
+        const item = await itemServiceInstance.findOne({
+          pt_domain: user_domain,
+          pt_part: entry.itdh_part,
+        });
         entry = {
           idh_line: entry.itdh_line,
           idh_sad_line: entry.itdh_sad_line, 
@@ -211,7 +220,15 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
           idh_taxable: entry.itdh_taxable,
           idh_tax_code: entry.itdh_tax_code,
           idh_taxc: entry.itdh_taxc,
-
+          
+          idh_draw: item.pt_draw,
+          idh_prod_line: item.pt_prod_line,
+          idh_promo: item.pt_promo,    
+          idh_group: item.pt_group,
+          idh_part_type: item.pt_part_type,
+          idh_dsgn_grp : item.pt_dsgn_grp,
+          idh_rev: item.pt_rev,
+          idh_inv_date: invoiceOrderTemp.ith_inv_date,
           //...entry,
           idh_domain: user_domain,
           idh_inv_nbr: invoice.ih_inv_nbr,

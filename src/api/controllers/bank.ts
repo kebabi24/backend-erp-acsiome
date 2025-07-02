@@ -1096,6 +1096,57 @@ const findBKHTRBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findBKHGrpTRBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+console.log(req.body)
+    const bkhServiceInstance = Container.get(BkhService);
+   
+   
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_bank:req.body.bank,bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      attributes: 
+      ['bkh_effdate', [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'bkh_amt' ],
+      [Sequelize.fn('sum', Sequelize.col('bkh_2000')), 'bkh_2000'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_1000')), 'bkh_1000'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_0500')), 'bkh_0500'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_0200')), 'bkh_0200'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p200')), 'bkh_p200'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p100')), 'bkh_p100'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p050')), 'bkh_p050'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p020')), 'bkh_p020'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p010')), 'bkh_p010'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_p005')), 'bkh_p005'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_bon')), 'bkh_bon'],
+      [Sequelize.fn('sum', Sequelize.col('bkh_cheque')), 'bkh_cheque'],
+      [Sequelize.literal('0'), 'id']
+    ],
+      group: ['bkh_effdate'],
+      raw: true,
+      order: [
+        ['bkh_effdate', 'ASC'],
+        
+      ],
+         });
+         console.log(bkhs)
+let i=1
+         for (let bk of bkhs) {
+          bk.id = i
+          i++
+         }
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data:  bkhs ,
+      });
+   
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBKHTR = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1188,7 +1239,7 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
       where: { bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
       attributes: 
       ['chr01', [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'Montant' ]],
-      group: ['chr01'],
+      group: ['chr01','bkh_terms'],
       raw: true,
       order: [
         ['chr01', 'ASC'],
@@ -1196,6 +1247,13 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
       ],
          });
       
+         const cheques = await bkhServiceInstance.findbetween({
+          where: { bkh_type:'P',bkh_terms:'CODPM3',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+          attributes: 
+          [ [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'cheque' ]],
+          raw: true,
+         
+             });
          const dep = await bkhServiceInstance.findbetween({
           where: { bkh_type:'ISS', bkh_code:{[Op.like]:'DP%'},bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
           attributes: 
@@ -1205,14 +1263,19 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
          
              });    
          
-             if(dep.length !=0) {
-    bkhs.push({chr01:"Dépense",Montant:dep[0].Montant})} 
-    else {bkhs.push({chr01:"Dépense",Montant:0})}
+    //          if(dep.length !=0) {
+    // bkhs.push({chr01:"Dépense",Montant:dep[0].Montant})} 
+    // else {bkhs.push({chr01:"Dépense",Montant:0})}
+    let cheque = 0
+    let depence = 0
+    if (cheques[0].cheque !=0) {cheque = Number(cheques[0].cheque)}
+    if (dep[0].Montant !=0) {depence = Number(-dep[0].Montant)}
     console.log(bkhs)
-    console.log(dep)
+    console.log(cheques)
+    console.log(dep[0].Montant)
       return res.status(200).json({
         message: 'fetched succesfully',
-        data:  {bkhs,dep} ,
+        data:  {bkhs,depence,cheque} ,
       });
    
   } catch (e) {
@@ -1248,5 +1311,6 @@ export default {
   findBKHRCTBy,
   findBKHTR,
   findBKHTRGRP, 
+  findBKHGrpTRBy
 
 };

@@ -16,8 +16,8 @@ export default ({ app }: { app: express.Application }) => {
     res.status(200).end();
   });
 
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(bodyParser.json({ limit: '1000mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '1000mb' }));
 
   // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
   // It shows the real origin IP in the heroku or Cloudwatch logs

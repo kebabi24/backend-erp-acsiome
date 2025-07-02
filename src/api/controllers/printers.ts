@@ -64,19 +64,23 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   
   try {
     const printerServiceInstance = Container.get(PrinterService);
-    const printers = await printerServiceInstance.findByPrinters({ ...req.body });
-
+    console.log(req.body)
+    const printers = await printerServiceInstance.findByUserPrinters({ ...req.body });
+console.log(printers)
 let result=[]    
     console.log(printers)
+    let i = 1
  for(let printer of printers) {
   const pr = await printerServiceInstance.findPrinter({printer_code: printer.printer_code})
  let obj = {
-  id: printer.id,
+  id: i,
   usrd_code : printer.usrd_code,
   printer_code: printer.printer_code,
+  printer_desc: printer.printer_desc,
   printer_path:  pr.printer_path,
  }
 result.push(obj)
+i++
  }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {

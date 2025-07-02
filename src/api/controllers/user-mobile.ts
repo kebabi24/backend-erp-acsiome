@@ -18,6 +18,12 @@ import PromotionService from '../../services/promotion';
 import siteService from '../../services/site';
 import CustomersMobileSercice from '../../services/customer-mobile';
 import _, { isNull } from 'lodash';
+import BkhService from '../../services/bkh';
+import InvoiceOrderDetailService from '../../services/invoice-order-detail';
+import UserService from '../../services/user';
+import AddressService from '../../services/address';
+import DdinvoiceService from '../../services/ddinvoice';
+import DdinvoiceLineService from '../../services/ddinvoice-line';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -207,7 +213,10 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       // these data is the same for both response cases
       const site = await siteServiceInstance.findOne({ si_site: role.role_site });
       const user_mobile_code = role.user_mobile_code;
+      
       const userMobile = await userMobileServiceInstanse.getUser({ user_mobile_code: user_mobile_code });
+      // console.log(userMobile)
+     
       var users = [];
       var profiles = [];
       var priceList = [];
@@ -223,9 +232,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         priceList = await userMobileServiceInstanse.getPriceListBY({ pricelist_code: role.pricelist_code });
       }
 //console.log("priceList",priceList)
+// console.log(role.role_code, "invoice")
       const invoice = await userMobileServiceInstanse.getInvoice(role.role_code);
+      
       let invoicecode= []
       for (let inv of invoice) {
+        // console.log('inv',inv)
         invoicecode.push(inv.invoice_code)
       }
       const invoiceLine = await userMobileServiceInstanse.getInvoiceLine({invoice_code:invoicecode});
@@ -234,7 +246,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
       const barCodesInfo = await userMobileServiceInstanse.findAllBarCodes();
       var role_controller = {};
       var profile_controller = {};
-
+// console.log(invoiceLine)
       const domain = await userMobileServiceInstanse.getDomain({ dom_domain: role.role_domain });
 
       const promos = await promoServiceInstanse.getValidePromos(role.role_site);
@@ -331,7 +343,12 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoice.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoice.period_active_date);
         });
       }
-//console.log("invoice",invoice)
+      if (invoiceLine.length > 0) {
+        invoiceLine.forEach(invoiceLine => {
+          invoiceLine.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoiceLine.period_active_date);
+        });
+      }
+// console.log("invoice",invoiceLine)
       // service created on backend
       if (parameter[index].hold === true) {
         let service1 = await userMobileServiceInstanse.getService({ role_code: role.role_code ,service_open:true});
@@ -423,7 +440,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         const clusters = await userMobileServiceInstanse.findAllClusters({});
         const subClusters = await userMobileServiceInstanse.findAllSubClusters({});
         const salesChannels = await userMobileServiceInstanse.getSalesChannels({});
-
+        console.log("termiber")
         return res.status(202).json({
           message: 'Data correct !',
           service_creation: parameter[index].hold,
@@ -484,7 +501,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         const clusters = await userMobileServiceInstanse.findAllClusters({});
         const subClusters = await userMobileServiceInstanse.findAllSubClusters({});
         const salesChannels = await userMobileServiceInstanse.getSalesChannels({});
-
+        console.log("termiber")
         return res.status(202).json({
           message: 'Data correct !',
           service_creation: parameter[index].hold,
@@ -528,8 +545,11 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           barCodesInfo: barCodesInfo,
           site: site,
         });
+       
       }
-    }
+      
+
+    } 
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -551,7 +571,8 @@ try {
 
   const userMobileServiceInstanse = Container.get(UserMobileService);
   const RoleServiceInstance = Container.get(RoleService);
-  
+  const itemServiceInstance = Container.get(ItemService);
+
   console.log('socket connected');
 
   socket.emit('readyToRecieve');
@@ -913,7 +934,23 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
 // }
       for(let inv of invoicescreateds) {
         for (const line of invoicesLines) {
-                  if (line.invoice_code === inv.invoice_code) { invoicesLinesToCreate.push(line); }
+          /*here pt*/
+          // const item = await itemServiceInstance.findOne({
+            
+          //   pt_part: line.product_code,
+          // });
+          // line.pt_draw = item.pt_draw
+          // line.pt_prod_line = item.pt_prod_line
+          // line.pt_promo = item.pt_promo    
+          // line.pt_group =item.pt_group
+          // line.pt_part_type = item.pt_part_type
+          // line.pt_dsgn_grp = item.pt_dsgn_grp
+          // line.pt_rev = item.pt_rev
+          // line.period_active_date = inv.period_active_date
+                  if (line.invoice_code === inv.invoice_code) { 
+                    line.period_active_date = formatDateOnlyFromMobileToBack(line.period_active_date);
+                    invoicesLinesToCreate.push(line);console.log(line) 
+                  }
                 }
           }
           const invoicesLiness = await userMobileServiceInstanse.createInvoicesLines(invoicesLinesToCreate);
@@ -1135,7 +1172,6 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
     const userMobileServiceInstance = Container.get(UserMobileService);
     const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
 
-   console.log(req.body);
     if (req.body.site == '*') {
       var invoices = await userMobileServiceInstance.getAllInvoice({
         where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
@@ -1150,6 +1186,50 @@ const findAllInvoice = async (req: Request, res: Response, next: NextFunction) =
       }
     } else {
       var invoices = await userMobileServiceInstance.getAllInvoice({
+        where : {site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1]}} ,
+          attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']] },
+      });
+     
+    }
+    for (let inv of invoices) {
+      const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+     // console.log(customer.customer_name)
+        inv.sdelivery_note_code = customer.customer_name
+
+    }
+   // console.log(invoices)
+    //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllInvoiceAcc = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
+
+   console.log(req.body);
+    if (req.body.site == '*') {
+      var invoices = await userMobileServiceInstance.getAllInvoiceAcc({
+        where: { period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+      for (let inv of invoices) {
+        const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+       // console.log(customer)
+          inv.Nom = customer.customer_name
+  
+      }
+    } else {
+      var invoices = await userMobileServiceInstance.getAllInvoiceAcc({
         where : {site: req.body.site, period_active_date: { [Op.between]: [req.body.date, req.body.date1]}} ,
           attributes: {
           include: [[Sequelize.literal(' amount - due_amount'), 'Credit']] },
@@ -1209,6 +1289,83 @@ const findAllInvoiceRole = async (req: Request, res: Response, next: NextFunctio
     return next(e);
   }
 };
+const findAllCreditRole = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
+
+   console.log(req.body);
+    if (req.body.site == '*') {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: {  role_code:req.body.role,closed:false,canceled:false,period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+    } else {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: { site: req.body.site, role_code:req.body.role,closed:false,canceled:false,period_active_date: { [Op.between]: [req.body.date, req.body.date1]} },
+          attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+     // console.log("here",invoices)
+    }
+    // console.log("invoices",invoices);
+    for (let inv of invoices) {
+      const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+      console.log(customer.customer_name)
+        inv.sdelivery_note_code = customer.customer_name
+
+    }
+    //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllCredit = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
+
+   console.log(req.body);
+    if (req.body.site == '*') {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: {  closed:false,canceled:false,period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+    } else {
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: { site: req.body.site, closed:false,canceled:false,period_active_date: { [Op.between]: [req.body.date, req.body.date1]} },
+          attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+     // console.log("here",invoices)
+    }
+    // console.log("invoices",invoices);
+    for (let inv of invoices) {
+      const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+      console.log(customer.customer_name)
+        inv.sdelivery_note_code = customer.customer_name
+
+    }
+    //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findPaymentterm = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -1260,6 +1417,31 @@ const findByInvoiceLine = async (req: Request, res: Response, next: NextFunction
     const userMobileServiceInstance = Container.get(UserMobileService);
 
     var invoicesline = await userMobileServiceInstance.getInvoiceLineBy({
+      where: { invoice_code: req.body.invoicecode },
+      attributes: {
+        include: [[Sequelize.literal('unit_price * quantity'), 'Montant']],
+      },
+    });
+
+    console.log(invoicesline);
+
+    //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoicesline });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByInvoiceLineAcc = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+ // console.log('rrrrrrrrrrrrrrrrrr', req.body);
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+
+    var invoicesline = await userMobileServiceInstance.getInvoiceLineByAcc({
       where: { invoice_code: req.body.invoicecode },
       attributes: {
         include: [[Sequelize.literal('unit_price * quantity'), 'Montant']],
@@ -1958,11 +2140,11 @@ const findAllInvoicewithDetails = async (req: Request, res: Response, next: Next
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation, PUBLIC.pt_mstr.pt_part_type  FROM     PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as amount, PUBLIC.aa_invoiceLine.id as id , PUBLIC.aa_invoiceLine.tax_rate,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation, PUBLIC.pt_mstr.pt_part_type  FROM     PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoice.canceled = false and  PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity * 1.19) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline, PUBLIC.aa_customer, PUBLIC.pt_mstr  where PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ?  ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity ) as amount, PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoiceLine.tax_rate,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice, PUBLIC.aa_invoiceline, PUBLIC.aa_customer, PUBLIC.pt_mstr  where  PUBLIC.aa_invoice.canceled = false and  PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part  and PUBLIC.pt_mstr.pt_domain = ?  ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
    //  console.log("inv",invs)
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
@@ -1980,6 +2162,42 @@ const findAllInvoicewithDetails = async (req: Request, res: Response, next: Next
       return next(e)
   } 
 }
+const findAllInvoicewithDetailsAcc = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+ // console.log("reqrrrrrrrrrrrrrrr",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+      if (req.body.site == '*') {
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_ddinvoiceLine.unit_price * PUBLIC.aa_ddinvoiceLine.quantity) as amount, PUBLIC.aa_ddinvoiceLine.id as id ,PUBLIC.aa_ddinvoice.invoice_code,PUBLIC.aa_ddinvoice.site,PUBLIC.aa_ddinvoice.period_active_date,PUBLIC.aa_ddinvoice.role_code,PUBLIC.aa_ddinvoice.user_code,PUBLIC.aa_ddinvoice.itinerary_code,PUBLIC.aa_ddinvoice.customer_code,PUBLIC.aa_ddinvoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_ddinvoiceline.product_code,PUBLIC.aa_ddinvoiceline.quantity ,PUBLIC.aa_ddinvoiceline.lot,PUBLIC.aa_ddinvoiceline.designation, PUBLIC.pt_mstr.pt_part_type  FROM     PUBLIC.aa_ddinvoice, PUBLIC.pt_mstr, PUBLIC.aa_ddinvoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoice.canceled = false  and PUBLIC.aa_ddinvoiceline.invoice_code = PUBLIC.aa_ddinvoice.invoice_code and PUBLIC.aa_ddinvoiceline.product_code = PUBLIC.pt_mstr.pt_part  and  PUBLIC.aa_ddinvoice.period_active_date >= ? and PUBLIC.aa_ddinvoice.period_active_date <= ? and PUBLIC.aa_ddinvoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_ddinvoiceline.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+     
+    } else {
+
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_ddinvoiceLine.unit_price * PUBLIC.aa_ddinvoiceLine.quantity ) as amount, PUBLIC.aa_ddinvoiceLine.id as id ,PUBLIC.aa_ddinvoice.invoice_code,PUBLIC.aa_ddinvoice.site,PUBLIC.aa_ddinvoice.period_active_date,PUBLIC.aa_ddinvoice.role_code,PUBLIC.aa_ddinvoice.user_code,PUBLIC.aa_ddinvoice.itinerary_code,PUBLIC.aa_ddinvoice.customer_code,PUBLIC.aa_ddinvoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_ddinvoiceline.product_code,PUBLIC.aa_ddinvoiceline.lot,PUBLIC.aa_ddinvoiceline.quantity ,PUBLIC.aa_ddinvoiceline.lot,PUBLIC.aa_ddinvoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_ddinvoice,  PUBLIC.aa_ddinvoiceline, PUBLIC.aa_customer, PUBLIC.pt_mstr  where PUBLIC.aa_invoice.canceled = false and PUBLIC.aa_ddinvoice.site = ? and PUBLIC.aa_ddinvoiceline.invoice_code = PUBLIC.aa_ddinvoice.invoice_code  and  PUBLIC.aa_ddinvoice.period_active_date >= ? and PUBLIC.aa_ddinvoice.period_active_date <= ? and PUBLIC.aa_ddinvoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_ddinvoiceline.product_code = PUBLIC.pt_mstr.pt_part  and PUBLIC.pt_mstr.pt_domain = ?  ORDER BY PUBLIC.aa_ddinvoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+   //  console.log("inv",invs)
+    //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
+   //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
+   // console.log(invs)
+    }
+    
+    //console.log("iiiiiiiiiiiiiiii",invs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
+
 const findAllInvoicewithDetailsRole = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get("logger")
   const Sequelize = Container.get("sequelize")
@@ -1993,11 +2211,11 @@ const findAllInvoicewithDetailsRole = async (req: Request, res: Response, next: 
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline , PUBLIC.aa_customer, PUBLIC.pt_mstr where PUBLIC.aa_invoice.role_code IN ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [[req.body.role],req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline , PUBLIC.aa_customer, PUBLIC.pt_mstr where PUBLIC.aa_invoice.canceled = false and  PUBLIC.aa_invoice.role_code IN ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [[req.body.role],req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation  , PUBLIC.pt_mstr.pt_part_type FROM   PUBLIC.aa_invoice, PUBLIC.aa_invoiceline ,  PUBLIC.aa_customer , PUBLIC.pt_mstr where PUBLIC.aa_invoice.role_code IN ? and  PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements:[[req.body.role],req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceline.unit_price * PUBLIC.aa_invoiceline.quantity * 1.19) as amount, PUBLIC.aa_invoiceline.id as id ,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation  , PUBLIC.pt_mstr.pt_part_type FROM   PUBLIC.aa_invoice, PUBLIC.aa_invoiceline ,  PUBLIC.aa_customer , PUBLIC.pt_mstr where PUBLIC.aa_invoice.canceled = false and PUBLIC.aa_invoice.role_code IN ? and  PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements:[[req.body.role],req.body.site,req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
@@ -2059,7 +2277,7 @@ const findAllCA = async (req: Request, res: Response, next: NextFunction) => {
       console.log(req.body)
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
     
-      var invs =await Sequelize.query("SELECT PUBLIC.aa_customer.id,PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis, SUM(PUBLIC.aa_invoice.horstax_amount) as horstax, SUM(PUBLIC.aa_invoice.taxe_amount) as tax,SUM(PUBLIC.aa_invoice.stamp_amount) as stamp,SUM(PUBLIC.aa_invoice.amount) as amount,SUM(PUBLIC.aa_invoice.due_amount) as due_amount FROM PUBLIC.aa_customer, PUBLIC.aa_invoice WHERE PUBLIC.aa_customer.customer_code = PUBLIC.aa_invoice.customer_code and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ?  and  PUBLIC.aa_invoice.canceled = false GROUP BY PUBLIC.aa_customer.id, PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis ORDER BY PUBLIC.aa_customer.customer_code", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT PUBLIC.aa_customer.id,PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis, SUM(PUBLIC.aa_invoice.horstax_amount) as horstax, SUM(PUBLIC.aa_invoice.taxe_amount) as tax,SUM(PUBLIC.aa_invoice.stamp_amount) as stamp,SUM(PUBLIC.aa_invoice.amount) as amount,SUM(PUBLIC.aa_invoice.due_amount) as due_amount , SUM(PUBLIC.aa_invoice.amount - PUBLIC.aa_invoice.due_amount) as credit FROM PUBLIC.aa_customer, PUBLIC.aa_invoice WHERE PUBLIC.aa_customer.customer_code = PUBLIC.aa_invoice.customer_code and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ?  and  PUBLIC.aa_invoice.canceled = false GROUP BY PUBLIC.aa_customer.id, PUBLIC.aa_customer.customer_code, PUBLIC.aa_customer.customer_name,PUBLIC.aa_customer.rc,PUBLIC.aa_customer.ai,PUBLIC.aa_customer.nif,PUBLIC.aa_customer.nis ORDER BY PUBLIC.aa_customer.customer_code", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     
    // console.log("iiiiiiiiiiiiiiii",invs)
@@ -2142,6 +2360,7 @@ const findSalesType = async (req: Request, res: Response, next: NextFunction) =>
 
 const getSalesDashboardAddData = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
+  const Sequelize = Container.get("sequelize")
   logger.debug('Calling getSalesDashboardAddDataendpoint');
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
@@ -2211,46 +2430,48 @@ const  ihss = await invoiceOrderServiceInstance.findS({
   where: {ih_inv_date: { [Op.between]: [start_date, end_date]}},
   
 })
-let ihsss = []
-for (let ih of ihss) {ihsss.push(ih.ih_inv_nbr)}
-let types = []
-  const typs = await codeServiceInstance.find({code_fldname:'pt_part_type'})
-  for (let typ of typs) {
-    let its = []
-    const items = await itemServiceInstance.find({pt_part_type : typ.code_value})
-        for(let item of items) { its.push(item.pt_part)}
-        const idhs = await invoiceOrderDetailServiceInstance.findS({
-          where: {idh_part: its,idh_inv_nbr : ihsss},
-          attributes: 
-          [[Sequelize.fn('sum', Sequelize.col('idh_qty_inv')), 'qtyinv' ]],
-          raw: true,
+// let ihsss = []
+// for (let ih of ihss) {ihsss.push(ih.ih_inv_nbr)}
+// let types = []
+//   const typs = await codeServiceInstance.find({code_fldname:'pt_part_type'})
+//   for (let typ of typs) {
+//     let its = []
+//     const items = await itemServiceInstance.find({pt_part_type : typ.code_value})
+//         for(let item of items) { its.push(item.pt_part)}
+//         const idhs = await invoiceOrderDetailServiceInstance.findS({
+//           where: {idh_part: its,idh_inv_nbr : ihsss},
+//           attributes: 
+//           [[Sequelize.fn('sum', Sequelize.col('idh_qty_inv')), 'qtyinv' ]],
+//           raw: true,
 
 
-        })
-        types.push({type:typ.code_cmmt,qty:(idhs[0].qtyinv != 0)? idhs[0].qtyinv : 0})
-  }
+//         })
+//         types.push({type:typ.code_cmmt,qty:(idhs[0].qtyinv != 0)? idhs[0].qtyinv : 0})
+//   }
 
-
-
-let mihsss = []
-for (let ih of ihss) {mihsss.push(ih.ih_inv_nbr)}
-let mtypes = []
+var idhs = await Sequelize.query("select sum(idh_price * idh_qty_inv) as amt,code_cmmt as type, sum(idh_qty_inv) as qty from public.idh_det, public.code_mstr where code_fldname = 'pt_part_type' and code_value = idh_part_type and idh_inv_date >= ? and idh_inv_date <= ? GROUP BY code_cmmt" , {replacements: [start_date,end_date],type: QueryTypes.SELECT });
+console.log(idhs)
+let mtypes = idhs
+let types = idhs
+// let mihsss = []
+// for (let ih of ihss) {mihsss.push(ih.ih_inv_nbr)}
+// let mtypes = []
   const mtyps = await codeServiceInstance.find({code_fldname:'pt_part_type'})
-  for (let mtyp of mtyps) {
-    let mits = []
-    const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
-        for(let item of items) { mits.push(item.pt_part)}
-        const midhs = await invoiceOrderDetailServiceInstance.findS({
-          where: {idh_part: mits,idh_inv_nbr : ihsss},
-          attributes: 
-          [[Sequelize.literal( 'idh_qty_inv * idh_price'), 'amtinv' ]],
-          raw: true,
+//   for (let mtyp of mtyps) {
+//     let mits = []
+//     const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
+//         for(let item of items) { mits.push(item.pt_part)}
+//         const midhs = await invoiceOrderDetailServiceInstance.findS({
+//           where: {idh_part: mits,idh_inv_nbr : ihsss},
+//           attributes: 
+//           [[Sequelize.literal( 'idh_qty_inv * idh_price'), 'amtinv' ]],
+//           raw: true,
 
 
-        })
-        //console.log("midhs",midhs)
-        mtypes.push({type:mtyp.code_cmmt,amt:(midhs.length != 0)? midhs[0].amtinv : 0})
-  }
+//         })
+//         //console.log("midhs",midhs)
+//         mtypes.push({type:mtyp.code_cmmt,amt:(midhs.length != 0)? midhs[0].amtinv : 0})
+//   }
 
 
 /* kamel*/
@@ -2338,8 +2559,47 @@ const   caroles = await userMobileServiceInstance.getAllInvoice({
 if(caroles[0].amount != null) {
 ca_roles.push({role_code:role.role_code,ca: caroles[0].amount})}
 }
-// console.log(ca_roles)
+
+/*credit dd*/
+let cred = 0
+    var credits = await Sequelize.query("select sum(amount-due_amount) as cred from public.aa_invoice where canceled = false and closed = false" , {type: QueryTypes.SELECT });
+    if(credits != null) {cred = credits[0].cred} else { cred = 0}
+//  console.log("credits",credits[0].cred)
 // console.log(ihamt)
+/*credit dd*/
+let credgros = 0
+    var credits_gros = await Sequelize.query("select sum(cm_balance) as cred from public.cm_mstr " , {type: QueryTypes.SELECT });
+    if(credits_gros != null) {credgros = credits_gros[0].cred} else { credgros = 0}
+ console.log("credits gros",credgros)
+
+
+ let credit_roles= []
+const  roless = await roleServiceInstance.findS({ order: [['role_code', 'ASC']],})
+for(let role of roless ) {
+const   crroles = await userMobileServiceInstance.getAllInvoice({
+  where: { closed:false, canceled:false,role_code : role.role_code},
+  attributes: 
+  [[Sequelize.fn('sum', Sequelize.col('amount')), 'amount' ],[Sequelize.fn('sum', Sequelize.col('due_amount')), 'due_amount' ]],
+  raw: true,
+})
+// console.log(caroles[0].amount)
+if(crroles[0].amount != null) {
+credit_roles.push({role_code:role.role_code,credit: Number(crroles[0].amount) - Number(crroles[0].due_amount) })}
+}
+/*count number invoice canceled*/
+// const   invoice = await userMobileServiceInstance.getAllInvoice({
+//   where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:true},
+//   attributes: 
+//   ['role_code',[Sequelize.fn('COUNT', Sequelize.col('canceled')), 'canceled']],
+//   group: ['role_code'],
+//   order: [['role_code', 'ASC']],
+//   raw: true,
+// })
+// console.log(invoice)
+
+    var credit_cust = await Sequelize.query("select id,cm_addr, cm_sort,cm_balance  from public.cm_mstr  where cm_balance <> 0 " , {type: QueryTypes.SELECT });
+   
+ 
     return res.status(200).json({
       ca_dist: cadist,
       ca_dd: cadd,
@@ -2351,8 +2611,11 @@ ca_roles.push({role_code:role.role_code,ca: caroles[0].amount})}
       ddamt_type_data: ddatypes,
       ca_zone_data : cazone,
       ca_bill: ihamt,
-      ca_role: ca_roles
-      
+      ca_role: ca_roles,
+      credit_dd : cred,
+      credit_gros : credgros ,
+      credit_role : credit_roles,
+      credit_Cust : credit_cust
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -2377,6 +2640,160 @@ const findAllSalesRoles = async (req: Request, res: Response, next: NextFunction
   } 
 }
 
+const findAllInvoicewithDetailsToinv = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+  
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+      if (req.body.site == '*') {
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity) as price, PUBLIC.aa_invoiceLine.unit_price ,PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoiceline.tax_rate,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation, PUBLIC.pt_mstr.pt_part_type  FROM     PUBLIC.aa_invoice, PUBLIC.pt_mstr, PUBLIC.aa_invoiceline, PUBLIC.aa_customer  where PUBLIC.aa_invoice.canceled = false and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code IN ? and PUBLIC.pt_mstr.pt_domain = ? ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.date,req.body.date1,[req.body.prod],user_domain], type: QueryTypes.SELECT });
+     
+    } else {
+
+      var invs =await Sequelize.query("SELECT (PUBLIC.aa_invoiceLine.unit_price * PUBLIC.aa_invoiceLine.quantity ) as price,PUBLIC.aa_invoiceLine.unit_price , PUBLIC.aa_invoiceLine.id as id ,PUBLIC.aa_invoiceline.tax_rate,PUBLIC.aa_invoice.invoice_code,PUBLIC.aa_invoice.site,PUBLIC.aa_invoice.period_active_date,PUBLIC.aa_invoice.role_code,PUBLIC.aa_invoice.user_code,PUBLIC.aa_invoice.itinerary_code,PUBLIC.aa_invoice.customer_code,PUBLIC.aa_invoice.service_code,PUBLIC.aa_customer.customer_name,PUBLIC.aa_invoiceline.product_code,PUBLIC.aa_invoiceline.quantity ,PUBLIC.aa_invoiceline.lot,PUBLIC.aa_invoiceline.designation , PUBLIC.pt_mstr.pt_part_type  FROM   PUBLIC.aa_invoice,  PUBLIC.aa_invoiceline, PUBLIC.aa_customer, PUBLIC.pt_mstr  where PUBLIC.aa_invoice.canceled = false and PUBLIC.aa_invoice.site = ? and PUBLIC.aa_invoiceline.invoice_code = PUBLIC.aa_invoice.invoice_code  and  PUBLIC.aa_invoice.period_active_date >= ? and PUBLIC.aa_invoice.period_active_date <= ? and PUBLIC.aa_invoice.customer_code = PUBLIC.aa_customer.customer_code and PUBLIC.aa_invoiceline.product_code = PUBLIC.pt_mstr.pt_part and PUBLIC.aa_invoiceline.product_code IN ? and PUBLIC.pt_mstr.pt_domain = ?  ORDER BY PUBLIC.aa_invoiceline.id DESC", { replacements: [req.body.site,req.body.date,req.body.date1,[req.body.prod],user_domain], type: QueryTypes.SELECT });
+   //  console.log("inv",invs)
+    //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
+   //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
+   // console.log(invs)
+    }
+    
+    //console.log("iiiiiiiiiiiiiiii",invs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
+
+const addDinvoices = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+
+  logger.debug("Calling Create sequence endpoint")
+  try {
+      
+      const ddinvoiceServiceInstance = Container.get(DdinvoiceService)
+
+      const iddinvoiceLineServiceInstance = Container.get(
+         DdinvoiceLineService
+      )
+      const userMobileServiceInstanse = Container.get(UserMobileService);
+      const { detail } = req.body
+
+       console.log(detail)
+      // const ih = await invoiceOrderServiceInstance.create({...invoiceOrder,ih_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by: user_code})
+      await iddinvoiceLineServiceInstance.create(detail/*,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin*/)
+
+      // for (let entry of detail) {
+      //     entry = { ...entry }
+      //     // console.log(entry.invoice_code,entry.product_code)
+      //     const invoiceLine = await userMobileServiceInstanse.getOneInvoiceLine({invoice_code:entry.invoice_code,product_code:entry.product_code,lot:entry.lot});
+      //     // console.log(invoiceLine)
+      //     await iddinvoiceLineServiceInstance.create({...entry,tax_rate:invoiceLine.tax_rate, price:entry.amount,unit_price:invoiceLine.unit_price,invoice_line:invoiceLine.invoice_line,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+
+      //    }
+         let array = []
+         for(let det of detail) {
+          array.push({Id:det.invoice_code, })
+        }
+        // console.log('array', array)      
+         var result = [];
+         array.reduce(function(res, value) {
+          if (!res[value.Id]) {
+            res[value.Id] = { Id: value.Id, qty: 0 };
+            result.push(res[value.Id])
+          }
+          // res[value.Id].qty += value.qty;
+          return res;
+        }, {});
+        
+       
+        for(let inv of result) {
+          const invoice = await userMobileServiceInstanse.getOneInvoice({invoice_code:inv.Id});
+
+
+let htax = 0
+let tax = 0
+let timbre = 0
+let ttc = 0
+const ddlines =   await iddinvoiceLineServiceInstance.find({invoice_code:invoice.invoice_code})
+
+for (let ddline of ddlines) {
+  htax = htax + Number(ddline.unit_price) * Number(ddline.quantity)
+  tax = tax + Number(ddline.unit_price) * Number(ddline.quantity) * Number(ddline.tax_rate) / 100
+}
+
+if(invoice.payment_term_code == "CODPM1") {
+  if((htax + tax) < 30001) { timbre = Math.trunc((htax + tax) / 100)} else {
+    if((htax + tax) >= 30001 && (htax + tax) < 100001) {
+      timbre = Math.trunc((htax + tax)* 1.5 / 100)    } else {
+        timbre = Math.trunc((htax + tax)* 2 / 100) 
+
+      }
+
+  }
+}
+ttc = htax + tax + timbre
+let ih = {
+  invoice_code:invoice.invoice_code,
+site:invoice.site,
+itinerary_code:invoice.itinerary_code,
+customer_code:invoice.customer_code,
+the_date:invoice.the_date,
+period_active_date:invoice.period_active_date,
+role_code:invoice.role_code,
+user_code:invoice.user_code,
+loc_code:invoice.loc_code,
+service_code :invoice.service_code,
+visit_code :invoice.visit_code,
+pricelist_code:invoice.pricelist_code,
+amount:ttc,
+due_amount:invoice.due_amount,
+payment_term_code:invoice.payment_term_code,
+devise_code:invoice.devise_code,
+description:invoice.description,
+discount:invoice.discount,
+taxe_amount : tax,
+stamp_amount : timbre,
+horstax_amount : htax,
+canceled : invoice.canceled,
+cancelation_reason_code : invoice.cancelation_reason_code,
+progress_level : invoice.progress_level,
+score_code : invoice.score_code,
+sdelivery_note_code : invoice.sdelivery_note_code,
+closed : invoice.closed,
+
+promorate: invoice.promorate,
+promoamt: invoice.promoamt,
+
+}
+
+
+        await ddinvoiceServiceInstance.create({...ih,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+
+
+        }
+      return res
+          .status(201)
+          .json({ message: "created succesfully", data: true })
+  } catch (e) {
+      //#
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
 export default {
   create,
   findOne,
@@ -2391,8 +2808,10 @@ export default {
   getDataBack,
   getDataBackTest,
   findAllInvoice,
+  findAllInvoiceAcc,
   findPaymentterm,
   findByInvoiceLine,
+  findByInvoiceLineAcc,
   findPaymentBy,
   findVisitBy,
   findAllVisits,
@@ -2402,8 +2821,11 @@ export default {
   getSalesDashboardAddData,
   findPaymentByService,
   findAllInvoicewithDetails,
+  findAllInvoicewithDetailsAcc,
   findAllInvoicewithDetailsRole,
   findAllInvoiceRole,
+  findAllCreditRole,
+  findAllCredit,
   findRoleByuser,
   findPaymentByRole,
   findVisitByRole,
@@ -2411,4 +2833,6 @@ export default {
   findAllSalesRole,
   findSalesType,
   findAllSalesRoles,
+  findAllInvoicewithDetailsToinv,
+  addDinvoices
 };

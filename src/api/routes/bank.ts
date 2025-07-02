@@ -33,7 +33,7 @@ export default (app: Router) => {
   route.post('/findbkhrct', controller.findBKHRCTBy);
   route.post('/findtrbk', controller.findBKHTR);
   route.post('/findbkhtrgrp', controller.findBKHTRGRP);
-  
+  route.post('/findbkhgrptr', controller.findBKHGrpTRBy);
   route.get('/', controller.findAll);
   
 };

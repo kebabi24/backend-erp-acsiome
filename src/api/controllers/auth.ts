@@ -21,12 +21,17 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
    
     try {
         
+        // const fs = require('node:fs');
+        const fs = require('node:fs/promises');
+        const keydata = await fs.readFile('key.key', { encoding: 'utf8'});
         const userServiceInstance = Container.get(UserService)
         const domainServiceInstance = Container.get(DomainService)
-        const { userName, password } = req.body
+        const { userName, password , key} = req.body
         const user = await userServiceInstance.findOne({
             usrd_user_name: userName,
         })
+        // if (await argon2.verify(keydata, key)) {
+            if (keydata ==  key) {
         if (!user)
             return res
                 .status(401)
@@ -44,7 +49,12 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         } else
             return res
                 .status(401)
-                .json({ message: "error password", data: null })
+                .json({ message: "password error", data: null })
+    }else {
+        return res
+        .status(401)
+        .json({ message: "Activation Error", data: null })
+    }        
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)

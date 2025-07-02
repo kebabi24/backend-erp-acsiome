@@ -464,6 +464,38 @@ let soldinit = (arb.length > 0 ) ? Number(arb[0].soldinit) : 0
         return next(e)
     }
 }
+const findBetweenDate = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+        console.log(req.body)
+        const AccountReceivableServiceInstance = Container.get(AccountReceivableService)
+        const customerServiceInstance = Container.get(CustomerService)
+        const arb = await AccountReceivableServiceInstance.findwithadress({
+              ar_type:'P',ar_effdate: { [Op.between]: [req.body.date, req.body.date1]},
+            
+        })
+        // for (let ar of arb) {
+        //     const customer = await customerServiceInstance.findOne({cm_addr : ar.ar_bill})
+        
+        // result.push({id:i+1,ar_bill: ar.ar_bill, name: customer.address.ad_name,ar_effdate: ar.ar_effdate,ar_curr: ar.ar_curr, ar_cr_terms: ar.ar_cr_terms,ar_cr_})
+        // i++
+        // }
+// console.log(arb[0].soldinit)
+
+      console.log(arb[0])
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: arb })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     createP,
@@ -476,5 +508,6 @@ export default {
     findBy,
     findByRange,
     update,
-    deleteOne
+    deleteOne,
+    findBetweenDate,
 }

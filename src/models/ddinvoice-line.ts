@@ -10,8 +10,8 @@ import Invoice from "./invoice"
 
 const sequelize = Container.get("sequelize")
 
-const InvoiceLine = sequelize.define(
-    "invoiceLine",
+const DdinvoiceLine = sequelize.define(
+    "ddinvoiceLine",
     {   
         id:{
             type: Sequelize.INTEGER,
@@ -19,13 +19,7 @@ const InvoiceLine = sequelize.define(
             autoIncrement: true,
             unique: true
         },
-        invoice_code:{
-            type: Sequelize.STRING,
-            references: {
-                model: "aa_invoice",
-                key: "invoice_code",
-            },
-        },
+        invoice_code: Sequelize.STRING,
         invoice_line:{type: Sequelize.INTEGER},
         product_code:{type: Sequelize.STRING}, 
         designation:{type: Sequelize.STRING}, 
@@ -45,19 +39,12 @@ const InvoiceLine = sequelize.define(
 
         
        
-        pt_draw : Sequelize.STRING,
-        pt_prod_line : Sequelize.STRING,
-        pt_promo : Sequelize.STRING,
-        pt_group : Sequelize.STRING,
-        pt_part_type : Sequelize.STRING,
-        pt_dsgn_grp : Sequelize.STRING,
-        pt_rev : Sequelize.STRING,
-        period_active_date : Sequelize.DATEONLY,      
-        canceled:  { type: Sequelize.BOOLEAN, defaultValue: false }, 
+       
+        
         // ...base
     },
     {
-        tableName: "aa_invoiceline",
+        tableName: "aa_ddinvoiceline",
     }
 )
-export default  InvoiceLine ;
+export default  DdinvoiceLine ;

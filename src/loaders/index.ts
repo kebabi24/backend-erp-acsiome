@@ -241,6 +241,8 @@ export default async ({ expressApp }) => {
       { name: 'timbreModel', model: require('../models/timbre').default },
       { name: 'endlocationDetailModel', model: require('../models/mobile_models/endlocationdetail').default },
       
+      { name: 'ddinvoiceModel', model: require('../models/ddinvoice').default },
+      { name: 'ddinvoiceLineModel', model: require('../models/ddinvoice-line').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -407,6 +409,7 @@ export default async ({ expressApp }) => {
     { foreignKey: 'invoice_code', targetKey: 'invoice_code' },
   );
 
+  
   // INVENTORY
   require('../models/mobile_models/inventory').default.hasOne(
     require('../models/mobile_models/inventory_line').default,
@@ -1136,7 +1139,7 @@ export default async ({ expressApp }) => {
     targetKey: 'cm_addr',
   });
   
-
+ 
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //   await sequelizeConnection.sync().catch(err => { console.log(err)});
