@@ -25,7 +25,7 @@ async function startServer() {
   let macip = ''
   
   si.networkInterfaces().then(data => {macip = data[0].mac+'axiom1983'
-    var fs = require('node:fs');
+    const fs = require('node:fs');
     const keydata = fs.readFileSync('key.key', 'utf8');
 // if(macip == '14:ab:c5:08:78:ed') {
   //macip = '$argon2id$v=19$m=4096,t=3,p=1$MTIzNDU2Nzg$Kchj5gqWurdXjFpRixxbx3avltQhdWhkEPnszad/6Po'
@@ -33,47 +33,70 @@ async function startServer() {
 
 
 
-  // var server = app.listen(config.port, err => {
-  //   if (err) {
-  //     Logger.error(err);
 
-  //     process.exit(1);
-  //     return;
-  //   }
-  //   Logger.info(`
-  //     ################################################ 
-  //     🛡️  Server listening on port: ${config.port} 🛡️ 
-  //     ################################################
-  //   `);
-  // });
-  // var fs = require('fs');
-  var http = require('http');
-  var https = require('https');
-  // var privatekey =fs.readFileSync('sslcert/server.key','utf8');
-  // var certificate = fs.readFileSync('sslcert/server.crt','utf8');
-  // var credentials = {key:'Palmary',cert:certificate};
-  //your express configuration here
-  var httpserver = http.createServer(app).listen(config.port);
-  var server =https.createServer(app).listen(3000);
-  Logger.info(`
-         ################################################ 
-         🛡️  Server listening on port: ${config.port} 🛡️ 
-         ################################################
-       `);
+  verifyPass(keydata, macip)
+    .then(isValid => {
+        if (isValid) {
+          const server = app.listen(config.port, err => {
+            if (err) {
+              Logger.error(err);
+        
+              process.exit(1);
+              return;
+            }
+            Logger.info(`
+              ################################################ 
+              🛡️  Server listening on port: ${config.port} 🛡️ 
+              ################################################
+            `);
+          });
+        
+         
+        
+          const io = require('socket.io')(server);
+          io.on('connection',userMobileController.getDataBack)
+        
+        } else {
+            console.log('Activation error!');
+        }
+    })
+    .catch(err => console.error(err));
+  })
+//   let is_valid = argon2.verify(macip, '14:ab:c5:08:78:ed')
+//   console.log(is_valid)
+//   if ( is_valid) {
+//   const server = app.listen(config.port, err => {
+//     if (err) {
+//       Logger.error(err);
 
-  const io = require('socket.io')(httpserver);
-  io.on('connection',userMobileController.getDataBack)
+//       process.exit(1);
+//       return;
+//     }
+//     Logger.info(`
+//       ################################################ 
+//       🛡️  Server listening on port: ${config.port} 🛡️ 
+//       ################################################
+//     `);
+//   });
+
+ 
+
+//   const io = require('socket.io')(server);
+//   io.on('connection',userMobileController.getDataBack)
+
+// } else { console.log('errrrrrrrrrrreur')}
+
   // io.on('connection', socket => {
   
 
     // socket.on('createOrder', data => posOrderController.createOrder(socket, data));
 
     // socket.on('disconnect', () => );
-  });
+  // });
 }
 
 startServer();
-async function verifyPassword(storedHash, providedPassword) {
+async function verifyPass(storedHash, providedPassword) {
   try {
       // The verify function returns true if the password matches
       // It returns false if the password doesn't match
@@ -81,7 +104,7 @@ async function verifyPassword(storedHash, providedPassword) {
       return isValid;
   } catch (err) {
       // Handle errors like invalid hash format
-      console.error('Error during password verification:', err);
+      console.error('Error during Activation verification:', err);
       return false;
   }
 }
