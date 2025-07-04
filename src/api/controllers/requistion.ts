@@ -288,13 +288,15 @@ const findAllApp = async (req: Request, res: Response, next: NextFunction) => {
       //  console.log(user_code)
       //  console.log(list)
         const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
+      let i = 1
         for(const req of requisitions){
           //  console.log(req)
             const details = await requisitionDetailServiceInstance.find({
                 rqd_domain: user_domain,
                 rqd_nbr: req.rqm_nbr,
             })
-            result.push({id: req.id ,req, details})
+            result.push({id: i ,req, details})
+            i++
         }
       //  console.log(result)
         return res
@@ -526,6 +528,34 @@ const findAllAppDet = async (req: Request, res: Response, next: NextFunction) =>
         return next(e)
     }
 }
+const findAllUser = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find all code endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        let result=[]
+        const requisitionServiceInstance = Container.get(RequisitionService)
+        const requisitionDetailServiceInstance = Container.get(
+            RequisitionDetailService
+        )
+        const requisitions = await requisitionServiceInstance.find({created_by:user_code,rqm_domain:user_domain})
+        for(const req of requisitions){
+            const details = await requisitionDetailServiceInstance.find({
+                rqd_domain: user_domain,
+                rqd_nbr: req.rqm_nbr,
+            })
+            result.push({id: req.id ,req, details})
+        }
+        console.log(result)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     findBy,
@@ -538,5 +568,6 @@ export default {
     updatedRQD,
     findByAll,
     findNotByAll,
-    findAllAppDet
+    findAllAppDet,
+    findAllUser
 }

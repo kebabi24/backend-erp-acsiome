@@ -14,7 +14,6 @@ export default (app: Router) => {
   route.post('/distinct', controller.findDistinct);
   route.post('/grouprcp', controller.findGroupRCP);
   route.get('/:id', controller.findOne);
-
   route.post('/find', controller.findBy);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);

@@ -40,7 +40,10 @@ export default class requisitionService {
     public async find(query: any): Promise<any> {
         try {
             const requisitions = await this.requisitionModel.findAll({
-                where: query,
+                where: query,  order: [
+                    ['rqm_req_date', 'ASC'],
+                    
+                  ],
                 include:[this.providerModel,this.sequenceModel]
             })
             this.logger.silly("find All requisitions mstr")
