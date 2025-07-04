@@ -49,7 +49,14 @@ export default class requisitionDetailService {
     }
     public async find(query: any): Promise<any> {
         try {
-            const requisitionDetails = await this.requisitionDetailModel.findAll({ where: query 
+            const requisitionDetails = await this.requisitionDetailModel.findAll({ where: query  ,include: [
+                {
+                  model: this.itemModel,
+                  as: 'item',
+                  required: true,
+                  include: [{ model: this.taxeModel, as: 'taxe', required: true }],
+                },
+              ],
               })
             this.logger.silly("find All requisitionDetails mstr")
             return requisitionDetails

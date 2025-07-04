@@ -6,7 +6,7 @@ const route = Router()
 export default (app: Router) => {
     app.use("/requisitions", route)
 
-    route.get("/", controller.findAll)
+    route.get("/findalluser", controller.findAllUser)
     route.get("/findappdet", controller.findAllAppDet)
     route.get("/findapp", controller.findAllApp)
     route.post("/", controller.create)
@@ -15,9 +15,10 @@ export default (app: Router) => {
     route.post("/finddet", controller.findByDet)
     route.post("/findNotAll", controller.findNotByAll)
     route.post("/findAll", controller.findByAll)
-   
+    route.get("/", controller.findAll)
     route.put("/:id", controller.update)
     route.put("/URQD/:id", controller.updatedet)
     route.put('/RQD/:id', controller.updatedRQD);
+    
 }
     
