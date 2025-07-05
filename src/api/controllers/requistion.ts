@@ -87,9 +87,11 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         const requisitionDetailServiceInstance = Container.get(
             RequisitionDetailService
         )
+        console.log(req.body)
         const requisition = await requisitionServiceInstance.findOne({
             ...req.body, rqm_domain: user_domain
        })
+       console.log(requisition)
         if (requisition) {
             const details = await requisitionDetailServiceInstance.find({
                 rqd_domain: user_domain,
@@ -288,15 +290,15 @@ const findAllApp = async (req: Request, res: Response, next: NextFunction) => {
       //  console.log(user_code)
       //  console.log(list)
         const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
-      let i = 1
+    //   let i = 1
         for(const req of requisitions){
           //  console.log(req)
             const details = await requisitionDetailServiceInstance.find({
                 rqd_domain: user_domain,
                 rqd_nbr: req.rqm_nbr,
             })
-            result.push({id: i ,req, details})
-            i++
+            result.push({id: req.id ,req, details})
+            // i++
         }
       //  console.log(result)
         return res
@@ -347,7 +349,7 @@ const updatedet = async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params
         console.log(req.params)
         const requ = await requisitionServiceInstance.update(
-            { ...req.body , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
+            { ...requisition , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
             { id }
         )
         await requisitionDetailServiceInstance.delete({rqd_domain: user_domain,rqd_nbr: requisition.rqm_nbr})
@@ -556,6 +558,25 @@ const findAllUser = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get('logger');
+    logger.debug('Calling update requisition endpoint');
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const requisitionServiceInstance = Container.get(RequisitionService)
+        const requisitionDetailServiceInstance = Container.get(
+            RequisitionDetailService
+        )
+      const { nbr } = req.params;
+      await requisitionDetailServiceInstance.delete({rqd_domain: user_domain,rqd_nbr: nbr})
+      await requisitionServiceInstance.delete({rqm_domain: user_domain,rqm_nbr: nbr})
+      return res.status(200).json({ message: 'deleted succesfully', data: nbr });
+    } catch (e) {
+      logger.error('🔥 error: %o', e);
+      return next(e);
+    }
+  };
 export default {
     create,
     findBy,
@@ -569,5 +590,6 @@ export default {
     findByAll,
     findNotByAll,
     findAllAppDet,
-    findAllUser
+    findAllUser,
+    deleteOne,
 }

@@ -6,8 +6,8 @@ const route = Router()
 export default (app: Router) => {
     app.use("/employes", route)
 
-    route.get("/", controller.findAll)
     route.post("/find", controller.findBy)
+    route.get("/", controller.findAll)
     route.post("/findreq", controller.findByReq)
     route.post("/findOne", controller.findByOne)
     route.post("/", controller.create)

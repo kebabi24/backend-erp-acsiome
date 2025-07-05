@@ -19,6 +19,7 @@ export default (app: Router) => {
     route.put("/:id", controller.update)
     route.put("/URQD/:id", controller.updatedet)
     route.put('/RQD/:id', controller.updatedRQD);
+    route.delete("/:nbr", controller.deleteOne)
     
 }
     

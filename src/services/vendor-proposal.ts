@@ -3,8 +3,9 @@ import { Service, Inject, Container } from "typedi"
 @Service()
 export default class vendorPropsalService {
     constructor(
-        @Inject("vendorProposalModel") private vendorProposalModel: Models.VendorProposalModel,
+        @Inject("vendorProposalModel") private vendorProposalModel: Models.VendorPropasalModel,
         @Inject("providerModel") private providerModel: Models.ProviderModel,
+        @Inject("addressModel") private addressModel: Models.AddressModel,
         @Inject("requisitionModel") private requisitionModel: Models.RequisitionModel,
         @Inject("logger") private logger
     ) {}
@@ -40,7 +41,7 @@ export default class vendorPropsalService {
         try {
             const vendorPropsals = await this.vendorProposalModel.findAll({
                 where: query,
-                include: [this.providerModel, this.requisitionModel],
+                include: [this.providerModel, this.requisitionModel,this.addressModel],
             })
             this.logger.silly("find All vendorPropsals mstr")
             return vendorPropsals
