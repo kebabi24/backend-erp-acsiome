@@ -7,7 +7,51 @@ import EmployeService from '../../services/employe';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
-const{user_domain} = req.headers
+     const{user_domain} = req.headers
+    logger.debug("Calling Create site endpoint")
+    try {
+        const repertoryServiceInstance = Container.get(RepertoryService)
+        // const employeServiceInstance = Container.get(EmployeService);
+        const {addr, repDetails} = req.body
+        console.log(req.body)
+        for (let entry of repDetails) {
+            await repertoryServiceInstance.delete({rep_domain:user_domain,rep_contact:entry.rep_contact})
+            entry = { ...entry,rep_code:addr, rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await repertoryServiceInstance.create(entry)
+            // if(entry.rep_type == 'Student')
+            // {  
+            //     let count = 0;
+            //      const employecount = await employeServiceInstance.find({ emp_domain: user_domain });
+            // if(employecount.length == 0){count = 1}
+            // else{count = employecount.length + 1}
+            //     const employe = await employeServiceInstance.create({
+            //         emp_addr:'E' + String('000'+ String(count)).slice(-3) ,
+            //         emp_fname:entry.rep_contact,
+            //         emp_lname:'',
+            //         emp_job:entry.chr01,
+            //         emp_level:entry.rep_post,
+            //         emp_site:entry.chr03,
+            //         emp_domain: user_domain,
+            //         created_by: user_code,
+            //         last_modified_by: user_code,
+            //       });
+            // }
+        }
+       // const repertory = await repertoryServiceInstance.create({...req.body, rep_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data:  addr })
+    } catch (e) {
+        //#
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+
+const createRepT = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+     const{user_domain} = req.headers
     logger.debug("Calling Create site endpoint")
     try {
         const repertoryServiceInstance = Container.get(RepertoryService)
@@ -236,5 +280,6 @@ export default {
     findByAddress,
     findByOne,
     update,
-    deleteOne
+    deleteOne,
+    createRepT
 }

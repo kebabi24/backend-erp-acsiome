@@ -6,6 +6,7 @@ export default class purchaseOrderService {
         @Inject("purchaseOrderModel")
         private purchaseOrderModel: Models.PurchaseOrderModel,
         @Inject("providerModel") private providerModel: Models.ProviderModel,
+        @Inject("addressModel") private addressModel: Models.AddressModel,
 
         @Inject("logger") private logger
     ) {}
@@ -24,7 +25,7 @@ export default class purchaseOrderService {
     public async findOne(query: any): Promise<any> {
         try {
             const purchaseOrder = await this.purchaseOrderModel.findOne({
-                where: query, include:this.providerModel
+                where: query, include:[this.providerModel,this.addressModel]
             })
             this.logger.silly("find one purchaseOrder mstr")
             return purchaseOrder
@@ -38,7 +39,7 @@ export default class purchaseOrderService {
         try {
             const purchaseOrders = await this.purchaseOrderModel.findAll({
                 where: query,
-                include:this.providerModel
+                include:[this.providerModel,this.addressModel]
             })
             this.logger.silly("find All purchaseOrders mstr")
             return purchaseOrders

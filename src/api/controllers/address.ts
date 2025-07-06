@@ -1,4 +1,5 @@
 import AddressService from "../../services/address"
+import RepertoryService from "../../services/repertory"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import user from "./user"
@@ -9,8 +10,24 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     logger.debug("Calling Create address endpoint with body: %o", req.body)
     try {
+        const repertoryServiceInstance = Container.get(RepertoryService)
         const addressServiceInstance = Container.get(AddressService)
         const address = await addressServiceInstance.create({...req.body,ad_domain:user_domain,created_by: user_code, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+       let type = ''
+       if(req.body.ad_type=='vendor') {type = "Provider"}
+       if(req.body.ad_type=='customer') {type = "Customer"}
+       if(req.body.ad_type=='bank') {type = "Bank"}
+       if(req.body.ad_type=='Transporter') {type = "Transporter"}
+        if(req.body.ad_attn != null) {
+            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn ,rep_tel:req.body.ad_phone,rep_tel2:req.body.ad_fax,rep_email:req.body.ad_ext,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await repertoryServiceInstance.create(entry)
+    
+        }
+        if(req.body.ad_attn2 != null) {
+            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn2 ,rep_tel:req.body.ad_phone2,rep_tel2:req.body.ad_fax2,rep_email:req.body.ad_ext2,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            await repertoryServiceInstance.create(entry)
+    
+        }
         return res
             .status(201)
             .json({ message: "created succesfully", data: { address } })
