@@ -1030,10 +1030,10 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
     const pos = await sequelize.query(
-      'SELECT *  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det  where  PUBLIC.pod_det.pod_domain = ? and  PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and  PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part ORDER BY PUBLIC.pod_det.id DESC',
+      'SELECT  PUBLIC.pod_det.id as id, po_nbr,po_vend,ad_name,po_ord_date,po_due_date,pod_part,pt_desc1,pod_um,pod_qty_ord,pod_qty_rcvd,po_stat,po_req_id,pod_site,pod_price, (pod_price * pod_qty_ord) as total_price , (pod_price * pod_qty_rcvd) as total_recep, (pod_qty_ord-pod_qty_rcvd) as rest_to_receive  FROM   PUBLIC.po_mstr, PUBLIC.pt_mstr, PUBLIC.pod_det ,PUBLIC.ad_mstr where  PUBLIC.pod_det.pod_domain = ? and  PUBLIC.po_mstr.po_domain =  PUBLIC.pod_det.pod_domain and  PUBLIC.pt_mstr.pt_domain = PUBLIC.pod_det.pod_domain and  PUBLIC.pod_det.pod_nbr = PUBLIC.po_mstr.po_nbr and PUBLIC.pod_det.pod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.po_mstr.po_vend = PUBLIC.ad_mstr.ad_addr  ORDER BY PUBLIC.pod_det.id DESC',
       { replacements: [user_domain], type: QueryTypes.SELECT },
     );
-    console.log(pos);
+      // console.log(pos);
     return res.status(200).json({ message: 'fetched succesfully', data: pos });
   } catch (e) {
     logger.error('error: %o', e);

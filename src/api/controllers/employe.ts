@@ -193,6 +193,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   const { user_site } = req.headers;
   try {
+    console.log(user_site)
     const employeServiceInstance = Container.get(EmployeService);
     if(user_site == '*'){var employe = await employeServiceInstance.find({ ...req.body, emp_domain: user_domain });}
     else{var employe = await employeServiceInstance.find({ ...req.body,emp_site:user_site, emp_domain: user_domain });}
