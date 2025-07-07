@@ -180,5 +180,14 @@ export default class ItemService {
     }
   }
 
-  
+  public async delete(query: any): Promise<any> {
+    try {
+      const item = await this.itemModel.destroy({ where: query });
+      this.logger.silly('delete one item ');
+      return item;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 }

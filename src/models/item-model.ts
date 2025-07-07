@@ -35,7 +35,7 @@ const ItemModel = sequelize.define(
     mod_origin: Sequelize.STRING,
     mod_drwg_loc: Sequelize.STRING,
     mod_status: Sequelize.STRING,
-    
+    mod_buyer: Sequelize.STRING,
     mod_abc: Sequelize.STRING,
     mod_site: {
       type: Sequelize.STRING,

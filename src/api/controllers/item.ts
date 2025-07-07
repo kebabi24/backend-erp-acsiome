@@ -16,6 +16,23 @@ import ItemDetailService from '../../services/item-detail';
 import DecompteService from '../../services/decompte';
 import RoleService from '../../services/role';
 import locationService from '../../services/location';
+
+import RequisitionDetailService from "../../services/requisition-detail"
+import PurchaseReceiveService from "../../services/purchase-receive"
+import PurchaseOrderDetailService from "../../services/purchase-order-detail"
+import VendorProposalDetailService from "../../services/vendor-proposal-detail"
+import VoucherOrderDetailService from "../../services/voucher-order-detail"
+import SaleOrderDetailService from "../../services/saleorder-detail"
+import SaleShiperService from "../../services/sale-shiper"
+import InvoiceOrderDetailService from "../../services/invoice-order-detail"
+import WorkOrderService from "../../services/work-order"
+import WorkOrderDetailService from "../../services/work-order-detail"
+
+
+
+
+
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -794,6 +811,123 @@ const findPart = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling update one  provider endpoint")
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  
+  try {
+      const itemServiceInstance = Container.get(ItemService);
+      const requisitionDetailServiceInstance = Container.get(RequisitionDetailService)
+      const vendorProposalDetailServiceInstance = Container.get(VendorProposalDetailService)
+      const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService)
+      const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService)
+      const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService)
+      const voucherOrderDetailServiceInstance = Container.get(VoucherOrderDetailService)
+      const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService)
+      const saleShiperServiceInstance = Container.get(SaleShiperService)
+      const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService)
+      const workOrderDetailServiceInstance = Container.get(WorkOrderDetailService)
+      const workOrderServiceInstance = Container.get(WorkOrderService)
+      const costSimulationServiceInstance = Container.get(CostSimulationService)
+      const {id} = req.params
+      console.log(req.params)
+let message = ''
+let bool = false
+      const item = await itemServiceInstance.findOne({id})
+      if(item) {
+      const requisition = await requisitionDetailServiceInstance.findOne({rqd_part:item.pt_part, rqd_domain: user_domain})
+
+      if (requisition) {
+          bool = true
+          message = "Cet Article a des demandes d'achat "
+      }
+      else {
+          const vp = await vendorProposalDetailServiceInstance.findOne({vpd_part:item.pt_part, vpd_domain: user_domain})
+          if (vp) {
+              bool = true
+              message = "Cet Article a des Offres  "
+          } else {
+              const po = await purchaseOrderDetailServiceInstance.findOne({pod_part:item.pt_part, pod_domain: user_domain})
+              if(po) {
+                  bool= true
+                  message = "Cet Article a des Bons de Commandes "
+              } else {
+                  const prh = await purchaseReceiveServiceInstance.findOne({prh_part:item.pt_part, prh_domain: user_domain})
+                  if(prh) {
+                      bool= true
+                      message = "Cet Article a des Bons de Reception "
+                  } 
+                  else {
+                      const tr = await inventoryTransactionServiceInstance.findOne({tr_part:item.pt_part, tr_domain: user_domain})
+                      if(tr) {
+                          bool= true
+                          message = "Cet Article a des Transactions "
+                      } else {
+
+                          const vh = await voucherOrderDetailServiceInstance.findOne({
+                              vdh_part:item.pt_part,vdh_domain:user_domain
+                          }) 
+                          if(vh){
+                              bool= true
+                              message = "Cet Article a des Factures Fournisseur "
+                          }else{
+                             
+                              const so = await saleOrderDetailServiceInstance.findOne({sod_part:item.pt_part,sod_domain : user_domain})
+                              if(so){
+                                  bool= true
+                                  message = "Cet Article a des Commandes Client "
+                              } else {
+                                const psh = await saleShiperServiceInstance.findOne({psh_part:item.pt_part,psh_domain : user_domain})
+                                if(psh){
+                                    bool= true
+                                    message = "Cet Article a des Bon de Livraison "
+                                } else {
+                                  const ih = await invoiceOrderDetailServiceInstance.findOne({idh_part:item.pt_part,idh_domain : user_domain})
+                                  if(so){
+                                      bool= true
+                                      message = "Cet Article a des Factures Client "
+                                  } else {
+                                    const wo = await workOrderServiceInstance.findOne({wo_part:item.pt_part,wo_domain : user_domain})
+                                    if(wo){
+                                        bool= true
+                                        message = "Cet Article a des Ordres de Fabrication "
+                                    } else {
+                                      const wod = await workOrderDetailServiceInstance.findOne({wod_part:item.pt_part,wod_domain : user_domain})
+                                      if(wod){
+                                          bool= true
+                                          message = "Cet Article a des Ordres de Facbrication "
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                          }
+                      }
+                  }
+
+              }
+          }
+
+      }
+      if(bool == false) {
+        const sct = await costSimulationServiceInstance.delete({sct_part:item.pt_part})     
+     const it = await itemServiceInstance.delete({id})
+     message = "Suppression Effectué avec succès"
+      } else {
+
+      }
+  }
+  console.log(bool,message)
+      return res
+          .status(200)
+          .json({ message: message, bool,data: item.id  })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
 export default {
   create,
   findBySpec,
@@ -818,5 +952,6 @@ export default {
   findJob,
   findAllTraining,
   updatePrice,
-  findPart
+  findPart,
+  deleteOne
 };

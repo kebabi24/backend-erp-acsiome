@@ -30,6 +30,6 @@ export default (app: Router) => {
   route.put('/updated/:id', controller.updateDet);
   route.post('/findjob', controller.findJob);
   route.post('/updateprice', controller.updatePrice);
- 
+  route.delete("/:id", controller.deleteOne)
   
 };
