@@ -9,7 +9,8 @@ import VoucherOrderService from "../../services/voucher-order"
 import AccountPayableService from "../../services/account-payable"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-
+import { Op, Sequelize } from 'sequelize';
+import { QueryTypes } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -191,11 +192,71 @@ let bool = false
         return next(e)
     }
 }
+
+const findActivities = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const Sequelize = Container.get("sequelize")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+    
+
+ var acts =await Sequelize.query("SELECT public.vd_mstr.id as id, vd_addr as vend, ad_name as name, (select COALESCE(sum(pod_price * pod_qty_ord),0) as poamt  from public.pod_det where pod_nbr in (select po_nbr from public.po_mstr where pod_nbr = po_nbr and po_vend = vd_addr and  po_ord_date >= ? and  po_ord_date <= ? )), (select COALESCE(sum(prh_pur_cost * prh_rcvd),0) as prhamt  from public.prh_hist where  prh_vend = vd_addr and  prh_rcp_date >= ? and  prh_rcp_date <= ? )  , (select COALESCE(sum(vdh_price * vdh_qty_inv),0) as vhamt  from public.vdh_det where vdh_inv_nbr in (select vh_inv_nbr from public.vh_hist where vh_inv_nbr = vdh_inv_nbr and vh_vend = vd_addr and  vh_inv_date >= ? and  vh_inv_date <= ? )) , (select COALESCE(sum( -1 * ap_base_amt),0) as apamt  from public.ap_mstr where  ap_vend = vd_addr and  ap_effdate >= ? and  ap_effdate <= ? and ap_type='P' ), public.vd_mstr.dec01 as total FROM public.vd_mstr, public.ad_mstr where vd_addr = ad_addr ORDER by id", { replacements: [req.body.date,req.body.date1,req.body.date,req.body.date1,req.body.date,req.body.date1,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+    
+ acts.map((item)=>{
+        let tot= Number(item.poamt) + Number(item.prhamt) + Number(item.vhamt) + Number(item.apamt)
+        let element= {...item,"total_price":tot}
+        result.push(element)
+      })
+      let data = result.filter((it) => it.total_price != 0);
+      // console.log(data)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: data })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+const findActHist = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const Sequelize = Container.get("sequelize")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        console.log(req.body)
+        let i = 0
+ let result = []
+    
+
+ var actsh =await Sequelize.query("SELECT public.pt_mstr.id as id, pt_part as part, pt_desc1 as desc, (select COALESCE(sum(pod_price * pod_qty_ord),0) as poamt  from public.pod_det where pod_part= pt_part and pod_nbr in (select po_nbr from public.po_mstr where  po_vend = ? and  po_ord_date >= ? and  po_ord_date <= ? )) ,(select COALESCE(sum(pod_qty_ord),0) as poqty  from public.pod_det where pod_part= pt_part and pod_nbr in (select po_nbr from public.po_mstr where po_vend = ? and  po_ord_date >= ? and  po_ord_date <= ? )) ,(select COALESCE(sum(prh_pur_cost * prh_rcvd),0) as prhamt  from public.prh_hist where  prh_part = pt_part and prh_vend = ? and  prh_rcp_date >= ? and  prh_rcp_date <= ? ),(select COALESCE(sum(prh_rcvd),0) as prhqty  from public.prh_hist where  prh_part = pt_part and prh_vend = ? and  prh_rcp_date >= ? and  prh_rcp_date <= ? ) ,(select COALESCE(sum(vdh_price * vdh_qty_inv),0) as vhamt  from public.vdh_det where vdh_part= pt_part and vdh_inv_nbr in (select vh_inv_nbr from public.vh_hist where  vh_vend = ? and  vh_inv_date >= ? and  vh_inv_date <= ? )) ,(select COALESCE(sum(vdh_qty_inv),0) as vhqty  from public.vdh_det where vdh_part= pt_part and vdh_inv_nbr in (select vh_inv_nbr from public.vh_hist where  vh_vend = ? and  vh_inv_date >= ? and  vh_inv_date <= ? ))FROM public.pt_mstr  ORDER by id", { replacements: [req.body.vend,req.body.date,req.body.date1,req.body.vend,req.body.date,req.body.date1,req.body.vend,req.body.date,req.body.date1,req.body.vend,req.body.date,req.body.date1,req.body.vend,req.body.date,req.body.date1,req.body.vend,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+    
+ actsh.map((item)=>{
+    let tot= Number(item.poamt) + Number(item.prhamt) + Number(item.vhamt) 
+    let element= {...item,"total_price":tot}
+    result.push(element)
+  })
+  let data = result.filter((it) => it.total_price != 0);
+      // console.log(data)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: data })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     findOne,
     findAll,
     findBy,
     update,
-    deleteOne
+    deleteOne,
+    findActivities,
+    findActHist
 }

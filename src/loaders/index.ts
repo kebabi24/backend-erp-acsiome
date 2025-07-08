@@ -834,9 +834,13 @@ export default async ({ expressApp }) => {
     foreignKey: 'ap_vend',
     targetKey: 'vd_addr',
   });
-  require('../models/account-payable').default.belongsTo(require('../models/address').default, {
-    foreignKey: 'ap_vend',
-    targetKey: 'ad_addr',
+  // require('../models/account-payable').default.belongsTo(require('../models/address').default, {
+  //   foreignKey: 'ap_vend',
+  //   targetKey: 'ad_addr',
+  // });
+  require('../models/account-payable').default.hasOne(require('../models/address').default, {
+    foreignKey: 'ad_addr',
+    sourceKey: 'ap_vend',
   });
 
   require('../models/general-ledger').default.belongsTo(require('../models/address').default, {

@@ -9,7 +9,7 @@ import {QueryTypes} from 'sequelize'
 import account from "./account"
 import moment from 'moment';
 import user from "./user"
-
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -421,6 +421,108 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findPaymentBetweenDate = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+        
+        const AccountPayableServiceInstance = Container.get(AccountPayableService)
+        const ap = await AccountPayableServiceInstance.findPaymentbetween(req.body)
+      
+    //  console.log(ap[0])
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: ap })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+const findInvoiceBetweenDate = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+        
+        const AccountPayableServiceInstance = Container.get(AccountPayableService)
+        const ap = await AccountPayableServiceInstance.findInvoicebetween(req.body)
+      
+    //  console.log(ap[0])
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: ap })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+const findByRange = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers 
+    try {
+        let i = 0
+ let result = []
+        console.log(req.body)
+        const AccountPayableServiceInstance = Container.get(AccountPayableService)
+        const arb = await AccountPayableServiceInstance.findS({
+            where: {  ap_vend:req.body.cust,ap_effdate: { [Op.lte]: req.body.date}},
+            attributes: 
+            ['ap_vend', [Sequelize.fn('sum', Sequelize.col('ap_base_amt')), 'soldinit' ]],
+            group: ['ap_vend'],
+            raw: true,
+        })
+// console.log(arb[0].soldinit)
+let soldinit = (arb.length > 0 ) ? Number(arb[0].soldinit) : 0
+ console.log(soldinit)
+ result.push({
+    id : i,
+    bill : req.body.cust,
+    nbr:"Solde Initial",
+    solde : soldinit,
+    debit: 0,
+    credit:0
+ })
+ i = i + 1
+        const accountPayables = await AccountPayableServiceInstance.findS({
+            where: {  ap_vend:req.body.cust,ap_effdate: { [Op.between]: [req.body.date, req.body.date1]}},
+            order: [['id', 'ASC']],
+
+        })
+        let sold = Number(soldinit)
+        for (let ar of accountPayables ) {
+            sold = sold + Number(ar.ap_base_amt)
+            result.push({
+                id: i,
+                bill  : req.body.cust,
+                nbr : ar.ap_nbr,
+                po : ar.ap_po,
+                date : ar.ap_effdate,
+                debit:(ar.ap_type == 'I') ? Number(ar.ap_base_amt) : 0,
+                credit:(ar.ap_type == 'P') ? Number(ar.ap_base_amt) : 0,
+                type : ar.ap_type,
+                solde : sold
+            })
+            i ++
+        }
+
+     //  console.log(result)
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     createNote,
@@ -432,5 +534,9 @@ export default {
     findBywithadress,
     findByOne,
     update,
-    deleteOne
+    deleteOne,
+    findPaymentBetweenDate,
+    findInvoiceBetweenDate,
+    findByRange,
+
 }
