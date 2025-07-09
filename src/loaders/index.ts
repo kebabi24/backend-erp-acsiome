@@ -842,6 +842,10 @@ export default async ({ expressApp }) => {
     foreignKey: 'ad_addr',
     sourceKey: 'ap_vend',
   });
+  require('../models/purchase-receive').default.hasOne(require('../models/address').default, {
+    foreignKey: 'ad_addr',
+    sourceKey: 'prh_vend',
+  });
 
   require('../models/general-ledger').default.belongsTo(require('../models/address').default, {
     foreignKey: 'glt_addr',

@@ -5,6 +5,7 @@ export default class purchaseReceiveService {
     constructor(
         @Inject("PurchaseReceiveModel") private purchaseReceiveModel: Models.PurchaseRecieveModel,
         @Inject("itemModel") private itemModel: Models.ItemModel,
+        @Inject("addressModel") private addressModel: Models.AddressModel,
         @Inject("logger") private logger
     ) {}
 
@@ -40,7 +41,16 @@ export default class purchaseReceiveService {
             throw e
         }
     }
-
+    public async findTr(query: any): Promise<any> {
+        try {
+            const purchaseReceives = await this.purchaseReceiveModel.findAll({ where: query ,include: [this.itemModel,this.addressModel]})
+            this.logger.silly("find All purchaseReceives mstr")
+            return purchaseReceives
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async findspec(query: any): Promise<any> {
         try {
             const purchaseReceives = await this.purchaseReceiveModel.findAll(query )
