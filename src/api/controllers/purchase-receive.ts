@@ -1426,7 +1426,7 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     console.log(distinct,liste, 'disting');
 
     const prhs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
+      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and PUBLIC.prh_hist.log01 = 'false'and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
       { replacements: [user_domain, distinct, liste], type: QueryTypes.SELECT },
     );
     return res.status(200).json({ message: 'fetched succesfully', data: prhs });
@@ -1471,7 +1471,22 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findByTr = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const prh = await purchaseReceiveServiceInstance.findTr({ ...req.body, prh_domain: user_domain });
+    const trs = await inventoryTransactionServiceInstance.find({ tr_type:"RCT-PO",tr_lot:prh[0].prh_receiver, tr_domain: user_domain });
+    console.log(prh);
+    return res.status(200).json({ message: 'fetched succesfully', data: {purchaseReceive:prh,inventoryTransaction:trs} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1535,7 +1550,37 @@ const findGroupRCP = async (req: Request, res: Response, next: NextFunction) => 
     return next(e);
   }
 };
+const findGroupRCPCancel = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
 
+  const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+  try {
+    const prhs = await purchaseReceiveServiceInstance.findspec({
+      where:{prh_invoiced:false,log01:false},
+      attributes: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
+      group: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
+      raw: true,
+    });
+    var i = 1;
+    let result = [];
+    for (let prh of prhs) {
+      result.push({
+        id: i,
+        prh_receiver: prh.prh_receiver,
+        prh_rcp_date: prh.prh_rcp_date,
+        prh_vend: prh.prh_vend,
+      });
+      i = i + 1;
+    }
+
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findGroupAmt = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all code endpoint');
@@ -1569,6 +1614,218 @@ console.log(result)
   }
 };
 
+
+
+
+const Unreceip = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create code endpoint');
+  try {
+    const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const purchaseOrderDetailServiceInstance = Container.get(purchaseOrderDetailService);
+    const statusServiceInstance = Container.get(inventoryStatusService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const labelServiceInstance = Container.get(LabelService);
+    const itemsServiceInstance = Container.get(ItemsService);
+console.log(req.params,req.body.date)
+const { prhnbr } = req.params;
+    var array = [];
+    array = req.body.detail;
+    var result = [];
+    const prhs = await purchaseReceiveServiceInstance.find({ prh_receiver:prhnbr, prh_domain: user_domain });
+    await purchaseReceiveServiceInstance.update({
+      prh_rcvd:0,
+      log01:true,
+      last_modified_by: user_code, last_modified_ip_adr: req.headers.origin 
+      },{prh_receiver:prhnbr});
+
+    var i = 1;
+    for (const arr of prhs) {
+      console.log(arr)
+          i = i + 1;
+      const pod = await purchaseOrderDetailServiceInstance.findOne({
+        pod_domain: user_domain,
+        pod_nbr: arr.prh_nbr,
+        pod_part: arr.prh_part,
+      });
+
+      if (pod)
+        await purchaseOrderDetailServiceInstance.update(
+          {
+            pod_qty_rcvd: Number(pod.pod_qty_rcvd) - Number(arr.prh_rcvd),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: pod.id },
+        );
+    }
+    for (const item of req.body.detail) {
+      const { tr_status, tr_expire, tr_ref, desc, ...remain } = item;
+      const part = await itemsServiceInstance.findOne({ pt_part: item.tr_part, pt_domain: user_domain });
+
+      await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
+        tr_status:item.tr_status,
+        tr_expire: item.tr_expire,
+        tr_line: item.tr_line,
+        tr_part: item.tr_part,
+        tr_qty_loc: -Number(item.tr_qty_loc),
+        tr_um: item.tr_um,
+        tr_um_conv: item.tr_um_conv,
+        tr_price: item.tr_price,
+        tr_gl_amt: - Number(item.tr_price) * Number(item.tr_qty_loc),
+        tr_site: item.tr_site,
+        tr_loc: item.tr_loc,
+        tr_serial: item.tr_serial,
+        tr_vend_lot: item.tr_vend_lot,
+        tr_nbr: prhs[0].prh_nbr,
+        tr_lot: prhnbr,
+        tr_addr: prhs[0].prh_vend,
+        tr_effdate: req.body.date,
+        tr_so_job: prhs[0].prh_xinvoice,
+        tr_curr: prhs[0].prh_curr,
+        tr_ex_rate: prhs[0].prh_ex_rate,
+        tr_ex_rate2: prhs[0].prh_ex_rate2,
+        tr_rmks: prhs[0].prh_rmks,
+        tr_type: 'RCT-PO',
+        tr_ref:item.tr_ref,
+        tr_date: new Date(),
+        tr_batch:item.tr_batch,
+        tr_grade:item.tr_grade,
+        tr__chr01:part.pt_draw,
+        tr__chr02:part.pt_break_cat,
+        tr__chr03:part.pt_group,
+        dec01:Number(new Date(req.body.date).getFullYear()),
+        dec02:Number(new Date(req.body.date).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+       
+      });
+      const lds = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
+        ld_part: item.tr_part,
+        ld_site: item.tr_site,
+      });
+      const sct_mtl_tl  = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: item.tr_part,
+        sct_site: item.tr_site,
+        sct_sim: 'STD-CG',
+      });
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: item.tr_part,
+        sct_site: prhs[0].prh_site,
+        sct_sim: 'STD-CG',
+      });
+      let qty = 0;
+      lds.map(elem => {
+        qty += Number(elem.ld_qty_oh);
+      });
+      const new_price = round(
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
+          (Number(-item.tr_qty_loc) *
+           
+            Number(item.tr_price) *
+            Number(prhs[0].prh_ex_rate2)) /
+            Number(prhs[0].prh_ex_rate)) /
+          (qty + Number(-item.tr_qty_loc) * Number(item.tr_um_conv)),
+        2,
+      );
+      await costSimulationServiceInstance.update(
+        {
+          sct_mtl_tl: new_price,
+          sct_cst_tot:
+            new_price +
+            Number(sctdet.sct_lbr_tl) +
+            Number(sctdet.sct_bdn_tl) +
+            Number(sctdet.sct_ovh_tl) +
+            Number(sctdet.sct_sub_tl),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        { sct_domain: user_domain, sct_part: item.tr_part, sct_site: prhs[0].prh_site, sct_sim: 'STD-CG' },
+      );
+      //console.log(tr_status);
+      const status = await statusServiceInstance.findOne({
+        is_domain: user_domain,
+        is_status: tr_status,
+      });
+      // console.log(status, 'here');
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
+        ld_part: item.tr_part,
+        ld_lot: item.tr_serial,
+        ld_site: prhs[0].prh_site,
+        ld_loc: item.tr_loc,
+        ld_ref: tr_ref,
+      });
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+            ld_expire: tr_expire,
+            ld__log01: status.is_nettable,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      else
+        await locationDetailServiceInstance.create({
+          ld_domain: user_domain,
+          ld_part: item.tr_part,
+          ld_date: new Date(),
+          ld_lot: item.tr_serial,
+          ld_site: item.tr_site,
+          ld_loc: item.tr_loc,
+          ld_qty_oh: -Number(item.tr_qty_loc),
+          ld_expire: item.tr_expire,
+          ld_status: item.tr_status,
+          ld__log01: status.is_nettable,
+          ld_ref: item.tr_ref,
+          chr01:part.pt_draw,
+          chr02:part.pt_break_cat,
+          chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:prhs[0].prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+
+    
+    }
+    
+    return res.status(201).json({ message: 'created succesfully', data: prhnbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 export default {
   create,
   createCab,
@@ -1579,9 +1836,12 @@ export default {
   findAll,
   findGroup,
   findBy,
+  findByTr,
   update,
   deleteOne,
   rctPo,
   findGroupRCP,
-  findGroupAmt
+  findGroupAmt,
+  Unreceip,
+  findGroupRCPCancel,
 };
