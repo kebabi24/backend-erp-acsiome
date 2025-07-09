@@ -525,7 +525,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
     const sequenceServiceInstance = Container.get(SequenceService);
     const labelServiceInstance = Container.get(LabelService);
     const itemsServiceInstance = Container.get(ItemsService);
-
+console.log(req.body)
     //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
     //let det = req.body.detail
     var array = [];
@@ -600,9 +600,9 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
       ].prh_rcvd += value.prh_rcvd;
       return res;
     }, {});
-    console.log('here');
-    console.log(result);
-    console.log('here');
+    // console.log('here');
+    // console.log(result);
+    // console.log('here');
 
     var i = 1;
     for (const arr of result) {
@@ -1640,7 +1640,7 @@ const { prhnbr } = req.params;
     const prhs = await purchaseReceiveServiceInstance.find({ prh_receiver:prhnbr, prh_domain: user_domain });
     await purchaseReceiveServiceInstance.update({
       prh_rcvd:0,
-      log01:true,
+      bool01:true,
       last_modified_by: user_code, last_modified_ip_adr: req.headers.origin 
       },{prh_receiver:prhnbr});
 
