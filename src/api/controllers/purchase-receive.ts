@@ -1426,7 +1426,7 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     console.log(distinct,liste, 'disting');
 
     const prhs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and PUBLIC.prh_hist.log01 = 'false'and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
+      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and PUBLIC.prh_hist.bool01 = 'false'and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
       { replacements: [user_domain, distinct, liste], type: QueryTypes.SELECT },
     );
     return res.status(200).json({ message: 'fetched succesfully', data: prhs });
@@ -1558,7 +1558,7 @@ const findGroupRCPCancel = async (req: Request, res: Response, next: NextFunctio
   const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
   try {
     const prhs = await purchaseReceiveServiceInstance.findspec({
-      where:{prh_invoiced:false,log01:false},
+      where:{prh_invoiced:false,bool01:false},
       attributes: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
       group: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
       raw: true,
