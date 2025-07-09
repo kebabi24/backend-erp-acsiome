@@ -525,7 +525,7 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
     const sequenceServiceInstance = Container.get(SequenceService);
     const labelServiceInstance = Container.get(LabelService);
     const itemsServiceInstance = Container.get(ItemsService);
-
+console.log(req.body)
     //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
     //let det = req.body.detail
     var array = [];
@@ -600,9 +600,9 @@ const createCab = async (req: Request, res: Response, next: NextFunction) => {
       ].prh_rcvd += value.prh_rcvd;
       return res;
     }, {});
-    console.log('here');
-    console.log(result);
-    console.log('here');
+    // console.log('here');
+    // console.log(result);
+    // console.log('here');
 
     var i = 1;
     for (const arr of result) {
@@ -1426,7 +1426,7 @@ const findAllDistinct = async (req: Request, res: Response, next: NextFunction) 
     console.log(distinct,liste, 'disting');
 
     const prhs = await sequelize.query(
-      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and PUBLIC.prh_hist.log01 = 'false'and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
+      "SELECT DISTINCT PUBLIC.prh_hist.prh_receiver, PUBLIC.prh_hist.prh_vend, PUBLIC.prh_hist. prh_rcp_date  FROM   PUBLIC.prh_hist where PUBLIC.prh_hist.prh_domain = ? and PUBLIC.prh_hist.prh_invoiced = 'false' and PUBLIC.prh_hist.bool01 = 'false'and  PUBLIC.prh_hist.prh_vend = ? and PUBLIC.prh_hist.prh_site = ?",
       { replacements: [user_domain, distinct, liste], type: QueryTypes.SELECT },
     );
     return res.status(200).json({ message: 'fetched succesfully', data: prhs });
@@ -1558,7 +1558,7 @@ const findGroupRCPCancel = async (req: Request, res: Response, next: NextFunctio
   const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
   try {
     const prhs = await purchaseReceiveServiceInstance.findspec({
-      where:{prh_invoiced:false,log01:false},
+      where:{prh_invoiced:false,bool01:false},
       attributes: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
       group: ['prh_receiver', 'prh_rcp_date', 'prh_vend'],
       raw: true,
@@ -1640,7 +1640,7 @@ const { prhnbr } = req.params;
     const prhs = await purchaseReceiveServiceInstance.find({ prh_receiver:prhnbr, prh_domain: user_domain });
     await purchaseReceiveServiceInstance.update({
       prh_rcvd:0,
-      log01:true,
+      bool01:true,
       last_modified_by: user_code, last_modified_ip_adr: req.headers.origin 
       },{prh_receiver:prhnbr});
 
