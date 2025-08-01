@@ -243,6 +243,8 @@ export default async ({ expressApp }) => {
       
       { name: 'ddinvoiceModel', model: require('../models/ddinvoice').default },
       { name: 'ddinvoiceLineModel', model: require('../models/ddinvoice-line').default },
+      { name: 'affectEquipementModel', model: require('../models/affect-equipement').default },
+      { name: 'ProviderBankModel', model: require('../models/provider-bank').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1162,7 +1164,10 @@ export default async ({ expressApp }) => {
     targetKey: 'cm_addr',
   });
   
- 
+  require('../models/provider').default.hasMany(require('../models/provider-bank').default, {
+    foreignKey: 'vdbk_addr',
+    sourceKey: 'vd_addr',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
     //  await sequelizeConnection.sync().catch(err => { console.log(err)});

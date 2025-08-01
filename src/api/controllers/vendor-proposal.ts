@@ -1,4 +1,6 @@
+import VendorProposalDetail from '../../models/vendor-proposal-detail';
 import VendorProposalService from '../../services/vendor-proposal';
+import vendorProposalDetailService from '../../services/vendor-proposal-detail';
 import VendorProposalDetailService from '../../services/vendor-proposal-detail';
 
 import { Router, Request, Response, NextFunction } from 'express';
@@ -129,20 +131,36 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 const update = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get('logger');
+  const logger = Container.get("logger")
   const{user_code} = req.headers 
   const{user_domain} = req.headers
 
-  logger.debug('Calling update one  vendorProposal endpoint');
+  logger.debug("Calling update one  inventoryStatus endpoint")
   try {
-    const vendorProposalServiceInstance = Container.get(VendorProposalService);
-    const { id } = req.params;
-    
-    const vendorProposal = await vendorProposalServiceInstance.update({ ...req.body, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id });
-    return res.status(200).json({ message: 'fetched succesfully', data: vendorProposal });
+      const vendorProposalServiceInstance = Container.get(VendorProposalService)
+      
+      const vendorProposalDetailServiceInstance = Container.get(
+          vendorProposalDetailService
+      )
+     
+      const {vendorProposal, vendorProposalDetail} = req.body
+      const { id } = req.params
+      console.log(req.params)
+      const requ = await vendorProposalServiceInstance.update(
+          { ...vendorProposal , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
+          { id }
+      )
+      await vendorProposalDetailServiceInstance.delete({vpd_domain: user_domain,vpd_nbr: vendorProposal.vp_nbr})
+      for (let entry of vendorProposalDetail) {
+          entry = { ...entry, vpd_domain: user_domain,vpd_nbr: vendorProposal.vp_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+          await vendorProposalDetailServiceInstance.create(entry)
+      }
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: requ })
   } catch (e) {
-    logger.error('🔥 error: %o', e);
-    return next(e);
+      logger.error("🔥 error: %o", e)
+      return next(e)
   }
 };
 

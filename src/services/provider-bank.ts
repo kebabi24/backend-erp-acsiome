@@ -1,17 +1,15 @@
 import { Service, Inject } from 'typedi';
 
 @Service()
-export default class ProvidersSercice {
+export default class ProviderBankSercice {
   constructor(
-    @Inject('providerModel') private providerModel: Models.ProviderModel,
-    @Inject('addressModel') private addressModel: Models.AddressModel,
     @Inject('ProviderBankModel') private providerBankModel: Models.ProviderBankModel,
     @Inject('logger') private logger,
   ) {}
 
   public async create(data: any): Promise<any> {
     try {
-      const provider = await this.providerModel.create({ ...data });
+      const provider = await this.providerBankModel.create({ ...data });
       this.logger.silly('provider', provider);
       return provider;
     } catch (e) {
@@ -21,7 +19,7 @@ export default class ProvidersSercice {
   }
   public async findOne(query: any): Promise<any> {
     try {
-      const provider = await this.providerModel.findOne({ where: query, include: [this.addressModel,this.providerBankModel] });
+      const provider = await this.providerBankModel.findOne({ where: query, });
       this.logger.silly('find one provider ');
       return provider;
     } catch (e) {
@@ -32,7 +30,7 @@ export default class ProvidersSercice {
 
   public async find(query: any): Promise<any> {
     try {
-      const providers = await this.providerModel.findAll({ where: query, include: this.addressModel });
+      const providers = await this.providerBankModel.findAll({ where: query, });
       this.logger.silly('find All providers ');
       return providers;
     } catch (e) {
@@ -43,7 +41,7 @@ export default class ProvidersSercice {
 
   public async update(data: any, query: any): Promise<any> {
     try {
-      const provider = await this.providerModel.update(data, { where: query });
+      const provider = await this.providerBankModel.update(data, { where: query });
       this.logger.silly('update one provider ');
       return provider;
     } catch (e) {
@@ -53,7 +51,7 @@ export default class ProvidersSercice {
   }
   public async delete(query: any): Promise<any> {
     try {
-      const provider = await this.providerModel.destroy({ where: query });
+      const provider = await this.providerBankModel.destroy({ where: query });
       this.logger.silly('delete one provider ');
       return provider;
     } catch (e) {
@@ -63,10 +61,10 @@ export default class ProvidersSercice {
   }
   public async upsert(query: any): Promise<any> {
     try {
-      const vd = await this.providerModel.sync({ force: true });
+      const vd = await this.providerBankModel.sync({ force: true });
       const us = query.vends;
       for (const u of us) {
-        const utilis = await this.providerModel.create(u);
+        const utilis = await this.providerBankModel.create(u);
       }
       this.logger.silly('update one provider mstr');
       return vd;

@@ -24,6 +24,10 @@ import UserService from '../../services/user';
 import AddressService from '../../services/address';
 import DdinvoiceService from '../../services/ddinvoice';
 import DdinvoiceLineService from '../../services/ddinvoice-line';
+import InvoiceOrderService from '../../services/invoice-order';
+import CodeService from '../../services/code';
+import AccountReceivableService from '../../services/account-receivable'
+
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -953,6 +957,7 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
                   }
                 }
           }
+          console.log(invoicesLinesToCreate)
           const invoicesLiness = await userMobileServiceInstanse.createInvoicesLines(invoicesLinesToCreate);
 
     }
@@ -2304,11 +2309,11 @@ const findAllSalesRole = async (req: Request, res: Response, next: NextFunction)
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query("SELECT id, role_code, role_name, (select COALESCE(sum(quantity),0) as quantity  from public.aa_invoiceline where invoice_code in (select invoice_code from public.aa_invoice where public.aa_invoice.role_code = public.aa_role.role_code and canceled = false and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? ) )  FROM public.aa_role ORDER by id", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query('SELECT public.aa_invoice.role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM  public.pt_mstr , public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query('SELECT id, role_code, role_name, (select COALESCE(sum(quantity),0) as "quantity" from public.aa_invoiceline where invoice_code in (select invoice_code from public.aa_invoice where public.aa_invoice.role_code = public.aa_role.role_code and PUBLIC.aa_invoice.site = ? and canceled = false  and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? ))  FROM public.aa_role ORDER by id', { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query('SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS id, public.aa_invoice.role_code as role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM  public.pt_mstr , public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and public.aa_invoice.site = ? and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
    //  console.log("inv",invs)
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});

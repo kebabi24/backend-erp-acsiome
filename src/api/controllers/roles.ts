@@ -1,4 +1,5 @@
 import RoleService from '../../services/role';
+import UserService  from '../../services/user';
 import RoleItineraryService from '../../services/role-itinerary';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
@@ -203,6 +204,37 @@ const findRoleFilter = async (req: Request, res: Response, next: NextFunction) =
     return next(e);
   }
 };
+
+const findSupRole = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all roles endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhheeeeeeeeeeeeeeeeee")
+    const RoleServiceInstance = Container.get(RoleService);
+    const userServiceInstance = Container.get(UserService)
+    const  sups = await RoleServiceInstance.findS({
+ 
+      attributes: ['upper_role_code'],
+      group: ['upper_role_code'],
+      raw: true,
+    })
+    
+    
+    let datasup = []
+    
+    for(let sup of sups) {
+      const usr = await userServiceInstance.findOne({usrd_code : sup.upper_role_code})
+       datasup.push({usrd_code:usr.usrd_code,usrd_name: usr.usrd_name})
+    }
+    
+    return res.status(200).json({ message: "fetched succesfully", data: datasup });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findOne,
@@ -214,5 +246,6 @@ export default {
   deleteOne,
   findOneByDeviceId,
   findBySomething,
-  findRoleFilter
+  findRoleFilter,
+  findSupRole,
 };

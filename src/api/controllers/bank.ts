@@ -1283,6 +1283,63 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
     return next(e);
   }
 };
+const bkhCautionDet = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const logger = Container.get('logger');
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    console.log("hhhhhhhhhhhhhhhhhhh")
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService);
+   
+    const sequenceServiceInstance = Container.get(SequenceService)
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AR', seq_type: 'AR' });
+        let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { id: seq.id, seq_type: 'AR', seq_seq: 'AR', seq_domain: user_domain },
+    );
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.bank,  bk_domain: user_domain });
+    const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_effdate: req.body.effdate,
+      bkh_date: req.body.date,
+      bkh_code: nbr,
+      // bkh_num_doc : req.body.service_code,
+      bkh_addr : req.body.addr,
+      chr01: req.body.role,
+      bkh_bank: req.body.bank,
+      bkh_type: 'P',
+      bkh_balance: Number(banks.bk_balance),
+      bkh_amt: req.body.amt_tr,
+      bkh_site: req.body.site,
+      chr02: req.body.chr02,
+      int01 : req.body.int01,
+
+      bkh_rmks: req.body.bkh_rmks, 
+      bkh_terms: req.body.bkh_terms,
+      bkh_cheque: req.body.bkh_cheque,
+      
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance) + Number(req.body.amt_tr),
+      },
+      {id: banks.id},
+    );
+    return res.status(201).json({ message: 'created succesfully', data: nbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 
 export default {
   create,
@@ -1303,6 +1360,7 @@ export default {
   bkhTr,
   bkhP,
   bkhPDet,
+  bkhCautionDet,
   bkhTrC,
   bkhTrCDet,
   findBKHBy,

@@ -236,6 +236,8 @@ declare global {
     export type EndlocationDetailModel = S.Model;
     export type DdinvoiceModel = S.Model;
     export type DdinvoiceLineModel = S.Model;
+    export type AffectEquipementModel = S.Model;
+    export type ProviderBankModel = S.Model;
    
   }
 }
