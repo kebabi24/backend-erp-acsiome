@@ -20,7 +20,7 @@ const AffectEquipement = sequelize.define(
         ae_itin: Sequelize.STRING,
         ae_cust: Sequelize.STRING,
         ae_eqp: Sequelize.STRING,
-        ae_eqp_nbr: { type: Sequelize.INTEGER, defaultValue: 0 },
+        ae_eqp_nbr: Sequelize.STRING,
         ae_amt_un: { type: Sequelize.DECIMAL, defaultValue: 0 },
         ae_amt: { type: Sequelize.DECIMAL, defaultValue: 0 },
         ae_effdate:Sequelize.DATEONLY,

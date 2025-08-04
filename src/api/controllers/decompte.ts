@@ -5,6 +5,7 @@ import RoleService from '../../services/role';
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { Op, Sequelize } from 'sequelize';
+import LoadRequestService from "../../services/load-request";
 
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
@@ -67,6 +68,7 @@ const findByRange = async (req: Request, res: Response, next: NextFunction) => {
         const userMobileServiceInstance = Container.get(UserMobileService)
         const locationDetailServiceInstance = Container.get(locationDetailService);
         const roleServiceInstance = Container.get(RoleService)
+        const loadRequestServiceInstance = Container.get(LoadRequestService)
          var decomptes = await decompteServiceInstance.findS({
             where: { dec_role: req.body.role, dec_effdate: { [Op.between]: [req.body.date, req.body.date1]} },
             order: [['dec_type', 'ASC'],['dec_effdate','ASC']],
@@ -104,6 +106,20 @@ const findByRange = async (req: Request, res: Response, next: NextFunction) => {
           for(let ld of lds) {
           invamt = invamt + Number(ld.ld_qty_oh) * Number(ld.item.pt_price) * 1.2138
           }
+          const  load = await loadRequestServiceInstance.findAllLoadRequests40ByRoleCode(role.role_code)
+          let loads = []
+          for (let lr of load) { loads.push(lr.load_request_code)}
+          const  amtload = await decompteServiceInstance.findS({
+            where: { dec_role: req.body.role,dec_type:"C", dec_code: loads },
+            
+            attributes: ['dec_role',  [Sequelize.fn('sum', Sequelize.col('dec_amt')), 'amtload' ]],
+                group: ['dec_role'],
+                raw: true,
+
+          })
+          console.log(amtload)
+          if(amtload.length != 0) { invamt = invamt + amtload[0].amtload}
+          
           var credit = await userMobileServiceInstance.getAllInvoice({
             where: { role_code: req.body.role, canceled: false,closed:false },
           //  attributes: ['role_code',  [Sequelize.literalfn('sum', Sequelize.col('amount' -'due_amount')), 'credit' ]],

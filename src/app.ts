@@ -13,13 +13,14 @@ import userMobileController from './api/controllers/user-mobile';
 import argon2 from "argon2"
 async function startServer() {
   const app = express();
-
+  
   /**
    * A little hack here
    * Import/Export can only be used in 'top-level code'
    * Well, at least in node 10 without babel and at the time of writing
    * So we are using good old require.
    **/
+  
   await require('./loaders').default({ expressApp: app });
   const si = require('systeminformation');
   let macip = ''
@@ -27,14 +28,8 @@ async function startServer() {
   si.networkInterfaces().then(data => {macip = data[0].mac+'axiom1983'
     const fs = require('node:fs');
     const keydata = fs.readFileSync('key.key', 'utf8');
-    
-// if(macip == '14:ab:c5:08:78:ed') {
-  //macip = '$argon2id$v=19$m=4096,t=3,p=1$MTIzNDU2Nzg$Kchj5gqWurdXjFpRixxbx3avltQhdWhkEPnszad/6Po'
 
-
-
-
-
+   
   verifyPass(keydata, macip)
     .then(isValid => {
         if (isValid) {
@@ -52,7 +47,7 @@ async function startServer() {
             `);
           });
         
-         
+          app.use('images', express.static('images'));
         
           const io = require('socket.io')(server);
           io.on('connection',userMobileController.getDataBack)
