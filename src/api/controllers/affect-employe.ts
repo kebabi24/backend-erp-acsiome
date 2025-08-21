@@ -308,36 +308,36 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     let result = [];
     let i = 1;
     console.log(req.body)
-    for(let emp of employe)
-      {const item = await itemServiceInstance.find({pt_domain:user_domain, pt_part:emp.pme_inst}) 
+  //   for(let emp of employe)
+  //     {const item = await itemServiceInstance.find({pt_domain:user_domain, pt_part:emp.pme_inst}) 
    
-    const collaborateur = await employeServiceInstance.find({emp_domain:user_domain, emp_addr:emp.pme_employe}) 
-    if(collaborateur[0].emp_site == user_site ||user_site == '*')
-    {console.log(user_site)
-      result.push({
-      id: i,
-      pme_nbr:emp.pme_nbr,
-      pme_pm_code:emp.pme_pm_code,
-      pme_site:emp.pme_site,
-      pme_inst:emp.pme_inst,
-      price:item[0].pt_price,
-      pme_task:emp.pme_task,
-      pme_task_status:emp.pme_task_status,
-      pme_start_date:emp.pme_start_date,
-      pme_end_date:emp.pme_end_date,
-      pme_employe:emp.pme_employe,
-      pme_cmt:emp.pme_cmt,
-      chr02:emp.chr02,
-      chr03:emp.chr03,
-      chr05:emp.chr05,
-      int01:emp.int01,
-      log01:emp.bool01,
-      site:collaborateur[0].emp_site,
-      service:collaborateur[0].emp_job,
-    });
-    i = i + 1}
-  }
-    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  //   const collaborateur = await employeServiceInstance.find({emp_domain:user_domain, emp_addr:emp.pme_employe}) 
+  //   if(collaborateur[0].emp_site == user_site ||user_site == '*')
+  //   {console.log(user_site)
+  //     result.push({
+  //     id: i,
+  //     pme_nbr:emp.pme_nbr,
+  //     pme_pm_code:emp.pme_pm_code,
+  //     pme_site:emp.pme_site,
+  //     pme_inst:emp.pme_inst,
+  //     price:item[0].pt_price,
+  //     pme_task:emp.pme_task,
+  //     pme_task_status:emp.pme_task_status,
+  //     pme_start_date:emp.pme_start_date,
+  //     pme_end_date:emp.pme_end_date,
+  //     pme_employe:emp.pme_employe,
+  //     pme_cmt:emp.pme_cmt,
+  //     chr02:emp.chr02,
+  //     chr03:emp.chr03,
+  //     chr05:emp.chr05,
+  //     int01:emp.int01,
+  //     log01:emp.bool01,
+  //     site:collaborateur[0].emp_site,
+  //     service:collaborateur[0].emp_job,
+  //   });
+  //   i = i + 1}
+  // }
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -352,7 +352,6 @@ const findByglobal = async (req: Request, res: Response, next: NextFunction) => 
   const { user_site } = req.headers;
   
   try {
-    console.log(req.body)
     const affectEmployeServiceInstance = Container.get(AffectEmployeService);
     const itemServiceInstance = Container.get(ItemService);
     const employeServiceInstance = Container.get(employeService);
@@ -360,7 +359,7 @@ const findByglobal = async (req: Request, res: Response, next: NextFunction) => 
       pme_domain:user_domain,
       
     },
-    attributes: ['pme_nbr', 'pme_pm_code', 'pme_site','pme_inst','pme_task',
+    attributes: ['id','pme_nbr', 'pme_pm_code', 'pme_site','pme_inst','pme_task',
       
       'pme_task_status',
       'pme_start_date',
@@ -370,43 +369,43 @@ const findByglobal = async (req: Request, res: Response, next: NextFunction) => 
       'chr04',
       'int01',
     ],
-    group: ['pme_nbr','pme_pm_code','pme_site','pme_inst','pme_task','pme_task_status','pme_start_date','pme_end_date','pme_start_time','pme_duration','chr04','int01'],
+    group: ['id','pme_nbr','pme_pm_code','pme_site','pme_inst','pme_task','pme_task_status','pme_start_date','pme_end_date','pme_start_time','pme_duration','chr04','int01'],
     raw: true, });
      
-    let result = [];
-    let i = 1;
-     for(let emp of employe)
-      {const item = await itemServiceInstance.find({pt_domain:user_domain, pt_part:emp.pme_inst}) 
+  //   let result = [];
+  //   let i = 1;
+  //    for(let emp of employe)
+  //     {const item = await itemServiceInstance.find({pt_domain:user_domain, pt_part:emp.pme_inst}) 
      
      
-    // const collaborateur = await employeServiceInstance.find({emp_domain:user_domain, emp_addr:emp.pme_employe}) 
-    // if(collaborateur[0].emp_site == user_site ||user_site == '*')
-    console.log(user_site)
-    if(item[0].pt_site == user_site || user_site == '*')
-    {result.push({
-      id: i,
-      pme_nbr:emp.pme_nbr,
-      pme_pm_code:emp.pme_pm_code,
-      pme_site:emp.pme_site,
-      pme_inst:emp.pme_inst,
-      price:item[0].pt_price,
-      pme_task:emp.pme_task,
-      pme_task_status:emp.pme_task_status,
-      pme_start_date:emp.pme_start_date,
-      pme_end_date:emp.pme_end_date,
-      pme_start_time:emp.pme_start_time,
-      pme_duration:emp.pme_duration,
-      pme_employe:emp.pme_employe,
-      pme_cmt:emp.pme_cmt,
-      chr04:emp.chr04,
-      chr02:emp.chr02,
-      chr03:emp.chr03,
-      int01:emp.int01,
-    });
-    i = i + 1
-  }
-  }
-    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  //   // const collaborateur = await employeServiceInstance.find({emp_domain:user_domain, emp_addr:emp.pme_employe}) 
+  //   // if(collaborateur[0].emp_site == user_site ||user_site == '*')
+  //   console.log(user_site)
+  //   if(item[0].pt_site == user_site || user_site == '*')
+  //   {result.push({
+  //     id: i,
+  //     pme_nbr:emp.pme_nbr,
+  //     pme_pm_code:emp.pme_pm_code,
+  //     pme_site:emp.pme_site,
+  //     pme_inst:emp.pme_inst,
+  //     price:item[0].pt_price,
+  //     pme_task:emp.pme_task,
+  //     pme_task_status:emp.pme_task_status,
+  //     pme_start_date:emp.pme_start_date,
+  //     pme_end_date:emp.pme_end_date,
+  //     pme_start_time:emp.pme_start_time,
+  //     pme_duration:emp.pme_duration,
+  //     pme_employe:emp.pme_employe,
+  //     pme_cmt:emp.pme_cmt,
+  //     chr04:emp.chr04,
+  //     chr02:emp.chr02,
+  //     chr03:emp.chr03,
+  //     int01:emp.int01,
+  //   });
+  //   i = i + 1
+  // }
+  // }
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

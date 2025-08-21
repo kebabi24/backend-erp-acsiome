@@ -17,6 +17,8 @@ export default (app: Router) => {
   route.post('/rct-unpcab', controller.rctUnpCab);
   route.post('/rct-pocab', controller.rctPoCab);
   route.post('/iss-unp', controller.issUnp);
+  route.post('/iss-epi', controller.issEpi);
+  route.post('/rct-epi', controller.rctEpi);
   route.post('/iss-tr', controller.issTr);
   route.post('/iss-trv', controller.issTrV);
   route.post('/iss-chl', controller.issChl);
@@ -49,10 +51,14 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/findcost', controller.findByCost);
   route.post('/findnbr', controller.findByNbr);
-  route.post('/findgroup', controller.findByGroup);  
+  route.post('/findgroup', controller.findByGroup); 
+  route.post('/findgroupepi', controller.findByGroupEpi);
+  route.post('/findgroupemp', controller.findByGroupEmp); 
   route.post('/findref', controller.findByRef); 
   route.post('/findrefs', controller.findByRefs); 
   route.post('/findactivity', controller.findByActivity);  
   route.post('/updateprice', controller.updatePrice);
   route.post('/findiss', controller.findByIss);
+  route.post('/findepi', controller.findByEpi);
+  route.post('/findemploye', controller.findByEmp);
 };

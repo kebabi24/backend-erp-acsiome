@@ -507,7 +507,38 @@ const getProjectTypes = async (req: Request, res: Response, next: NextFunction) 
   try {
     const projectServiceInstance = Container.get(ProjectService);
     const project_types = await projectServiceInstance.getProjectTypes();
+    console.log('types', project_types)
     return res.status(200).json({ message: 'fetched succesfully', data: project_types });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getProjectLists = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all project endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const projectServiceInstance = Container.get(ProjectService);
+    const project_lists = await projectServiceInstance.getProjectLists();
+    console.log('lists', project_lists)
+    return res.status(200).json({ message: 'fetched succesfully', data: project_lists });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getProjectReasons = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all project endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const projectServiceInstance = Container.get(ProjectService);
+    const project_reasons = await projectServiceInstance.getProjectReasons();
+    console.log('reasons', project_reasons)
+    return res.status(200).json({ message: 'fetched succesfully', data: project_reasons });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -726,6 +757,8 @@ export default {
   findAllbomDetails,
   findpmdetail,
   getProjectTypes,
+  getProjectLists,
+  getProjectReasons,
   findAssignedEmpOfProject,
   findInstructionsOfProject,
   createAssetDown,

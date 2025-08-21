@@ -22,7 +22,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     try {
         
         // const fs = require('node:fs');
-        const fs = require('node:fs/promises');
+        const fs = require('fs/promises');
         const keydata = await fs.readFile('key.key', { encoding: 'utf8'});
         const userServiceInstance = Container.get(UserService)
         const domainServiceInstance = Container.get(DomainService)

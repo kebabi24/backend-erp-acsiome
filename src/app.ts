@@ -25,7 +25,7 @@ async function startServer() {
   let macip = ''
   
   si.networkInterfaces().then(data => {macip = data[0].mac+'axiom1983'
-    const fs = require('node:fs');
+    const fs = require('fs');
     const keydata = fs.readFileSync('key.key', 'utf8');
     
 // if(macip == '14:ab:c5:08:78:ed') {
@@ -33,7 +33,7 @@ async function startServer() {
 
 
 
-
+console.log(macip)
 
   verifyPass(keydata, macip)
     .then(isValid => {

@@ -1,9 +1,11 @@
 import OperationHistoryService from "../../services/operation-history"
 import WorkOrderService from "../../services/work-order"
 import WorkroutingService from "../../services/workrouting"
+import WorkCenterService from "../../services/workcenter"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { Op, Sequelize } from 'sequelize';
+import { INTEGER } from "sequelize"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get('logger');
@@ -16,6 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       const operationHistoryServiceInstance = Container.get(OperationHistoryService)
       const workOrderServiceInstance = Container.get(WorkOrderService)
       const workroutingServiceInstance = Container.get(WorkroutingService)
+      const workcenterServiceInstance = Container.get(WorkCenterService)
       
       for (const item of detail) {
 
@@ -51,23 +54,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           last_modified_ip_adr: req.headers.origin,
         });
       }
-      for (const down of dwndetail) {
-        const op1 = await operationHistoryServiceInstance.findOne({op_wkctr : op.op_wkctr,op_mch:op.op_mch,op_date:op.op_date,op_type:'down',op_domain:user_domain})
-
-        var elapsed = Math.abs(new Date(down.fin_cause).getTime() - new Date(down.debut_cause).getTime()) / (1000 * 60)
-        // console.log('elapsed',elapsed)
-        // const hms = down.fin_cause;
-        // const [hours, minutes] = hms.split(':');
-        // const totalSeconds = Number(+hours) * 60 * 60 + Number(+minutes) * 60 ;
-        // const hmsd = down.debut_cause;
-        // const [hoursd, minutesd] = hmsd.split(':');
-        // const totalSecondsd = Number(+hoursd) * 60 * 60 + Number(+minutesd) * 60 ;
+      for (let down of dwndetail) {
+        const op1 = await operationHistoryServiceInstance.findOne({op_wkctr : op.op_wkctr,op_mch:op.op_mch,op_date:op.op_date,op_type:'down',op_domain:user_domain,chr01:down.chr01,op_rsn_down:down.op_rsn_down})
+const opfirst = await operationHistoryServiceInstance.findOne({op_wkctr : op.op_wkctr,op_mch:op.op_mch,op_type:'down',op_domain:user_domain})
+const opnbr = await operationHistoryServiceInstance.find({op_wkctr : op.op_wkctr,op_mch:op.op_mch,op_type:'down',op_domain:user_domain})
+let first_date = new Date()
+if(opfirst){first_date = new Date(opfirst.op_date)}
+let last_date = new Date()
+if (op1){last_date = new Date(op1.op_date)}
+let total_days = Math.abs(new Date(last_date).getTime() - new Date(first_date).getTime()) / (1000*60*60*24)
+        // var elapsed = Math.abs(new Date(down.fin_cause).getTime() - new Date(down.debut_cause).getTime()) / (1000 * 60)
+        
+        let hms = down.chr02;
+        if(hms == null){hms = '00:00'}
+        const [hours, minutes] = hms.split(':');
+        const totalSeconds = Number(+hours) * 60 + Number(+minutes) ;
+        const hmsd = down.chr01;
+        const [hoursd, minutesd] = hmsd.split(':');
+        const totalSecondsd = Number(+hoursd) * 60 + Number(+minutesd)  ;
+        let elapsed = 0 
+        
         if(op1){
+            console.log('op1')
+            let jours = Math.abs(new Date(down.op_tran_date).getTime() - new Date(down.op_date).getTime()) / (1000 * 60)
+            elapsed = jours + totalSeconds - totalSecondsd
             await operationHistoryServiceInstance.update({
                 ...down,
                 ...op,
-                chr01:down.debut_cause,
-                chr02:down.fin_cause,
+                chr01:down.chr01,
+                chr02:down.chr02,
                 op_domain:user_domain,
                 op_type: "down", 
                 op_act_run : elapsed,
@@ -77,12 +92,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                 last_modified_ip_adr: req.headers.origin,
                 },{id:op1.id});
         }
-        else{   
+        else{   if(elapsed < 0){elapsed = 0}
                 await operationHistoryServiceInstance.create({
                 ...down,
                 ...op,
-                chr01:down.debut_cause,
-                chr02:down.fin_cause,
+                chr01:down.chr01,
+                chr02:down.chr02,
                 op_domain:user_domain,
                 op_type: "down", 
                 op_act_run : elapsed,
@@ -92,6 +107,18 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
                 last_modified_ip_adr: req.headers.origin,
                 });
             }
+        const wcs = await workcenterServiceInstance.find({wc_wkctr:op.op_wkctr,wc_mch:op.op_mch,wc_domain: user_domain})
+         for (let wctr of wcs){
+            console.log(elapsed)
+            let idd = wctr.id
+            let nbdown = opnbr.length
+            let dudown = Number(wctr.int02) + Number(elapsed)
+            let avdown = (dudown / nbdown)
+            avdown = Math.trunc(avdown)
+            let mtbf = total_days / nbdown
+            mtbf = Math.trunc(mtbf)
+            const wc = await workcenterServiceInstance.update({int01:nbdown,int02:dudown,int03:avdown,int04:mtbf, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id:idd})
+         }
         const wos = await workOrderServiceInstance.find({ wo_routing:op.op_mch,wo_rel_date:{[Op.gte]: op.op_tran_date},wo_domain: user_domain })
         for (let wo of wos)
         {

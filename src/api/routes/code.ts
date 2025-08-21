@@ -7,6 +7,8 @@ export default (app: Router) => {
     app.use("/codes", route)
 
     route.get("/", controller.findAll)
+    route.get("/impact", controller.findImpact)
+    route.get("/opstatus", controller.findOpStatus)
     route.get("/check", controller.findCheck)
     route.get("/act", controller.findAct)
     route.get("/wostatus", controller.findwostatus)

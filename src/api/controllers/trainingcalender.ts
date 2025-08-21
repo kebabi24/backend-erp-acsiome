@@ -5,8 +5,8 @@ import ConfigService from '../../services/config';
 import crmService from '../../services/crm';
 import SequenceService from '../../services/sequence';
 const nodemailer = require('nodemailer');
-const qrcode = require('qrcode-terminal');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+// const qrcode = require('qrcode-terminal');
+// const { Client, LocalAuth } = require('whatsapp-web.js');
 
 
 

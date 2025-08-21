@@ -1,5 +1,6 @@
 import EmployeService from '../../services/employe';
 import ItemService from '../../services/item';
+import CodeService from '../../services/code';
 import EmployeAvailabilityService from '../../services/employe-availability';
 import AffectEmployeService from '../../services/affect-employe';
 import EmployeScoreService from '../../services/employe-score';
@@ -22,10 +23,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const employeScoreServiceInstance = Container.get(EmployeScoreService);
     const employeJobServiceInstance = Container.get(EmployeJobService);
     const employeTrainingServiceInstance = Container.get(EmployeTrainingService);
+    const codeserviceInstance = Container.get(CodeService);
     const { Employe, employeScoreDetail, employeJobDetail , employeTrDetail } = req.body;
-   
+    const code = await codeserviceInstance.findOne({ code_fldname:'bareme_temps' });
+   let dist_date = new Date(Employe.emp_first_date)
+   console.log(code.dec01,dist_date)
+dist_date.setDate(dist_date.getDate() + Number(code.dec01))
+console.log(dist_date)
     const employe = await employeServiceInstance.create({
       ...Employe,
+      date01:dist_date,
+      int02:0,
       emp_domain: user_domain,
       created_by: user_code,
       last_modified_by: user_code,
@@ -240,6 +248,25 @@ const findByReq = async (req: Request, res: Response, next: NextFunction) => {
     }
     }
     return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByCycle = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeServiceInstance = Container.get(EmployeService);
+    let d = new Date()
+    let d1 = new Date()
+    d.setDate(d.getDate() - 15)
+    d1.setDate(d1.getDate() + 15)
+    const employe = await employeServiceInstance.find({ emp_domain: user_domain,date01:{ [Op.between]: [d,d1]} });
+    console.log(d,d1)
+    return res.status(200).json({ message: 'fetched succesfully', data: employe });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -608,6 +635,7 @@ export default {
   deleteOne,
   findAvailable,
   findByOne,
+  findByCycle,
   findChild,
   findTrBy,
 };

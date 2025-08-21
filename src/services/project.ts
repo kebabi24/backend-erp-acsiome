@@ -90,9 +90,35 @@ export default class projectService {
     try {
       const project_types = await this.codeModel.findAll({
         where: { code_fldname: 'pj_type' },
-        attributes: ['id', 'code_value', 'code_desc'],
+        attributes: ['id', 'code_value', 'code_cmmt'],
       });
       this.logger.silly('find project_types ');
+      return project_types;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async getProjectLists(): Promise<any> {
+    try {
+      const project_types = await this.codeModel.findAll({
+        where: { code_fldname: 'pj_list' },
+        attributes: ['id', 'code_value', 'code_cmmt'],
+      });
+      this.logger.silly('find project_lists ');
+      return project_types;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async getProjectReasons(): Promise<any> {
+    try {
+      const project_types = await this.codeModel.findAll({
+        where: { code_fldname: 'pj_reason' },
+        attributes: ['id', 'code_value', 'code_cmmt'],
+      });
+      this.logger.silly('find project_reasons ');
       return project_types;
     } catch (e) {
       this.logger.error(e);

@@ -40,6 +40,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create item endpoint ');
   try {
     const itemServiceInstance = Container.get(ItemService);
+    console.log(req.body)
     const item = await itemServiceInstance.create({
       ...req.body,
       pt_domain: user_domain,
@@ -791,6 +792,27 @@ const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const epiUpdate = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling update one  job endpoint');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+     let refid = req.body.id;
+   console.log(refid,req.body.pt_status)
+     const locationDetail = await itemServiceInstance.update(
+      { pt_status:req.body.pt_status,pt_price:req.body.pt_price,pt_sfty_stk:req.body.pt_sfty_stk, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { id : refid},
+    );
+
+    return res.status(200).json({ message: 'fetched succesfully', data: locationDetail });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findPart = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -953,5 +975,6 @@ export default {
   findAllTraining,
   updatePrice,
   findPart,
-  deleteOne
+  deleteOne,
+  epiUpdate
 };
