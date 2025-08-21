@@ -243,6 +243,12 @@ export default async ({ expressApp }) => {
       
       { name: 'ddinvoiceModel', model: require('../models/ddinvoice').default },
       { name: 'ddinvoiceLineModel', model: require('../models/ddinvoice-line').default },
+      { name: 'affectEquipementModel', model: require('../models/affect-equipement').default },
+      { name: 'ProviderBankModel', model: require('../models/provider-bank').default },
+      { name: 'profileServiceModel', model: require('../models/profile-service').default },
+      { name: 'sequenceServiceModel', model: require('../models/sequence-service').default },
+      { name: 'voucherProformaModel', model: require('../models/voucher-proforma').default },
+      { name: 'voucherProformaDetailModel', model: require('../models/voucher-proforma-detail').default },
     ],
   });
   Logger.info('✌️ Dependency Injector loaded');
@@ -1162,10 +1168,49 @@ export default async ({ expressApp }) => {
     targetKey: 'cm_addr',
   });
   
- 
+  require('../models/provider').default.hasMany(require('../models/provider-bank').default, {
+    foreignKey: 'vdbk_addr',
+    sourceKey: 'vd_addr',
+  });
+
+
+
+
+  require('../models/provider').default.hasOne(require('../models/voucher-proforma').default, {
+    foreignKey: 'vhp_vend',
+    sourceKey: 'vd_addr',
+  });
+  require('../models/voucher-proforma').default.belongsTo(require('../models/provider').default, {
+    foreignKey: 'vhp_vend',
+    targetKey: 'vd_addr',
+  });
+  require('../models/item').default.hasOne(require('../models/voucher-proforma-detail').default, {
+    foreignKey: 'vdhp_part',
+    sourceKey: 'pt_part',
+  });
+  require('../models/voucher-proforma-detail').default.belongsTo(require('../models/item').default, {
+    foreignKey: 'vdhp_part',
+    targetKey: 'pt_part',
+  });
+  require('../models/taxe').default.hasOne(require('../models/voucher-proforma-detail').default, {
+    foreignKey: 'vdhp_tax_code',
+    sourceKey: 'tx2_tax_code',
+  });
+  require('../models/voucher-proforma-detail').default.belongsTo(require('../models/taxe').default, {
+    foreignKey: 'vdhp_tax_code',
+    targetKey: 'tx2_tax_code',
+  });
+  require('../models/address').default.hasOne(require('../models/voucher-proforma').default, {
+    foreignKey: 'vhp_vend',
+    sourceKey: 'ad_addr',
+  });
+  require('../models/voucher-proforma').default.belongsTo(require('../models/address').default, {
+    foreignKey: 'vhp_vend',
+    targetKey: 'ad_addr',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
-    //  await sequelizeConnection.sync().catch(err => { console.log(err)});
+  //  await sequelizeConnection.sync().catch(err => { console.log(err)});
   //  await sequelizeConnection
   //   .sync({ alter: true })
   //   .then(() => {

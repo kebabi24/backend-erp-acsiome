@@ -13,7 +13,7 @@ import ItemService from '../../services/item';
 import taxeService from '../../services/taxe';
 import BankService from '../../services/bank';
 import BkhService from '../../services/bkh';
-
+import RequisitionService from "../../services/requisition"
 import AddressService from '../../services/address';
 
 import { generatePdf } from '../../reporting/generator';
@@ -29,6 +29,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const purchaseOrderServiceInstance = Container.get(PurchaseOrderService);
     const purchaseOrderDetailServiceInstance = Container.get(PurchaseOrderDetailService);
+    const requisitionServiceInstance = Container.get(RequisitionService)
     const { purchaseOrder, purchaseOrderDetail } = req.body;
     console.log(purchaseOrderDetail)
     const po = await purchaseOrderServiceInstance.create({
@@ -44,6 +45,15 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       entry = { ...entry, pod_domain: user_domain, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
     }
+    const requisition = await requisitionServiceInstance.findOne({
+      rqm_nbr:purchaseOrder.po_req_id, rqm_domain: user_domain
+ })
+ if(requisition) {
+  const requ = await requisitionServiceInstance.update(
+    { rqm_status:'C' , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},
+    { id:requisition.id }
+)
+ }
       //logger.debug('Calling Create sequence endpoint');
       // try {
       //   const addressServiceInstance = Container.get(AddressService);

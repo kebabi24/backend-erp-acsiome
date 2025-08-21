@@ -9,6 +9,7 @@ export default (app: Router) => {
     route.get("/", controller.findAll)
     route.get("/impact", controller.findImpact)
     route.get("/opstatus", controller.findOpStatus)
+    route.get("/findprovider", controller.findAllProvider)
     route.get("/check", controller.findCheck)
     route.get("/act", controller.findAct)
     route.get("/wostatus", controller.findwostatus)
@@ -38,4 +39,6 @@ export default (app: Router) => {
     route.delete("/:id", controller.deleteOne)
     route.post("/deletes", controller.deletes)
     route.post("/sumbitDomain", controller.DomainTraining)
+    route.get("/findprovider", controller.findAllProvider)
+    route.get("/", controller.findAll)
 }

@@ -1,19 +1,17 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
-import controller from "../controllers/sale-shiper"
+import controller from "../controllers/affect-equipement"
 const route = Router()
 
-
 export default (app: Router) => {
-    app.use("/sale-shipers", route)
+    app.use("/affectequipements", route)
 
-    route.post("/", controller.create)
     route.get("/", controller.findAll)
-    route.put("/:distinct", controller.findAllDistinct)
+    route.post("/", controller.create)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
-    route.post("/findallby", controller.findAllBy)
-    
+    route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
-    route.delete("/:id", controller.deleteOne)
+    route.post("/getallpaymentby", controller.findBetweenDate)
+ 
 }

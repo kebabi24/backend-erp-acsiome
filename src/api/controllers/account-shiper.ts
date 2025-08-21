@@ -163,8 +163,24 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
 const findBy = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all account endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
+    try {
+        const AccountShiperServiceInstance = Container.get(AccountShiperService)
+        const accountShipers = await AccountShiperServiceInstance.find({...req.body,as_domain: user_domain})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: accountShipers })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
+const findByCos = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find by  all account endpoint")
     const{user_code} = req.headers 
@@ -258,5 +274,6 @@ export default {
     findAll,
     findBy,
     update,
-    deleteOne
+    deleteOne,
+    findByCos
 }

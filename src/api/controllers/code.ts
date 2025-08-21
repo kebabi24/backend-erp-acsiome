@@ -1,7 +1,7 @@
 import CodeService from '../../services/code';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-
+import { Op } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -681,6 +681,22 @@ const DomainTraining = async (req: Request, res: Response, next: NextFunction) =
   }
 }
 
+const findAllProvider = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.find({code_domain:user_domain, code_fldname:{ [Op.or] : ['vd_type','vd_shipvia','vd_promo','vd_lang','check_form','vd_cr_terms']}});
+    //  const si = require('systeminformation');
+    //  si.networkInterfaces().then(data => console.log(data[0].mac));
+    return res.status(200).json({ message: 'fetched succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createCodes,
@@ -713,5 +729,6 @@ export default {
   deleteOne,
   findTriggerType,
   DomainTraining,
-  deletes
+  deletes,
+  findAllProvider
 };

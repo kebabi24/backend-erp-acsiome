@@ -560,4 +560,5 @@ export default {
   findBydet,
   update,
   deleteOne,
+  findAllBy,
 };

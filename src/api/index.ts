@@ -121,6 +121,9 @@ import decompte from './routes/decompte';
 import accountOrder from './routes/account-order';
 import priceListQuantity from './routes/price-list-quantity';
 import timbre from './routes/timbre';
+import affectEquipement from './routes/affect-equipement';
+import profileService from './routes/profile-service';
+import voucherProforma from './routes/voucher-proforma';
 // guaranteed to get dependencies
 export default () => {
   const app = Router();
@@ -245,5 +248,8 @@ export default () => {
   accountOrder(app)
   priceListQuantity(app)
   timbre(app)
+  affectEquipement(app)
+  profileService(app)
+  voucherProforma(app);
   return app;
 };

@@ -9,6 +9,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/cab', controller.createCab);
+  route.post('/prhcab', controller.createPrhCab);
   route.post('/cabdet', controller.createCabDet);
   route.post('/:distinct/:liste', controller.findAllDistinct);
   route.post('/distinct', controller.findDistinct);

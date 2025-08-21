@@ -7,6 +7,7 @@ import VendorProposalService from "../../services/vendor-proposal"
 import InventoryTransactionService from "../../services/inventory-transaction"
 import VoucherOrderService from "../../services/voucher-order"
 import AccountPayableService from "../../services/account-payable"
+import ProviderBankService from "../../services/provider-bank"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import { Op, Sequelize } from 'sequelize';
@@ -18,11 +19,16 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
     logger.debug("Calling Create provider endpoint with body: %o", req.body)
     try {
-        
+        const { Provider, BankDetails } = req.body;
+        console.log(BankDetails)
         const providerServiceInstance = Container.get(ProviderService)
-        const provider = await providerServiceInstance.create({...req.body,vd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+        const providerBankServiceInstance = Container.get (ProviderBankService)
+        const provider = await providerServiceInstance.create({...Provider,vd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
-       
+       for (let bank of BankDetails) {
+        const providerBank = await providerBankServiceInstance.create({...bank,vdbk_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+
+       }
         return res
             .status(201)
             .json({ message: "created succesfully", data: { provider } })
@@ -38,7 +44,9 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const providerServiceInstance = Container.get(ProviderService)
         const {id} = req.params
+        console.log("hhhhhhhhhhhhhhhhhhhhhhhhhereeeeeeeeeeeeeeeeeeee")
         const provider = await providerServiceInstance.findOne({id})
+        console.log(provider)
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: provider  })
@@ -81,7 +89,22 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
+const findByDet = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all provider endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const providerServiceInstance = Container.get(ProviderService)
+        const provider = await providerServiceInstance.findOne({...req.body,vd_domain:user_domain})
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: provider })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
@@ -91,9 +114,17 @@ const{user_domain} = req.headers
 
     logger.debug("Calling update one  provider endpoint")
     try {
+        const { Provider, BankDetails } = req.body;
         const providerServiceInstance = Container.get(ProviderService)
+        const providerBankServiceInstance = Container.get (ProviderBankService)
         const {id} = req.params
-        const provider = await providerServiceInstance.update({...req.body,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+        const vd = await providerServiceInstance.findOne({id:id})
+        const provider = await providerServiceInstance.update({...Provider,last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id})
+       const pb = await providerBankServiceInstance.delete({vdbk_addr:vd.vd_addr,vdbk_domain:vd.vd_domain})
+        for (let bank of BankDetails) {
+            const providerBank = await providerBankServiceInstance.create({...bank,vdbk_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    
+           }
         return res
             .status(200)
             .json({ message: "fetched succesfully", data: provider  })
@@ -255,6 +286,7 @@ export default {
     findOne,
     findAll,
     findBy,
+    findByDet,
     update,
     deleteOne,
     findActivities,

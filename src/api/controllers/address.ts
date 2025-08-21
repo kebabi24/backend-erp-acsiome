@@ -19,12 +19,12 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
        if(req.body.ad_type=='bank') {type = "Bank"}
        if(req.body.ad_type=='Transporter') {type = "Transporter"}
         if(req.body.ad_attn != null) {
-            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn ,rep_tel:req.body.ad_phone,rep_tel2:req.body.ad_fax,rep_email:req.body.ad_ext,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn ,rep_post:req.body.ad_user1,rep_tel:req.body.ad_phone,rep_tel2:req.body.ad_fax,rep_email:req.body.ad_ext,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryServiceInstance.create(entry)
     
         }
         if(req.body.ad_attn2 != null) {
-            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn2 ,rep_tel:req.body.ad_phone2,rep_tel2:req.body.ad_fax2,rep_email:req.body.ad_ext2,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+            let entry = { rep_code:req.body.ad_addr,rep_type:type,rep_contact:req.body.ad_attn2,rep_post:req.body.ad_user2 ,rep_tel:req.body.ad_phone2,rep_tel2:req.body.ad_fax2,rep_email:req.body.ad_ext2,rep_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
             await repertoryServiceInstance.create(entry)
     
         }
