@@ -21,6 +21,8 @@ const Config = sequelize.define(
         cfg_accounting: {type: Sequelize.BOOLEAN, defaultValue : false  }, 
         cfg_declared: {type: Sequelize.BOOLEAN, defaultValue : false  },    
         cfg_imput_auto:   {type: Sequelize.BOOLEAN, defaultValue : false  },
+        cfg_po_threshold : {type: Sequelize.BIGINT, defaultValue : 0  },
+        cfg_threshold_user : Sequelize.STRING,
        
         ...base,
     },

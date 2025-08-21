@@ -106,8 +106,25 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const locationDetails = await locationDetailServiceInstance.find({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
+    console.log("locationDetails")
+  
+   {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
+ 
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllCos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all locationDetail endpoint');
   const { user_code } = req.headers;
@@ -908,6 +925,7 @@ export default {
   createldpos,
   findOne,
   findAll,
+  findAllCos,
   findBy,
   findByOne,
   findByOneRef,

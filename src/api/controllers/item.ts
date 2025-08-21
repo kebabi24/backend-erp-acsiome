@@ -763,7 +763,7 @@ const updatePrice = async (req: Request, res: Response, next: NextFunction) => {
           const indexpart =  Details.findIndex(({ part }) => part == locdet.ld_part);
          // console.log(indexpart, locdet.ld_part, locdet.ld_qty_oh)
           if(indexpart >= 0) {
-            amt = amt + ((Details[indexpart].new_price *  1.2138) -(Details[indexpart].old_price  * 1.19)) * locdet.ld_qty_oh
+            amt = amt + ((Details[indexpart].new_price *  1.2138) -(Details[indexpart].old_price  * 1.2138)) * locdet.ld_qty_oh
           }
 
         }
