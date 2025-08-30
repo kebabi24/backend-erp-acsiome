@@ -20,5 +20,6 @@ export default (app: Router) => {
     route.put("/:id", controller.update)
     route.post("/child", controller.findChild)
     route.post("/tr", controller.findTrBy)
+    route.post("/findbypo", controller.findByPo)
  
 }

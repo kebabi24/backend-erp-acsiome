@@ -2309,11 +2309,11 @@ const findAllSalesRole = async (req: Request, res: Response, next: NextFunction)
       let result = []
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
       if (req.body.site == '*') {
-      var invs =await Sequelize.query('SELECT public.aa_invoice.role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM  public.pt_mstr , public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query('SELECT public.aa_invoice.role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     } else {
 
-      var invs =await Sequelize.query('SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS id, public.aa_invoice.role_code as role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM  public.pt_mstr , public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and public.aa_invoice.site = ? and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query('SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS id, public.aa_invoice.role_code as role_code, product_code,  designation ,COALESCE(sum(quantity),0) as "quantity"   FROM  public.aa_invoiceline ,public.aa_invoice where public.aa_invoiceline.invoice_code = public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and public.aa_invoice.site = ? and PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? group by public.aa_invoice.role_code,product_code,  designation ORDER by public.aa_invoice.role_code', { replacements: [req.body.site,req.body.date,req.body.date1], type: QueryTypes.SELECT });
    //  console.log("inv",invs)
     //  var invs =await Sequelize.query('select * from PUBLIC.aa_invoiceline', {type: QueryTypes.SELECT });
    //const invoiceLine = await userMobileServiceInstance.getInvoiceLineBy({});
@@ -2383,12 +2383,15 @@ const getSalesDashboardAddData = async (req: Request, res: Response, next: NextF
    let cadd = 0
    let rvdd= 0
    let rvdist = 0
+   let qtydd = 0
+   let qtygros = 0
     var invoices = await userMobileServiceInstance.getAllInvoice({
       where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
       attributes: 
       [[Sequelize.fn('sum', Sequelize.col('amount')), 'amount' ]],
       raw: true,
   })
+
 
 //console.log(invoices.length , invoices)
 if(invoices[0].amount == null) { cadd = 0} else {  cadd = invoices[0].amount}
@@ -2454,14 +2457,14 @@ const  ihss = await invoiceOrderServiceInstance.findS({
 //         types.push({type:typ.code_cmmt,qty:(idhs[0].qtyinv != 0)? idhs[0].qtyinv : 0})
 //   }
 
-var idhs = await Sequelize.query("select sum(idh_price * idh_qty_inv) as amt,code_cmmt as type, sum(idh_qty_inv) as qty from public.idh_det, public.code_mstr where code_fldname = 'pt_part_type' and code_value = idh_part_type and idh_inv_date >= ? and idh_inv_date <= ? GROUP BY code_cmmt" , {replacements: [start_date,end_date],type: QueryTypes.SELECT });
-console.log(idhs)
-let mtypes = idhs
-let types = idhs
+// var idhs = await Sequelize.query("select sum(idh_price * idh_qty_inv) as amt,code_cmmt as type, sum(idh_qty_inv) as qty from public.idh_det, public.code_mstr where code_fldname = 'pt_part_type' and code_value = idh_part_type and idh_inv_date >= ? and idh_inv_date <= ? GROUP BY code_cmmt" , {replacements: [start_date,end_date],type: QueryTypes.SELECT });
+// console.log(idhs)
+// let mtypes = idhs
+// let types = idhs
 // let mihsss = []
 // for (let ih of ihss) {mihsss.push(ih.ih_inv_nbr)}
 // let mtypes = []
-  const mtyps = await codeServiceInstance.find({code_fldname:'pt_part_type'})
+  // const mtyps = await codeServiceInstance.find({code_fldname:'pt_part_type'})
 //   for (let mtyp of mtyps) {
 //     let mits = []
 //     const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
@@ -2480,34 +2483,56 @@ let types = idhs
 
 
 /* kamel*/
-let invds = []
-var ddinvoices = await userMobileServiceInstance.getAllInvoice({
-  where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
+// let invds = []
+// var ddinvoices = await userMobileServiceInstance.getAllInvoice({
+//   where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
  
+// })
+// for (let ddinv of ddinvoices) {invds.push(ddinv.invoice_code)}
+// let ddqtypes = []
+// let ddatypes = []
+//  // console.log(mtyps)
+//   for (let mtyp of mtyps) {
+//     let ddmits = []
+//     const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
+//         for(let item of items) { ddmits.push(item.pt_part)}
+//         const mils = await userMobileServiceInstance.getInvoiceLineS({
+//           where: {product_code: ddmits,invoice_code : invds},
+//           attributes: 
+//           [[Sequelize.fn('sum', Sequelize.col('price')), 'ddamt' ],
+//            [Sequelize.fn('sum', Sequelize.col('quantity')), 'ddqty' ]
+//         ],
+//           raw: true,
+
+
+//         })
+//         ddqtypes.push({type:mtyp.code_cmmt,qty:(mils[0].ddqty != null)? mils[0].ddqty : 0})
+//         ddatypes.push({type:mtyp.code_cmmt,amt:(mils[0].ddamt != null)? mils[0].ddamt : 0})
+//   }
+
+
+var invoicesline = await userMobileServiceInstance.getInvoiceLineBy({
+  where: {  period_active_date: { [Op.between]: [start_date, end_date]},canceled:false},
+  attributes: 
+  [[Sequelize.fn('sum', Sequelize.col('quantity')), 'quantity' ]],
+  raw: true,
 })
-for (let ddinv of ddinvoices) {invds.push(ddinv.invoice_code)}
-let ddqtypes = []
-let ddatypes = []
- // console.log(mtyps)
-  for (let mtyp of mtyps) {
-    let ddmits = []
-    const items = await itemServiceInstance.find({pt_part_type : mtyp.code_value})
-        for(let item of items) { ddmits.push(item.pt_part)}
-        const mils = await userMobileServiceInstance.getInvoiceLineS({
-          where: {product_code: ddmits,invoice_code : invds},
-          attributes: 
-          [[Sequelize.fn('sum', Sequelize.col('price')), 'ddamt' ],
-           [Sequelize.fn('sum', Sequelize.col('quantity')), 'ddqty' ]
-        ],
-          raw: true,
 
 
-        })
-        ddqtypes.push({type:mtyp.code_cmmt,qty:(mils[0].ddqty != null)? mils[0].ddqty : 0})
-        ddatypes.push({type:mtyp.code_cmmt,amt:(mils[0].ddamt != null)? mils[0].ddamt : 0})
-  }
+//console.log(invoices.length , invoices)
+if(invoicesline[0].quantity == null) { qtydd = 0} else {  qtydd = invoicesline[0].quantity}
 
 
+var ihs = await invoiceOrderDetailServiceInstance.findS({
+  where: {idh_inv_date: { [Op.between]: [start_date, end_date]}},
+  attributes: 
+  [[Sequelize.fn('sum', Sequelize.col('idh_qty_inv')), 'qty' ]],
+  raw: true,
+})
+ 
+  if(ihs[0].qty == null) { qtygros= 0} else {  qtygros = ihs[0].qty}
+  console.log(qtydd,qtygros)
+//
 let cazone = []
 
 const  sups = await roleServiceInstance.findS({
@@ -2564,6 +2589,11 @@ const   caroles = await userMobileServiceInstance.getAllInvoice({
 if(caroles[0].amount != null) {
 ca_roles.push({role_code:role.role_code,ca: caroles[0].amount})}
 }
+console.log(req.body)
+var   qty_roles = await Sequelize.query("select role_code,sum(quantity) as qte from public.aa_invoiceline,  public.aa_invoice where  public.aa_invoiceline.invoice_code =  public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and public.aa_invoice.period_active_date >= ? and public.aa_invoice.period_active_date <= ? group by role_code order by role_code ASC" , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT })
+
+console.log(req.body)
+var   qty_custs = await Sequelize.query("select ih_bill,ad_name,sum(idh_qty_inv) as qte from public.idh_det, public.ad_mstr, public.ih_hist where public.ad_mstr.ad_addr = public.ih_hist.ih_bill and public.idh_det.idh_inv_nbr =  public.ih_hist.ih_inv_nbr  and public.ih_hist.ih_inv_date >= ? and public.ih_hist.ih_inv_date <= ? group by ih_bill , ad_name order by ih_bill ASC" , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT })
 
 /*credit dd*/
 let cred = 0
@@ -2610,17 +2640,21 @@ credit_roles.push({role_code:role.role_code,credit: Number(crroles[0].amount) - 
       ca_dd: cadd,
       rv_dd : rvdd,
       rv_dist: rvdist,
-      qty_type_data:types,
-      amt_type_data: mtypes,
-      ddqty_type_data:ddqtypes,
-      ddamt_type_data: ddatypes,
+      // qty_type_data:types,
+      // amt_type_data: mtypes,
+      // ddqty_type_data:ddqtypes,
+      // ddamt_type_data: ddatypes,
       ca_zone_data : cazone,
       ca_bill: ihamt,
       ca_role: ca_roles,
+      qty_role: qty_roles,
+      qty_cust: qty_custs,
       credit_dd : cred,
       credit_gros : credgros ,
       credit_role : credit_roles,
-      credit_Cust : credit_cust
+      credit_Cust : credit_cust,
+      qtydd: qtydd,
+      qtygros:qtygros
     });
   } catch (e) {
     logger.error('🔥 error: %o', e);

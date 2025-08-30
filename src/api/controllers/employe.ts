@@ -9,7 +9,7 @@ import EmployeTrainingService from '../../services/employe-training';
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import RequisitionDetailService from "../../services/requisition-detail"
-
+import {QueryTypes} from 'sequelize'
 import { Op } from 'sequelize';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -593,6 +593,29 @@ const findTrBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByPo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+console.log(req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+
+      const ihs =await sequelize.query("select id, emp_addr, emp_fname,emp_lname,emp_job, (select count(*) from public.po_mstr where po_buyer = emp_addr) as occ from public.emp_mstr order by occ DESC", {type: QueryTypes.SELECT });
+   //  console.log("ihs",ihs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: ihs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
+
 export default {
   create,
   createC,
@@ -610,4 +633,5 @@ export default {
   findByOne,
   findChild,
   findTrBy,
+  findByPo,
 };

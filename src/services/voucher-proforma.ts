@@ -24,7 +24,7 @@ export default class voucherProformaService {
     public async findOne(query: any): Promise<any> {
         try {
             const voucherProforma = await this.voucherProformaModel.findOne({
-                where: query, include:this.providerModel
+                where: query, include:this.addressModel
             })
             this.logger.silly("find one voucherProforma mstr")
             return voucherProforma

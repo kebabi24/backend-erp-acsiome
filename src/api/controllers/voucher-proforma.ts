@@ -282,17 +282,67 @@ const findBetweenDate = async (req: Request, res: Response, next: NextFunction) 
  let result = []
         console.log(req.body)
  const voucherProformaServiceInstance = Container.get(VoucherProformaService)
+ const voucherProformaDetailServiceInstance = Container.get(
+    VoucherProformaDetailService
+)
         const ap = await voucherProformaServiceInstance.findbetween(req.body)
       
+        for(const vh of ap){
+            const details = await voucherProformaDetailServiceInstance.find({
+                vdhp_domain: user_domain,
+                vdhp_inv_nbr: vh.vhp_inv_nbr,
+            })
+            result.push({id:vh.id, vh, details})
+    
+        }
     //  console.log(ap[0])
         return res
             .status(200)
-            .json({ message: "fetched succesfully", data: ap })
+            .json({ message: "fetched succesfully", data: result })
     } catch (e) {
         logger.error("🔥 error: %o", e)
         return next(e)
     }
 }
+const updated = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get('logger');
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
+  
+    logger.debug('Calling update one  purchaseOrder endpoint');
+    try {
+        const voucherProformaServiceInstance = Container.get(VoucherProformaService)
+        const voucherProformaDetailServiceInstance = Container.get(
+           VoucherProformaDetailService
+       )
+      const { id } = req.params;
+      const {voucherOrder, detail} = req.body
+      // const purchaseOrder = await purchaseOrderServiceInstance.update(
+      //   { ...req.body, last_modified_by: user_code },
+      //   { id },
+      // );
+      const proforma = await voucherProformaServiceInstance.findOne({ id });
+      console.log(proforma.vhp_inv_nbr);
+      const purchaseOrderDetail = await voucherProformaServiceInstance.update(
+        { ...voucherOrder,  last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
+        { id: id },
+      );
+    
+      await voucherProformaDetailServiceInstance.delete({vdhp_inv_nbr: proforma.vhp_inv_nbr,vdhp_domain:user_domain})
+      // const pos = await purchaseOrderDetailServiceInstance.find({ pod_domain: user_domain, pod_nbr: purchase.po_nbr });
+  
+      for (let entry of detail) {
+        // const purchaseOrderDetail = await purchaseOrderDetailServiceInstance.update(
+          entry = { ...entry, vdhp_domain:user_domain,vdhp_inv_nbr: proforma.vhp_inv_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+              await voucherProformaDetailServiceInstance.create(entry)
+        
+      }
+      return res.status(200).json({ message: 'fetched succesfully', data: id });
+    } catch (e) {
+      logger.error('ðŸ”¥ error: %o', e);
+      return next(e);
+    }
+  };
 export default {
     create,
     //createdirect,
@@ -303,5 +353,7 @@ export default {
     findAll,
     update,
     findAllwithDetails,
-    findBetweenDate
+    findBetweenDate,
+    updated
+    
 }
