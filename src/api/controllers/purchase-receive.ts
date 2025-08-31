@@ -849,7 +849,330 @@ console.log(req.body)
     return next(e);
   }
 };
+/*create retour*/
+const createRetour = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create code endpoint');
+  try {
+    const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const purchaseOrderDetailServiceInstance = Container.get(purchaseOrderDetailService);
+    const statusServiceInstance = Container.get(inventoryStatusService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const labelServiceInstance = Container.get(LabelService);
+    const itemsServiceInstance = Container.get(ItemsService);
+console.log(req.body)
+    //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
+    //let det = req.body.detail
+    var array = [];
+    array = req.body.detail;
+    var result = [];
+    array.reduce(function(res, value) {
+      //console.log('aaa',res[value.idh_part])
+      if (
+        !res[
+          (value.tr_part,
+          value.tr_serial,
+          // value.prh_taxable,
+          // value.prh_taxc,
+          // value.prh_tax_code,
+          value.tr_um,
+          value.tr_um_conv,
+          value.tr_site,
+          value.tr_loc,
+          
+          value.tr_price)
+        ]
+      ) {
+        res[
+          (value.tr_part,
+          value.tr_serial,
+          // value.prh_taxable,
+          // value.prh_taxc,
+          // value.prh_tax_code,
+          value.tr_um,
+          value.tr_um_conv,
+          value.tr_site,
+          value.tr_loc,
+          value.tr_price)
+        ] = {
+          tr_part: value.tr_part,
+          tr_serial: value.tr_serial,
+          // prh_taxable: value.prh_taxable,
+          // prh_taxc: value.prh_taxc,
+          // prh_tax_code: value.prh_tax_code,
+          tr_um: value.tr_um,
+          tr_um_conv: value.tr_um_conv,
+          tr_site:value.tr_site,
+          tr_loc: value.tr_loc,
+          // prh_vend_lot: value._vend_lot,
+          tr_price: value.tr_price,
+          tr_qty_loc: 0,
+        };
+        result.push(
+          res[
+            (value.tr_part,
+            value.tr_serial,
+            // value.prh_taxable,
+            // value.prh_taxc,
+            // value.prh_tax_code,
+            value.tr_um,
+            value.tr_um_conv,
+            value.tr_site,
+            value.tr_loc,
+            value.tr_price)
+          ],
+        );
+      }
+      res[
+        (value.tr_part,
+        value.tr_serial,
+        // value.prh_taxable,
+        // value.prh_taxc,
+        // value.prh_tax_code,
+        value.tr_um,
+        value.tr_um_conv,
+        value.tr_site,
+        value.tr_loc,
+        value.tr_price)
+      ].tr_qty_loc += value.tr_qty_loc;
+      return res;
+    }, {});
+    // console.log('here');
+    // console.log(result);
+    // console.log('here');
 
+    var i = 1;
+    for (const arr of result) {
+      console.log(arr)
+      await purchaseReceiveServiceInstance.create({
+        prh_domain: user_domain,
+        prh_receiver: req.body.prhnbr,
+        prh_part:arr.tr_part,
+        prh_serial:arr.tr_serial,
+        // value.prh_taxable,
+        // value.prh_taxc,
+        // value.prh_tax_code,
+        prh_um:arr.tr_um,
+        prh_um_conv:arr.tr_um_conv,
+        prh_loc:arr.tr_loc,
+        prh_site:arr.tr_site,
+        prh_price:arr.tr_price,
+        prh_rcvd: arr.tr_qty_loc,
+        prh_line: i,
+        ...req.body.pr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+      i = i + 1;
+    }
+    //   const pod = await purchaseOrderDetailServiceInstance.findOne({
+    //     pod_domain: user_domain,
+    //     pod_nbr: req.body.pr.prh_nbr,
+    //     pod_part: arr.prh_part,
+    //   });
+
+    //   if (pod)
+    //     await purchaseOrderDetailServiceInstance.update(
+    //       {
+    //         pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(arr.prh_rcvd),
+    //         last_modified_by: user_code,
+    //         last_modified_ip_adr: req.headers.origin,
+    //       },
+    //       { id: pod.id },
+    //     );
+    // }
+    for (const item of req.body.detail) {
+      const {  ...remain } = item;
+      const part = await itemsServiceInstance.findOne({ pt_part: remain.tr_part, pt_domain: user_domain });
+
+      const pod = await purchaseOrderDetailServiceInstance.findOne({
+            pod_domain: user_domain,
+            pod_nbr: remain.tr_nbr,
+            pod_part: remain.tr_part,
+          });
+    
+          if (pod)
+            await purchaseOrderDetailServiceInstance.update(
+              {
+                pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(remain.tr_qty_loc),
+                last_modified_by: user_code,
+                last_modified_ip_adr: req.headers.origin,
+              },
+              { id: pod.id },
+            );
+      // var labelId = null;
+      // if (part.pt_iss_pol) {
+      //   const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
+      //   console.log(seq);
+      //   labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+      //   await sequenceServiceInstance.update(
+      //     { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      //     { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+      //   );
+      // }
+      await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
+        tr_status:remain.tr_status,
+        tr_expire : remain.tr_expire,
+        tr_line: remain.tr_line,
+        tr_part: remain.tr_part,
+        tr_qty_loc: remain.tr_qty_loc,
+        tr_um: remain.tr_um,
+        tr_um_conv: remain.tr_um_conv,
+        tr_price: remain.tr_price,
+        tr_gl_amt: Number(remain.tr_price) * Number(remain.tr_qty_loc),
+        tr_site: remain.tr_site,
+        tr_loc: remain.tr_loc,
+        tr_serial: remain.tr_serial,
+        tr_nbr: remain.tr_nbr,
+        tr_lot: req.body.prhnbr,
+        tr_addr: req.body.pr.prh_vend,
+        tr_effdate: req.body.pr.prh_rcp_date,
+        tr_so_job: req.body.pr.prh_xinvoice,
+        tr_curr: req.body.pr.prh_curr,
+        tr_ex_rate: req.body.pr.prh_ex_rate,
+        tr_ex_rate2: req.body.pr.prh_ex_rate2,
+        tr_rmks: req.body.pr.prh_rmks,
+        tr_type: 'RCT-PO',
+        tr_ref:remain.tr_ref,
+        tr_date: new Date(),
+        tr_batch:remain.tr_batch,
+        tr_grade:remain.tr_grade,
+        tr__chr01:part.pt_draw,
+        tr__chr02:part.pt_break_cat,
+        tr__chr03:part.pt_group,
+        dec01:Number(new Date(req.body.pr.prh_rcp_date).getFullYear()),
+        dec02:Number(new Date(req.body.pr.prh_rcp_date).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+       
+      });
+      const lds = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
+        ld_part: remain.tr_part,
+        ld_site: remain.tr_site,
+      });
+      const sct_mtl_tl  = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: remain.tr_part,
+        sct_site: remain.tr_site,
+        sct_sim: 'STD-CG',
+      });
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: remain.tr_part,
+        sct_site: remain.tr_site,
+        sct_sim: 'STD-CG',
+      });
+      let qty = 0;
+      lds.map(elem => {
+        qty += Number(elem.ld_qty_oh);
+      });
+      const new_price = round(
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
+          (Number(remain.tr_qty_loc) *
+           
+            Number(remain.tr_price) *
+            Number(req.body.pr.prh_ex_rate2)) /
+            Number(req.body.pr.prh_ex_rate)) /
+          (qty + Number(remain.tr_qty_loc) * Number(remain.tr_um_conv)),
+        2,
+      );
+      await costSimulationServiceInstance.update(
+        {
+          sct_mtl_tl: new_price,
+          sct_cst_tot:
+            new_price +
+            Number(sctdet.sct_lbr_tl) +
+            Number(sctdet.sct_bdn_tl) +
+            Number(sctdet.sct_ovh_tl) +
+            Number(sctdet.sct_sub_tl),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        { sct_domain: user_domain, sct_part: remain.tr_part, sct_site: remain.tr_site, sct_sim: 'STD-CG' },
+      );
+      //console.log(tr_status);
+      const status = await statusServiceInstance.findOne({
+        is_domain: user_domain,
+        is_status: remain.tr_status,
+      });
+      // console.log(status, 'here');
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
+        ld_part: remain.tr_part,
+        ld_lot: remain.tr_serial,
+        ld_site: remain.tr_site,
+        ld_loc: remain.tr_loc,
+        ld_ref: remain.tr_ref,
+      });
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.tr_qty_loc) * Number(remain.tr_um_conv),
+            ld_expire: remain.tr_expire,
+            ld__log01: status.is_nettable,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      else
+        await locationDetailServiceInstance.create({
+          ld_domain: user_domain,
+          ld_part: remain.tr_part,
+          ld_date: new Date(),
+          ld_lot: remain.tr_serial,
+          ld_site: remain.tr_site,
+          ld_loc: remain.tr_loc,
+          ld_qty_oh: Number(remain.prh_rcvd),
+          ld_expire: remain.tr_expire,
+          ld_status: remain.tr_status,
+          ld__log01: status.is_nettable,
+          ld_ref: remain.tr_ref,
+          chr01:part.pt_draw,
+          chr02:part.pt_break_cat,
+          chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:req.body.pr.prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+
+      }
+    return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+/*create retour*/
 /*cab det*/
 const createCabDet = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -2112,4 +2435,5 @@ export default {
   Unreceip,
   findGroupRCPCancel,
   createPrhCab,
+  createRetour
 };
