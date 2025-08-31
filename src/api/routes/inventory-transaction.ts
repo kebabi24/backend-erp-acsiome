@@ -11,6 +11,7 @@ export default (app: Router) => {
   route.get('/findAllissSo', controller.findAllissSo);
   route.get('/:id', controller.findOne);
   route.post('/find', controller.findBy);
+  route.post('/finddistribution', controller.findBydistribution);
   route.put('/:id', controller.update);
   route.delete('/:id', controller.deleteOne);
   route.post('/rct-unp', controller.rctUnp);

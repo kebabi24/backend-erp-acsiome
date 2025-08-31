@@ -68,7 +68,36 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
-
+const findByparent = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all code endpoint")
+    const { user_domain } = req.headers;
+    try {
+        const workcenterServiceInstance = Container.get(WorkCenterService)
+        const wcs = await workcenterServiceInstance.find({...req.body,wc_domain: user_domain})
+        let result=[] 
+        for (let wc of wcs){
+            const wcp = await workcenterServiceInstance.find({wc_wkctr:wc.wc_wkctr,wc_mch:wc.wc_user1,wc_domain: user_domain})
+    let parent:any;
+    if(wcp.length ==0){parent = null}else{parent = wcp[0].wc_desc}
+    console.log(parent)
+result.push({
+    id:wc.id,
+    wc_wkctr:wc.wc_wkctr,
+    wc_mch:wc.wc_mch,
+    wc_dept:wc.wc_dept,
+    wc_desc:wc.wc_desc,
+    wc_user1:parent,
+})
+        }
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: result })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const update = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     const{user_code} = req.headers 
@@ -108,6 +137,7 @@ export default {
     findOne,
     findAll,
     findBy,
+    findByparent,
     update,
     deleteOne
 }

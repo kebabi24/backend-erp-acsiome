@@ -120,24 +120,26 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     const result = [];
     var j = 1;
     for (let obj of details) {
+      console.log(obj)
       if (obj.type != "Stock") {
-      const ps = await psServiceInstance.finds({ ps_parent: obj.bom , ps_domain:user_domain});
+      const ps = await psServiceInstance.find({ ps_parent: obj.bom , ps_domain:user_domain});
+      console.log(ps)
       for (let p of ps) {
-       
+       console.log('ps')
         var bool = false;
         for (var i = 0; i < result.length; i++) {
           if (result[i].part == p.ps_comp) {
-            result[i].qty =
-              result[i].qty + (Number(p.ps_qty_per) / (parseFloat(p.ps_scrp_pct) / 100)) * Number(obj.prod_qty);
+              result[i].qty = result[i].qty + (Number(p.ps_qty_per) ) * Number(obj.ord_qty);
             //  result[i].qtycom = (result[i].qty + Number(p.ps_qty_per) * Number(obj.prod_qty) )  - result[i].qtyoh
             bool = true;
           }
         }
         if (bool == false) {
+          console.log('bool')
           result.push({
             id: j,
             part: p.ps_comp,
-            qty: (Number(p.ps_qty_per) / (parseFloat(p.ps_scrp_pct) / 100)) * Number(obj.prod_qty),
+            qty: (Number(p.ps_qty_per) ) * Number(obj.ord_qty),
           });
           //     qtyoh: ldqty,sftystk:item.pt_sfty_stk,  qtycom: qtyc
           // const item = await itemServiceInstance.findOne({pt_part:p.ps_comp})
@@ -159,10 +161,11 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
         }
       }
         } else {
+          console.log('else')
           result.push({
             id: j,
             part: obj.part,
-            qty:  Number(obj.prod_qty),
+            qty:  Number(obj.ord_qty),
           });
           j = j + 1
 
@@ -172,7 +175,7 @@ const findBySpec = async (req: Request, res: Response, next: NextFunction) => {
     let dat = [];
     for (let res of result) {
       const item = await itemServiceInstance.findOne({ pt_part: res.part , pt_domain:user_domain});
-      const lds = await ldServiceInstance.find({ ld_part: res.part, ld_site: site,ld_domain:user_domain });
+      const lds = await ldServiceInstance.find({ ld_part: res.part, ld_domain:user_domain });
       var ldqty = 0;
       for (let ld of lds) {
         ldqty = ldqty + Number(ld.ld_qty_oh);

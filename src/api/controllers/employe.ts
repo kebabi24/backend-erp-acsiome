@@ -1,6 +1,7 @@
 import EmployeService from '../../services/employe';
 import ItemService from '../../services/item';
 import CodeService from '../../services/code';
+import psService from '../../services/ps';
 import EmployeAvailabilityService from '../../services/employe-availability';
 import AffectEmployeService from '../../services/affect-employe';
 import EmployeScoreService from '../../services/employe-score';
@@ -260,13 +261,63 @@ const findByCycle = async (req: Request, res: Response, next: NextFunction) => {
   const { user_domain } = req.headers;
   try {
     const employeServiceInstance = Container.get(EmployeService);
+    const codeserviceInstance = Container.get(CodeService);
     let d = new Date()
     let d1 = new Date()
-    d.setDate(d.getDate() - 15)
-    d1.setDate(d1.getDate() + 15)
+    const code = await codeserviceInstance.findOne({ code_fldname:'bareme_temps' });
+    d.setDate(d.getDate() -  Number(code.dec01))
+    d1.setDate(d1.getDate() + Number(code.dec01))
     const employe = await employeServiceInstance.find({ emp_domain: user_domain,date01:{ [Op.between]: [d,d1]} });
     console.log(d,d1)
     return res.status(200).json({ message: 'fetched succesfully', data: employe });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByCycleDetail = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const employeServiceInstance = Container.get(EmployeService);
+    const psServiceInstance = Container.get(psService);
+    const codeserviceInstance = Container.get(CodeService);
+    const itemServiceInstance = Container.get(ItemService)
+    let d = new Date()
+    let d1 = new Date()
+    const code = await codeserviceInstance.findOne({ code_fldname:'bareme_temps' });
+    d.setDate(d.getDate() -  Number(code.dec01))
+    d1.setDate(d1.getDate() + Number(code.dec01))
+    const employe = await employeServiceInstance.find({ emp_domain: user_domain,date01:{ [Op.between]: [d,d1]} });
+    let result = []
+    for(let emp of employe)
+    {
+      const nomenclature = await psServiceInstance.find({ ps_domain:user_domain,ps_parent:emp.emp_level,ps_userid:emp.emp_line2 });
+      for (let ps of nomenclature)
+        
+      {const pt = await itemServiceInstance.findOne({pt_domain:user_domain,pt_part:ps.ps_comp})
+      let couleur = pt.pt_break_cat
+      let desc = pt.pt_desc1
+        result.push({id:emp.id,
+        emp_addr:emp.emp_addr,
+        emp_fname:emp.emp_fname,
+        emp_lname:emp.emp_lname,
+        bom:emp.emp_level,
+        date01:emp.date01,
+        Epi:ps.ps_comp,
+        desc:desc,
+        Couleur:couleur,
+        Taille:pt.pt_rev,
+        ord_qty:ps.ps_qty_per,
+        type:''
+      })
+      }
+      
+    }
+    console.log(d,d1)
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -636,6 +687,7 @@ export default {
   findAvailable,
   findByOne,
   findByCycle,
+  findByCycleDetail,
   findChild,
   findTrBy,
 };

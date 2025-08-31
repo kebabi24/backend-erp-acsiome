@@ -39,6 +39,7 @@ export default (app: Router) => {
     route.delete("/:id", controller.deleteOne)
     route.post("/deletes", controller.deletes)
     route.post("/sumbitDomain", controller.DomainTraining)
+    route.post("/sumbitData", controller.addData)
     route.get("/findprovider", controller.findAllProvider)
     route.get("/", controller.findAll)
 }

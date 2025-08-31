@@ -680,6 +680,72 @@ const DomainTraining = async (req: Request, res: Response, next: NextFunction) =
       return next(e)
   }
 }
+const addData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling Create Multiple Visit results  endpoint")
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+      const codeServiceInstanse = Container.get(CodeService)
+
+      var creationDomain = 'no enteries to be created was sent'
+     
+      var updateDomain  = ['no enteries to be updated was sent']
+      //console.log("ppppppppppppppppppppppp",req.body)
+      // CREATE 
+      if(req.body.domain){
+          // console.log(req.body.visitResults)
+          const listOfDomainToCreate = [...req.body.domain]
+          // let obj = {
+          //   code_domain:user_domain
+          //   , created_by: user_code,
+          //    created_ip_adr: req.headers.origin,
+          //    last_modified_by: user_code,
+          //    last_modified_ip_adr: req.headers.origin,
+          // }
+        
+          for (let dom of listOfDomainToCreate ) {
+            
+        //  console.log(dom)
+          creationDomain = await codeServiceInstanse.create({...dom ,code_domain:user_domain
+            , created_by: user_code,
+             created_ip_adr: req.headers.origin,
+             last_modified_by: user_code,
+             last_modified_ip_adr: req.headers.origin})
+             //listOfDomainToCreate)
+        }
+      }
+//console.log("updatedData",req.body.updateData)
+      // UPDATE 
+      if(req.body.updateData){
+        //  console.log("updatedData"+ Object.keys(req.body.updateData))
+          const listOfDomainToCreate = req.body.updateData
+          // creationResults = await mobileSettingsServiceInstanse.createManyVisitResult(listOfVisitResultsToCreate)
+          for(const domain of listOfDomainToCreate ){
+              const updatedDomainList = await codeServiceInstanse.update(
+                  {...domain}, 
+                  { id : domain.id})
+                  updateDomain.push(updatedDomainList)
+          }
+          // console.log(listOfVisitResultsToCreate)
+      }
+      
+  
+      // const newDomain = await codeServiceInstanse.find({code_fldname:req.body.field,code_domain:user_domain})
+      return res
+          .status(201)
+          .json({ 
+              message: "created visit results succesfully", 
+              createResults:  creationDomain, 
+              updateResults:updateDomain,
+              // newVisitResults : newDomain,
+          })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
 
 const findAllProvider = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -729,6 +795,7 @@ export default {
   deleteOne,
   findTriggerType,
   DomainTraining,
+  addData,
   deletes,
   findAllProvider
 };
