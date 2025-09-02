@@ -1040,7 +1040,7 @@ console.log(req.body)
         tr_ex_rate: req.body.pr.prh_ex_rate,
         tr_ex_rate2: req.body.pr.prh_ex_rate2,
         tr_rmks: req.body.pr.prh_rmks,
-        tr_type: 'RCT-PO',
+        tr_type: 'ISS-PRV',
         tr_ref:remain.tr_ref,
         tr_date: new Date(),
         tr_batch:remain.tr_batch,
