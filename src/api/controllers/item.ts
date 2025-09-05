@@ -134,6 +134,66 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findBytaille = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const itemst = await itemServiceInstance.find({ pt_prod_line:'EPI',pt_rev:req.body.taille,pt_domain:user_domain });
+    const itemsp = await itemServiceInstance.find({ pt_prod_line:'EPI',pt_rev:req.body.pointure,pt_domain:user_domain });
+    
+     let result = []
+     for (let det of itemst){
+      let result_body={
+        id:det.id,
+        pt_part:det.pt_part,
+        pt_desc1:det.pt_desc1,
+        pt_um:det.pt_um,
+        pt_site:det.pt_site,
+        pt_loc:det.pt_loc,
+        pt_prod_line:det.pt_prod_line,
+        pt_part_type:det.pt_part_type,
+        pt_draw:det.pt_draw,
+        pt_group:det.pt_group,
+        pt_rev:det.pt_rev,
+        pt_break_cat:det.pt_break_cat,
+        pt_dsgn_grp:det.pt_dsgn_grp,
+
+
+      }
+      result.push(result_body)
+    }
+    for (let det2 of itemsp){
+      let result_body2={
+        id:det2.id,
+        pt_part:det2.pt_part,
+        pt_desc1:det2.pt_desc1,
+        pt_um:det2.pt_um,
+        pt_site:det2.pt_site,
+        pt_loc:det2.pt_loc,
+        pt_prod_line:det2.pt_prod_line,
+        pt_part_type:det2.pt_part_type,
+        pt_draw:det2.pt_draw,
+        pt_group:det2.pt_group,
+        pt_rev:det2.pt_rev,
+        pt_break_cat:det2.pt_break_cat,
+        pt_dsgn_grp:det2.pt_dsgn_grp,
+
+
+      }
+      result.push(result_body2)
+    }
+    
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByPurchase = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all item endpoint');
@@ -954,6 +1014,7 @@ export default {
   create,
   findBySpec,
   findBy,
+  findBytaille,
   findByPurchase,
   findBywithperte,
   findByOp,

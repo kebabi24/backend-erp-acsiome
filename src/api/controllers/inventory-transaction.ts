@@ -253,7 +253,7 @@ emp_fname:emp.emp_fname,
 emp_lname:emp.emp_lname,
 emp_upper:emp.emp_upper,
 emp_job:emp.emp_job,
-emp_level:emp.mp_level,
+emp_level:emp.emp_level,
 emp_line2:emp.emp_line2,
 emp_first_date:emp.emp_first_date,
 date01:emp.date01,
@@ -269,6 +269,176 @@ band:0,
 casquette:0,
 lunette:0,
 gant:0,
+})
+    }
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByreport = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const employeserviceinstance = Container.get(employeService);
+    const itemserviceinstance = Container.get(ItemService);
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const emps = await itemserviceinstance.find({pt_domain:user_domain,pt_prod_line:'EPI' });
+    let result = []
+    for (let emp of emps){
+        // const blouse = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'BLOUSE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const tshirt = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'T-SHIRT'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const pantalon = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'PANTALON'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const chaussure = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'CHAUSSURE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const veste = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'VESTE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const band = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'BAND'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const protection = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'PROTECTION AUDITIVE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const impermeable = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'IMPERMEABLE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const casquette = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'CASQUETTE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const lunette = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'LUNETTE'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01', [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        // const gant = await inventoryTransactionServiceInstance.findSpecial({
+        //   where: {
+        //     tr_domain:user_domain,
+        //     tr_user1:emp.emp_fname,
+        //     tr_type: { [Op.eq]: 'ISS-EPI' },
+        //     tr__chr01:'GANT'
+        //     // tr_effdate: { [Op.between]: [req.body.date_1, req.body.date_2] },
+        //   },
+        //   attributes: ['tr__chr01',  [Sequelize.literal('SUM(tr_qty_loc * tr_um_conv)'), 'total']],
+        //   group: ['tr__chr01'],
+        //   raw: true,
+        // });
+        
+result.push({
+id:emp.id,
+pt_part:emp.pt_part,
+pt_desc1:emp.pt_desc1,
+pt_part_type:emp.pt_part_type,
+pt_draw:emp.pt_draw,
+pt_group:emp.pt_group,
+pt_model:emp.pt_model,
+pt_rev:emp.pt_rev,
+pt_break_cat:emp.pt_break_cat,
+qty_oh:0,
+rctpo:0,
+issepi:0,
+retepi:0,
+ecart:0,
+
 })
     }
     
@@ -1220,7 +1390,7 @@ const issEpi = async (req: Request, res: Response, next: NextFunction) => {
         ld_lot: item.tr_serial,
         ld_site: item.tr_site,
         ld_loc: item.tr_loc,
-        ld_ref: item.tr_ref,
+        
       });
 
       if (ld)
@@ -5365,5 +5535,6 @@ export default {
   reprint,
   findByEmp,
   findByEpi,
-  findBydistribution
+  findBydistribution,
+  findByreport
 };

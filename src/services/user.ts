@@ -11,6 +11,7 @@ export default class UserService {
     @Inject('purchaseOrderModel')
     private purchaseOrderModel: Models.PurchaseOrderModel,
     @Inject('posOrderModel') private posOrderModel: Models.posOrderModel,
+    @Inject('requisitionModel') private requisitionModel: Models.RequisitionModel,
     @Inject('logger') private logger,
   ) {}
 
@@ -184,6 +185,20 @@ export default class UserService {
       const orders = await this.posOrderModel.findAll({
         where: { status: 'A' },
         attributes: ['id', 'order_code', 'customer', 'order_emp'],
+      });
+
+      this.logger.silly('found new orders', orders);
+      return orders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+  public async getreqapprovals(): Promise<any> {
+    try {
+      const orders = await this.requisitionModel.findAll({
+        // where: { rqm_aprv_stat: '0' },
+        attributes: ['id', 'rqm_nbr', 'rqm_category', 'rqm_req_date','rqm_aprv_stat'],
       });
 
       this.logger.silly('found new orders', orders);

@@ -199,10 +199,11 @@ const getNotifications = async (req: Request, res: Response, next: NextFunction)
       
         const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
         const orders = await userServiceInstance.getNewOrders()
-        
+        const req_approval = await userServiceInstance.getreqapprovals()
+        console.log(req_approval)
         return res
                 .status(200)
-                .json({ message: "new orders", data: {purchase_orders ,orders} })
+                .json({ message: "new orders", data: {purchase_orders ,orders,req_approval} })
 
        
     } catch (e) {

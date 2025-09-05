@@ -11,6 +11,7 @@ export default (app: Router) => {
   route.get('/training/', controller.findAllTraining);
   route.post('/', controller.create);
   route.post('/find', controller.findBy);
+  route.post('/findtaille', controller.findBytaille);
   route.post('/findpurchasing', controller.findByPurchase);
   route.post('/findwithperte', controller.findBywithperte);
   route.post('/findop', controller.findByOp);
