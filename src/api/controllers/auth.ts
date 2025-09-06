@@ -13,7 +13,7 @@ import { Container } from "typedi"
 import argon2 from "argon2"
 import jwt from "jsonwebtoken"
 import CryptoJS from "../../utils/CryptoJS";
-
+import {QueryTypes} from 'sequelize'
 var Crypto = require('crypto');
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -191,15 +191,20 @@ const verifypwd = async (req: Request, res: Response, next: NextFunction) => {
 
 const getNotifications = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
+    const sequelize = Container.get("sequelize")
+   
     logger.debug("Calling login endpoint")
+    const { user_code } = req.headers;
+    const { user_domain } = req.headers;
     try {
         
         const userServiceInstance = Container.get(UserService)
-
+console.log('user_code',user_code)
       
         const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
         const orders = await userServiceInstance.getNewOrders()
-        const req_approval = await userServiceInstance.getreqapprovals()
+        const req_approval = await sequelize.query("select public.rqm_mstr.id as id, rqm_nbr, rqm_category, rqm_req_date,rqm_aprv_stat, seq_seq from public.rqm_mstr, public.seq_mstr where (rqm_aprv_stat = '0' or rqm_aprv_stat = '1' or rqm_aprv_stat = '2') and rqm_category = seq_seq and (seq_appr1 = ? or seq_appr2 = ? or seq_appr3 = ?)", { replacements: [user_code,user_code,user_code], type: QueryTypes.SELECT })
+        // const req_approval = await userServiceInstance.getreqapprovals(user_code)
         console.log(req_approval)
         return res
                 .status(200)

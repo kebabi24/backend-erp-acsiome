@@ -1,5 +1,6 @@
 import { Service, Inject } from 'typedi';
 import argon2 from 'argon2';
+import { Op } from 'sequelize';
 @Service()
 export default class UserService {
   constructor(
@@ -194,10 +195,12 @@ export default class UserService {
       throw e;
     }
   }
-  public async getreqapprovals(): Promise<any> {
+  public async getreqapprovals(user:any): Promise<any> {
     try {
       const orders = await this.requisitionModel.findAll({
-        // where: { rqm_aprv_stat: '0' },
+         where: { rqm_aprv_stat:{[Op.or] :['0','1','2'] },
+        
+        },
         attributes: ['id', 'rqm_nbr', 'rqm_category', 'rqm_req_date','rqm_aprv_stat'],
       });
 
