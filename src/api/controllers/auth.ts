@@ -14,6 +14,7 @@ import argon2 from "argon2"
 import jwt from "jsonwebtoken"
 import CryptoJS from "../../utils/CryptoJS";
 import {QueryTypes} from 'sequelize'
+import configService from "../../services/config";
 var Crypto = require('crypto');
 const login = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -199,16 +200,21 @@ const getNotifications = async (req: Request, res: Response, next: NextFunction)
     try {
         
         const userServiceInstance = Container.get(UserService)
+        const configServiceInstance = Container.get(configService)
 console.log('user_code',user_code)
-      
-        const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
-        const orders = await userServiceInstance.getNewOrders()
+const config = await configServiceInstance.findOne({});
+        // const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
+        if (config.cfg_threshold_user.indexOf(user_code) !== -1) {
+        
+          var purchase_orders = await sequelize.query("select public.po_mstr.id as id, po_nbr, po_vend, po_ord_date from public.po_mstr where (po_stat != 'V' or po_stat isNull) and po_amt  >=  ? order by po_ord_date ASC", { replacements: [config.cfg_po_threshold],type: QueryTypes.SELECT })
+        }
+        // const orders = await userServiceInstance.getNewOrders()
         const req_approval = await sequelize.query("select public.rqm_mstr.id as id, rqm_nbr, rqm_category, rqm_req_date,rqm_aprv_stat, seq_seq from public.rqm_mstr, public.seq_mstr where (rqm_aprv_stat = '0' or rqm_aprv_stat = '1' or rqm_aprv_stat = '2') and rqm_category = seq_seq and (seq_appr1 = ? or seq_appr2 = ? or seq_appr3 = ?)", { replacements: [user_code,user_code,user_code], type: QueryTypes.SELECT })
         // const req_approval = await userServiceInstance.getreqapprovals(user_code)
         console.log(req_approval)
         return res
                 .status(200)
-                .json({ message: "new orders", data: {purchase_orders ,orders,req_approval} })
+                .json({ message: "new orders", data: {purchase_orders ,req_approval} })
 
        
     } catch (e) {
