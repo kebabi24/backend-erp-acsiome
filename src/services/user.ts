@@ -198,7 +198,7 @@ export default class UserService {
   public async getreqapprovals(user:any): Promise<any> {
     try {
       const orders = await this.requisitionModel.findAll({
-         where: { rqm_aprv_stat:{[Op.or] :['0','1','2'] },
+         where: { rqm_aprv_stat:{[Op.or] :[0,1,2] },
         
         },
         attributes: ['id', 'rqm_nbr', 'rqm_category', 'rqm_req_date','rqm_aprv_stat'],

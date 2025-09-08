@@ -187,7 +187,7 @@ const findNotByAll = async (req: Request, res: Response, next: NextFunction) => 
         const requisitions = await requisitionServiceInstance.find({
             ... {
                 rqm_aprv_stat: {
-                  [Op.ne]: "3"
+                  [Op.ne]: 3
                 },
                 rqm_open: true ,
                 rqm_domain: user_domain
@@ -289,7 +289,7 @@ const findAllApp = async (req: Request, res: Response, next: NextFunction) => {
         }
       //  console.log(user_code)
       //  console.log(list)
-        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
+        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: 3} , rqm_category:  list})
     //   let i = 1
         for(const req of requisitions){
           //  console.log(req)
@@ -473,7 +473,7 @@ const findAllAppDet = async (req: Request, res: Response, next: NextFunction) =>
         }
       //  console.log(user_code)
         console.log(list)
-        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: "3"} , rqm_category:  list})
+        const requisitions = await requisitionServiceInstance.find({rqm_domain:user_domain, rqm_aprv_stat: {[Op.not]: 3} , rqm_category:  list})
      let req = []
      for (let requisition of requisitions) {
         req.push(requisition.rqm_nbr)
