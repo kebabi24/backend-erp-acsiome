@@ -1,6 +1,8 @@
 import ProfileService from "../../services/profile"
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
+import codeService from "../../services/code"
+import ProfileServiceService from "../../services/profile-service"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -106,11 +108,38 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findByService = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling find by  all profile endpoint")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+    try {
+        const profileServiceInstance = Container.get(ProfileService)
+        const codeServiceInstance = Container.get(codeService)
+        const profileServiceServiceInstance = Container.get(ProfileServiceService)
+        
+        const profiles = await profileServiceServiceInstance.find({...req.body,usgs_domain:user_domain})
+
+        let prof=[]
+for(let pr of profiles) {
+prof.push(pr.usgs_service)
+}
+        const codes = await codeServiceInstance.find({code_fldname:'emp_job',code_value:prof,code_domain:user_domain})
+      
+        return res
+            .status(200)
+            .json({ message: "fetched succesfully", data: codes })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 export default {
     create,
     findOne,
     findAll,
     findBy,
+    findByService,
     update,
     deleteOne
 }
