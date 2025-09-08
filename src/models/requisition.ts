@@ -85,7 +85,7 @@ const Requisition = sequelize.define(
     rqm_open: {type: Sequelize.BOOLEAN, defaultValue : false  },
     rqm_prev_rtp: {type: Sequelize.BOOLEAN, defaultValue : false  },
     rqm_cls_date: Sequelize.DATEONLY,
-    rqm_aprv_stat: Sequelize.STRING,
+    rqm_aprv_stat: Sequelize.INTEGER,
     rqm_ex_rate2: Sequelize.DATEONLY,
     rqm_ex_ratetype: Sequelize.STRING,
     rqm_exru_seq: Sequelize.INTEGER,

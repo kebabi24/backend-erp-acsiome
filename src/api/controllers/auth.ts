@@ -201,20 +201,46 @@ const getNotifications = async (req: Request, res: Response, next: NextFunction)
         
         const userServiceInstance = Container.get(UserService)
         const configServiceInstance = Container.get(configService)
+        const sequenceServiceInstance = Container.get(SequenceService)
 console.log('user_code',user_code)
 const config = await configServiceInstance.findOne({});
         // const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
+        if(config.cfg_threshold_user != null) {
         if (config.cfg_threshold_user.indexOf(user_code) !== -1) {
         
           var purchase_orders = await sequelize.query("select public.po_mstr.id as id, po_nbr, po_vend, po_ord_date from public.po_mstr where (po_stat != 'V' or po_stat isNull) and po_amt  >=  ? order by po_ord_date ASC", { replacements: [config.cfg_po_threshold],type: QueryTypes.SELECT })
         }
+    }
         // const orders = await userServiceInstance.getNewOrders()
-        const req_approval = await sequelize.query("select public.rqm_mstr.id as id, rqm_nbr, rqm_category, rqm_req_date,rqm_aprv_stat, seq_seq from public.rqm_mstr, public.seq_mstr where (rqm_aprv_stat = '0' or rqm_aprv_stat = '1' or rqm_aprv_stat = '2') and rqm_category = seq_seq and (seq_appr1 = ? or seq_appr2 = ? or seq_appr3 = ?)", { replacements: [user_code,user_code,user_code], type: QueryTypes.SELECT })
+        const seqs = await sequelize.query("select seq_seq,seq_appr1,seq_appr1_lev,seq_appr2,seq_appr2_lev,seq_appr3,seq_appr3_lev from public.seq_mstr where (seq_appr1 = ? or seq_appr2 = ? or seq_appr3 = ?)", { replacements: [user_code,user_code,user_code], type: QueryTypes.SELECT });
+        let usrs = []
+ for (let seq of seqs) {
+    if(seq.seq_appr1 == user_code) {
+        usrs.push({user:seq.seq_appr1,level:Number(seq.seq_appr1_lev),seq:seq.seq_seq})
+    }
+    if(seq.seq_appr2 == user_code) {
+        usrs.push({user:seq.seq_appr2,level:Number(seq.seq_appr2_lev),seq:seq.seq_seq})
+    }
+    if(seq.seq_appr3 == user_code) {
+        usrs.push({user:seq.seq_appr3,level:Number(seq.seq_appr3_lev),seq:seq.seq_seq})
+    }
+ }
+ 
+        let reqs = []
+        for(let usr of usrs) {
+            const req_approvals = await sequelize.query("select public.rqm_mstr.id as id, rqm_nbr, rqm_category, rqm_req_date,rqm_aprv_stat from public.rqm_mstr where  rqm_category = ? and rqm_aprv_stat < ? ", { replacements: [usr.seq,usr.level],  type: QueryTypes.SELECT })
+            for (let req_approval of req_approvals ){
+                const indexpart =  reqs.findIndex(({ rqm_nbr}) => rqm_nbr == req_approval.rqm_nbr);
+                if (indexpart<0) {
+                    reqs.push({id:req_approval.id, rqm_nbr:req_approval.rqm_nbr, rqm_category:req_approval.rqm_category, rqm_req_date:req_approval.rqm_req_date,rqm_aprv_stat:req_approval.rqm_aprv_stat})
+                }
+            }
+    }
         // const req_approval = await userServiceInstance.getreqapprovals(user_code)
-        console.log(req_approval)
+        console.log(reqs.length)
         return res
                 .status(200)
-                .json({ message: "new orders", data: {purchase_orders ,req_approval} })
+                .json({ message: "new orders", data: {purchase_orders ,reqs} })
 
        
     } catch (e) {
