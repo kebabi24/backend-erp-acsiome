@@ -22,6 +22,7 @@ export default (app: Router) => {
   route.get("/det/:id", controller.findOneDet)
   route.post('/findprod', controller.findProd);
   route.post('/stk', controller.findAllwithstk);
+  route.post('/stknotnull', controller.findAllwithstk0);
   route.post('/itemstk', controller.findAllItemswithstk);
   route.put('/:id', controller.update);
   route.post('/calccmp', controller.CalcCmp);

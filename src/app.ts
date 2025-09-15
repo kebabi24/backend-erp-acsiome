@@ -9,7 +9,7 @@ import { setTimeout } from 'timers';
 import { emit } from 'process';
 
 import userMobileController from './api/controllers/user-mobile';
-// import posOrderController from './api/controllers/pos-order';
+import authController from './api/controllers/auth';
 import argon2 from "argon2"
 async function startServer() {
   const app = express();
@@ -51,6 +51,15 @@ async function startServer() {
         
           const io = require('socket.io')(server);
           io.on('connection',userMobileController.getDataBack)
+
+           io.on('createOrder', authController.getNotifications) 
+  //          socket => {
+  
+
+  //   socket.on('createOrder', data => authController.getNotifications(socket, data);
+
+  //   socket.on('disconnect', () => );
+  // });
         
         } else {
             console.log('Activation error!');

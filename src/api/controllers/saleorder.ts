@@ -108,6 +108,97 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+
+const createceram = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling Create sequence endpoint');
+
+  try {
+    console.log(req.body.saleOrder.so_category)
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const accountOrderServiceInstance = Container.get(AccountOrderService);
+    const customerServiceInstance = Container.get(CustomerService)
+    const locationDetailServiceInstance = Container.get(locationDetailService)
+    const { saleOrder, saleOrderDetail } = req.body;
+    
+    const so = await saleOrderServiceInstance.create({
+      ...saleOrder,
+      so_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    const cm = await customerServiceInstance.findOne({cm_addr: saleOrder.so_cust,cm_domain : user_domain,})
+    if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+         
+    const ao = await accountOrderServiceInstance.create({
+      ao_so_nbr:so.so_nbr,
+      ao_nbr : so.so_nbr,
+      ao_cust: saleOrder.so_cust,
+      ao_type:"I",
+      ao_amt:Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt), 
+
+      ao_po : saleOrder.so_po,
+
+      ao_rmks : saleOrder.so_rmks,
+      ao_curr : saleOrder.so_curr,
+      ao_ex_rate : saleOrder.so_ex_rate,
+      ao_ex_rate2 : saleOrder.so_ex_rate2,
+      ao_cr_terms : saleOrder.so_cr_terms,
+      
+      
+      ao_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    //console.log(saleOrderDetail)
+    for (let entry of saleOrderDetail) {
+      entry = {
+        ...entry,
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+        sod_due_date : saleOrder.so_due_date,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      await saleOrderDetailServiceInstance.create(entry);
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
+        ld_part: entry.sod_part,
+        ld_lot: null,
+        ld_site: entry.sod_site,
+        ld_loc: entry.sod_loc,
+      });
+
+      if (ld){
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_all: Number(ld.ld_qty_all) + Number(entry.sod_qty_ord) * Number(entry.sod_um_conv),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+        }
+    }
+  
+
+    return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const createdirect = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1089,6 +1180,7 @@ console.log(result)
 export default {
   create,
   createdirect,
+  createceram,
   findBy,
   findByAll,
   findByAllSo,

@@ -444,6 +444,35 @@ const findAllwithstk = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+const findAllwithstk0 = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const items = await itemServiceInstance.find({pt_domain:user_domain});
+    const result = [];
+    for (const item of items) {
+      const res = await locationDetailServiceInstance.findSpecial({
+        where: { ld_part: item.pt_part,ld_domain:user_domain },
+        attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total'], [Sequelize.fn('sum', Sequelize.col('ld_qty_all')), 'totalall']],
+        group: ['ld_part'],
+        raw: true,
+      });
+
+      //items.total_qty = res.total_qty;
+      const qty = res[0] ? (res[0].total ? res[0].total - res[0].totalall : 0) : 0;
+      item.pt_ord_max = qty;
+     if(qty > 0) { result.push(item)};
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findAllItemswithstk = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -1025,6 +1054,7 @@ export default {
   findAll,
   findProd,
   findAllwithstk,
+  findAllwithstk0,
   findAllItemswithstk,
   update,
   CalcCmp,
