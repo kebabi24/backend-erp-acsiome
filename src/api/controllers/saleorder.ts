@@ -24,6 +24,7 @@ import workOrderService from '../../services/work-order';
 import { isNull } from 'lodash';
 import WorkRouting from '../../models/workrouting';
 import workroutingService from '../../services/workrouting';
+import SequenceService from '../../services/sequence';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -121,9 +122,10 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
     const accountOrderServiceInstance = Container.get(AccountOrderService);
-    const customerServiceInstance = Container.get(CustomerService)
-    const locationDetailServiceInstance = Container.get(locationDetailService)
-    const { saleOrder, saleOrderDetail } = req.body;
+    const customerServiceInstance = Container.get(CustomerService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const { saleOrder, accountOrder,saleOrderDetail } = req.body;
     
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
@@ -134,12 +136,13 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     const cm = await customerServiceInstance.findOne({cm_addr: saleOrder.so_cust,cm_domain : user_domain,})
-    if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+    if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt) - Number(accountOrder.ao_amt) , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
          
     const ao = await accountOrderServiceInstance.create({
       ao_so_nbr:so.so_nbr,
       ao_nbr : so.so_nbr,
       ao_cust: saleOrder.so_cust,
+      ao_effdate: saleOrder.so_ord_date,
       ao_type:"I",
       ao_amt:Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt), 
 
@@ -158,6 +161,8 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+
+    
     //console.log(saleOrderDetail)
     for (let entry of saleOrderDetail) {
       entry = {
@@ -190,8 +195,26 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
         );
         }
     }
-  
-
+  if(accountOrder.ao_amt != 0 && accountOrder.ao_amt != null) {
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AU', seq_type: 'AU' });
+    let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+      await sequenceServiceInstance.update(
+        { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+        { id: seq.id, seq_type: 'AU', seq_seq: 'AU', seq_domain: user_domain },
+      );
+    const aop = await accountOrderServiceInstance.create({
+    ...accountOrder,
+      ao_nbr : nbr,
+      ao_so_nbr:so.so_nbr,
+      
+      ao_bill: saleOrder.so_cust,
+      ao_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+  }
     return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
   } catch (e) {
     //#

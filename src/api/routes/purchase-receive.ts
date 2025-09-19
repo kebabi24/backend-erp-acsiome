@@ -9,6 +9,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/cab', controller.createCab);
+  route.post('/addstd', controller.createStd);
   route.post('/retour', controller.createRetour);
   route.post('/prhcab', controller.createPrhCab);
   route.post('/cabdet', controller.createCabDet);

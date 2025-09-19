@@ -49,7 +49,7 @@ const createP = async (req: Request, res: Response, next: NextFunction) => {
         let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-      { id: seq.id, seq_type: 'AP', seq_seq: 'AP', seq_domain: user_domain },
+      { id: seq.id, seq_type: 'AU', seq_seq: 'AU', seq_domain: user_domain },
     );
         // const bankdet = await bankDetailServiceInstance.findOne({bkd_bank: req.body.ao_bank,bkd_domain: user_domain, bkd_pay_method: req.body.ao_pay_method, bkd_module : "AR"})
         // if (bankdet) {

@@ -510,6 +510,451 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+
+
+/*std*/
+
+const createStd = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create code endpoint');
+  try {
+    const purchaseReceiveServiceInstance = Container.get(PurchaseReceiveService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const purchaseOrderDetailServiceInstance = Container.get(purchaseOrderDetailService);
+    const statusServiceInstance = Container.get(inventoryStatusService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const labelServiceInstance = Container.get(LabelService);
+    const itemsServiceInstance = Container.get(ItemsService);
+
+    //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
+    //let det = req.body.detail
+    const pageWidth = 118 * 2.83465; // Width of the page in points
+    const pageHeight = 120 * 2.83465; // Height of the page in points
+
+    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    var array = [];
+    array = req.body.detail;
+    var result = [];
+    array.reduce(function(res, value) {
+      //console.log('aaa',res[value.idh_part])
+      if (
+        !res[
+          (value.prh_part,
+          value.prh_serial,
+          value.prh_taxable,
+          value.prh_taxc,
+          value.prh_tax_code,
+          value.prh_um,
+          value.prh_um_conv,
+          value.prh_loc,
+          value._vend_lot,
+          value.prh_pur_cost)
+        ]
+      ) {
+        res[
+          (value.prh_part,
+          value.prh_serial,
+          value.prh_taxable,
+          value.prh_taxc,
+          value.prh_tax_code,
+          value.prh_um,
+          value.prh_um_conv,
+          value.prh_loc,
+          value._vend_lot,
+          value.prh_pur_cost)
+        ] = {
+          prh_part: value.prh_part,
+          prh_serial: value.prh_serial,
+          prh_taxable: value.prh_taxable,
+          prh_taxc: value.prh_taxc,
+          prh_tax_code: value.prh_tax_code,
+          prh_um: value.prh_um,
+          prh_um_conv: value.prh_um_conv,
+          prh_loc: value.prh_loc,
+          prh_vend_lot: value._vend_lot,
+          prh_pur_cost: value.prh_pur_cost,
+          prh_rcvd: 0,
+        };
+        result.push(
+          res[
+            (value.prh_part,
+            value.prh_serial,
+            value.prh_taxable,
+            value.prh_taxc,
+            value.prh_tax_code,
+            value.prh_um,
+            value.prh_um_conv,
+            value.prh_loc,
+            value._vend_lot,
+            value.prh_pur_cost)
+          ],
+        );
+      }
+      res[
+        (value.prh_part,
+        value.prh_serial,
+        value.prh_taxable,
+        value.prh_taxc,
+        value.prh_tax_code,
+        value.prh_um,
+        value.prh_um_conv,
+        value.prh_loc,
+        value._vend_lot,
+        value.prh_pur_cost)
+      ].prh_rcvd += value.prh_rcvd;
+      return res;
+    }, {});
+    console.log('here CREATE');
+    console.log(result);
+    console.log('here CREATE END');
+
+    var i = 1;
+    for (const arr of result) {
+      await purchaseReceiveServiceInstance.create({
+        prh_domain: user_domain,
+        prh_receiver: req.body.prhnbr,
+        ...arr,
+        prh_line: i,
+        ...req.body.pr,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+      i = i + 1;
+      const pod = await purchaseOrderDetailServiceInstance.findOne({
+        pod_domain: user_domain,
+        pod_nbr: req.body.pr.prh_nbr,
+        pod_part: arr.prh_part,
+      });
+
+      if (pod)
+        await purchaseOrderDetailServiceInstance.update(
+          {
+            pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(arr.prh_rcvd),
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: pod.id },
+        );
+    }
+    for (const item of req.body.detail) {
+      const { tr_status, tr_expire, desc, ...remain } = item;
+      const part = await itemsServiceInstance.findOne({ pt_part: remain.prh_part, pt_domain: user_domain });
+      // await purchaseReceiveServiceInstance.create({
+      //   prh_receiver: req.body.prhnbr,
+      //   ...remain,
+      //   ...req.body.pr,
+      //   created_by: user_code,
+      //   created_ip_adr: req.headers.origin,
+      //   last_modified_by: user_code,
+      //   last_modified_ip_adr: req.headers.origin,
+      // });
+      // const pod = await purchaseOrderDetailServiceInstance.findOne({
+      //   pod_nbr: req.body.pr.prh_nbr,
+      //   pod_part: remain.prh_part,
+      // });
+
+      // if (pod)
+      //   await purchaseOrderDetailServiceInstance.update(
+      //     {
+      //       pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(remain.prh_rcvd),
+      //       last_modified_by: user_code,
+      //       last_modified_ip_adr: req.headers.origin,
+      //     },
+      //     { id: pod.id },
+      //   );
+      var labelId = null;
+      if (part.pt_iss_pol) {
+        const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
+        console.log(seq);
+        labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+        await sequenceServiceInstance.update(
+          { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+          { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+        );
+      }
+      await inventoryTransactionServiceInstance.create({
+        tr_domain: user_domain,
+        tr_status,
+        tr_expire,
+        tr_grade: remain.tr_grade,
+        tr_batch:remain.tr_batch,
+        tr_line: remain.prh_line,
+        tr_part: remain.prh_part,
+        tr_qty_loc: remain.prh_rcvd,
+        tr_um: remain.prh_um,
+        tr_um_conv: remain.prh_um_conv,
+        tr_price: remain.prh_pur_cost,
+        tr_gl_amt: Number(remain.prh_pur_cost) * Number(remain.prh_rcvd),
+        tr_site: req.body.pr.prh_site,
+        tr_loc: remain.prh_loc,
+        tr_serial: remain.prh_serial,
+        tr_vend_lot: remain.prh_vend_lot,
+        tr_nbr: req.body.pr.prh_nbr,
+        tr_lot: req.body.prhnbr,
+        tr_addr: req.body.pr.prh_vend,
+        tr_effdate: req.body.pr.prh_rcp_date,
+        tr_so_job: req.body.pr.prh_xinvoice,
+        tr_curr: req.body.pr.prh_curr,
+        tr_ex_rate: req.body.pr.prh_ex_rate,
+        tr_ex_rate2: req.body.pr.prh_ex_rate2,
+        tr_rmks: req.body.pr.prh_rmks,
+        tr_type: 'RCT-PO',
+        tr_ref: labelId,
+        tr_date: new Date(),
+        tr__chr01:part.pt_draw,
+        tr__chr02:part.pt_break_cat,
+        tr__chr03:part.pt_group,
+        dec01:Number(new Date(req.body.pr.prh_rcp_date).getFullYear()),
+        dec02:Number(new Date(req.body.pr.prh_rcp_date).getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_desc:part.pt_desc1,
+        tr_prod_line: part.pt_prod_line,
+        
+        tr__chr04:part.pt_part_type,
+        int01:part.int01,
+        int02:part.int02,
+        
+      });
+      const lds = await locationDetailServiceInstance.find({
+        ld_domain: user_domain,
+        ld_part: remain.prh_part,
+        ld_site: req.body.pr.prh_site,
+      });
+      const  sct_mtl_tl  = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: remain.prh_part,
+        sct_site: req.body.pr.prh_site,
+        sct_sim: 'STD-CG',
+      });
+      const sctdet = await costSimulationServiceInstance.findOne({
+        sct_domain: user_domain,
+        sct_part: remain.prh_part,
+        sct_site: req.body.pr.prh_site,
+        sct_sim: 'STD-CG',
+      });
+      let qty = 0;
+      lds.map(elem => {
+        qty += Number(elem.ld_qty_oh);
+      });
+      console.log('calcul mnt')
+      
+      const new_price = round(
+        (qty * Number(sct_mtl_tl.sct_cst_tot) +
+          (Number(remain.prh_rcvd) * Number(remain.prh_pur_cost) * Number(req.body.pr.prh_ex_rate2)) / Number(req.body.pr.prh_ex_rate)) /
+          (qty + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
+        2,
+      );
+      console.log(new_price)
+      await costSimulationServiceInstance.update(
+        {
+          sct_mtl_tl: new_price,
+          sct_cst_tot:
+            new_price +
+            Number(sctdet.sct_lbr_tl) +
+            Number(sctdet.sct_bdn_tl) +
+            Number(sctdet.sct_ovh_tl) +
+            Number(sctdet.sct_sub_tl),
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        { sct_domain: user_domain, sct_part: remain.prh_part, sct_site: req.body.pr.prh_site, sct_sim: 'STD-CG' },
+      );
+      //console.log(tr_status);
+      const status = await statusServiceInstance.findOne({
+        is_domain: user_domain,
+        is_status: tr_status,
+      });
+      // console.log(status, 'here');
+      const ld = await locationDetailServiceInstance.findOne({
+        ld_domain: user_domain,
+        ld_part: remain.prh_part,
+        ld_lot: remain.prh_serial,
+        ld_site: req.body.pr.prh_site,
+        ld_loc: remain.prh_loc,
+        ld_ref: labelId,
+      });
+      if (ld)
+        await locationDetailServiceInstance.update(
+          {
+            ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
+            ld_expire: tr_expire,
+            ld__log01: status.is_nettable,
+            last_modified_by: user_code,
+            last_modified_ip_adr: req.headers.origin,
+          },
+          { id: ld.id },
+        );
+      else
+        await locationDetailServiceInstance.create({
+          ld_domain: user_domain,
+          ld_part: remain.prh_part,
+          ld_date: new Date(),
+          ld_lot: remain.prh_serial,
+          ld_site: req.body.pr.prh_site,
+          ld_loc: remain.prh_loc,
+          ld_qty_oh: Number(remain.prh_rcvd),
+          ld_expire: tr_expire,
+          ld_status: tr_status,
+          ld__log01: status.is_nettable,
+          ld_ref: labelId,
+          chr01:part.pt_draw,
+          chr02:part.pt_break_cat,
+          chr03:part.pt_group,
+          int01:part.int01,
+          int02:part.int02,
+          chr04:req.body.pr.prh_vend,
+          chr05:part.pt_prod_line,
+          ld__chr02:part.pt_part_type,
+          ld_rev:part.pt_rev,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        });
+
+      /****create label**** */
+      if (part.pt_iss_pol) {
+        await labelServiceInstance.create({
+          lb_domain: user_domain,
+          lb_site: req.body.pr.prh_site,
+
+          lb_loc: remain.prh_loc,
+
+          lb_part: remain.prh_part,
+
+          lb_nbr: req.body.prhnbr,
+
+          lb_lot: remain.prh_serial,
+
+          lb_ref: labelId,
+
+          lb_date: req.body.pr.prh_rcp_date,
+
+          lb_cab: labelId,
+
+          lb_qty: remain.prh_rcvd,
+          lb_ld_status: tr_status,
+          lb_desc: part.pt_desc1,
+
+          /****create label**** */
+        });
+        /****print label**** */
+        const imagePath = './logo.png';
+        
+        // Set the options for the image
+        const imageOptions = {
+          fit: [150, 150], // Size of the image
+          // align: 'center', // Center the image horizontally
+          // valign: 'top', // Align the image to the top of the page
+        };
+
+        // Add the image to the document
+        // doc.image(imagePath, imageOptions);
+
+        // Define the properties of the rectangles
+        const rectWidth = 300;
+        const rectHeight = 50;
+        const rectSpacing = 5;
+        const rectX = (doc.page.width - rectWidth) / 2;
+        let rectY = 15;
+
+        // Define the texts for each rectangle
+        const texts = [
+          'REFERENCE: ' + req.body.lb_part,
+          'Total unité :' + req.body.lb_qty,
+          // '' + labelId,
+          'Description : ' + req.body.lb_desc,
+          'Groupe: ' + req.body.lb_desc,
+          'Date: ' + req.body.lb_date,
+        ];
+
+        // Set the options for the rectangle text
+        const textOptions = {
+          align: 'center',
+          valign: 'center',
+        };
+
+        for (let i = 0; i < 5; i++) {
+          let textX: number = 0;
+          let textY: number = 0;
+          // Draw the rectangle
+          doc.rect(rectX, rectY, rectWidth, rectHeight).stroke();
+
+          // Calculate the position for the text
+          if (i !== 4) {
+            textX = rectX + rectWidth / 6;
+            textY = rectY + rectHeight / 6 - doc.currentLineHeight() / 6 + 5;
+
+            // Save the current transformation matrix
+            doc.save();
+
+            doc
+              .font('Helvetica-Bold')
+              .fontSize(14)
+              .text(texts[i], textX, textY, textOptions);
+
+            // doc.restore();
+
+            // Move to the next rectangle position
+
+            rectY += rectHeight + rectSpacing;
+          } else {
+            textX = rectX + rectWidth / 6;
+            textY = 250;
+   
+            doc
+              .font('Helvetica-Bold')
+              .fontSize(14)
+              .text(texts[i], textX, textY, textOptions);
+          }
+   
+        }
+
+        // Save the PDF document
+        doc.pipe(fs.createWriteStream('label.pdf'));
+        doc.end();
+
+        const filePath = './output.pdf';
+        const printerName = 'Xprinter XP-TT426B';
+
+        printer
+          .print(filePath, { printer: printerName })
+          .then(() => {
+            console.log('Printing completed.');
+          })
+          .catch(error => {
+            console.error('Error while printing:', error);
+          });
+        /****print label**** */
+      }
+    }
+   
+    return res.status(201).json({ message: 'created succesfully', data: req.body.prhnbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+/*std*/
+
+
+
+
 const createCab = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -2418,6 +2863,7 @@ const createPrhCab = async (req: Request, res: Response, next: NextFunction) => 
 };
 export default {
   create,
+  createStd,
   createCab,
   createCabDet,
   findOne,
