@@ -22,6 +22,8 @@ import LabelService from '../../services/label';
 import ItemsService from '../../services/item';
 import AccountUnplanifedService from '../../services/account-unplanifed';
 import ProvidersSercice from '../../services/provider';
+import BkhService from '../../services/bkh';
+import BankService from "../../services/bank"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -533,7 +535,8 @@ const createStd = async (req: Request, res: Response, next: NextFunction) => {
     const itemsServiceInstance = Container.get(ItemsService);
     const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
     const providerServiceInstance = Container.get(ProvidersSercice);
-
+    const bkhServiceInstance = Container.get(BkhService);
+    const bankServiceInstance = Container.get(BankService)
     //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
     //let det = req.body.detail
     const pageWidth = 118 * 2.83465; // Width of the page in points
@@ -653,7 +656,7 @@ const createStd = async (req: Request, res: Response, next: NextFunction) => {
          
     
 console.log(req.body.as)
-    if(req.body.as.au_amt != 0 ) {
+    if(req.body.as.au_amt != 0 && req.body.as.au_amt != null) {
       const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AU', seq_type: 'AU' });
       let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
         await sequenceServiceInstance.update(
@@ -661,6 +664,34 @@ console.log(req.body.as)
           { id: seq.id, seq_type: 'AU', seq_seq: 'AU', seq_domain: user_domain },
         );
     const accountUnplanifed = await accountUnplanifedServiceInstance.create({...req.body.as,au_ship: req.body.prhnbr,au_nbr:nbr,au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    const banks = await bankServiceInstance.findOne({ bk_code: req.body.as.au_bank, bk_domain: user_domain });
+   
+    const bk = await bkhServiceInstance.create({
+        bkh_domain: user_domain,
+        bkh_code: nbr,
+        bkh_effdate: req.body.as.au_effdate,
+        bkh_date: new Date(),
+        bkh_num_doc : req.body.prhnbr,
+        bkh_addr : req.body.as.au_vend,
+        bkh_bank: req.body.as.au_bank,
+        bkh_type: 'ISS',
+        bkh_balance: banks.bk_balance,
+        bkh_amt:  Number(req.body.as.au_amt),
+        // bkh_site: req.body.site,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+      await bankServiceInstance.update(
+        {
+          bk_balance: Number(banks.bk_balance)  - Number(req.body.as.au_amt),
+  
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        },
+        { id:banks.id, bk_domain: user_domain },
+      );
     }
     for (const item of req.body.detail) {
       const { tr_status, tr_expire, desc, ...remain } = item;
@@ -703,7 +734,7 @@ console.log(req.body.as)
         tr_ex_rate2: req.body.pr.prh_ex_rate2,
         tr_rmks: req.body.pr.prh_rmks,
         tr_type: 'RCT-PO',
-        tr_ref: labelId,
+        // tr_ref: labelId,
         tr_date: new Date(),
         tr__chr01:part.pt_draw,
         tr__chr02:part.pt_break_cat,

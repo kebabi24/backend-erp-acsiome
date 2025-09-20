@@ -25,6 +25,8 @@ import { isNull } from 'lodash';
 import WorkRouting from '../../models/workrouting';
 import workroutingService from '../../services/workrouting';
 import SequenceService from '../../services/sequence';
+import BkhService from '../../services/bkh';
+import BankService from "../../services/bank"
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -125,6 +127,8 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
     const customerServiceInstance = Container.get(CustomerService);
     const locationDetailServiceInstance = Container.get(locationDetailService);
     const sequenceServiceInstance = Container.get(SequenceService);
+    const bkhServiceInstance = Container.get(BkhService);
+        const bankServiceInstance = Container.get(BankService)
     const { saleOrder, accountOrder,saleOrderDetail } = req.body;
     
     const so = await saleOrderServiceInstance.create({
@@ -214,6 +218,36 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+  
+
+  const banks = await bankServiceInstance.findOne({ bk_code: accountOrder.ao_bank, bk_domain: user_domain });
+   
+  const bk = await bkhServiceInstance.create({
+      bkh_domain: user_domain,
+      bkh_code: nbr,
+      bkh_effdate: accountOrder.ao_effdate,
+      bkh_date: new Date(),
+      bkh_num_doc : so.so_nbr,
+      bkh_addr : accountOrder.ao_vend,
+      bkh_bank: accountOrder.ao_bank,
+      bkh_type: 'RCT',
+      bkh_balance: banks.bk_balance,
+      bkh_amt:  Number(accountOrder.ao_amt),
+      // bkh_site: req.body.site,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    await bankServiceInstance.update(
+      {
+        bk_balance: Number(banks.bk_balance)  + Number(accountOrder.ao_amt),
+
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      },
+      { id:banks.id, bk_domain: user_domain },
+    );
   }
     return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
   } catch (e) {
