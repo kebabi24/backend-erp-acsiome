@@ -20,6 +20,8 @@ const bwipjs = require('bwip-js');
 const printer = require('pdf-to-printer');
 import LabelService from '../../services/label';
 import ItemsService from '../../services/item';
+import AccountUnplanifedService from '../../services/account-unplanifed';
+import ProvidersSercice from '../../services/provider';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
@@ -529,6 +531,8 @@ const createStd = async (req: Request, res: Response, next: NextFunction) => {
     const sequenceServiceInstance = Container.get(SequenceService);
     const labelServiceInstance = Container.get(LabelService);
     const itemsServiceInstance = Container.get(ItemsService);
+    const accountUnplanifedServiceInstance = Container.get(AccountUnplanifedService);
+    const providerServiceInstance = Container.get(ProvidersSercice);
 
     //const lastId = await purchaseReceiveServiceInstance.max('prh_nbr');
     //let det = req.body.detail
@@ -642,32 +646,26 @@ const createStd = async (req: Request, res: Response, next: NextFunction) => {
           { id: pod.id },
         );
     }
+    const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_curr:req.body.pr.prh_curr,au_po:req.body.pr.prh_rmks,au_ex_rate:req.body.pr.prh_ex_rate,au_ex_rate2:req.body.pr.prh_ex_rate2,au_effdate:req.body.pr.prh_rcp_date,au_nbr:req.body.prhnbr,au_ship:req.body.prh_vend,au_type:'I',au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+   
+    const vd = await providerServiceInstance.findOne({vd_addr: req.body.pr.prh_vend,vd_domain : user_domain,})
+    if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(req.body.as.dec01)  - Number(req.body.as.au_amt) , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})
+         
+    
+console.log(req.body.as)
+    if(req.body.as.au_amt != 0 ) {
+      const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'AU', seq_type: 'AU' });
+      let nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+        await sequenceServiceInstance.update(
+          { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+          { id: seq.id, seq_type: 'AU', seq_seq: 'AU', seq_domain: user_domain },
+        );
+    const accountUnplanifed = await accountUnplanifedServiceInstance.create({...req.body.as,au_ship: req.body.prhnbr,au_nbr:nbr,au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    }
     for (const item of req.body.detail) {
       const { tr_status, tr_expire, desc, ...remain } = item;
       const part = await itemsServiceInstance.findOne({ pt_part: remain.prh_part, pt_domain: user_domain });
-      // await purchaseReceiveServiceInstance.create({
-      //   prh_receiver: req.body.prhnbr,
-      //   ...remain,
-      //   ...req.body.pr,
-      //   created_by: user_code,
-      //   created_ip_adr: req.headers.origin,
-      //   last_modified_by: user_code,
-      //   last_modified_ip_adr: req.headers.origin,
-      // });
-      // const pod = await purchaseOrderDetailServiceInstance.findOne({
-      //   pod_nbr: req.body.pr.prh_nbr,
-      //   pod_part: remain.prh_part,
-      // });
 
-      // if (pod)
-      //   await purchaseOrderDetailServiceInstance.update(
-      //     {
-      //       pod_qty_rcvd: Number(pod.pod_qty_rcvd) + Number(remain.prh_rcvd),
-      //       last_modified_by: user_code,
-      //       last_modified_ip_adr: req.headers.origin,
-      //     },
-      //     { id: pod.id },
-      //   );
       var labelId = null;
       if (part.pt_iss_pol) {
         const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });
