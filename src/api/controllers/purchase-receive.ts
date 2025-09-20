@@ -646,7 +646,7 @@ const createStd = async (req: Request, res: Response, next: NextFunction) => {
           { id: pod.id },
         );
     }
-    const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_curr:req.body.pr.prh_curr,au_po:req.body.pr.prh_rmks,au_ex_rate:req.body.pr.prh_ex_rate,au_ex_rate2:req.body.pr.prh_ex_rate2,au_effdate:req.body.pr.prh_rcp_date,au_nbr:req.body.prhnbr,au_ship:req.body.prh_vend,au_type:'I',au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+    const accountUnplanifed = await accountUnplanifedServiceInstance.create({au_cr_terms:req.body.as.au_cr_terms,au_curr:req.body.pr.prh_curr,au_po:req.body.pr.prh_rmks,au_ex_rate:req.body.pr.prh_ex_rate,au_ex_rate2:req.body.pr.prh_ex_rate2,au_effdate:req.body.pr.prh_rcp_date,au_nbr:req.body.prhnbr,au_ship:req.body.prh_vend,au_type:'I',au_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
    
     const vd = await providerServiceInstance.findOne({vd_addr: req.body.pr.prh_vend,vd_domain : user_domain,})
     if(vd) await providerServiceInstance.update({vd_ship_balance : Number(vd.vd_ship_balance) + Number(req.body.as.dec01)  - Number(req.body.as.au_amt) , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: vd.id})
