@@ -13,7 +13,7 @@ export default (app: Router) => {
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
     route.post("/findallby", controller.findAllBy)
-    
+    route.post("/finddet", controller.findBydet)
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
 }

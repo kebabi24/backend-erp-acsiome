@@ -5,7 +5,7 @@ import VendorProposalDetailService from '../../services/vendor-proposal-detail';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-
+import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -18,7 +18,7 @@ const{user_domain} = req.headers
     const { vendorProposal, vendorProposalDetail } = req.body;
     const vp = await vendorProposalServiceInstance.create({...vendorProposal,vp_domain: user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin});
     for (let entry of vendorProposalDetail) {
-      entry = { ...entry,vpd_domain: user_domain, vpd_nbr: vp.vp_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin };
+      entry = { ...entry,vpd_inv_nbr:vp.vp_inv_nbr,vpd_domain: user_domain, vpd_nbr: vp.vp_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin };
       await vendorProposalDetailServiceInstance.create(entry);
     }
     return res.status(201).json({ message: 'created succesfully', data: vp });
@@ -51,7 +51,34 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByPrice = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+console.log(req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      let result = []
+      const date = new Date()
+      const date1 = new Date()
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+console.log(req.body)
+if(req.body.vend != null && req.body.vend != '') {
+      var ihs =await sequelize.query("SELECT PUBLIC.vpd_det.id as id,PUBLIC.vpd_det.vpd_part as part,PUBLIC.vpd_det.vpd_q_price as price,PUBLIC.vp_mstr.vp_vend as vend,PUBLIC.pt_mstr.pt_desc1 as desc, PUBLIC.ad_mstr.ad_name as name FROM   PUBLIC.vp_mstr, PUBLIC.pt_mstr, PUBLIC.vpd_det , PUBLIC.ad_mstr where  PUBLIC.vpd_det.vpd_inv_nbr = PUBLIC.vp_mstr.vp_inv_nbr and PUBLIC.ad_mstr.ad_addr = PUBLIC.vp_mstr.vp_vend and PUBLIC.vpd_det.vpd_part = PUBLIC.pt_mstr.pt_part and PUBLIC.vpd_det.vpd_part = ? and  PUBLIC.vp_mstr.vp_date <= ? and PUBLIC.vp_mstr.vp_q_date >= ? and  PUBLIC.vp_mstr.vp_vend = ? and PUBLIC.vp_mstr.vp_domain = ? ORDER BY PUBLIC.vpd_det.id ASC", { replacements: [req.body.part,date,date1,req.body.vend,user_domain], type: QueryTypes.SELECT });
+  } else {
+    var ihs =await sequelize.query("SELECT PUBLIC.vpd_det.id as id,PUBLIC.vpd_det.vpd_part as part,PUBLIC.vpd_det.vpd_q_price as price,PUBLIC.vp_mstr.vp_vend as vend,PUBLIC.pt_mstr.pt_desc1 as desc, PUBLIC.ad_mstr.ad_name as name FROM   PUBLIC.vp_mstr, PUBLIC.pt_mstr, PUBLIC.vpd_det , PUBLIC.ad_mstr where  PUBLIC.vpd_det.vpd_inv_nbr = PUBLIC.vp_mstr.vp_inv_nbr and PUBLIC.ad_mstr.ad_addr = PUBLIC.vp_mstr.vp_vend and PUBLIC.vpd_det.vpd_part = PUBLIC.pt_mstr.pt_part and PUBLIC.vpd_det.vpd_part = ? and  PUBLIC.vp_mstr.vp_date <= ? and PUBLIC.vp_mstr.vp_q_date >= ? and PUBLIC.vp_mstr.vp_domain = ? ORDER BY PUBLIC.vpd_det.id ASC", { replacements: [req.body.part,date,date1,user_domain], type: QueryTypes.SELECT });
 
+  }
+     console.log("ihs",ihs)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: ihs })
+          
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   
@@ -152,7 +179,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       )
       await vendorProposalDetailServiceInstance.delete({vpd_domain: user_domain,vpd_nbr: vendorProposal.vp_nbr})
       for (let entry of vendorProposalDetail) {
-          entry = { ...entry, vpd_domain: user_domain,vpd_nbr: vendorProposal.vp_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
+          entry = { ...entry, vpd_inv_nbr:vendorProposal.vp_inv_nbr,vpd_domain: user_domain,vpd_nbr: vendorProposal.vp_nbr, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }
           await vendorProposalDetailServiceInstance.create(entry)
       }
       return res
@@ -167,6 +194,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   create,
   findBy,
+  findByPrice,
   findOne,
   findAll,
   update,

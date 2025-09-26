@@ -14,6 +14,14 @@ const VendorProposalDetail = sequelize.define(
             unique: true
 
         },
+
+        vpd_inv_nbr: {
+            type: Sequelize.STRING,
+            references: {
+                model: "vp_mstr",
+                key: "vp_inv_nbr",
+            },
+        },
         vpd_nbr: {
             type: Sequelize.STRING,
             references: {
@@ -35,6 +43,16 @@ const VendorProposalDetail = sequelize.define(
         vpd_q_price: {type: Sequelize.DECIMAL, defaultValue : 0  },
         vpd_q_qty: {type: Sequelize.DECIMAL, defaultValue : 0  },
         vpd_mfgr: Sequelize.STRING,
+        vpd_taxable: { type: Sequelize.BOOLEAN, defaultValue: false },
+        vpd_taxc: Sequelize.STRING,
+        vpd_tax_code: {
+            type: Sequelize.STRING,
+            references: {
+              model: 'tx2_mstr',
+              key: 'tx2_tax_code',
+            },
+          },
+
         vpd_mfgr_part: Sequelize.STRING,
         vpd_domain:  Sequelize.STRING,
         ...base,

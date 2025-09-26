@@ -1,7 +1,7 @@
 import { Container } from "typedi"
 import Sequelize from "sequelize"
 import base from "./base"
-
+import Sequence from './sequence';
 const sequelize = Container.get("sequelize")
 
 const VendorProposal = sequelize.define(
@@ -14,9 +14,13 @@ const VendorProposal = sequelize.define(
             unique: true
 
         },
+        vp_inv_nbr: { 
+            type:Sequelize.STRING,
+            unique:true,
+        },
         vp_nbr: {
             type: Sequelize.STRING,
-            unique: true
+            // unique: true
         },
         vp_vend: {
             type: Sequelize.STRING,
@@ -65,4 +69,9 @@ const VendorProposal = sequelize.define(
         tableName: "vp_mstr",
     }
 )
+VendorProposal.addHook('beforeCreate', async (instance, option) => {
+    const seq = await Sequence.findOne({ where: { seq_seq: "DV", seq_type: "DV"  } });
+    instance.vp_inv_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+    await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_seq: "DV" } });
+  });
 export default VendorProposal
