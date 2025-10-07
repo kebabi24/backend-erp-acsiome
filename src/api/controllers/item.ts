@@ -27,7 +27,7 @@ import SaleShiperService from "../../services/sale-shiper"
 import InvoiceOrderDetailService from "../../services/invoice-order-detail"
 import WorkOrderService from "../../services/work-order"
 import WorkOrderDetailService from "../../services/work-order-detail"
-
+import { QueryTypes } from 'sequelize';
 
 
 
@@ -327,7 +327,7 @@ const findByOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const itemServiceInstance = Container.get(ItemService);
     
-   
+   console.log("here",req.headers)
     const items = await itemServiceInstance.findOne({ ...req.body,pt_domain:user_domain });
    
     return res.status(200).json({ message: 'fetched succesfully', data: items });
@@ -481,22 +481,15 @@ const findAllItemswithstk = async (req: Request, res: Response, next: NextFuncti
   try {
     const itemServiceInstance = Container.get(ItemService);
     const locationDetailServiceInstance = Container.get(LocationDetailService);
-    const items = await itemServiceInstance.findwithstk({});
+    const Sequelize = Container.get("sequelize")
+    // const items = await itemServiceInstance.findwithstk({});
     const result = [];
-    // for (const item of items) {
-    //   const res = await locationDetailServiceInstance.findSpecial({
-    //     where: { ld_part: item.pt_part,ld_domain:user_domain },
-    //     attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total']],
-    //     group: ['ld_part'],
-    //     raw: true,
-    //   });
 
-    //   //items.total_qty = res.total_qty;
-    //   const qty = res[0] ? (res[0].total ? res[0].total : 0) : 0;
-    //   item.pt_ord_max = qty;
-    //   result.push(item);
-    // }
-    return res.status(200).json({ message: 'fetched succesfully', data: items });
+
+    const ihs =await Sequelize.query("SELECT  PUBLIC.pt_mstr.id as id , PUBLIC.pt_mstr.pt_part , PUBLIC.pt_mstr.pt_desc1 , PUBLIC.pt_mstr.pt_um, PUBLIC.pt_mstr.pt_ord_mult,PUBLIC.pt_mstr.pt_pur_lead,PUBLIC.pt_mstr.pt_phantom, PUBLIC.pt_mstr.pt_site,PUBLIC.pt_mstr.pt_loc, PUBLIC.pt_mstr.pt_taxable,PUBLIC.pt_mstr.pt_taxc,PUBLIC.pt_mstr.pt_price,PUBLIC.tx2_mstr.tx2_tax_pct , (select sum (PUBLIC.ld_det.ld_qty_oh) FROM  PUBLIC.ld_det where PUBLIC.ld_det.ld_part = PUBLIC.pt_mstr.pt_part ) as qty  FROM PUBLIC.pt_mstr  , PUBLIC.tx2_mstr where PUBLIC.tx2_mstr.tx2_tax_code = PUBLIC.pt_mstr.pt_taxc and PUBLIC.pt_mstr.pt_domain = ?  and qty >= 0 ORDER BY qty DESC", { replacements: [user_domain], type: QueryTypes.SELECT });
+ console.log(ihs)
+ 
+    return res.status(200).json({ message: 'fetched succesfully', data: ihs });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

@@ -191,7 +191,7 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       if (ld){
         await locationDetailServiceInstance.update(
           {
-            ld_qty_all: Number(ld.ld_qty_all) + Number(entry.sod_qty_ord) * Number(entry.sod_um_conv),
+            ld_qty_all: Number(ld.ld_qty_all) + Number(entry.sod_qty_ord) ,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
