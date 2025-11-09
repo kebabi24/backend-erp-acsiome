@@ -8,6 +8,7 @@ export default (app: Router) => {
 
     route.post("/", controller.create)
     route.post("/createiv", controller.createIV)
+    route.post("/avoir", controller.createAvoir)
     route.post("/imput", controller.imput)
     route.post("/imputproject", controller.imputProject)
     route.get("/", controller.findAll)

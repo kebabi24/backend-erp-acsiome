@@ -192,7 +192,7 @@ const findRoleFilter = async (req: Request, res: Response, next: NextFunction) =
     console.log("hhhhhhhhhhhhhhhhhhhhhhhhhheeeeeeeeeeeeeeeeee")
     const RoleServiceInstance = Container.get(RoleService);
     const roles = await RoleServiceInstance.findS({order: [['id', 'ASC']],});
-    console.log(roles)
+    // console.log(roles)
     var data = [];
     for (let role of roles) {
       data.push({ value: role.role_code, label: role.role_code });

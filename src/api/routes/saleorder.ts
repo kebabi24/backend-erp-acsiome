@@ -9,6 +9,7 @@ export default (app: Router) => {
     route.post("/", controller.create)
     route.post("/direct", controller.createdirect)
     route.post("/ceram", controller.createceram)
+    route.post("/somobile", controller.createSoMobile)
     route.get("/", controller.findAll)
     route.get("/allwithdetail", controller.findAllwithDetails)
     route.post("/allsojob", controller.findAllSoJob)

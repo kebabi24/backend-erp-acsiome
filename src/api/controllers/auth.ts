@@ -205,11 +205,16 @@ const getNotifications = async (req: Request, res: Response, next: NextFunction)
 console.log('user_code',user_code)
 const config = await configServiceInstance.findOne({});
         // const purchase_orders = await userServiceInstance.getNewPurchaseOrders()
+        // console.log(config.cfg_threshold_user.indexOf(user_code))
         if(config.cfg_threshold_user != null) {
         if (config.cfg_threshold_user.indexOf(user_code) !== -1) {
         
           var purchase_orders = await sequelize.query("select public.po_mstr.id as id, po_nbr, po_vend, po_ord_date from public.po_mstr where (po_stat != 'V' or po_stat isNull) and po_amt  >=  ? order by po_ord_date ASC", { replacements: [config.cfg_po_threshold],type: QueryTypes.SELECT })
+        } else {
+            purchase_orders = []
         }
+    } else {
+        purchase_orders = []
     }
         // const orders = await userServiceInstance.getNewOrders()
         const seqs = await sequelize.query("select seq_seq,seq_appr1,seq_appr1_lev,seq_appr2,seq_appr2_lev,seq_appr3,seq_appr3_lev from public.seq_mstr where (seq_appr1 = ? or seq_appr2 = ? or seq_appr3 = ?)", { replacements: [user_code,user_code,user_code], type: QueryTypes.SELECT });
@@ -307,11 +312,12 @@ const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
         const userServiceInstance = Container.get(UserMobileService)
         const employeServiceInstance = Container.get(EmployeService)
         // const domainServiceInstance = Container.get(DomainService)\
-        console.log(req.body)
+        console.log(req.body , "here")
         const { userName, password } = req.body
         const user = await userServiceInstance.findOne({
             user_mobile_code: userName,
         })
+        
         if (!user)
             return res
                 .status(401)
@@ -328,6 +334,7 @@ const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
             // const domain = await domainServiceInstance.findOne({
             //     dom_domain: user.usrd_domain,
             // })
+          
             return res
                 .status(200)
                 .json({ message: "succesfully", data: { user, token,menus,employe } })

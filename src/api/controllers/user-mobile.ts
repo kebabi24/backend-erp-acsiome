@@ -27,7 +27,7 @@ import DdinvoiceLineService from '../../services/ddinvoice-line';
 import InvoiceOrderService from '../../services/invoice-order';
 import CodeService from '../../services/code';
 import AccountReceivableService from '../../services/account-receivable'
-
+import { round } from 'lodash';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
@@ -2345,7 +2345,7 @@ const findSalesType = async (req: Request, res: Response, next: NextFunction) =>
       console.log(req.body)
       //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
     
-      var invs =await Sequelize.query("SELECT PUBLIC.pt_mstr.id,PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_desc1, PUBLIC.pt_mstr.pt_part_type, PUBLIC.code_mstr.code_cmmt, SUM(PUBLIC.aa_invoiceline.quantity) as quantity, SUM(PUBLIC.aa_invoiceline.price * PUBLIC.aa_invoiceline.quantity) as price FROM PUBLIC.pt_mstr, PUBLIC.code_mstr ,PUBLIC.aa_invoiceline WHERE PUBLIC.pt_mstr.pt_part = PUBLIC.aa_invoiceline.product_code and  PUBLIC.code_mstr.code_fldname = 'pt_part_type' and PUBLIC.code_mstr.code_value = PUBLIC.pt_mstr.pt_part_type and PUBLIC.aa_invoiceline.invoice_code in(select invoice_code from PUBLIC.aa_invoice where  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? and  PUBLIC.aa_invoice.canceled = false) GROUP BY PUBLIC.pt_mstr.id, PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_part_type,PUBLIC.code_mstr.code_cmmt,PUBLIC.pt_mstr.pt_desc1 ORDER BY PUBLIC.pt_mstr.pt_part_type ASC, PUBLIC.pt_mstr.pt_part ASC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+      var invs =await Sequelize.query("SELECT PUBLIC.pt_mstr.id,PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_desc1, PUBLIC.pt_mstr.pt_part_type, PUBLIC.code_mstr.code_cmmt, SUM(PUBLIC.aa_invoiceline.quantity) as quantity, SUM(PUBLIC.aa_invoiceline.price ) as price FROM PUBLIC.pt_mstr, PUBLIC.code_mstr ,PUBLIC.aa_invoiceline WHERE PUBLIC.pt_mstr.pt_part = PUBLIC.aa_invoiceline.product_code and  PUBLIC.code_mstr.code_fldname = 'pt_part_type' and PUBLIC.code_mstr.code_value = PUBLIC.pt_mstr.pt_part_type and PUBLIC.aa_invoiceline.invoice_code in(select invoice_code from PUBLIC.aa_invoice where  PUBLIC.aa_invoice.period_active_date >= ? and  PUBLIC.aa_invoice.period_active_date <= ? and  PUBLIC.aa_invoice.canceled = false) GROUP BY PUBLIC.pt_mstr.id, PUBLIC.pt_mstr.pt_part, PUBLIC.pt_mstr.pt_part_type,PUBLIC.code_mstr.code_cmmt,PUBLIC.pt_mstr.pt_desc1 ORDER BY PUBLIC.pt_mstr.pt_part_type ASC, PUBLIC.pt_mstr.pt_part ASC", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
      
     
   // console.log("iiiiiiiiiiiiiiii",invs)
@@ -2360,6 +2360,34 @@ const findSalesType = async (req: Request, res: Response, next: NextFunction) =>
   } 
 }
 
+const findSalesRoleType = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  const Sequelize = Container.get("sequelize")
+  const{user_domain} = req.headers
+  const userMobileServiceInstance = Container.get(UserMobileService);
+
+    
+ // console.log("reqrrrrrrrrrrrrrrr",req.body)
+  logger.debug("Calling find all invoiceOrder endpoint")
+  try {
+      console.log(req.body)
+      //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
+    
+      var invs =await Sequelize.query("SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 0)) AS id, PUBLIC.aa_invoice.role_code as role, PUBLIC.aa_invoiceline.pt_part_type as pt_part_type, PUBLIC.code_mstr.code_cmmt as code_cmmt, SUM(PUBLIC.aa_invoiceline.quantity) as quantity, SUM(PUBLIC.aa_invoiceline.price ) as price FROM PUBLIC.aa_invoice, PUBLIC.code_mstr ,PUBLIC.aa_invoiceline WHERE   PUBLIC.code_mstr.code_fldname = 'pt_part_type' and PUBLIC.code_mstr.code_value = PUBLIC.aa_invoiceline.pt_part_type	and PUBLIC.aa_invoiceline.canceled = false and public.aa_invoice.invoice_code = public.aa_invoiceline.invoice_code and  PUBLIC.aa_invoiceline.period_active_date >= ? and  PUBLIC.aa_invoiceline.period_active_date <= ? GROUP BY   PUBLIC.aa_invoice.role_code, PUBLIC.aa_invoiceline.pt_part_type,PUBLIC.code_mstr.code_cmmt ORDER BY PUBLIC.aa_invoice.role_code ASC, PUBLIC.aa_invoiceline.pt_part_type ", { replacements: [req.body.date,req.body.date1], type: QueryTypes.SELECT });
+     
+     
+    
+   //console.log("iiiiiiiiiiiiiiii",types)
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: invs })
+          
+          
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  } 
+}
 
 
 
@@ -2438,6 +2466,17 @@ const  ihss = await invoiceOrderServiceInstance.findS({
   where: {ih_inv_date: { [Op.between]: [start_date, end_date]}},
   
 })
+
+var typedd   = await Sequelize.query("select pt_part_type,code_cmmt as type, sum(quantity) as qty,  sum(price) as amt from public.aa_invoiceline , public.code_mstr  where code_fldname = 'pt_part_type' and code_value = pt_part_type and period_active_date >= ? and period_active_date <= ? and canceled = false group by pt_part_type , code_cmmt  " , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT });
+var typegros = await Sequelize.query("select idh_part_type,code_cmmt as type,sum(idh_qty_inv) as qty,  sum(idh_qty_inv * idh_price) as amt from public.idh_det , public.code_mstr where code_fldname = 'pt_part_type' and code_value = idh_part_type and  idh_inv_date >= ? and idh_inv_date <= ? group by idh_part_type , code_cmmt  " , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT });
+   console.log(typedd)
+
+   for (let t of typedd) {
+    t.amt = round(t.amt,2)
+   }
+   for (let t of typegros) {
+    t.amt = round(t.amt,2)
+   }
 // let ihsss = []
 // for (let ih of ihss) {ihsss.push(ih.ih_inv_nbr)}
 // let types = []
@@ -2531,7 +2570,7 @@ var ihs = await invoiceOrderDetailServiceInstance.findS({
 })
  
   if(ihs[0].qty == null) { qtygros= 0} else {  qtygros = ihs[0].qty}
-  console.log(qtydd,qtygros)
+  // console.log(qtydd,qtygros)
 //
 let cazone = []
 
@@ -2589,10 +2628,10 @@ const   caroles = await userMobileServiceInstance.getAllInvoice({
 if(caroles[0].amount != null) {
 ca_roles.push({role_code:role.role_code,ca: caroles[0].amount})}
 }
-console.log(req.body)
+// console.log(req.body)
 var   qty_roles = await Sequelize.query("select role_code,sum(quantity) as qte from public.aa_invoiceline,  public.aa_invoice where  public.aa_invoiceline.invoice_code =  public.aa_invoice.invoice_code and public.aa_invoice.canceled = false and public.aa_invoice.period_active_date >= ? and public.aa_invoice.period_active_date <= ? group by role_code order by role_code ASC" , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT })
 
-console.log(req.body)
+// console.log(req.body)
 var   qty_custs = await Sequelize.query("select ih_bill,ad_name,sum(idh_qty_inv) as qte from public.idh_det, public.ad_mstr, public.ih_hist where public.ad_mstr.ad_addr = public.ih_hist.ih_bill and public.idh_det.idh_inv_nbr =  public.ih_hist.ih_inv_nbr  and public.ih_hist.ih_inv_date >= ? and public.ih_hist.ih_inv_date <= ? group by ih_bill , ad_name order by ih_bill ASC" , {replacements: [req.body.start_date,req.body.end_date],type: QueryTypes.SELECT })
 
 /*credit dd*/
@@ -2605,7 +2644,7 @@ let cred = 0
 let credgros = 0
     var credits_gros = await Sequelize.query("select sum(cm_balance) as cred from public.cm_mstr " , {type: QueryTypes.SELECT });
     if(credits_gros != null) {credgros = credits_gros[0].cred} else { credgros = 0}
- console.log("credits gros",credgros)
+//  console.log("credits gros",credgros)
 
 
  let credit_roles= []
@@ -2644,6 +2683,8 @@ credit_roles.push({role_code:role.role_code,credit: Number(crroles[0].amount) - 
       // amt_type_data: mtypes,
       // ddqty_type_data:ddqtypes,
       // ddamt_type_data: ddatypes,
+      typedd: typedd,
+      typegros: typegros,
       ca_zone_data : cazone,
       ca_bill: ihamt,
       ca_role: ca_roles,
@@ -2871,6 +2912,7 @@ export default {
   findAllCA,
   findAllSalesRole,
   findSalesType,
+  findSalesRoleType,
   findAllSalesRoles,
   findAllInvoicewithDetailsToinv,
   addDinvoices

@@ -24,10 +24,7 @@ const VendorProposalDetail = sequelize.define(
         },
         vpd_nbr: {
             type: Sequelize.STRING,
-            references: {
-                model: "vp_mstr",
-                key: "vp_nbr",
-            },
+          
         },
         vpd_line: Sequelize.INTEGER,
         vp_part: {
