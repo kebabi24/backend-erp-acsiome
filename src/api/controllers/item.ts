@@ -347,14 +347,15 @@ const findByOneStk = async (req: Request, res: Response, next: NextFunction) => 
    console.log("here",req.headers)
     const items = await itemServiceInstance.findOne({ ...req.body,pt_domain:user_domain });
    
-    const res = await locationDetailServiceInstance.findSpecial({
+    const stk = await locationDetailServiceInstance.findSpecial({
       where: { ld_part: items.pt_part,ld_domain:user_domain },
       attributes: ['ld_part', [Sequelize.fn('sum', Sequelize.col('ld_qty_oh')), 'total'],[Sequelize.fn('sum', Sequelize.col('ld_qty_all')), 'totalall']],
       group: ['ld_part'],
       raw: true,
     });
-    const qty = res[0] ? (res[0].total - res[0].totalall? res[0].total : 0) : 0;
+    const qty = stk[0] ? (stk[0].total - stk[0].totalall ) : 0;
       items.pt_ord_max = qty;
+console.log(items)
     return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);
