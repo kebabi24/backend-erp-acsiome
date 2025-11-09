@@ -18,6 +18,7 @@ export default (app: Router) => {
   route.post("/findspec", controller.findBySpec)
   route.post('/findsupp', controller.findBySupp);
   route.post('/findOne', controller.findByOne);
+  route.post('/findOnestk', controller.findByOneStk);
   route.get('/:id', controller.findOne);
   route.get("/det/:id", controller.findOneDet)
   route.post('/findprod', controller.findProd);
