@@ -26,5 +26,6 @@ export default (app: Router) => {
     route.put("/So/:id", controller.updateSo)
     route.post("/findAll", controller.findByAll)  
     route.post("/findAllso", controller.findByAllSo)  
+    route.delete("/:nbr", controller.deleteOne)
     
 }

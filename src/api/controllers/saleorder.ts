@@ -168,6 +168,7 @@ const createSoMobile = async (req: Request, res: Response, next: NextFunction) =
             sod_part: entry.pt_part,
             sod_desc : entry.pt_desc1,
             sod_um  : pt.pt_um,
+            sod_um_conv:1,
             sod_line: i,
             sod_qty_ord : entry.qtem,
             sod_qty_chg: entry.qtecolie,
@@ -1465,7 +1466,54 @@ console.log(result)
     return next(e);
   }
 };
+const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling update requisition endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+      const saleOrderServiceInstance = Container.get(SaleOrderService)
+      const locationDetailServiceInstance = Container.get(locationDetailService)
+      const saleOrderDetailServiceInstance = Container.get(
+          SaleOrderDetailService
+      )
+      let yes = false
+    const { nbr } = req.params;
+    const sod =  await saleOrderDetailServiceInstance.findOne({sod_domain: user_domain,sod_nbr: nbr, sod_qty_ship :{ [Op.ne]: 0 } })
+    if(sod == null) {
+      const sodss = await saleOrderDetailServiceInstance.find({sod_domain: user_domain,sod_nbr: nbr} )
+      for (let sods of sodss) {
+        const ld = await locationDetailServiceInstance.findOne({
+          ld_part: sods.sod_part,
+          ld_lot: null,
+          ld_site: sods.sod_site,
+          ld_loc: sods.sod_loc,
+          ld_domain:user_domain
+        });
+        if (ld)
+          await locationDetailServiceInstance.update(
+            {
+              ld_qty_all: Number(ld.ld_qty_all) - Number(sods.sod_qty_ord) * Number(sods.sod_um_conv),
+              last_modified_by: user_code,
+              last_modified_ip_adr: req.headers.origin,
+            },
+            { id: ld.id },
+          );
+      }
+    await saleOrderDetailServiceInstance.delete({sod_domain: user_domain,sod_nbr: nbr})
+    await saleOrderServiceInstance.delete({so_domain: user_domain,so_nbr: nbr})
+    yes = true
+    }
+    else {
+      yes = false
 
+    }
+    return res.status(200).json({ message: 'deleted succesfully', data: yes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createdirect,
@@ -1486,4 +1534,5 @@ export default {
   getCA,
   findAllSoJob,
   findAllwithDetailsCeram,
+  deleteOne
 };
