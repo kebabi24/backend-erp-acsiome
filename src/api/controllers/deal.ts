@@ -2,8 +2,8 @@ import DealService from '../../services/deal';
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
-const multer = require('multer');
-const upload = multer({ dest: './uploads/' });
+// const multer = require('multer');
+// const upload = multer({ dest: './uploads/' });
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -17,7 +17,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const data = req.body.data;
     const filedata = req.file;
     const jsonData = JSON.parse(data);
-    
+    console.log(filedata)
     const deal = await dealServiceInstance.create({
       deal_code: jsonData['deal_code'],
       deal_desc: jsonData['deal_desc'],

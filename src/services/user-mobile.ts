@@ -1,6 +1,7 @@
 import { Service, Inject } from 'typedi';
 import { Op, Sequelize } from 'sequelize';
 import argon2 from 'argon2';
+import CryptoJS from "../utils/CryptoJS";
 var Crypto = require('crypto');
 @Service()
 export default class UserMobileService {
@@ -57,27 +58,29 @@ export default class UserMobileService {
 
   public async create(data: any): Promise<any> {
     try {
-      var secret_key = 'fd85b494-aaaa';
-      var secret_iv = 'smslt';
-      var encryptionMethod = 'AES-256-CBC';
-      var key = Crypto.createHash('sha512')
-        .update(secret_key, 'utf-8')
-        .digest('hex')
-        .substr(0, 32);
-      var iv = Crypto.createHash('sha512')
-        .update(secret_iv, 'utf-8')
-        .digest('hex')
-        .substr(0, 16);
+      // var secret_key = 'fd85b494-aaaa';
+      // var secret_iv = 'smslt';
+      // var encryptionMethod = 'AES-256-CBC';
+      // var key = Crypto.createHash('sha512')
+      //   .update(secret_key, 'utf-8')
+      //   .digest('hex')
+      //   .substr(0, 32);
+      // var iv = Crypto.createHash('sha512')
+      //   .update(secret_iv, 'utf-8')
+      //   .digest('hex')
+      //   .substr(0, 16);
 
-      data.password = encrypt_string(data.password, encryptionMethod, key, iv);
-      // console.log(encryptedPassword)
-      const password = await argon2.hash(data.password);
+      // data.password = encrypt_string(data.password, encryptionMethod, key, iv);
+      // // console.log(encryptedPassword)
+      // const password = await argon2.hash(data.password);
 
-      const newPassword = Crypto.createHash('md5', 'secret_key')
-        .update(data.password)
-        .digest('hex');
+      // const newPassword = Crypto.createHash('md5', 'secret_key')
+      //   .update(data.password)
+      //   .digest('hex');
 
-      console.log(newPassword);
+      // console.log(newPassword);
+      data.password = CryptoJS.AES.encrypt(data.password, 'b4cb72173ee45d8c7d188e8f77eb16c2').toString();
+      console.log('Encrypted:', data.password);
       const user = await this.userMobileModel.create({ ...data });
       this.logger.silly('user mobile created');
       return user;
@@ -114,7 +117,10 @@ export default class UserMobileService {
 
   // ******************** UPDATE **************************
   public async update(data: any, query: any): Promise<any> {
-    const password = await argon2.hash(data.password.value);
+    console.log(data)
+    // const password = await argon2.hash(data.password.value);
+    const password = CryptoJS.AES.encrypt(data.password, 'b4cb72173ee45d8c7d188e8f77eb16c2').toString();
+    console.log('Encrypted:', data.password);
     try {
       const user = await this.userMobileModel.update({ ...data, password }, { where: query });
       this.logger.silly('update one user mstr');

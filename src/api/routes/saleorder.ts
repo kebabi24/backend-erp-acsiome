@@ -12,6 +12,7 @@ export default (app: Router) => {
     route.post("/somobile", controller.createSoMobile)
     route.get("/", controller.findAll)
     route.get("/allwithdetail", controller.findAllwithDetails)
+    route.get("/allwithdetailceram", controller.findAllwithDetailsCeram)
     route.post("/allsojob", controller.findAllSoJob)
   
     route.get("/:id", controller.findOne)

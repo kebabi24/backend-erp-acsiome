@@ -141,6 +141,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userMobileServiceInstance = Container.get(UserMobileService);
     const { user_mobile_code } = req.params;
+    console.log(req.body)
     const user = await userMobileServiceInstance.update(
       {
         ...req.body,
@@ -168,8 +169,7 @@ const updated = async (req: Request, res: Response, next: NextFunction) => {
     const user = await userMobileServiceInstance.updated(
       {
         ...req.body,
-        //  last_modified_by:user_code,
-        //  last_modified_ip_adr: req.headers.origin
+       
       },
       { user_mobile_code: user_mobile_code },
     );

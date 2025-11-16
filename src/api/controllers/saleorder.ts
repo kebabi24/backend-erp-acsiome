@@ -161,11 +161,14 @@ const createSoMobile = async (req: Request, res: Response, next: NextFunction) =
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    let i = 1
     for (let entry of req.body.products) {
       const pt = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: entry.pt_part });
           entry = {
             sod_part: entry.pt_part,
             sod_desc : entry.pt_desc1,
+            sod_um  : pt.pt_um,
+            sod_line: i,
             sod_qty_ord : entry.qtem,
             sod_qty_chg: entry.qtecolie,
             sod_qty_qote: entry.qtepiece,
@@ -184,6 +187,7 @@ const createSoMobile = async (req: Request, res: Response, next: NextFunction) =
             last_modified_ip_adr: req.headers.origin,
           };
           await saleOrderDetailServiceInstance.create(entry);
+          i++
           console.log(entry.sod_part,pt.pt_site,pt.pt_loc)
           const ld = await locationDetailServiceInstance.findOne({
             ld_domain: user_domain,
@@ -1348,12 +1352,26 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
   try {
     let result = [];
     //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
-
-    const sos = await sequelize.query(
-      'SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det, PUBLIC.as_mstr  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and  PUBLIC.as_mstr.as_domain =  PUBLIC.sod_det.sod_domain and  PUBLIC.as_mstr.as_ship = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',
-      { replacements: [user_domain], type: QueryTypes.SELECT },
-    );
-
+console.log(user_domain)
+    const sos = await sequelize.query('SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det, PUBLIC.as_mstr  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and  PUBLIC.as_mstr.as_domain =  PUBLIC.sod_det.sod_domain and  PUBLIC.as_mstr.as_ship = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',{ replacements: [user_domain], type: QueryTypes.SELECT },);
+console.log(sos)
+    return res.status(200).json({ message: 'fetched succesfully', data: sos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllwithDetailsCeram = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const sequelize = Container.get('sequelize');
+  const { user_domain } = req.headers;
+  logger.debug('Calling find all purchaseOrder endpoint');
+  try {
+    let result = [];
+    //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
+console.log(user_domain)
+    const sos = await sequelize.query('SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',{ replacements: [user_domain], type: QueryTypes.SELECT },);
+console.log(sos)
     return res.status(200).json({ message: 'fetched succesfully', data: sos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -1467,4 +1485,5 @@ export default {
   getActivity,
   getCA,
   findAllSoJob,
+  findAllwithDetailsCeram,
 };

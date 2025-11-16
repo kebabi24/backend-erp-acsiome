@@ -317,16 +317,19 @@ const loginMobile = async (req: Request, res: Response, next: NextFunction) => {
         const user = await userServiceInstance.findOne({
             user_mobile_code: userName,
         })
-        
+        const ciphertext = CryptoJS.AES.encrypt("1234", 'fd85b494-aaaa').toString();
+        console.log('Encrypted:', ciphertext);
         if (!user)
             return res
                 .status(401)
                 .json({ message: "user not found", data: null })
 
-                let decrypt= CryptoJS.AES.decrypt(user.password,'b4cb72173ee45d8c7d188e8f77eb16c2').toString(CryptoJS.enc.Utf8);
+               let decrypt= CryptoJS.AES.decrypt(user.password,'b4cb72173ee45d8c7d188e8f77eb16c2').toString(CryptoJS.enc.Utf8);
+            // let decrypt= CryptoJS.AES.decrypt(user.password,'fd85b494-aaaa').toString(CryptoJS.enc.Utf8);
             //    console.log('decrypt',decrypt)
+            console.log(decrypt == password)
         if (decrypt == password) {
-
+console.log("he")
             
             const token = jwt.sign({ user: user.id }, "acsiome")
             const menus = await userServiceInstance.getMenus({ profile_code: user.profile_code });
