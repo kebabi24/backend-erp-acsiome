@@ -1,9 +1,11 @@
 import express from 'express';
+import 'reflect-metadata'; // We need this in order to use @Decorators
 import bodyParser, { urlencoded } from 'body-parser';
 import cors from 'cors';
 import routes from '../api';
 import config from '../config';
 import logger from 'morgan';
+const path = require('path');
 export default ({ app }: { app: express.Application }) => {
   /**
    * Health Check endpoints
@@ -30,7 +32,6 @@ export default ({ app }: { app: express.Application }) => {
   // Alternate description:
   // Enable Cross Origin Resource Sharing to all origins by default
   app.use(cors());
-
   // Some sauce that always add since 2014
   // "Lets you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it."
   // Maybe not needed anymore ?
@@ -69,4 +70,5 @@ export default ({ app }: { app: express.Application }) => {
       },
     });
   });
+ 
 };

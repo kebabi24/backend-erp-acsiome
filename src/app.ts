@@ -3,7 +3,9 @@ import 'reflect-metadata'; // We need this in order to use @Decorators
 import config from './config';
 
 import express from 'express';
-
+// const express = require('express');
+const multer = require('multer');
+const path = require('path');
 import Logger from './loaders/logger';
 import { setTimeout } from 'timers';
 import { emit } from 'process';
@@ -13,7 +15,11 @@ import authController from './api/controllers/auth';
 import argon2 from "argon2"
 async function startServer() {
   const app = express();
+  const uploadsPath = path.resolve(__dirname, '../uploads');
   
+  app.use(config.api.prefix + '/uploads', express.static(uploadsPath));
+  
+ // app.use("/uploads", express.static(path.join(process.cwd(), "./uploads")));
   /**
    * A little hack here
    * Import/Export can only be used in 'top-level code'
@@ -26,13 +32,22 @@ async function startServer() {
   let macip = ''
   
   si.networkInterfaces().then(data => {macip = data[0].mac+'axiom1983'
+  //console.log(macip = data[0].mac)
     const fs = require('node:fs');
     const keydata = fs.readFileSync('key.key', 'utf8');
-
-   
+    const multer = require('multer');
   verifyPass(keydata, macip)
     .then(isValid => {
         if (isValid) {
+     // Now, images can be accessed via http://localhost:PORT/uploads/image-filename.jpg
+
+    // Serve static files from the 'public/images' directory
+  //  app.use(express.static('../uploads'));
+
+    // OR, to use a virtual path prefix (recommended)
+    // Files in the 'uploads' folder will be accessible via '/images' URL prefix
+   // app.use( express.static(path.resolve(__dirname,"../uploads")));
+
           const server = app.listen(config.port, err => {
             if (err) {
               Logger.error(err);
@@ -45,10 +60,12 @@ async function startServer() {
               🛡️  Server listening on port: ${config.port} 🛡️ 
               ################################################
             `);
+            
           });
         
-          app.use('images', express.static('images'));
-        
+         
+        // Serve static files from the 'public/images' directory
+  
           const io = require('socket.io')(server);
           io.on('connection',userMobileController.getDataBack)
 
@@ -112,4 +129,5 @@ async function verifyPass(storedHash, providedPassword) {
       console.error('Error during Activation verification:', err);
       return false;
   }
+ 
 }

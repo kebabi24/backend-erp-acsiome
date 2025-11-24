@@ -5,7 +5,6 @@ const route = Router();
 
 export default (app: Router) => {
   app.use('/items', route);
-
   route.get('/', controller.findAll);
   route.get("/findpart", controller.findPart)
   route.get('/training/', controller.findAllTraining);
