@@ -29,8 +29,8 @@ import WorkOrderService from "../../services/work-order"
 import WorkOrderDetailService from "../../services/work-order-detail"
 import { QueryTypes } from 'sequelize';
 
-
-
+const multer = require('multer');
+const upload = multer({ dest: './uploads/' });
 
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -40,16 +40,160 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling Create item endpoint ');
   try {
     const itemServiceInstance = Container.get(ItemService);
-    console.log(req.body)
+    
+   console.log("herrrrrrrrrrre")
+    console.log('req.body',req.body)
+    const data = req.body.data;
+    req.file.originalname
+    const filedata = req.file;
+    console.log(filedata)
+     const jsonData = JSON.parse(data);
+    // const storage = multer.diskStorage({
+    //   destination: function (req, file, cb) {
+    //     // Specify the destination folder for uploads
+    //     // Ensure this folder exists in your project directory
+    //     cb(null, './uploads/'); 
+    //   },
+    //   filename: function (req, file, cb) {
+    //     // Use the original file name
+    //     // Optionally, you can add a timestamp or unique suffix to prevent overwrites
+    //     // cb(null, Date.now() + '_' + file.originalname); 
+    //     cb(null, file.originalname);
+    //   }
+    // });
+    
+    // // 2. Initialize upload middleware with the configured storage
+    // const upload = multer({ storage: storage });
+    
+    // // 3. Define the route using the 'upload' middleware
+    //  upload.single('file'), (req, res) => {
+    //   if (req.file) {
+    //     console.log('File uploaded:', req.file.originalname);
+    //     res.send('File uploaded successfully with original name.');
+    //   } else {
+    //     res.status(400).send('No file uploaded.');
+    //   }
+    // };
+    
+const it = {
+
+  pt_part : jsonData['pt_part'],
+  pt_desc1 : jsonData['pt_desc1'],
+  pt_desc2 : jsonData['pt_desc2'],
+  pt_um : jsonData['pt_um'],
+  pt_prod_line : jsonData['pt_prod_line'],
+  pt_part_type : jsonData['pt_part_type'],
+  pt_draw : jsonData['pt_draw'],
+  pt_status : jsonData['pt_status'],
+  pt_rev : jsonData['pt_rev'],
+  pt_dsgn_grp : jsonData['pt_dsgn_grp'],
+  pt_group : jsonData['pt_group'],
+ // pt_drwg_loc = jsonData['pt_drwg_loc'],
+  pt_drwg_size : jsonData['pt_drwg_size'],
+  pt_promo : jsonData['pt_promo'],
+  pt_break_cat : jsonData['pt_break_cat'],
+  pt_abc : jsonData['pt_abc'],
+  pt_avg_int : jsonData['pt_avg_int'],
+  pt_lot_ser : jsonData['pt_lot_ser'],
+  pt_cyc_int : jsonData['pt_cyc_int'],
+  pt_site : jsonData['pt_site'],
+  pt_shelflife : jsonData['pt_shelflife'],
+  pt_loc : jsonData['pt_loc'],
+  pt_sngl_lot : jsonData['pt_sngl_lot'],
+  pt_loc_type : jsonData['pt_loc_type'],
+  pt_critical : jsonData['pt_critical'],
+  pt_auto_lot : jsonData['pt_auto_lot'],
+  pt_rctpo_status : jsonData['pt_rctpo_status'],
+  pt_rctpo_active : jsonData['pt_rctpo_active'],
+  pt_lot_grp : jsonData['pt_lot_grp'],
+  pt_rctwo_status : jsonData['pt_rctwo_status'],
+  pt_rctwo_active : jsonData['pt_rctwo_active'],
+  pt_article : jsonData['pt_article'],
+
+  pt_ship_wt : jsonData['pt_ship_wt'],
+  pt_ship_wt_um : jsonData['pt_ship_wt_um'],
+  pt_net_wt : jsonData['pt_net_wt'],
+  pt_net_wt_um : jsonData['pt_net_wt_um'],
+  pt_fr_class : jsonData['pt_fr_class'],
+  pt_size : jsonData['pt_size'],
+  pt_size_um : jsonData['pt_size_um'],
+
+  pt_ms : jsonData['pt_ms'],
+  pt_buyer : jsonData['pt_buyer'],
+  pt_phantom : jsonData['pt_phantom'],
+  pt_plan_ord : jsonData['pt_plan_ord'],
+  pt_vend : jsonData['pt_vend'],
+
+  pt_ord_min : jsonData['pt_ord_min'],
+  pt_timefence : jsonData['pt_timefence'],
+  pt_po_site : jsonData['pt_po_site'],
+  pt_ord_max : jsonData['pt_ord_max'],
+  pt_pm_code : jsonData['pt_pm_code'],
+  pt_ord_mult : jsonData['pt_ord_mult'],
+  pt_ord_pol : jsonData['pt_ord_pol'],
+  pt_cfg_type : jsonData['pt_cfg_type'],
+  pt_op_yield : jsonData['pt_op_yield'],
+  pt_ord_qty : jsonData['pt_ord_qty'],
+  pt_insp_rqd : jsonData['pt_insp_rqd'],
+  pt_yield_pct : jsonData['pt_yield_pct'],
+  pt_insp_lead : jsonData['pt_insp_lead'],
+  pt_run : jsonData['pt_run'],
+  pt_ord_per : jsonData['pt_ord_per'],
+  pt_mfg_lead : jsonData['pt_mfg_lead'],
+  pt_pur_lead : jsonData['pt_pur_lead'],
+  pt_setup : jsonData['pt_setup'],
+  pt_sfty_stk : jsonData['pt_sfty_stk'],
+  pt_sfty_time : jsonData['pt_sfty_time'],
+  pt_rop : jsonData['pt_rop'],
+  pt_atp_family : jsonData['pt_atp_family'],
+  pt_network : jsonData['pt_network'],
+  pt_run_seq1 : jsonData['pt_run_seq1'],
+  pt_routing : jsonData['pt_routing'],
+  // pt_iss_pol = jsonData['pt_iss_pol'],
+  pt_run_seq2 : jsonData['pt_run_seq2'],
+  pt_bom_code : jsonData['pt_bom_code'],
+
+  pt_pur_price : jsonData['pt_pur_price'],
+  pt_price : jsonData['pt_price'],
+  pt_taxable : jsonData['pt_taxable'],
+  pt_taxc : jsonData['pt_taxc'],
+
+
+  pt_iss_pol   : jsonData['pt_iss_pol'],
+  pt_length    : jsonData['pt_length'],
+  pt_height    : jsonData['pt_height'],
+  pt_width     : jsonData['pt_width'],
+  pt_origin    : jsonData['pt_origin'],
+ 
+  pt_model     : jsonData['pt_model'],
+  
+  int01        : jsonData['int01'],
+  int02        : jsonData['int02'],
+
+
+
+  pt_salable : jsonData['pt_salable'],
+  pt_inventoryable : jsonData['pt_inventoryable'],
+  pt_consignable : jsonData['pt_consignable'],
+  pt_returnable : jsonData['pt_returnable'],
+  pt_orderable : jsonData['pt_orderable'],
+  pt_loadable : jsonData['pt_loadable'],
+  pt_promotion : jsonData['pt_promotion'],
+
+  pt_loadpacking : jsonData['pt_loadpacking'],
+  pt_salepacking : jsonData['pt_salepacking'],
+
+}
     const item = await itemServiceInstance.create({
-      ...req.body,
+      ...it,
+      pt_drwg_loc:req.file.originalname,
       pt_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    return res.status(201).json({ message: 'created succesfully', data: { item } });
+    return res.status(201).json({ message: 'created succesfully', data: {item} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

@@ -2,13 +2,30 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import controller from '../controllers/item';
 const route = Router();
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // Specify the destination folder for uploads
+    // Ensure this folder exists in your project directory
+    cb(null, './uploads/'); 
+  },
+  filename: function (req, file, cb) {
+    // Use the original file name
+    // Optionally, you can add a timestamp or unique suffix to prevent overwrites
+    // cb(null, Date.now() + '_' + file.originalname); 
+    cb(null, file.originalname);
+  }
+});
+// const upload = multer({ dest: './uploads/' });
+const upload = multer({ storage: storage });
 
 export default (app: Router) => {
   app.use('/items', route);
   route.get('/', controller.findAll);
   route.get("/findpart", controller.findPart)
   route.get('/training/', controller.findAllTraining);
-  route.post('/', controller.create);
+  route.post('/', upload.single('file'), controller.create);
   route.post('/find', controller.findBy);
   route.post('/findtaille', controller.findBytaille);
   route.post('/findpurchasing', controller.findByPurchase);
@@ -35,4 +52,5 @@ export default (app: Router) => {
   route.delete("/:id", controller.deleteOne)
   route.post('/epiUpdate', controller.epiUpdate);
   
+ 
 };
