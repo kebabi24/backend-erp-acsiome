@@ -14,7 +14,7 @@ export default (app: Router) => {
     route.get("/allwithdetail", controller.findAllwithDetails)
     route.get("/allwithdetailceram", controller.findAllwithDetailsCeram)
     route.post("/allsojob", controller.findAllSoJob)
-  
+    route.get("/ceram", controller.findAllCeram)
     route.get("/:id", controller.findOne)
     route.post("/find", controller.findBy)
     route.post("/findrange", controller.findByrange)
@@ -27,5 +27,6 @@ export default (app: Router) => {
     route.post("/findAll", controller.findByAll)  
     route.post("/findAllso", controller.findByAllSo)  
     route.delete("/:nbr", controller.deleteOne)
+    
     
 }

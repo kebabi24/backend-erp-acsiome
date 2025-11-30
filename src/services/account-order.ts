@@ -38,7 +38,16 @@ export default class AccountOrderService {
             throw e
         }
     }
-
+    public async findgrp(query: any): Promise<any> {
+        try {
+            const accountOrders = await this.accountOrderModel.findAll(query )
+            this.logger.silly("find All Codes mstr")
+            return accountOrders
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     public async update(data: any, query: any): Promise<any> {
         try {
             const accountOrder = await this.accountOrderModel.update(data, { where: query })

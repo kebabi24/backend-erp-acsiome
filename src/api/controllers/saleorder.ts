@@ -869,6 +869,49 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findAllCeram = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all purchaseOrder endpoint');
+  const { user_domain } = req.headers;
+
+  try {
+    let result = [];
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const accountOrderServiceInstance = Container.get(AccountOrderService);
+   
+    const sos = await saleOrderServiceInstance.find({ so_domain: user_domain });
+    for (const so of sos) {
+      const orders = await accountOrderServiceInstance.findgrp({
+        where: {
+          ao_domain: user_domain,
+          ao_so_nbr : so.so_nbr,
+          ao_type : 'P'
+        },
+        attributes: [
+       
+          [Sequelize.fn('sum', Sequelize.col('ao_amt')), 'total'],
+        ],
+        group: ['ao_so_nbr' ],
+        raw: true,
+      });
+      if(orders.length > 0) {
+      so.dec01 = orders[0].total
+      so.dec02 = so.so_amt - orders[0].total }
+      
+      const details = await saleOrderDetailServiceInstance.find({
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+      });
+      
+      result.push({ id: so.id, so, details });
+    }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByrange = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   
@@ -1524,6 +1567,7 @@ export default {
   findByAllSo,
   findOne,
   findAll,
+  findAllCeram,
   findByrange,
   update,
   updateProj,
