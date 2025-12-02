@@ -548,6 +548,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const itemServiceInstance = Container.get(ItemService);
     const codes = await itemServiceInstance.find({pt_domain:user_domain});
+  
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
   } catch (e) {
     logger.error('🔥 error: %o', e);

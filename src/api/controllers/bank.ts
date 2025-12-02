@@ -437,6 +437,44 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const findBankByUser = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+    const bankServiceInstance = Container.get(BankService);
+    const bankDetailServiceInstance = Container.get(BankDetailService);
+   console.log(req.body)
+    const bank = await bankServiceInstance.findOne({
+      bk_user1: {
+        [Op.substring]: req.body.user // LIKE '%apple_shake%'
+      },
+      bk_domain: user_domain,
+    });
+    
+    if (bank) {
+      const details = await bankDetailServiceInstance.find({
+        bkd_bank: bank.bk_code,
+        bkd_domain: user_domain,
+      });
+   
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data: { bank, details },
+      });
+    } else {
+      return res.status(200).json({
+        message: 'not FOund',
+        data: { bank, details: null },
+      });
+    }
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1344,6 +1382,7 @@ const bkhCautionDet = async (req: Request, res: Response, next: NextFunction) =>
 export default {
   create,
   findBy,
+  findBankByUser,
   findByAll,
   findAR,
   findBkByUser,
