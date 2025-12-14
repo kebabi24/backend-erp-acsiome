@@ -565,7 +565,7 @@ const findProd = async (req: Request, res: Response, next: NextFunction) => {
   const Op = Sequelize.Op;
   
   try {
-    
+    console.log("ana")
   
     const itemServiceInstance = Container.get(ItemService);
      
@@ -579,6 +579,35 @@ const findProd = async (req: Request, res: Response, next: NextFunction) => {
     });
 
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const findProdImg = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  const Sequelize = require('sequelize');
+  const Op = Sequelize.Op;
+  
+  try {
+    
+    console.log(user_domain)
+  
+    const itemServiceInstance = Container.get(ItemService);
+     console.log("herrrrrrrrrrrrr", req.body)
+     let cust = req.body.cust
+     let form = req.body.form
+     let api = req.body.api
+    const items = await itemServiceInstance.findS(user_domain,cust,form,api);
+    // console.log(items)
+    // for(let ob of items) {
+    //   console.log(ob.url)
+    // }
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1217,6 +1246,7 @@ export default {
   findOneDet,
   findAll,
   findProd,
+  findProdImg,
   findAllwithstk,
   findAllwithstk0,
   findAllItemswithstk,

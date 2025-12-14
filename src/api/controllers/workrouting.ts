@@ -99,11 +99,11 @@ const findAlldistinct = async (req: Request, res: Response, next: NextFunction) 
         let result = []
         //const purchaseOrderServiceInstance = Container.get(PurchaseOrderService)
 
-        const ros =await sequelize.query('SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc ,  PUBLIC.ro_det.ro_wkctr FROM   PUBLIC.ro_det where PUBLIC.ro_det.ro_domain = ?',   {replacements: [user_domain], type: QueryTypes.SELECT });
+        const ros =await sequelize.query('SELECT DISTINCT  PUBLIC.ro_det.ro_routing , PUBLIC.ro_det.ro_desc ,  PUBLIC.ro_det.ro_wkctr,PUBLIC.ro_det.ro_run  FROM   PUBLIC.ro_det where PUBLIC.ro_det.ro_domain = ?',   {replacements: [user_domain], type: QueryTypes.SELECT });
         
         let id = 1;
         for(const ro of ros){
-            result.push({id:id, ro_routing: ro.ro_routing, ro_desc: ro.ro_desc, ro_wkctr:ro.ro_wkctr})
+            result.push({id:id, ro_routing: ro.ro_routing, ro_desc: ro.ro_desc, ro_wkctr:ro.ro_wkctr, ro_run:ro.ro_run})
             id = id + 1;    
         }
 
