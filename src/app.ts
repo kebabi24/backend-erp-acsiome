@@ -9,16 +9,35 @@ const path = require('path');
 import Logger from './loaders/logger';
 import { setTimeout } from 'timers';
 import { emit } from 'process';
-
+import fs from "fs";
 import userMobileController from './api/controllers/user-mobile';
 import authController from './api/controllers/auth';
+
 import argon2 from "argon2"
 async function startServer() {
   const app = express();
   const uploadsPath = path.resolve(__dirname, '../uploads');
   
   app.use(config.api.prefix + '/uploads', express.static(uploadsPath));
+  app.get(config.api.prefix +"/images-list", (req, res) => {
+    const folderPath = path.resolve(__dirname, '../uploads');//path.join(__dirname, "uploads");
   
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        return res.status(500).json({ error: "Cannot read uploads folder" });
+      }
+  
+      // Return only image files
+      const images = files.filter(f =>
+        f.match(/\.(png|jpg|jpeg|webp|gif)$/i)
+      );
+  
+      res.json({
+        baseUrl: config.api.prefix + '/uploads',
+        images
+      });
+    });
+  });
  // app.use("/uploads", express.static(path.join(process.cwd(), "./uploads")));
   /**
    * A little hack here

@@ -817,7 +817,8 @@ for (let cu of custs) {
           'pt_prod_line',
           'pt_promo',
           'pt_dsgn_grp',
-          'pt_draw'
+          'pt_draw',
+          'pt_drwg_loc',
 
 
           
@@ -892,6 +893,7 @@ for (let cu of custs) {
           'pt_promo',
           'pt_dsgn_grp',
           'pt_draw',
+          'pt_drwg_loc',
           
         ],
       });
