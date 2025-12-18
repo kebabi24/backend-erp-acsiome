@@ -65,6 +65,25 @@ export default class ItemService {
       throw e;
     }
   }
+  public async findS(domain: any,cust:any,form:any,api:String): Promise<any> {
+    try {
+      const codes = await this.itemModel.findAll({
+        where : {pt_domain : domain,pt_pm_code: 'M',pt_cust:cust,pt_dsgn_grp:form},
+        order: [
+          ['pt_part', 'ASC']],
+          attributes: {
+            include :[[Sequelize.fn('CONCAT', api,Sequelize.col('pt_drwg_loc'), ), 'url']],},
+        include: this.taxeModel,
+        // incluse: this.locationModel,
+      });
+
+      this.logger.silly('find item ');
+      return codes;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   
   public async findBySupp(query: any): Promise<any> {
     try {

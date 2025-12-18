@@ -25,6 +25,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.get("/findpart", controller.findPart)
   route.get('/training/', controller.findAllTraining);
+  route.post('/findprodimg', controller.findProdImg);
   route.post('/', upload.single('file'), controller.create);
   route.post('/find', controller.findBy);
   route.post('/findtaille', controller.findBytaille);
@@ -37,6 +38,8 @@ export default (app: Router) => {
   route.post('/findOnestk', controller.findByOneStk);
   route.get('/:id', controller.findOne);
   route.get("/det/:id", controller.findOneDet)
+ 
+  
   route.post('/findprod', controller.findProd);
   route.post('/stk', controller.findAllwithstk);
   route.post('/stknotnull', controller.findAllwithstk0);

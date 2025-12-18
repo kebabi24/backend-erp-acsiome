@@ -93,6 +93,19 @@ export default class QualityControl {
       throw e;
     }
   }
+  public async findSepcifications(query: any): Promise<any> {
+    try {
+        const specifications = await this.specificationModel.findAll({
+            where: query,
+            
+        })
+        this.logger.silly("find All reports mstr")
+        return specifications
+    } catch (e) {
+        this.logger.error(e)
+        throw e
+    }
+}
   public async find(query: any): Promise<any> {
     try {
         const reports = await this.specificationTestHistoryModel.findAll({

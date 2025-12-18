@@ -223,7 +223,7 @@ const Item = sequelize.define(
     oid_pt_mstr: Sequelize.STRING,
     pt_loadpacking: Sequelize.INTEGER,
     pt_salepacking: Sequelize.INTEGER,
-
+    pt_cust: Sequelize.STRING,
      pt_salable      : { type: Sequelize.BOOLEAN, defaultValue: false },
      pt_inventoryable: { type: Sequelize.BOOLEAN, defaultValue: false },
      pt_consignable  : { type: Sequelize.BOOLEAN, defaultValue: false },

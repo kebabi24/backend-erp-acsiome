@@ -419,7 +419,20 @@ const getAllQros = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findBy = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const qualityControlService = Container.get(QualityControlService);
+    const mps = await qualityControlService.findSepcifications({ ...req.body, mp_domain: user_domain });
+    console.log(mps);
+    return res.status(200).json({ message: 'fetched succesfully', data: mps });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   findOneSpecificationByCode,
   createStandardSpecification,
@@ -442,4 +455,5 @@ export default {
   createQroAndQps,
   getAllQros,
   getTestsHistory,
+  findBy,
 };

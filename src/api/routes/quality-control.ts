@@ -30,4 +30,5 @@ export default (app: Router) => {
 
   route.post('/createIpAndIpds', controller.createIpAndIpds);
   route.post('/createQroAndQps', controller.createQroAndQps);
+  route.post('/find', controller.findBy);
 };

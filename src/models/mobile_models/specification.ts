@@ -29,7 +29,7 @@ const Specification = sequelize.define(
         
         mp_user1:{ type:Sequelize.STRING},
         mp_user2:{ type:Sequelize.STRING},
-
+        mp_type: { type:Sequelize.STRING},
         mp_chr01:{ type:Sequelize.STRING},
         mp_chr02:{ type:Sequelize.STRING},
         mp_chr03:{ type:Sequelize.STRING},
