@@ -192,10 +192,10 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
           [Op.gte]: date,
         },
         pi_min_net: {
-            [Op.lte]: qty,
+            [Op.lte]: Math.abs(qty),
           },
         pi_max_ord: {
-        [Op.gte]: qty,
+        [Op.gte]: Math.abs(qty),
         },
         pi_um: um,
         pi_curr: curr,
@@ -232,10 +232,10 @@ const getPrice = async (req: Request, res: Response, next: NextFunction) => {
           [Op.gte]: date,
         },
         pi_min_net: {
-            [Op.lte]: qty,
+            [Op.lte]: Math.abs(qty),
           },
         pi_max_ord: {
-        [Op.gte]: qty,
+        [Op.gte]: Math.abs(qty),
         },
         pi_um: um,
         pi_curr: curr,
