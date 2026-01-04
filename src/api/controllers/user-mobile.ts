@@ -27,11 +27,14 @@ import DdinvoiceLineService from '../../services/ddinvoice-line';
 import InvoiceOrderService from '../../services/invoice-order';
 import CodeService from '../../services/code';
 import AccountReceivableService from '../../services/account-receivable'
+import fs from "fs";
 import { round } from 'lodash';
+import config from '../../config';
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
 const moment = require('moment');
+const path = require('path');
 
 // ********************** CREATE NEW USER MOBILE *************
 
@@ -352,6 +355,43 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
           invoiceLine.dataValues.period_active_date = formatDateOnlyFromBackToMobile(invoiceLine.period_active_date);
         });
       }
+      // app.get(config.api.prefix +"/images-list", (req, res) => {
+        const folderPath = path.resolve(__dirname, '../../../uploads');//path.join(__dirname, "uploads");
+        let urls=[]
+        fs.readdir(folderPath, (err, files) => {
+          if (err) {
+            console.log(' cannot read uploads folder '+err)
+            // return res.status(500).json({ error: "Cannot read uploads folder" });
+          }
+          // console.log(files)
+          // console.log(JSON.stringify(files))
+           urls = files.map(
+            (f) =>  config.api.prefix +"/uploads/"+f
+          );
+        // });
+          // res.json({ images: urls });
+          // Return only image files
+          // const images = files.filter(f =>
+          //   f.match(/\.(png|jpg|jpeg|webp|gif)$/i)
+          // );
+      
+          // res.json({
+          //   baseUrl: config.api.prefix + '/uploads',
+          //   images
+          // });
+        });
+      // });
+      // const uploadsPath = path.join(__dirname, "uploads");
+
+      // fs.readdir(uploadsPath, (err, files) => {
+      //   if (err) return res.status(500).json({ error: err });
+    
+      //   const urls = files.map(
+      //     (f) => `${req.protocol}://${req.get("host")}/uploads/${f}`
+      //   );
+    
+      //   res.json({ images: urls });
+      // })
 // console.log("invoice",invoiceLine)
       // service created on backend
       if (parameter[index].hold === true) {
@@ -448,6 +488,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(202).json({
           message: 'Data correct !',
           service_creation: parameter[index].hold,
+          images: urls,
           // user_mobile: userMobile,
           users: users,
           parameter: parameter,
@@ -509,6 +550,7 @@ const signin = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(202).json({
           message: 'Data correct !',
           service_creation: parameter[index].hold,
+          images: urls,
           // user_mobile: userMobile,
           users: users,
           parameter: parameter,
