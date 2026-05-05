@@ -99,7 +99,7 @@ const Requisition = sequelize.define(
 );
 Requisition.addHook('beforeCreate', async (instance, option) => {
   const seq = await Sequence.findOne({ where: { seq_seq: instance.rqm_category, seq_type: "RQ"  } });
-  instance.rqm_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+  instance.rqm_nbr = `${seq.seq_prefix}${Number(seq.seq_curr_val)+1}`;
   await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_seq: instance.rqm_category } });
 });
 export default Requisition;

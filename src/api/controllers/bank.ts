@@ -10,6 +10,7 @@ import serviceMobile from '../../services/mobile-service';
 import { Op, Sequelize } from 'sequelize';
 import SequenceService from '../../services/sequence';
 import RoleService from '../../services/role';
+import AffectEquipementService from '../../services/affect-equipement';
 'use strict';
 const nodemailer = require('nodemailer');
 const create = async (req: Request, res: Response, next: NextFunction) => {
@@ -1145,7 +1146,7 @@ console.log(req.body)
    
    
     const bkhs = await bkhServiceInstance.findbetween({
-      where: { bkh_bank:req.body.bank,bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      where: {bkh_bank:req.body.bank,bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
       attributes: 
       ['bkh_effdate', [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'bkh_amt' ],
       [Sequelize.fn('sum', Sequelize.col('bkh_2000')), 'bkh_2000'],
@@ -1196,7 +1197,7 @@ const findBKHTR = async (req: Request, res: Response, next: NextFunction) => {
    //console.log(req.body)
    
     const bkhs = await bkhServiceInstance.findbetween({
-      where: { bkh_bank: req.body.bank,bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      where: { chr01: {[Op.ne]: null} , bkh_bank: req.body.bank,bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
       order: [
         ['id', 'ASC'],
         
@@ -1274,7 +1275,7 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
    //console.log(req.body)
    
     const bkhs = await bkhServiceInstance.findbetween({
-      where: { bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+      where: {chr01: {[Op.ne]: null} , bkh_type:'P',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
       attributes: 
       ['chr01', [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'Montant' ]],
       group: ['chr01','bkh_terms'],
@@ -1348,13 +1349,13 @@ const bkhCautionDet = async (req: Request, res: Response, next: NextFunction) =>
       bkh_addr : req.body.addr,
       chr01: req.body.role,
       bkh_bank: req.body.bank,
-      bkh_type: 'P',
+      bkh_type: 'C',
       bkh_balance: Number(banks.bk_balance),
       bkh_amt: req.body.amt_tr,
       bkh_site: req.body.site,
       chr02: req.body.chr02,
       int01 : req.body.int01,
-
+      chr03: req.body.chr03,
       bkh_rmks: req.body.bkh_rmks, 
       bkh_terms: req.body.bkh_terms,
       bkh_cheque: req.body.bkh_cheque,
@@ -1379,6 +1380,68 @@ const bkhCautionDet = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
+const SoldeCustEquip = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling find by  all bank endpoint');
+  try {
+
+    const bkhServiceInstance = Container.get(BkhService);
+    const affectEquipementServiceInstance = Container.get(AffectEquipementService);
+   
+   console.log(req.body)
+    const bkhs = await bkhServiceInstance.findbetween({
+      where: { bkh_addr: req.body.cust, bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'C',bkh_domain: user_domain,},
+      
+    });
+    const aes = await affectEquipementServiceInstance.find({ ae_cust: req.body.cust, ae_effdate: { [Op.between]: [req.body.date, req.body.date1]} ,ae_domain:user_domain});
+let solde = 0
+    let result = []
+    let i = 1
+    for (let ae of aes) {
+        let obj = {
+          id:i,
+          cust:ae.ae_cust,
+          date: ae.ae_effdate,
+          equip: ae.ae_eqp,
+          nbr : ae.ae_eqp_nbr,
+          debit : ae.ae_amt,
+          credit:0,
+          note: ae.id,
+          type: "E"
+        }
+solde = solde + ae.ae_amt
+      result.push(obj)
+      i++
+    }
+    for (let bk of bkhs) {
+      let obj = {
+        id:i,
+        cust:bk.bkh_addr,
+        date: bk.bkh_effdate,
+        equip: "",
+        nbr : "",
+        debit:0,
+        credit : bk.bkh_amt,
+        note: bk.bkh_rmks,
+        type : bk.bkh_type
+      }
+      solde = solde - bk.bkh_amt
+    result.push(obj)
+    i++
+  }
+      return res.status(200).json({
+        message: 'fetched succesfully',
+        data: { result , solde},
+      });
+   
+    
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBy,
@@ -1400,6 +1463,7 @@ export default {
   bkhP,
   bkhPDet,
   bkhCautionDet,
+  SoldeCustEquip,
   bkhTrC,
   bkhTrCDet,
   findBKHBy,

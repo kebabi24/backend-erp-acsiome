@@ -10,6 +10,7 @@ export default (app: Router) => {
   route.post('/', controller.create);
   route.post('/createdirect', controller.createDirect);
   route.post('/findwo', controller.findBywo);
+  route.post('/findrowo', controller.findRoWo);
   route.post('/createsojob', controller.createSoJob);
   route.post('/createsfjob', controller.createSfJob);
   route.post('/createwopos', controller.createPosWorkOrder);

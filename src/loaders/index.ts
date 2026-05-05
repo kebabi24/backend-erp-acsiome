@@ -1208,6 +1208,12 @@ export default async ({ expressApp }) => {
     foreignKey: 'vhp_vend',
     targetKey: 'ad_addr',
   });
+
+
+  require('../models/mobile_models/price_list').default.hasOne(require('../models/item').default, {
+    foreignKey: 'pt_part',
+    sourceKey: 'product_code',
+  });
   Logger.info('✌️ ADD MODEL ASSOCIATION');
   // sync models
   //  await sequelizeConnection.sync().catch(err => { console.log(err)});

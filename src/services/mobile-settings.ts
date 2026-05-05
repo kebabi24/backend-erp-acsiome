@@ -8,6 +8,7 @@ export default class MobileSettingsService {
         @Inject("cancelationReasonModel") private cancelationReasonModel: Models.cancelationReasonModel,
         @Inject("paymentMethodModel") private paymentMethodModel: Models.paymentModel,
         @Inject("priceListModel") private priceListModel: Models.PricelistModel,
+        @Inject("itemModel") private itemModel: Models.ItemModel,
         @Inject("logger") private logger
     ) {}
 
@@ -49,7 +50,7 @@ export default class MobileSettingsService {
         try {
             console.log(query)
             const priceList = await this.priceListModel.findAll({
-                where:query
+                where:query , include: this.itemModel 
                })
               // console.log(priceList)
             this.logger.silly("found one price list")
@@ -181,7 +182,16 @@ export default class MobileSettingsService {
             throw e
         }
     }
-    
+    public async delete(query: any): Promise<any> {
+        try {
+            const message = await this.priceListModel.destroy({ where: query })
+            this.logger.silly("delete one mesure mstr")
+            return message
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
     
 
    

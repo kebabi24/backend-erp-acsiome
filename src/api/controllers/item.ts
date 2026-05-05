@@ -1232,6 +1232,21 @@ let bool = false
       return next(e)
   }
 }
+const findByNot = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+console.log(req.body)
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const items = await itemServiceInstance.find({ pt_part: { [Op.notIn]: req.body.pt_part },pt_domain:user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   findBySpec,
@@ -1262,5 +1277,6 @@ export default {
   findPart,
   deleteOne,
   epiUpdate,
-  findByOneStk
+  findByOneStk,
+  findByNot
 };

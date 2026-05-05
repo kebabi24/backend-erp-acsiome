@@ -30,6 +30,7 @@ import { DECIMAL } from 'sequelize';
 import GeneralLedgerService from "../../services/general-ledger"
 import ProductLineService from "../../services/product-line"
 import employeService from '../../services/employe';
+import {QueryTypes} from 'sequelize'
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -3233,19 +3234,49 @@ const findDayly1 = async (req: Request, res: Response, next: NextFunction) => {
 
 const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
-  
+  const sequelize = Container.get("sequelize")
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-   
+   console.log(user_domain)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-    const tr = await inventoryTransactionServiceInstance.findSpec({
+    const tr = await inventoryTransactionServiceInstance.findSpec1({
+      where : {
       tr_domain:user_domain,
-      
       tr_effdate:{ [Op.between]: [req.body.date, req.body.date1] },
-      tr_rev : { [Op.ne]: 'CHANGED' }
+      tr_rev : { [Op.ne]: 'CHANGED' },
+      },
+      attributes: [
+        'id',
+        'dec01',
+        'dec02',
+        'tr_addr',
+        'tr_part',
+        'tr_desc',
+        'tr__chr01',
+        'tr__chr02',
+        'tr__chr03',
+        'int03',
+        'tr_serial',
+        'tr_um',
+        'tr_qty_loc',
+        'tr_price',
+        'tr__dec02',
+        'tr_status',
+        'tr_ref',
+        'tr_effdate',
+        'tr_program',
+        'tr_so_job',
+        'tr_type',
+        'tr_nbr',
+        'tr_lot',
+        'tr_rmks',
+        'last_modified_by',      
+       
+      ],
     });
-    
+    // const tr =await sequelize.query("SELECT * from PUBLIC.tr_hist where PUBLIC.tr_hist.tr_effdate >= ? and PUBLIC.tr_hist.tr_effdate <= ? and PUBLIC.tr_hist.tr_domain = ? and PUBLIC.tr_hist.tr_rev != 'CHANGED'  ORDER BY PUBLIC.tr_hist.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+ 
   //   let result = [];
   //   var i = 1;
   //   for (let trs of tr){
@@ -3284,7 +3315,7 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   //   i = i + 1
   // }
   // }
-  
+  // console.log(tr)
     return res.status(201).json({ message: 'created succesfully', data: tr });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {

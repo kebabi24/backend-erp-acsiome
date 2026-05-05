@@ -150,6 +150,38 @@ const findBetweenDate = async (req: Request, res: Response, next: NextFunction) 
         return next(e)
     }
 }
+const findCBetweenDate = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get("logger")
+  logger.debug("Calling find by  all account endpoint")
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers 
+  try {
+      let i = 0
+let result = []
+      console.log(req.body)
+      const affectEquipementServiceInstance = Container.get(AffectEquipementService);
+      const bkhServiceInstance = Container.get(BkhService);
+      const bkhs = await bkhServiceInstance.findbetween({
+          where: { bkh_bank:req.body.bank,bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_type :'C'},
+          bkh_domain: user_domain,
+        });
+      // for (let ar of arb) {
+      //     const customer = await customerServiceInstance.findOne({cm_addr : ar.ar_bill})
+      
+      // result.push({id:i+1,ar_bill: ar.ar_bill, name: customer.address.ad_name,ar_effdate: ar.ar_effdate,ar_curr: ar.ar_curr, ar_cr_terms: ar.ar_cr_terms,ar_cr_})
+      // i++
+      // }
+// console.log(arb[0].soldinit)
+
+  
+      return res
+          .status(200)
+          .json({ message: "fetched succesfully", data: bkhs })
+  } catch (e) {
+      logger.error("🔥 error: %o", e)
+      return next(e)
+  }
+}
 export default {
   create,
   findOne,
@@ -159,4 +191,5 @@ export default {
   update,
   deleteOne,
   findBetweenDate,
+  findCBetweenDate
 };

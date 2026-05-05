@@ -15,5 +15,6 @@ export default (app: Router) => {
     route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
     route.post("/findAll", controller.findByAll)
+    route.post("/findBetween", controller.findByBetween)
     
 }

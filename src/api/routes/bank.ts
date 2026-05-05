@@ -28,6 +28,8 @@ export default (app: Router) => {
   route.post('/addbkhpayment', controller.bkhP);
   route.post('/addbkhpaymentdet', controller.bkhPDet);
   route.post('/addbkhcautiondet', controller.bkhCautionDet);
+  route.post('/bkhcautiondet', controller.SoldeCustEquip);
+  
   route.post('/addbkhtransfertc', controller.bkhTrC);
   route.post('/addbkhtransfertcdet', controller.bkhTrCDet);
   route.post('/findbkh', controller.findBKHBy);

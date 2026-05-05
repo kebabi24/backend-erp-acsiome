@@ -32,24 +32,35 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     
 
-    const invoiceOrderServiceInstance = Container.get(InvoiceOrderTempService);
+    const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
     const saleOrderServiceInstance = Container.get(SaleOrderService);
 
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
 
-    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
-    const { invoiceOrder, invoiceOrderDetail } = req.body;
+    const invoiceOrderTempDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
 
-    const ih = await invoiceOrderServiceInstance.create({
-      ...invoiceOrder,
+    const configServiceInstance = Container.get(ConfigService)
+   
+    const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
+    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
+    const payMethServiceInstance = Container.get(PayMethService);
+    const payMethDetailServiceInstance = Container.get(PayMethDetailService);
+    const generalLedgerServiceInstance = Container.get(GeneralLedgerService);
+    const accountReceivableServiceInstance = Container.get(AccountReceivableService);
+    const customerServiceInstance = Container.get(CustomerService)
+    const itemServiceInstance = Container.get(ItemService);
+    const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body;
+
+    const ih = await invoiceOrderTempServiceInstance.create({
+      ...invoiceOrderTemp,
       ith_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-console.log(invoiceOrderDetail)
-    for (let entry of invoiceOrderDetail) {
+// console.log(invoiceOrderTempDetail)
+    for (let entry of invoiceOrderTempDetail) {
       entry = {
         ...entry,
         itdh_domain: user_domain,
@@ -60,7 +71,7 @@ console.log(invoiceOrderDetail)
         last_modified_ip_adr: req.headers.origin,
       };
 
-      await invoiceOrderDetailServiceInstance.create(entry);
+      await invoiceOrderTempDetailServiceInstance.create(entry);
 
       const sod = await saleOrderDetailServiceInstance.findOne({
         sod_domain: user_domain,
@@ -91,75 +102,11 @@ console.log(invoiceOrderDetail)
         { id: so.id },
       );
 
-    return res.status(201).json({ message: 'created succesfully', data: ih.ith_inv_nbr });
-  } catch (e) {
-    //#
-    logger.error('🔥 error: %o', e);
-    return next(e);
-  }
-};
 
-const createIV = async (req: Request, res: Response, next: NextFunction) => {
-  const logger = Container.get('logger');
-  const { user_code } = req.headers;
-  const { user_domain } = req.headers;
 
-  logger.debug('Calling Create sequence endpoint');
-  try {
-    
-    const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
+      const config = await configServiceInstance.findOne({})
 
-    const invoiceOrderTempDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
-    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
-    const configServiceInstance = Container.get(ConfigService)
-    const saleShiperServiceInstance = Container.get(SaleShiperService);
-
-    const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
-    const itemServiceInstance = Container.get(ItemService);
-    
-    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
-    const payMethServiceInstance = Container.get(PayMethService);
-    const payMethDetailServiceInstance = Container.get(PayMethDetailService);
-    const generalLedgerServiceInstance = Container.get(GeneralLedgerService);
-    const accountReceivableServiceInstance = Container.get(AccountReceivableService);
-    const customerServiceInstance = Container.get(CustomerService)
-    const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body;
-
-    const ih = await invoiceOrderTempServiceInstance.create({
-      ...invoiceOrderTemp,
-      ith_domain: user_domain,
-      created_by: user_code,
-      created_ip_adr: req.headers.origin,
-      last_modified_by: user_code,
-    });
-
-    console.log('numero : ' , ih.ith_inv_nbr)
-    for (let entry of invoiceOrderTempDetail) {
-      entry = { ...entry, itdh_domain: user_domain, itdh_inv_nbr: ih.ith_inv_nbr };
-      await invoiceOrderTempDetailServiceInstance.create({
-        ...entry,
-        created_by: user_code,
-        created_ip_adr: req.headers.origin,
-        last_modified_by: user_code,
-        last_modified_ip_adr: req.headers.origin,
-      });
-
-      const sh = await saleShiperServiceInstance.findOne({
-        psh_domain: user_domain,
-        psh_shiper: entry.itdh_ship,
-        psh_part: entry.itdh_part,
-        psh_nbr: entry.itdh_nbr,
-        psh_line: entry.itdh_sad_line,
-      });
-      if (sh)
-        await saleShiperServiceInstance.update(
-          { psh_invoiced: true, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
-          { id: sh.id },
-        );
-    }
-    const config = await configServiceInstance.findOne({})
-
-    console.log(config)
+    // console.log(config)
     if (config.cfg_imput_auto) {
 
 
@@ -315,7 +262,233 @@ const createIV = async (req: Request, res: Response, next: NextFunction) => {
         
       if(cm) await customerServiceInstance.update({cm_balance : Number(cm.cm_balance) + Number(((Number(invoice.ih_tot_amt)) * Number(invoice.ih_ex_rate2)) / Number(invoice.ih_ex_rate))  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
 
-      console.log("imput auto")
+      // console.log("imput auto")
+    } /*if config.cfg_imput_auto*/
+    return res.status(201).json({ message: 'created succesfully', data: ih.ith_inv_nbr });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+const createIV = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  logger.debug('Calling Create sequence endpoint');
+  try {
+    
+    const invoiceOrderTempServiceInstance = Container.get(InvoiceOrderTempService);
+
+    const invoiceOrderTempDetailServiceInstance = Container.get(InvoiceOrderTempDetailService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const configServiceInstance = Container.get(ConfigService)
+    const saleShiperServiceInstance = Container.get(SaleShiperService);
+
+    const invoiceOrderServiceInstance = Container.get(InvoiceOrderService);
+    const itemServiceInstance = Container.get(ItemService);
+    
+    const invoiceOrderDetailServiceInstance = Container.get(InvoiceOrderDetailService);
+    const payMethServiceInstance = Container.get(PayMethService);
+    const payMethDetailServiceInstance = Container.get(PayMethDetailService);
+    const generalLedgerServiceInstance = Container.get(GeneralLedgerService);
+    const accountReceivableServiceInstance = Container.get(AccountReceivableService);
+    const customerServiceInstance = Container.get(CustomerService)
+    const { invoiceOrderTemp, invoiceOrderTempDetail } = req.body;
+
+    const ih = await invoiceOrderTempServiceInstance.create({
+      ...invoiceOrderTemp,
+      ith_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+    });
+
+    // console.log('numero : ' , ih.ith_inv_nbr)
+    for (let entry of invoiceOrderTempDetail) {
+      entry = { ...entry, itdh_domain: user_domain, itdh_inv_nbr: ih.ith_inv_nbr };
+      await invoiceOrderTempDetailServiceInstance.create({
+        ...entry,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+
+      const sh = await saleShiperServiceInstance.findOne({
+        psh_domain: user_domain,
+        psh_shiper: entry.itdh_ship,
+        psh_part: entry.itdh_part,
+        psh_nbr: entry.itdh_nbr,
+        psh_line: entry.itdh_sad_line,
+      });
+      if (sh)
+        await saleShiperServiceInstance.update(
+          { psh_invoiced: true, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+          { id: sh.id },
+        );
+    }
+    const config = await configServiceInstance.findOne({})
+
+    // console.log(config)
+    if (config.cfg_imput_auto) {
+
+
+
+     // console.log("temp", this.invoiceTemp)
+      let invoiceOrder = {
+        ih_category :  invoiceOrderTemp.ith_category,
+        ih_cust : invoiceOrderTemp.ith_cust,
+        ih_bill : invoiceOrderTemp.ith_bill,
+        ih_nbr : invoiceOrderTemp.ith_nbr,
+        ih_inv_nbr : ih.ith_inv_nbr,
+        ih_inv_date : invoiceOrderTemp.ith_inv_date,
+        ih_taxable : invoiceOrderTemp.ith_taxable,
+        ih_rmks : invoiceOrderTemp.ith_rmks,
+        ih_curr : invoiceOrderTemp.ith_curr,
+        ih_ex_rate : invoiceOrderTemp.ith_ex_rate,
+        ih_ex_rate2 : invoiceOrderTemp.ith_ex_rate2,
+        // ih_inv_nbr :  invoiceOrderTemp.ith_inv_nbr,
+        ih_cr_terms : invoiceOrderTemp.ith_cr_terms,
+        ih_amt :      invoiceOrderTemp.ith_amt,
+        ih_tax_amt : invoiceOrderTemp.ith_tax_amt,
+        ih_trl1_amt : invoiceOrderTemp.ith_trl1_amt,
+        ih_tot_amt :      invoiceOrderTemp.ith_tot_amt,
+        
+  
+      }
+
+      const invoice = await invoiceOrderServiceInstance.create({
+        ...invoiceOrder,
+        ih_domain: user_domain,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      });
+  
+      for (let entry of invoiceOrderTempDetail) {
+
+        const item = await itemServiceInstance.findOne({
+          pt_domain: user_domain,
+          pt_part: entry.itdh_part,
+        });
+        entry = {
+          idh_line: entry.itdh_line,
+          idh_sad_line: entry.itdh_sad_line, 
+          idh_nbr: entry.itdh_nbr,
+          idh_ship: entry.itdh_ship,
+          idh_part: entry.itdh_part,
+          // desc: detail.item.pt_desc1,
+          idh_qty_inv: entry.itdh_qty_inv,
+          idh_site: entry.itdh_site,
+          idh_loc: entry.itdh_loc,
+          idh_um: entry.itdh_um,
+          idh_price: entry.itdh_price,
+          idh_ex_rate: entry.itdh_ex_rate,
+          idh_ex_rate2: entry.itdh_ex_rate2,
+          idh_disc_pct: entry.itdh_disc_pct,
+          idh_taxable: entry.itdh_taxable,
+          idh_tax_code: entry.itdh_tax_code,
+          idh_taxc: entry.itdh_taxc,
+          
+          idh_draw: item.pt_draw,
+          idh_prod_line: item.pt_prod_line,
+          idh_promo: item.pt_promo,    
+          idh_group: item.pt_group,
+          idh_part_type: item.pt_part_type,
+          idh_dsgn_grp : item.pt_dsgn_grp,
+          idh_rev: item.pt_rev,
+          idh_inv_date: invoiceOrderTemp.ith_inv_date,
+          //...entry,
+          idh_domain: user_domain,
+          idh_inv_nbr: invoice.ih_inv_nbr,
+          created_by: user_code,
+          created_ip_adr: req.headers.origin,
+          last_modified_by: user_code,
+          last_modified_ip_adr: req.headers.origin,
+        };
+        await invoiceOrderDetailServiceInstance.create(entry);
+      }
+  
+      const PayMeth = await payMethServiceInstance.findOne({
+        ct_domain: user_domain,
+        ct_code: invoice.ih_cr_terms,
+      });
+  
+      if (PayMeth) {
+        const details = await payMethDetailServiceInstance.find({
+          ctd_domain: user_domain,
+          ctd_code: PayMeth.ct_code,
+        });
+  
+        for (let det of details) {
+          const effdate = new Date(invoiceOrder.ih_inv_date);
+          effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
+  
+          await accountReceivableServiceInstance.create({
+            ar_domain: user_domain,
+            ar_nbr: invoice.ih_inv_nbr,
+            ar_effdate: invoice.ih_inv_date,
+            ar_due_date: effdate,
+            ar_date: new Date(),
+            ar_type: 'I',
+            ar_cust: invoice.ih_cust,
+            ar_bill: invoice.ih_bill,
+            ar_rmks: invoice.ih_rmks,
+            ar_cr_terms: invoice.ih_cr_terms,
+            ar_open: true,
+            ar_applied: 0,
+            ar_base_applied: 0,
+            ar_curr: invoice.ih_curr,
+            ar_ex_rate: invoice.ih_ex_rate,
+            ar_ex_rate2: invoice.ih_ex_rate2,
+            ar_amt:
+              ((Number(invoice.ih_tot_amt)) * Number(det.ctd_pct)) / 100,
+            ar_base_amt:
+              ((((Number(invoice.ih_tot_amt)) *
+                Number(invoice.ih_ex_rate2)) /
+                Number(invoice.ih_ex_rate)) *
+                Number(det.ctd_pct)) / 100,
+            created_by: user_code,
+            last_modified_by: user_code,
+          });
+        }
+      } else {
+        await accountReceivableServiceInstance.create({
+          ar_domain: user_domain,
+          ar_nbr: invoice.ih_inv_nbr,
+          ar_effdate: invoice.ih_inv_date,
+          ar_due_date: invoice.ih_due_date,
+          ar_date: new Date(),
+          ar_type: 'I',
+          ar_cust: invoice.ih_cust,
+          ar_bill: invoice.ih_bill,
+          ar_rmks: invoice.ih_rmks,
+          ar_cr_terms: invoice.ih_cr_terms,
+          ar_open: true,
+          ar_applied: 0,
+          ar_base_applied: 0,
+          ar_curr: invoice.ih_curr,
+          ar_ex_rate: invoice.ih_ex_rate,
+          ar_ex_rate2: invoice.ih_ex_rate2,
+          ar_amt: Number(invoice.ih_tot_amt),
+          ar_base_amt:
+            ((Number(invoice.ih_tot_amt)) *
+              Number(invoice.ih_ex_rate2)) /
+            Number(invoice.ih_ex_rate),
+          created_by: user_code,
+          last_modified_by: user_code,
+        });
+      }
+  
+      const cm = await customerServiceInstance.findOne({cm_addr: invoice.ih_bill,cm_domain : user_domain,})
+        
+      if(cm) await customerServiceInstance.update({cm_balance : Number(cm.cm_balance) + Number(((Number(invoice.ih_tot_amt)) * Number(invoice.ih_ex_rate2)) / Number(invoice.ih_ex_rate))  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+
+      // console.log("imput auto")
     } /*if config.cfg_imput_auto*/
     // const addressServiceInstance = Container.get(AddressService);
     // const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: invoiceOrderTemp.ith_bill });
@@ -375,7 +548,7 @@ const createAvoir = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
     });
 
-    console.log('numero : ' , ih.ith_inv_nbr)
+    // console.log('numero : ' , ih.ith_inv_nbr)
     for (let det of invoiceOrderDetail) {
 
      let entry = { 
@@ -411,7 +584,7 @@ const createAvoir = async (req: Request, res: Response, next: NextFunction) => {
     }
     const config = await configServiceInstance.findOne({})
 
-    console.log(config)
+    // console.log(config)
     if (config.cfg_imput_auto) {
 
 
@@ -567,7 +740,7 @@ const createAvoir = async (req: Request, res: Response, next: NextFunction) => {
         
       if(cm) await customerServiceInstance.update({cm_balance : Number(cm.cm_balance) + Number(((Number(invoice.ih_tot_amt)) * Number(invoice.ih_ex_rate2)) / Number(invoice.ih_ex_rate))  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
 
-      console.log("imput auto")
+      // console.log("imput auto")
     } /*if config.cfg_imput_auto*/
     // const addressServiceInstance = Container.get(AddressService);
     // const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: invoiceOrderTemp.ith_bill });
@@ -653,7 +826,7 @@ const imput = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     
-console.log(PayMeth)
+// console.log(PayMeth)
     if (PayMeth) {
       const details = await payMethDetailServiceInstance.find({
         ctd_domain: user_domain,
@@ -663,7 +836,7 @@ console.log(PayMeth)
       for (let det of details) {
         const effdate = new Date(invoiceOrder.ih_inv_date);
         effdate.setDate(effdate.getDate() + Number(det.ctd_due_day));
-console.log('ctd',invoiceOrder.ih_amt)
+// console.log('ctd',invoiceOrder.ih_amt)
         await accountReceivableServiceInstance.create({
           ar_domain: user_domain,
           ar_nbr: ih.ih_inv_nbr,

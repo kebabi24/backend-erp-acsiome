@@ -20,7 +20,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const woroutingServiceInstance = Container.get(WoroutingService);
     const allocationDetailServiceInstance = Container.get(AllocationDetailService)
     const wo = await workOrderServiceInstance.findOne({ id: req.body._wod.wod_lot , wo_domain: user_domain});
-
+//console.log(req.body.detail)
     if (wo)
       await workOrderServiceInstance.update(
         {

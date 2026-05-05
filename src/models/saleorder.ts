@@ -215,7 +215,7 @@ const saleOrder = sequelize.define(
 	saleOrder.addHook('beforeCreate', async (instance, option) => {
 		
 	const seq = await Sequence.findOne({ where: { seq_seq: instance.so_category, seq_type: "SO"  } });
-	instance.so_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+	instance.so_nbr = `${seq.seq_prefix}${Number(seq.seq_curr_val)+1}`;
 	await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_type: "SO", seq_seq: instance.so_category } });
 	});
 export default saleOrder;

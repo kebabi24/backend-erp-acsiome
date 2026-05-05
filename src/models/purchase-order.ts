@@ -169,7 +169,7 @@ const PurchaseOrder = sequelize.define(
 PurchaseOrder.addHook('beforeCreate', async (instance, option) => {
     console.log(instance.po_category)
     const seq = await Sequence.findOne({ where: { seq_seq: instance.po_category} });
-    instance.po_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+    instance.po_nbr = `${seq.seq_prefix}${Number(seq.seq_curr_val)+1}`;
     await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_seq: instance.po_category } });
   });
 export default PurchaseOrder

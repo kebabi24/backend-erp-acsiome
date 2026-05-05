@@ -7,6 +7,8 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
 import { Console } from 'console';
+import { Op, Sequelize } from 'sequelize';
+
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const bwipjs = require('bwip-js');
@@ -523,113 +525,117 @@ const createPAL = async (req: Request, res: Response, next: NextFunction) => {
     const labelServiceInstance = Container.get(LabelService);
     const sequenceServiceInstance = Container.get(SequenceService);
     var labelId = null;
+console.log(req.body)
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PAL', seq_type: 'PL' });
 
     labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
     await sequenceServiceInstance.update(
       { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-      { id: seq.id, seq_type: 'PL', seq_seq: 'PAL', seq_domain: user_domain },
+      { id: seq.id},
     );
     const label = await labelServiceInstance.create({
       ...req.body,
       //lb_ref: labelId,
       lb_pal: labelId,
       lb_cab: labelId,
+      lb_date: new Date(),
+      lb_site: '1000',
+      lb_loc : 'CH000',
       lb_domain: user_domain,
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
-    const pageWidth = 284; // Width of the page in points
-    const pageHeight = 426; // Height of the page in points
+    // const pageWidth = 284; // Width of the page in points
+    // const pageHeight = 426; // Height of the page in points
 
-    const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
-    doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
-    const image = doc.openImage('./edel.jpg');
+    // const doc = new PDFDocument({ size: [pageWidth, pageHeight] });
+    // doc.page.margins = { top: 0, bottom: 0, left: 0, right: 0 };
+    // const image = doc.openImage('./edel.jpg');
 
-    // Draw the barcode image on the PDF document
-    doc.image(image, 50, 0, {
-      fit: [180, 150], // Adjust the size of the barcode image as needed
-    });
+    // // Draw the barcode image on the PDF document
+    // doc.image(image, 50, 0, {
+    //   fit: [180, 150], // Adjust the size of the barcode image as needed
+    // });
 
-    doc
-      .rect(10, 80, 265, 80)
-      .stroke()
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('PRODUIT : ' + req.body.lb_desc, 20, 90)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('QTE :' + req.body.lb_qty, 20, 115)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('N° LOT :' + req.body.lb_lot, 20, 140);
+    // doc
+    //   .rect(10, 80, 265, 80)
+    //   .stroke()
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('PRODUIT : ' + req.body.lb_desc, 20, 90)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('QTE :' + req.body.lb_qty, 20, 115)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('N° LOT :' + req.body.lb_lot, 20, 140);
 
-    // Define the second rectangle and its text lines
-    doc
-      .rect(10, 170, 265, 80)
-      .stroke()
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('PAR :', 20, 180)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 203)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('PAL N° :' + req.body.lb_nbr, 20, 228);
+    // // Define the second rectangle and its text lines
+    // doc
+    //   .rect(10, 170, 265, 80)
+    //   .stroke()
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('PAR :', 20, 180)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('DATE DE RECEPTION :' + req.body.lb_date, 20, 203)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('PAL N° :' + req.body.lb_nbr, 20, 228);
 
-    // Define the third rectangle and its text lines
-    doc
-      .rect(10, 310, 265, 70)
-      .stroke()
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('BARCODE:' + labelId, 20, 320)
-      .font('Helvetica-Bold')
-      .fontSize(12)
-      .text('FABRIQUE EN ALGERIE', 75, 405);
+    // // Define the third rectangle and its text lines
+    // doc
+    //   .rect(10, 310, 265, 70)
+    //   .stroke()
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('BARCODE:' + labelId, 20, 320)
+    //   .font('Helvetica-Bold')
+    //   .fontSize(12)
+    //   .text('FABRIQUE EN ALGERIE', 75, 405);
 
-    bwipjs.toBuffer(
-      {
-        bcid: 'code128', // Barcode type (replace with the desired barcode format)
-        text: labelId, // Barcode data
-        scale: 3, // Scaling factor for the barcode image
-        includetext: true, // Include the barcode text
-        height: 10,
-        width: 72,
-      },
-      function(err, png) {
-        if (err) {
+    // bwipjs.toBuffer(
+    //   {
+    //     bcid: 'code128', // Barcode type (replace with the desired barcode format)
+    //     text: labelId, // Barcode data
+    //     scale: 3, // Scaling factor for the barcode image
+    //     includetext: true, // Include the barcode text
+    //     height: 10,
+    //     width: 72,
+    //   },
+    //   function(err, png) {
+    //     if (err) {
           
-          return;
-        }
+    //       return;
+    //     }
 
-        // Load the barcode image from the generated PNG buffer
-        const image = doc.openImage(png);
+    //     // Load the barcode image from the generated PNG buffer
+    //     const image = doc.openImage(png);
 
-        // Draw the barcode image on the PDF document
-        doc.image(image, 50, 335, {
-          fit: [5400, 40], // Adjust the size of the barcode image as needed
-        });
-        // Save the PDF document
-        doc.pipe(fs.createWriteStream('output.pdf'));
-        doc.end();
-      },
-    );
+    //     // Draw the barcode image on the PDF document
+    //     doc.image(image, 50, 335, {
+    //       fit: [5400, 40], // Adjust the size of the barcode image as needed
+    //     });
+    //     // Save the PDF document
+    //     doc.pipe(fs.createWriteStream('output.pdf'));
+    //     doc.end();
+    //   },
+    // );
 
-    const filePath = './output.pdf';
-    const printerName = req.body.lb_printer;
+    // const filePath = './output.pdf';
+    // const printerName = req.body.lb_printer;
 
-    printer
-      .print(filePath, { printer: printerName })
-      .then(() => {
+    // printer
+    //   .print(filePath, { printer: printerName })
+    //   .then(() => {
       
-      })
-      .catch(error => {
-        console.error('Error while printing:', error);
-      });
+    //   })
+    //   .catch(error => {
+    //     console.error('Error while printing:', error);
+    //   });
     return res.status(201).json({ message: 'created succesfully', data: label });
   } catch (e) {
     //#
@@ -660,7 +666,31 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
-
+const findByUser = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+console.log(req.body)
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    const label = await labelServiceInstance.findS({
+      where: {  lb_date:req.body.lb_date, created_by: user_code, lb_domain:user_domain},
+      attributes: 
+      ['lb_part', 'lb__chr01',[Sequelize.fn('sum', Sequelize.col('lb_qty')), 'QTY' ]],
+      group: ['lb_part','lb__chr01'],
+      raw: true,
+    });
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data: { label} ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   
@@ -825,6 +855,7 @@ export default {
   createPAL,
   addAllocation,
   findBy,
+  findByUser,
   findByAll,
   findOne,
   findAll,

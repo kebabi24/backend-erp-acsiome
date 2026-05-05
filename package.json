@@ -4,9 +4,9 @@
   "description": "Bulletproof node.js",
   "main": "src/app.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "webpack",
     "heroku-postbuild": "npm run build",
-    "start": "nodemon",
+    "start": "nodemon ",
     "inspect": "nodemon --inspect src/app.ts",
     "test": "jest",
     "lint": "npm run lint:js ",

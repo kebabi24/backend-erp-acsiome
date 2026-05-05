@@ -144,7 +144,7 @@ const Quote = sequelize.define(
 );
 Quote.addHook('beforeCreate', async (instance, option) => {
 	const seq = await Sequence.findOne({ where: {  seq_type: "QO"  } });
-	instance.qo_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+	instance.qo_nbr = `${seq.seq_prefix}${Number(seq.seq_curr_val)+1}`;
 	await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: { seq_type: "QO" } });
   });
   

@@ -54,6 +54,6 @@ export default (app: Router) => {
   route.post('/updateprice', controller.updatePrice);
   route.delete("/:id", controller.deleteOne)
   route.post('/epiUpdate', controller.epiUpdate);
-  
+  route.post('/findnot', controller.findByNot);
  
 };

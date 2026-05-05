@@ -874,7 +874,7 @@ const findByPriceRole = async (req: Request, res: Response, next: NextFunction) 
     let result=[]
     let i=1
     for (let data of locationDetails) {
-      const line = await loadRequestServiceInstance.findLoadRequestLineBysum({where : {load_request_code:lr,product_code: data.ld_part},
+      const line = await loadRequestServiceInstance.findLoadRequestLineBysum({where : {load_request_code:lr,product_code: data.ld_part,qt_effected: {[Op.ne]: 0},},
         attributes: ['product_code',  [Sequelize.fn('sum', Sequelize.col('qt_effected')), 'total_qtyeffected']],
         group: ['product_code',],
         raw: true,

@@ -1,5 +1,5 @@
 import { Service, Inject } from "typedi"
-
+import { Op, Sequelize } from 'sequelize';
 @Service()
 export default class AccountReceivableService {
     constructor(
@@ -32,6 +32,21 @@ export default class AccountReceivableService {
     public async findwithadress(query: any): Promise<any> {
         
         try {
+            const accountReceivables = await this.accountReceivableModel.findAll({ where: query,include: this.customerModel, order : [['id', 'ASC']] ,
+            attributes: {
+                include: [[Sequelize.literal('ar_amt * -1'), 'aramt'],[Sequelize.literal('ar_applied * -1'), 'arapplied'],[Sequelize.literal('ar_base_amt * -1'), 'arbase_amt'],[Sequelize.literal('ar_base_applied * -1'), 'arbase_applied']],
+              }
+            })
+            this.logger.silly("find All Codes mstr")
+            return accountReceivables
+        } catch (e) {
+            this.logger.error(e)
+            throw e
+        }
+    }
+    public async findInvswithadress(query: any): Promise<any> {
+        
+        try {
             const accountReceivables = await this.accountReceivableModel.findAll({ where: query,include: this.customerModel, order : [['id', 'ASC']] })
             this.logger.silly("find All Codes mstr")
             return accountReceivables
@@ -42,7 +57,7 @@ export default class AccountReceivableService {
     }
     public async find(query: any): Promise<any> {
         try {
-            const accountReceivables = await this.accountReceivableModel.findAll({ where: query })
+            const accountReceivables = await this.accountReceivableModel.findAll({ where: query,include: this.customerModel })
             this.logger.silly("find All Codes mstr")
             return accountReceivables
         } catch (e) {

@@ -223,7 +223,7 @@ const InvoiceOrderTemp = sequelize.define(
 		)
 	InvoiceOrderTemp.addHook('beforeCreate', async (instance, option) => {
 	const seq = await Sequence.findOne({ where: { seq_seq: instance.ith_category, seq_type: "IV"  } });
-	instance.ith_inv_nbr = `${seq.seq_prefix}-${Number(seq.seq_curr_val)+1}`;
+	instance.ith_inv_nbr = `${seq.seq_prefix}${Number(seq.seq_curr_val)+1}`;
 	await Sequence.update({ seq_curr_val: Number(seq.seq_curr_val )+1 }, { where: {seq_type: "IV", seq_seq: instance.ith_category } });
 	 });
 export default InvoiceOrderTemp;

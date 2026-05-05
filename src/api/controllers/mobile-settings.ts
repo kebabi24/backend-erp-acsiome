@@ -235,7 +235,30 @@ const createPriceList = async (req: Request, res: Response, next: NextFunction) 
     }
 
 }
+const updatePriceList = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    logger.debug("Calling createPaymentMethods  endpoint")
+    console.log(req.body)
+    const {data} =  req.body
+    const mobileSettingsServiceInstanse = Container.get(MobileSettingsService)
+    const priceList = await mobileSettingsServiceInstanse.delete({pricelist_code :data[0].pricelist_code})
+    try{
+      
+        
+        const priceList = await mobileSettingsServiceInstanse.createPriceList(data)
+        return res.status(200)
+            .json({
+                message: "Data inserted !",
+                priceList:priceList
+             })
+            }
+      
+    catch(e){
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
 
+}
 const getAllPriceList = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling get visit list  endpoint")
@@ -317,5 +340,6 @@ export default {
     getPriceList,
     getAllPriceList,
     createPriceList,
+    updatePriceList,
     getPPProfile,
 }

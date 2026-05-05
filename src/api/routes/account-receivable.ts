@@ -20,4 +20,6 @@ export default (app: Router) => {
     route.put("/:id", controller.update)
     route.delete("/:id", controller.deleteOne)
     route.post("/getallpaymentby", controller.findBetweenDate)
+    route.post("/getallinvoicesby", controller.findInvBetweenDate)
+    
 }

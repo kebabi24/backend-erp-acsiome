@@ -48,6 +48,7 @@ export default class ServiceMobileService {
           { model: this.userMobileModel, include: [this.profileMobileModel] },
           { model: this.role_itineraryModel, include: [this.itineraryModel] },
         ],
+        order : [['role_code', 'ASC']]
       });
       this.logger.silly('find All service mobile mstr');
       return service;

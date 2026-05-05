@@ -42,7 +42,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     const accountOrderServiceInstance = Container.get(AccountOrderService);
     const customerServiceInstance = Container.get(CustomerService)
     const { saleOrder, saleOrderDetail } = req.body;
-    
+    console.log(req.body)
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
       so_domain: user_domain,
@@ -111,7 +111,111 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const createMobile = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
 
+  logger.debug('Calling Create sequence endpoint');
+
+  try {
+    console.log(req.body.saleOrder.so_category)
+    const saleOrderServiceInstance = Container.get(SaleOrderService);
+    const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService);
+    const accountOrderServiceInstance = Container.get(AccountOrderService);
+    const customerServiceInstance = Container.get(CustomerService)
+    const itemServiceInstance = Container.get(ItemService)
+    const { saleOrder, saleOrderDetail } = req.body;
+    console.log(req.body)
+    const so = await saleOrderServiceInstance.create({
+      ...saleOrder,
+      so_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    const cm = await customerServiceInstance.findOne({cm_addr: saleOrder.so_cust,cm_domain : user_domain,})
+    if(cm) await customerServiceInstance.update({cm_ship_balance : Number(cm.cm_ship_balance) + Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)  , last_modified_by:user_code,last_modified_ip_adr: req.headers.origin},{id: cm.id})
+         
+    const ao = await accountOrderServiceInstance.create({
+      ao_so_nbr:so.so_nbr,
+      ao_nbr : so.so_nbr,
+      ao_cust: saleOrder.so_cust,
+      ao_type:"I",
+      ao_amt:Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt), 
+
+      ao_po : saleOrder.so_po,
+
+      ao_rmks : saleOrder.so_rmks,
+      ao_curr : saleOrder.so_curr,
+      ao_ex_rate : saleOrder.so_ex_rate,
+      ao_ex_rate2 : saleOrder.so_ex_rate2,
+      ao_cr_terms : saleOrder.so_cr_terms,
+      
+      
+      ao_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    //console.log(saleOrderDetail)
+    let i = 1
+    for (let entry of saleOrderDetail) {
+      const item = await itemServiceInstance.findOne({ pt_domain: user_domain, pt_part: entry.product_code });
+console.log(item)
+    
+     
+      entry = {
+        sod_line: i,
+        sod_part: entry.product_code,
+      
+      sod_desc: item.pt_desc1,
+      sod_qty_ord: entry.quantity,
+      sod_um: item.pt_um,
+      sod_price: entry.unit_price,
+      sod_serial : entry.lot,
+      sod_site: item.pt_site,
+      sod_loc: item.pt_loc,
+      sod_type: (item.pt_phantom) ? 'M' : null,
+      sod_taxable: item.pt_taxable,
+      sod_taxc: item.taxe.tx2_tax_pct,
+      sod_tax_code : item.taxe.tx2_tax_code,
+
+        sod_domain: user_domain,
+        sod_nbr: so.so_nbr,
+        sod_due_date : saleOrder.so_due_date,
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+      };
+      i++
+      console.log(entry)
+      await saleOrderDetailServiceInstance.create(entry);
+    }
+    // const addressServiceInstance = Container.get(AddressService);
+    // console.log(saleOrder.so_cust)
+    //  const addr = await addressServiceInstance.findOne({ ad_domain: user_domain, ad_addr: saleOrder.so_cust });
+
+    // const pdfData = {
+    //   so: so,
+    //   sod: saleOrderDetail,
+    //    adr: addr,
+    // };
+
+    // console.log('pdfData', pdfData);
+
+    // let pdf = await generatePdf(pdfData, 'so');
+
+    return res.status(201).json({ message: 'created succesfully', data: so/*, pdf: pdf.content*/ });
+  } catch (e) {
+    //#
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const createSoMobile = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1128,7 +1232,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-  console.log('so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso');
+//  console.log('so sos os osososososososossssssssssssssssssssssssssssssssssssssssssssssssso');
   logger.debug('Calling update one  inventoryStatus endpoint');
   try {
     const saleOrderServiceInstance = Container.get(SaleOrderService);
@@ -1136,12 +1240,12 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
      const accountshiperServiceInstance = Container.get(accountShiperService);
     const { id } = req.params;
     const { saleOrder, saleOrderDetail } = req.body;
-    console.log(id);
+    //console.log(id);
     const so = await saleOrderServiceInstance.update(
       { ...saleOrder, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },
     );
-    console.log(saleOrderDetail);
+   // console.log(saleOrderDetail);
     const accountShipers = await accountshiperServiceInstance.find({as_ship:saleOrder.so_nbr,as_domain: user_domain})
     let count = accountShipers.length + 1
     const accountShiper = await accountshiperServiceInstance.create({as_nbr: saleOrder.so_nbr + '-0' + String(count),as_ship: saleOrder.so_nbr,as_bill:saleOrder.so_bill,as_cust:saleOrder.so_cust,as_type:'I',as_so_nbr:saleOrder.so_nbr,as_effdate:saleOrder.so_ord_date,as_cr_terms:saleOrder.so_cr_terms,as_sales_amt:Number(Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt)) ,as_amt:Number(Number(saleOrder.dec01)),as_curr:so.so_curr,as_domain : user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
@@ -1159,6 +1263,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
       };
       await saleOrderDetailServiceInstance.create(entry);
     }
+    console.log("here",so)
     return res.status(200).json({ message: 'fetched succesfully', data: so });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -1397,8 +1502,25 @@ const findAllwithDetails = async (req: Request, res: Response, next: NextFunctio
     let result = [];
     //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
 console.log(user_domain)
-    const sos = await sequelize.query('SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det, PUBLIC.as_mstr  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr and  PUBLIC.as_mstr.as_domain =  PUBLIC.sod_det.sod_domain and  PUBLIC.as_mstr.as_ship = PUBLIC.so_mstr.so_nbr and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',{ replacements: [user_domain], type: QueryTypes.SELECT },);
-console.log(sos)
+    const sos = await sequelize.query('SELECT PUBLIC.so_mstr.id as "iid" , *   FROM   PUBLIC.so_mstr, PUBLIC.pt_mstr, PUBLIC.sod_det  where PUBLIC.sod_det.sod_domain =  ? and  PUBLIC.sod_det.sod_nbr = PUBLIC.so_mstr.so_nbr  and PUBLIC.sod_det.sod_part = PUBLIC.pt_mstr.pt_part and PUBLIC.so_mstr.so_domain = PUBLIC.sod_det.sod_domain and PUBLIC.pt_mstr.pt_domain = PUBLIC.sod_det.sod_domain ORDER BY PUBLIC.sod_det.id DESC',{ replacements: [user_domain], type: QueryTypes.SELECT },);
+
+    return res.status(200).json({ message: 'fetched succesfully', data: sos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findAllwithDetailsObj = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const sequelize = Container.get('sequelize');
+  const { user_domain } = req.headers;
+  logger.debug('Calling find all purchaseOrder endpoint');
+  try {
+    let result = [];
+    //const saleOrderServiceInstance = Container.get(PurchaseOrderService)
+// console.log(user_domain)
+    const sos = await sequelize.query('SELECT  PUBLIC.so_mstr.id  ,PUBLIC.so_mstr.so_nbr, PUBLIC.so_mstr.so_cust, PUBLIC.so_mstr.so_ord_date , PUBLIC.so_mstr.so_due_date, PUBLIC.so_mstr.so_stat,PUBLIC.so_mstr.so_po, PUBLIC.so_mstr.so_channel, PUBLIC.so_mstr.so_amt, PUBLIC.cm_mstr.cm_sort   FROM   PUBLIC.so_mstr , PUBLIC.cm_mstr where PUBLIC.so_mstr.so_ord_date >= ? and PUBLIC.so_mstr.so_ord_date <= ? and  PUBLIC.so_mstr.so_domain =  ? and PUBLIC.so_mstr.so_cust = PUBLIC.cm_mstr.cm_addr ORDER BY PUBLIC.so_mstr.id DESC',{ replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT },);
+//console.log(sos)
     return res.status(200).json({ message: 'fetched succesfully', data: sos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -1560,6 +1682,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   create,
   createdirect,
+  createMobile,
   createceram,
   createSoMobile,
   findBy,
@@ -1578,5 +1701,6 @@ export default {
   getCA,
   findAllSoJob,
   findAllwithDetailsCeram,
-  deleteOne
+  deleteOne,
+  findAllwithDetailsObj
 };

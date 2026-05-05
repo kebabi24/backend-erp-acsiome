@@ -16,6 +16,7 @@ export default (app: Router) => {
     route.get("/cancelationReasons", controller.getCanelationReasons);
     route.get('/getPriceList', controller.getAllPriceList);
     route.post('/findppprofile', controller.getPPProfile);
+    route.post("/updatePriceList", controller.updatePriceList)
     
 
     

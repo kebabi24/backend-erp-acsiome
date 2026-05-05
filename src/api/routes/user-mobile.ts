@@ -40,6 +40,7 @@ export default (app: Router) => {
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/getAllInvoicesRole', controller.findAllInvoiceRole);
+  route.post('/getAllInvoicesRoleExp', controller.findAllInvoiceRoleExp);
   route.post('/getAllCreditsRole', controller.findAllCreditRole);
   route.post('/getAllCredits', controller.findAllCredit);
   route.post('/findallca', controller.findAllCA);

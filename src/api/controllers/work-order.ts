@@ -730,6 +730,35 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findRoWo = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  SOME wo endpoint');
+  const { user_domain } = req.headers;
+  try {
+    const workOrderServiceInstance = Container.get(WorkOrderService);
+    let wos = await workOrderServiceInstance.findOne({ ...req.body , wo_domain: user_domain});
+    console.log(wos)
+if (wos == null ) {
+  const d = new Date()
+  d.setHours(0,0,0,0)
+  const d1 = new Date()
+  d1.setHours(23,59,59,59)
+  console.log(d,d1)
+  
+  const date = new Date().toLocaleDateString()
+   wos = await workOrderServiceInstance.findOne({ wo_routing : req.body.wo_routing, wo_status: 'F',
+   wo_rel_date:  {
+    [Op.between]: [d, d1],
+    }, 
+   wo_domain: user_domain});
+}
+console.log(wos)
+    return res.status(200).json({ message: 'fetched succesfully', data: wos });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findBybroyage = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  SOME wo endpoint');
@@ -2361,6 +2390,7 @@ export default {
   findOne,
   findAll,
   findBy,
+  findRoWo,
   findBybroyage,
   findByextrusion,
   findBythermo,

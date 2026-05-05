@@ -7,7 +7,7 @@ import SaleOrderService from '../../services/saleorder';
 import { Router, Request, Response, NextFunction } from "express"
 import { Container } from "typedi"
 import {QueryTypes} from 'sequelize'
-
+import { Op, Sequelize } from 'sequelize';
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -232,7 +232,26 @@ const findByAll = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const findByBetween = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    
+    logger.debug("Calling find by  all requisition endpoint")
+    const{user_domain} = req.headers
 
+    try {
+        const invoiceOrderServiceInstance = Container.get(InvoiceOrderService)
+        
+        const ihs = await invoiceOrderServiceInstance.find({ih_domain:user_domain,ih_inv_date: { [Op.between]: [req.body.date, req.body.date1]}})
+            
+        return res.status(202).json({
+            message: "sec",
+            data:  ihs ,
+        })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 const findAll = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
     logger.debug("Calling find all invoiceOrder endpoint")
@@ -293,8 +312,8 @@ console.log(req.body)
     try {
         let result = []
         //const invoiceOrderServiceInstance = Container.get(invoiceOrderService)
-
-        const ihs =await sequelize.query("SELECT PUBLIC.idh_det.id,PUBLIC.idh_det.idh_ship,PUBLIC.idh_det.idh_um,PUBLIC.idh_det.idh_part, PUBLIC.idh_det.idh_qty_inv,PUBLIC.idh_det.idh_price,PUBLIC.ih_hist.ih_inv_nbr,PUBLIC.ih_hist.ih_bill,PUBLIC.ih_hist.ih_inv_date,PUBLIC.pt_mstr.pt_desc1, PUBLIC.ad_mstr.ad_name, (PUBLIC.idh_det.idh_price * PUBLIC.idh_det.idh_qty_inv) as montant   FROM   PUBLIC.ih_hist, PUBLIC.pt_mstr, PUBLIC.idh_det , PUBLIC.ad_mstr where PUBLIC.ih_hist.ih_inv_date >= ? and PUBLIC.ih_hist.ih_inv_date <= ? and PUBLIC.idh_det.idh_inv_nbr = PUBLIC.ih_hist.ih_inv_nbr and PUBLIC.ad_mstr.ad_addr = PUBLIC.ih_hist.ih_bill and PUBLIC.idh_det.idh_part = PUBLIC.pt_mstr.pt_part and PUBLIC.ih_hist.ih_domain = ? ORDER BY PUBLIC.idh_det.id ASC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
+console.log(req.body)
+        const ihs =await sequelize.query("SELECT PUBLIC.idh_det.id,PUBLIC.idh_det.idh_ship,PUBLIC.idh_det.idh_um,PUBLIC.idh_det.idh_part, PUBLIC.idh_det.idh_qty_inv,PUBLIC.idh_det.idh_price,PUBLIC.ih_hist.ih_inv_nbr,PUBLIC.ih_hist.ih_bill,PUBLIC.ih_hist.ih_inv_date,PUBLIC.ih_hist.ih_category,PUBLIC.pt_mstr.pt_desc1, PUBLIC.ad_mstr.ad_name, (PUBLIC.idh_det.idh_price * PUBLIC.idh_det.idh_qty_inv) as montant   FROM   PUBLIC.ih_hist, PUBLIC.pt_mstr, PUBLIC.idh_det , PUBLIC.ad_mstr where PUBLIC.ih_hist.ih_inv_date >= ? and PUBLIC.ih_hist.ih_inv_date <= ? and PUBLIC.idh_det.idh_inv_nbr = PUBLIC.ih_hist.ih_inv_nbr and PUBLIC.ad_mstr.ad_addr = PUBLIC.ih_hist.ih_bill and PUBLIC.idh_det.idh_part = PUBLIC.pt_mstr.pt_part and PUBLIC.ih_hist.ih_domain = ? ORDER BY PUBLIC.idh_det.id ASC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
      //  console.log("ihs",ihs)
         return res
             .status(200)
@@ -312,6 +331,7 @@ export default {
     createdirect,
     findBy,
     findByAll,
+    findByBetween,
     findOne,
     findByOne,
     findAll,

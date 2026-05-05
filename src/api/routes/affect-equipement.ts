@@ -13,5 +13,6 @@ export default (app: Router) => {
     route.post("/findone", controller.findByOne)
     route.put("/:id", controller.update)
     route.post("/getallpaymentby", controller.findBetweenDate)
+    route.post("/getallcautionsby", controller.findCBetweenDate)
  
 }

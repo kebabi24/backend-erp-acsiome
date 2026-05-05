@@ -754,7 +754,7 @@ const role =  await RoleServiceInstance.findOne({role_code:service.role_code})
        
        }
        //const dataa = data.locationsDetails;
-      // console.log('data', dataa);
+       console.log('data', dataa);
        // console.log('data', dataa);
        dataa.forEach(ld => {
        //  console.log('ld', ld.ld_expire);
@@ -1298,6 +1298,38 @@ const findAllInvoiceAcc = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+const findAllInvoiceRoleExp = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all user endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const userMobileServiceInstance = Container.get(UserMobileService);
+    const customerMobileServiceInstance = Container.get(CustomersMobileSercice);
+
+   console.log(req.body);
+ 
+      var invoices = await userMobileServiceInstance.getAllInvoice({
+        where: {   progress_level: {
+          [Op.is]: null
+        },role_code:req.body.role,period_active_date: { [Op.between]: [req.body.date, req.body.date1]}},
+        attributes: {
+          include: [[Sequelize.literal(' amount - due_amount'), 'Credit']], },
+      });
+    console.log("invoices",invoices);
+    for (let inv of invoices) {
+      const  customer = await customerMobileServiceInstance.findOne({customer_code:inv.customer_code})
+      // console.log(customer.customer_name)
+        inv.sdelivery_note_code = customer.customer_name
+
+    }
+    //  const invoices = await userMobileServiceInstance.getAllInvoice({...req.body, /*invoice_domain: user_domain*/});
+    return res.status(200).json({ message: 'fetched succesfully', data: invoices });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findAllInvoiceRole = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all user endpoint');
@@ -2946,6 +2978,7 @@ export default {
   findAllInvoicewithDetailsAcc,
   findAllInvoicewithDetailsRole,
   findAllInvoiceRole,
+  findAllInvoiceRoleExp,
   findAllCreditRole,
   findAllCredit,
   findRoleByuser,

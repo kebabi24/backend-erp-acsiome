@@ -31,6 +31,16 @@ export default class LabelService {
       throw e;
     }
   }
+  public async findS(query: any): Promise<any> {
+    try {
+      const labels = await this.labelModel.findAll(query);
+      this.logger.silly('find All labels mstr');
+      return labels;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
 
   public async find(query: any): Promise<any> {
     try {

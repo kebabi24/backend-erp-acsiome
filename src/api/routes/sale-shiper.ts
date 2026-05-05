@@ -8,6 +8,7 @@ export default (app: Router) => {
     app.use("/sale-shipers", route)
 
     route.post("/", controller.create)
+    route.post("/plq", controller.createPlq)
     route.get("/", controller.findAll)
     route.put("/:distinct", controller.findAllDistinct)
     route.get("/:id", controller.findOne)
