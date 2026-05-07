@@ -16,7 +16,7 @@ export default (app: Router) => {
   route.post('/find', controller.findBy);
   route.post('/finduser', controller.findByUser);
   route.post('/findby', controller.findByAll);
-  
+  route.post('/findbetween', controller.findBetween);
   route.put('/:id', controller.update);
   route.post('/upd', controller.updated);
   route.post('/', controller.create);

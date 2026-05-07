@@ -691,6 +691,27 @@ console.log(req.body)
     return next(e);
   }
 };
+
+const findBetween = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  
+  logger.debug('Calling find by  all job endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const labelServiceInstance = Container.get(LabelService);
+    const labels = await labelServiceInstance.find({lb_domain:user_domain,lb_date: { [Op.between]: [req.body.date, req.body.date1]}})
+console.log(labels)
+    return res.status(200).json({
+      message: 'fetched succesfully',
+      data:  labels ,
+    });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};    
 const findByAll = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   
@@ -856,6 +877,7 @@ export default {
   addAllocation,
   findBy,
   findByUser,
+  findBetween,
   findByAll,
   findOne,
   findAll,

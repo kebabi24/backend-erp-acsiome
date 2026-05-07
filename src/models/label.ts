@@ -34,7 +34,7 @@ const Label = sequelize.define(
     lb_qty: { type: Sequelize.DECIMAL, defaultValue: 0 },
 
     lb_actif: { type: Sequelize.BOOLEAN, defaultValue: false },
-
+    lb_deleted: { type: Sequelize.BOOLEAN, defaultValue: false },
     lb_status: Sequelize.STRING,
 
     lb_ray: Sequelize.STRING,
