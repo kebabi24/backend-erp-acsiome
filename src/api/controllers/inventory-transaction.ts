@@ -31,6 +31,7 @@ import GeneralLedgerService from "../../services/general-ledger"
 import ProductLineService from "../../services/product-line"
 import employeService from '../../services/employe';
 import {QueryTypes} from 'sequelize'
+import SequenceService from '../../services/sequence';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -5517,191 +5518,206 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling update one  code endpoint');
   const { user_code } = req.headers;
   const { user_domain } = req.headers;
-
-//  console.log(req.body)
-  
+//   const data = req.body.data;
+// //  console.log(req.body)
+// const jsonData = JSON.parse(data);
   try {
-    console.log(req.body.body.list)
-  //   const { detail, it, nlot } = req.body;
-  //   const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
-  //   const locationDetailServiceInstance = Container.get(locationDetailService);
-  //   const costSimulationServiceInstance = Container.get(costSimulationService);
-  //   const itemServiceInstance = Container.get(itemService);
-  //   const statusServiceInstance = Container.get(statusService);
-
-  //   for (const item of detail) {
+    console.log(req.body)
+    const list = req.body.list;
+   
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const locationDetailServiceInstance = Container.get(locationDetailService);
+    const costSimulationServiceInstance = Container.get(costSimulationService);
+    const itemServiceInstance = Container.get(itemService);
+    const statusServiceInstance = Container.get(statusService);
+    const sequenceServiceInstance = Container.get(SequenceService);
+    const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_type: 'TR' });
+    
+    let nlot = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
+    await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { id:seq.id, seq_domain: user_domain },
+    );
+    for (const item of list) {
      
-  //     const sct = await costSimulationServiceInstance.findOne({
-  //       sct_part: item.tr_part,
-  //       sct_site: it.tr_site,
-  //       sct_sim: 'STD-CG',
-  //       sct_domain: user_domain,
-  //     });
-  //     const sctrct = await costSimulationServiceInstance.findOne({
-  //       sct_part: item.tr_part,
-  //       sct_site: it.tr_ref_site,
-  //       sct_sim: 'STD-CG',
-  //       sct_domain: user_domain
-  //     });
-  //     const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_part: item.tr_part,
+        sct_site: '1000',
+        sct_sim: 'STD-CG',
+        sct_domain: user_domain,
+      });
+      const sctrct = await costSimulationServiceInstance.findOne({
+        sct_part: item.tr_part,
+        sct_site: '1000',
+        sct_sim: 'STD-CG',
+        sct_domain: user_domain
+      });
+      const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
 
-  //     const ld = await locationDetailServiceInstance.findOne({
-  //       ld_part: item.tr_part,
-  //       ld_lot: item.tr_serial,
-  //       ld_site: it.tr_site,
-  //       ld_loc: it.tr_loc,
-  //       ld_ref:item.tr_ref,
-  //       ld_domain:user_domain,
-  //     });
-  //     if (ld)
-  //       await locationDetailServiceInstance.update(
-  //         {
-  //           ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-  //           last_modified_by: user_code,
-  //           last_modified_ip_adr: req.headers.origin,
-  //         },
-  //         { id: ld.id },
-  //       );
-  //     await inventoryTransactionServiceInstance.create({
-  //       ...item,
-  //       ...it,
-  //       tr_lot: nlot,
-  //       tr_qty_loc: -1 * Number(item.tr_qty_loc),
-  //       tr_loc_begin: (ld) ? ld.ld_qty_oh : 0,
-  //       tr_type: 'ISS-TR',
-  //       tr_date: new Date(),
-  //       tr_mtl_std: sct.sct_mtl_tl,
-  //       tr_lbr_std: sct.sct_lbr_tl,
-  //       tr_bdn_std: sct.sct_bdn_tl,
-  //       tr_ovh_std: sct.sct_ovh_tl,
-  //       tr_sub_std: sct.sct_sub_tl,
-  //       tr_desc:pt.pt_desc1,
-  //       tr_prod_line: pt.pt_prod_line,
-  //       tr__chr01:pt.pt_draw,
-  //       tr__chr02:pt.pt_break_cat,
-  //       tr__chr03:pt.pt_group,
-  //       tr_batch: (ld) ? ld.ld__chr01: null,
-  //       tr_grade:(ld) ? ld.ld_grade: null,
-  //       dec01:Number(new Date(it.tr_effdate).getFullYear()),
-  //       dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
-  //       tr_program:new Date().toLocaleTimeString(),
-  //       tr__chr04:pt.pt_part_type,
-  //       int01:pt.int01,
-  //       int02:pt.int02,
-  //       int03:pt.pt_size,
-  //       tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-  //       created_by: user_code,
-  //       created_ip_adr: req.headers.origin,
-  //       last_modified_by: user_code,
-  //       last_modified_ip_adr: req.headers.origin,
-  //       tr_domain: user_domain,
-  //     });
+      // const ld = await locationDetailServiceInstance.findOne({
+      //   ld_part: item.tr_part,
+      //   ld_lot: item.tr_serial,
+      //   ld_site: '1000',
+      //   ld_loc: req.body.tr_loc,
+      //   ld_ref:item.tr_ref,
+      //   ld_domain:user_domain,
+      // });
+      // if (ld)
+      //   await locationDetailServiceInstance.update(
+      //     {
+      //       ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //       last_modified_by: user_code,
+      //       last_modified_ip_adr: req.headers.origin,
+      //     },
+      //     { id: ld.id },
+      //   );
+      await inventoryTransactionServiceInstance.create({
+        ...item,
+        tr_ref_loc:req.body.tr_loc,
+        tr_loc: req.body.tr_loc_from,
+        tr_lot: nlot,
+        tr_site: '1000',
+        tr_qty_loc: -1 * Number(item.tr_qty_loc),
+        // tr_loc_begin: (ld) ? ld.ld_qty_oh : 0,
+        tr_effdate:new Date(),
+        tr_type: 'ISS-TR',
+        tr_date: new Date(),
+        tr_mtl_std: sct.sct_mtl_tl,
+        tr_lbr_std: sct.sct_lbr_tl,
+        tr_bdn_std: sct.sct_bdn_tl,
+        tr_ovh_std: sct.sct_ovh_tl,
+        tr_sub_std: sct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
+        tr_um:pt.pt_um,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        // tr_batch: (ld) ? ld.ld__chr01: null,
+        // tr_grade:(ld) ? ld.ld_grade: null,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        int03:pt.pt_size,
+        tr_gl_amt: Number(item.tr_qty_loc) * Number(1) * Number(sct.sct_cst_tot),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
+      });
 
-  //     const ld1 = await locationDetailServiceInstance.findOne({
-  //       ld_part: item.tr_part,
-  //       ld_lot: item.tr_serial,
-  //       ld_site: it.tr_ref_site,
-  //       ld_loc: it.tr_ref_loc,
-  //       ld_ref:item.tr_ref,
-  //       ld_domain: user_domain,
-  //     });
+      // const ld1 = await locationDetailServiceInstance.findOne({
+      //   ld_part: item.tr_part,
+      //   ld_lot: item.tr_serial,
+      //   ld_site: it.tr_ref_site,
+      //   ld_loc: it.tr_ref_loc,
+      //   ld_ref:item.tr_ref,
+      //   ld_domain: user_domain,
+      // });
      
-  //     if (ld1)
-  //       await locationDetailServiceInstance.update(
-  //         {
-  //           ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-  //           last_modified_by: user_code,
-  //           last_modified_ip_adr: req.headers.origin,
-  //         },
-  //         { id: ld1.id },
-  //       );
-  //     else {
-  //       const status = await statusServiceInstance.findOne({
-  //         is_status: item.tr_status,
-  //         is_domain: user_domain,
-  //       });
-  //       await locationDetailServiceInstance.create({
-  //         ld_part: item.tr_part,
-  //         ld_lot: item.tr_serial,
-  //         ld_ref: item.tr_ref,
-  //         ld_date: new Date(),
-  //         ld_site: it.tr_ref_site,
-  //         ld_loc: it.tr_ref_loc,
-  //         ld_status: item.tr_status,
-  //         ld__log01: status.is_nettable,
-  //         ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-  //         ld_expire: item.tr_expire,
-  //         created_by: user_code,
-  //         created_ip_adr: req.headers.origin,
-  //         last_modified_by: user_code,
-  //         last_modified_ip_adr: req.headers.origin,
-  //         ld_domain: user_domain,
-  //         chr01:ld.chr01,
-  //         chr02:ld.chr02,
-  //         chr03:ld.chr03,
-  //         int01:pt.int01,
-  //         int02:pt.int02,
-  //         int03:pt.pt_size,
-  //         chr04:(ld) ? ld.chr04 : null,
-  //         chr05:pt.pt_prod_line,
-  //         ld_grade:(ld) ? ld.ld_grade : null,
-  //         ld__chr01: (ld) ? ld.ld__chr01 : null,
-  //         ld__chr02:pt.pt_part_type,
-  //         ld_rev:pt.pt_rev,
-  //       });
-  //     }
-  //     await inventoryTransactionServiceInstance.create({
-  //       ...item,
-  //       ...it,
-  //       tr_lot: nlot,
-  //       tr_qty_loc: Number(item.tr_qty_loc),
-  //       tr_type: 'RCT-TR',
-  //       tr_date: new Date(),
-  //       tr_loc: it.tr_ref_loc,
-  //       tr_loc_begin: (ld1) ? ld1.ld_qty_oh : 0,
-  //       tr_site: it.tr_ref_site,
-  //       tr_ref_site: it.tr_site,
-  //       tr_ref_loc: it.tr_loc,
-  //       tr_mtl_std: sctrct.sct_mtl_tl,
-  //       tr_lbr_std: sctrct.sct_lbr_tl,
-  //       tr_bdn_std: sctrct.sct_bdn_tl,
-  //       tr_ovh_std: sctrct.sct_ovh_tl,
-  //       tr_sub_std: sctrct.sct_sub_tl,
-  //       tr_desc:pt.pt_desc1,
-  //       tr_prod_line: pt.pt_prod_line,
-  //       tr__chr01:pt.pt_draw,
-  //       tr__chr02:pt.pt_break_cat,
-  //       tr__chr03:pt.pt_group,
-  //       tr_grade:(ld) ? ld.ld_grade : null,
-  //       tr_batch: (ld) ? ld.ld__chr01 : null,
-  //       dec01:Number(new Date(it.tr_effdate).getFullYear()),
-  //       dec02:Number(new Date(it.tr_effdate).getMonth() + 1),
-  //       tr_program:new Date().toLocaleTimeString(),
-  //       created_by: user_code,
-  //       created_ip_adr: req.headers.origin,
-  //       last_modified_by: user_code,
-  //       last_modified_ip_adr: req.headers.origin,
-  //       tr_domain: user_domain,
+      // if (ld1)
+      //   await locationDetailServiceInstance.update(
+      //     {
+      //       ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //       last_modified_by: user_code,
+      //       last_modified_ip_adr: req.headers.origin,
+      //     },
+      //     { id: ld1.id },
+      //   );
+      // else {
+      //   const status = await statusServiceInstance.findOne({
+      //     is_status: item.tr_status,
+      //     is_domain: user_domain,
+      //   });
+      //   await locationDetailServiceInstance.create({
+      //     ld_part: item.tr_part,
+      //     ld_lot: item.tr_serial,
+      //     ld_ref: item.tr_ref,
+      //     ld_date: new Date(),
+      //     ld_site: it.tr_ref_site,
+      //     ld_loc: it.tr_ref_loc,
+      //     ld_status: item.tr_status,
+      //     ld__log01: status.is_nettable,
+      //     ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+      //     ld_expire: item.tr_expire,
+      //     created_by: user_code,
+      //     created_ip_adr: req.headers.origin,
+      //     last_modified_by: user_code,
+      //     last_modified_ip_adr: req.headers.origin,
+      //     ld_domain: user_domain,
+      //     chr01:ld.chr01,
+      //     chr02:ld.chr02,
+      //     chr03:ld.chr03,
+      //     int01:pt.int01,
+      //     int02:pt.int02,
+      //     int03:pt.pt_size,
+      //     chr04:(ld) ? ld.chr04 : null,
+      //     chr05:pt.pt_prod_line,
+      //     ld_grade:(ld) ? ld.ld_grade : null,
+      //     ld__chr01: (ld) ? ld.ld__chr01 : null,
+      //     ld__chr02:pt.pt_part_type,
+      //     ld_rev:pt.pt_rev,
+      //   });
+      // }
+      await inventoryTransactionServiceInstance.create({
+        ...item,
+        tr_effdate: new Date(),
+        tr_lot: nlot,
+        tr_loc:req.body.tr_loc,
+        // tr_loc_from: req.body.tr_loc_from,
+        tr_qty_loc: Number(item.tr_qty_loc),
+        tr_type: 'RCT-TR',
+        tr_date: new Date(),
+        // tr_loc: it.tr_ref_loc,
+        // tr_loc_begin: (ld1) ? ld1.ld_qty_oh : 0,
+        tr_site: '1000',
+        tr_ref_site:'1000',
+        tr_ref_loc: req.body.tr_loc_from,
+        tr_mtl_std: sctrct.sct_mtl_tl,
+        tr_lbr_std: sctrct.sct_lbr_tl,
+        tr_bdn_std: sctrct.sct_bdn_tl,
+        tr_ovh_std: sctrct.sct_ovh_tl,
+        tr_sub_std: sctrct.sct_sub_tl,
+        tr_desc:pt.pt_desc1,
+        tr_um:pt.pt_um,
+        tr_prod_line: pt.pt_prod_line,
+        tr__chr01:pt.pt_draw,
+        tr__chr02:pt.pt_break_cat,
+        tr__chr03:pt.pt_group,
+        // tr_grade:(ld) ? ld.ld_grade : null,
+        // tr_batch: (ld) ? ld.ld__chr01 : null,
+        dec01:Number(new Date().getFullYear()),
+        dec02:Number(new Date().getMonth() + 1),
+        tr_program:new Date().toLocaleTimeString(),
+        created_by: user_code,
+        created_ip_adr: req.headers.origin,
+        last_modified_by: user_code,
+        last_modified_ip_adr: req.headers.origin,
+        tr_domain: user_domain,
         
-  //       tr__chr04:pt.pt_part_type,
-  //       int01:pt.int01,
-  //       int02:pt.int02,
-  //       int03:pt.pt_size,
-  //       tr_gl_amt: Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-  //     });
-  //   }
+        tr__chr04:pt.pt_part_type,
+        int01:pt.int01,
+        int02:pt.int02,
+        int03:pt.pt_size,
+        tr_gl_amt: Number(item.tr_qty_loc) * Number(1) * Number(sctrct.sct_cst_tot),
+      });
+    }
 
-  //   // const pdfData = {
-  //   //   double: true,
-  //   //   detail: detail,
-  //   //   it: it,
-  //   //   nlot: nlot,
-  //   // };
+    // const pdfData = {
+    //   double: true,
+    //   detail: detail,
+    //   it: it,
+    //   nlot: nlot,
+    // };
 
-  //   // const pdf = await generatePdf(pdfData, 'it-tr');
+    // const pdf = await generatePdf(pdfData, 'it-tr');
 
-  //   //pdf
-  //   return res.status(200).json({ message: 'deleted succesfully', data: true, /*pdf: pdf.content*/ });
+    //pdf
+    return res.status(200).json({ message: 'Added succesfully', data:  nlot /*pdf: pdf.content*/ });
    } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
