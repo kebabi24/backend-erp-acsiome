@@ -676,7 +676,7 @@ console.log(req.body)
   try {
     const labelServiceInstance = Container.get(LabelService);
     const label = await labelServiceInstance.findS({
-      where: {  lb_date:req.body.lb_date, created_by: user_code, lb_domain:user_domain},
+      where: {  lb_date:req.body.lb_date, lb_deleted: false,created_by: user_code, lb_domain:user_domain},
       attributes: 
       ['lb_part', 'lb__chr01',[Sequelize.fn('sum', Sequelize.col('lb_qty')), 'QTY' ]],
       group: ['lb_part','lb__chr01'],
@@ -702,7 +702,7 @@ const findBetween = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const labelServiceInstance = Container.get(LabelService);
     const labels = await labelServiceInstance.find({lb_domain:user_domain,lb_date: { [Op.between]: [req.body.date, req.body.date1]}})
-console.log(labels)
+//console.log(labels)
     return res.status(200).json({
       message: 'fetched succesfully',
       data:  labels ,
