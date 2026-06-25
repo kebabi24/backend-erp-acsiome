@@ -4,11 +4,13 @@ import { Service, Inject } from "typedi"
 export default class CustomerItineraryService {
     constructor(
         @Inject("itinerary_CustomerModel") private customerItineraryModel: Models.Itinerary_CustomerModel,
+        @Inject('customerMobileModel') private customerMobileModel: Models.CustomerMobileModel,
         @Inject("logger") private logger
     ) {}
 
     public async create(data: any): Promise<any> {
         try {
+           
             const cus_itn = await this.customerItineraryModel.create({ ...data })
             this.logger.silly("create customer-itn mstr")
             return cus_itn
@@ -41,7 +43,7 @@ export default class CustomerItineraryService {
     }
     public async find(query: any): Promise<any> {
         try {
-            const cus_itn = await this.customerItineraryModel.findAll({ where: query })
+            const cus_itn = await this.customerItineraryModel.findAll({ where: query,include: this.customerMobileModel })
             this.logger.silly("find All customer-itn mstr")
             return cus_itn
         } catch (e) {

@@ -24,11 +24,37 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         const providerServiceInstance = Container.get(ProviderService)
         const providerBankServiceInstance = Container.get (ProviderBankService)
         const provider = await providerServiceInstance.create({...Provider,vd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
-
+console.log(req.body)
        for (let bank of BankDetails) {
         const providerBank = await providerBankServiceInstance.create({...bank,vdbk_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
 
        }
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data: { provider } })
+    } catch (e) {
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+
+}
+const createP = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
+    logger.debug("Calling Create provider endpoint with body: %o", req.body)
+    try {
+       // const { Provider, BankDetails } = req.body;
+       // console.log(BankDetails)
+        const providerServiceInstance = Container.get(ProviderService)
+        const providerBankServiceInstance = Container.get (ProviderBankService)
+        const provider = await providerServiceInstance.create({...req.body,vd_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+// console.log(req.body)
+//        for (let bank of BankDetails) {
+//         const providerBank = await providerBankServiceInstance.create({...bank,vdbk_domain:user_domain, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+
+//        }
         return res
             .status(201)
             .json({ message: "created succesfully", data: { provider } })
@@ -283,6 +309,7 @@ const findActHist = async (req: Request, res: Response, next: NextFunction) => {
 }
 export default {
     create,
+    createP,
     findOne,
     findAll,
     findBy,

@@ -37,6 +37,7 @@ export default (app: Router) => {
   route.post('/findOne', controller.findByOne);
   route.post('/findOnestk', controller.findByOneStk);
   route.get('/:id', controller.findOne);
+  route.get('/file/:id', controller.findOneFile);
   route.get("/det/:id", controller.findOneDet)
  
   
@@ -45,6 +46,7 @@ export default (app: Router) => {
   route.post('/stknotnull', controller.findAllwithstk0);
   route.post('/itemstk', controller.findAllItemswithstk);
   route.put('/:id', controller.update);
+  route.put('/upfile/:id', upload.single('file'),controller.updateFile);
   route.post('/calccmp', controller.CalcCmp);
   route.post('/findlast', controller.findlast);
   route.post("/detail", controller.createDetail);

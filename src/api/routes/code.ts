@@ -10,6 +10,7 @@ export default (app: Router) => {
     route.get("/impact", controller.findImpact)
     route.get("/opstatus", controller.findOpStatus)
     route.get("/findprovider", controller.findAllProvider)
+    route.get("/findcustomer", controller.findAllCustomer)
     route.get("/check", controller.findCheck)
     route.get("/act", controller.findAct)
     route.get("/wostatus", controller.findwostatus)
@@ -23,6 +24,7 @@ export default (app: Router) => {
     route.get("/triggerType", controller.findTriggerType)
     route.get("/conge", controller.findConge)
     route.get("/module", controller.findModule)
+    route.get("/class", controller.findCmClass)
     route.get("/trans", controller.findTrans)
     route.get("/verify", controller.findVerify)
     route.get("/types", controller.findTypes)
@@ -40,6 +42,6 @@ export default (app: Router) => {
     route.post("/deletes", controller.deletes)
     route.post("/sumbitDomain", controller.DomainTraining)
     route.post("/sumbitData", controller.addData)
-    route.get("/findprovider", controller.findAllProvider)
+    
     route.get("/", controller.findAll)
 }

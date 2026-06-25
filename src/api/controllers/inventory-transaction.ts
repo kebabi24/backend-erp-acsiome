@@ -32,6 +32,7 @@ import ProductLineService from "../../services/product-line"
 import employeService from '../../services/employe';
 import {QueryTypes} from 'sequelize'
 import SequenceService from '../../services/sequence';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const{user_code} = req.headers 
@@ -5522,7 +5523,7 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
 // //  console.log(req.body)
 // const jsonData = JSON.parse(data);
   try {
-    console.log(req.body)
+    
     const list = req.body.list;
    
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
@@ -5531,6 +5532,7 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
     const itemServiceInstance = Container.get(itemService);
     const statusServiceInstance = Container.get(statusService);
     const sequenceServiceInstance = Container.get(SequenceService);
+    const codeService = Container.get(CodeService);
     const seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_type: 'TR' });
     
     let nlot = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;
@@ -5554,23 +5556,6 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
       });
       const pt = await itemServiceInstance.findOne({ pt_part: item.tr_part,pt_domain: user_domain });
 
-      // const ld = await locationDetailServiceInstance.findOne({
-      //   ld_part: item.tr_part,
-      //   ld_lot: item.tr_serial,
-      //   ld_site: '1000',
-      //   ld_loc: req.body.tr_loc,
-      //   ld_ref:item.tr_ref,
-      //   ld_domain:user_domain,
-      // });
-      // if (ld)
-      //   await locationDetailServiceInstance.update(
-      //     {
-      //       ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //       last_modified_by: user_code,
-      //       last_modified_ip_adr: req.headers.origin,
-      //     },
-      //     { id: ld.id },
-      //   );
       await inventoryTransactionServiceInstance.create({
         ...item,
         tr_ref_loc:req.body.tr_loc,
@@ -5610,59 +5595,7 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
         tr_domain: user_domain,
       });
 
-      // const ld1 = await locationDetailServiceInstance.findOne({
-      //   ld_part: item.tr_part,
-      //   ld_lot: item.tr_serial,
-      //   ld_site: it.tr_ref_site,
-      //   ld_loc: it.tr_ref_loc,
-      //   ld_ref:item.tr_ref,
-      //   ld_domain: user_domain,
-      // });
-     
-      // if (ld1)
-      //   await locationDetailServiceInstance.update(
-      //     {
-      //       ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //       last_modified_by: user_code,
-      //       last_modified_ip_adr: req.headers.origin,
-      //     },
-      //     { id: ld1.id },
-      //   );
-      // else {
-      //   const status = await statusServiceInstance.findOne({
-      //     is_status: item.tr_status,
-      //     is_domain: user_domain,
-      //   });
-      //   await locationDetailServiceInstance.create({
-      //     ld_part: item.tr_part,
-      //     ld_lot: item.tr_serial,
-      //     ld_ref: item.tr_ref,
-      //     ld_date: new Date(),
-      //     ld_site: it.tr_ref_site,
-      //     ld_loc: it.tr_ref_loc,
-      //     ld_status: item.tr_status,
-      //     ld__log01: status.is_nettable,
-      //     ld_qty_oh: Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-      //     ld_expire: item.tr_expire,
-      //     created_by: user_code,
-      //     created_ip_adr: req.headers.origin,
-      //     last_modified_by: user_code,
-      //     last_modified_ip_adr: req.headers.origin,
-      //     ld_domain: user_domain,
-      //     chr01:ld.chr01,
-      //     chr02:ld.chr02,
-      //     chr03:ld.chr03,
-      //     int01:pt.int01,
-      //     int02:pt.int02,
-      //     int03:pt.pt_size,
-      //     chr04:(ld) ? ld.chr04 : null,
-      //     chr05:pt.pt_prod_line,
-      //     ld_grade:(ld) ? ld.ld_grade : null,
-      //     ld__chr01: (ld) ? ld.ld__chr01 : null,
-      //     ld__chr02:pt.pt_part_type,
-      //     ld_rev:pt.pt_rev,
-      //   });
-      // }
+      
       await inventoryTransactionServiceInstance.create({
         ...item,
         tr_effdate: new Date(),
@@ -5707,6 +5640,72 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
+  /* export */
+  const fs = require('node:fs');
+  const content = 'Some content!';
+  let str = ``
+  var days: String
+  var months : String
+  var year : String
+  var houres: String
+  var minutes : String
+  var seconds : String
+  let date= new Date()
+  let day = date.getDate();
+ // console.log(day)
+if (day < 10) {
+  days = "0" + String(day)
+}
+else {days = String(day)}
+//console.log(days)
+let month = date.getMonth();
+//console.log(month)
+if (month < 9) {
+  month = month + 1
+  months = "0" + month
+} else {
+  months = String(month + 1)
+}
+let houre = date.getHours()
+if(houre < 10) {
+  houres = "0" + String(houre)
+} else {houres = String(houre)}
+let minute = date.getMinutes()
+
+if(minute < 10) {
+  minutes = "0" + String(minute)
+} else {minutes = String(minute)}
+
+let second = date.getSeconds()
+
+if(second < 10) {
+  seconds = "0" + String(second)
+} else {seconds = String(second)}
+
+
+let years = date.getFullYear();
+let datelr = `${years}.${months}.${days}.${houres}.${minutes}.${seconds}`;
+
+  const code = await codeService.findOne({code_fldname:"export-transfert",code_value:"tr"});
+
+  if(code != null) {
+    for (const item of list) {
+
+ // console.log(item)
+        str += `${datelr}|${req.body.tr_loc_from}|${req.body.tr_loc}|${item.tr_part}|${item.tr_serial}|${item.tr_qty_loc}|${item.tr_ref}|${user_code}|\n`;
+
+     
+    let filename = code.code_cmmt +  nlot + '.txt'
+ //   console.log("filename :",filename)
+      try {
+        fs.writeFileSync(filename, str);
+        // file written successfully
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
+/*export end*/        
     // const pdfData = {
     //   double: true,
     //   detail: detail,
@@ -5719,6 +5718,41 @@ const issTrPal = async (req: Request, res: Response, next: NextFunction) => {
     //pdf
     return res.status(200).json({ message: 'Added succesfully', data:  nlot /*pdf: pdf.content*/ });
    } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getDashboardData = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const Sequelize = Container.get("sequelize")
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  const { start_date, end_date } = req.body;
+  try {
+    
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.find({tr_effdate:{ [Op.between]: [start_date, end_date]},tr_domain:user_domain,tr_type:'RCT-wo',  });
+ let Prod_qty = 0
+ let Prod_amt = 0 
+ let Achat_qty = 0
+ let Achat_amt = 0 
+    var prod  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-WO' and  tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ?" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+    if(prod[0].qty == null) { Prod_qty = 0} else {  Prod_qty =  Number(prod[0].qty)}
+    if(prod[0].amt == null) { Prod_amt = 0} else {  Prod_amt =  Number(Math.round(prod[0].amt))}
+
+    var achat  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-PO' and public.tr_hist.chr01 = 'import' and tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ?" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+    if(achat[0].qty == null) { Achat_qty = 0} else {  Achat_qty =  Number(achat[0].qty)}
+    if(achat[0].amt == null) { Achat_amt = 0} else {  Achat_amt =  Number(Math.round(achat[0].amt))}
+    
+
+    var Gachat  = await Sequelize.query("select  tr_addr,ad_name,sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.ad_mstr, public.pt_mstr  where tr_part = pt_part and  tr_type = 'RCT-PO' and public.tr_hist.chr01 = 'import' and tr_addr = ad_addr and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? group by tr_addr, ad_name" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+
+   var GAtype  = await Sequelize.query("select  pt_part_type,code_cmmt,sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist ,  public.pt_mstr, public.code_mstr  where tr_part = pt_part and  tr_type = 'RCT-PO' and code_fldname = 'pt_part_type' and code_value = pt_part_type and public.tr_hist.chr01 = 'import' and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? group by pt_part_type , code_cmmt" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+   console.log(GAtype)
+  
+    return res.status(200).json({ message: 'fetched succesfully', data:{Prod_qty,Prod_amt,Achat_qty,Achat_amt,Gachat,GAtype} });
+  } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
   }
@@ -5781,4 +5815,5 @@ export default {
   findBydistribution,
   findByreport,
   issTrPal,
+  getDashboardData,
 };

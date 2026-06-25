@@ -64,4 +64,5 @@ export default (app: Router) => {
   route.post('/findepi', controller.findByEpi);
   route.post('/findemploye', controller.findByEmp);
   route.post('/iss-tr-pal', controller.issTrPal);
+  route.post('/mfgdashboard', controller.getDashboardData);
 };

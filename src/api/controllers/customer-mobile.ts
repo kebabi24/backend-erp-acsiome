@@ -18,7 +18,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customerMobileServiceInstance = Container.get(CustomerMobileService);
     const customerMobile = await customerMobileServiceInstance.create({
-      ...customerMobileData,
+      ...customerMobileData,balance:0,
       //  created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin
     });
 
@@ -465,7 +465,7 @@ const getCustomersOfItinerary = async (req: Request, res: Response, next: NextFu
    
     const itn = await customerItineraryServiceInstance.find({ itinerary_code: itinerary_code });
     
-    console.log(itn)
+    // console.log(itn)
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -489,6 +489,28 @@ const getCustomersByItinerary = async (req: Request, res: Response, next: NextFu
     const cust = await customerMobileServiceInstance.find({ customer_code:itns });
     console.log(itn)
     return res.status(200).json({ message: 'fetched succesfully', data: cust });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const getCustByItinerary = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find one  itn endpoint');
+
+  try {
+    const customerItineraryServiceInstance = Container.get(CustomerItineraryService);
+    const customerMobileServiceInstance = Container.get(CustomerMobileService);
+    const { itinerary_code } = req.body;
+   console.log(itinerary_code)
+    const itn = await customerItineraryServiceInstance.find({ itinerary_code: itinerary_code });
+    console.log(itn)
+    let itns = []
+    for (let it of itn) {
+      itns.push ({id:it.id,customer_code:it.customer_code,customer_name:it.customerMobile.customer_name,rank:it.rank})
+    }
+   
+    return res.status(200).json({ message: 'fetched succesfully', data: itns});
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -544,5 +566,6 @@ export default {
   getDataForCustomerCreate,
   getCustomersOfItinerary,
   getCustomersByItinerary,
+  getCustByItinerary,
   getOneCustomersByItinerary
 };

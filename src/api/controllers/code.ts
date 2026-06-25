@@ -763,6 +763,42 @@ const findAllProvider = async (req: Request, res: Response, next: NextFunction) 
     return next(e);
   }
 };
+const findAllCustomer = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.find({code_domain:user_domain, code_fldname:{ [Op.or] : ['cm_type','cm_shipvia','cm_promo','cm_lang','cm_pay_method','cm_cr_terms','cm_region','cm_class']}});
+    //  const si = require('systeminformation');
+    //  si.networkInterfaces().then(data => console.log(data[0].mac));
+    return res.status(200).json({ message: 'fetched succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findCmClass = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findsome({code_domain:user_domain, code_fldname: 'cm_class' });
+
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_value });
+    }
+    
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 export default {
   create,
   createCodes,
@@ -797,5 +833,7 @@ export default {
   DomainTraining,
   addData,
   deletes,
-  findAllProvider
+  findAllProvider,
+  findAllCustomer,
+  findCmClass
 };

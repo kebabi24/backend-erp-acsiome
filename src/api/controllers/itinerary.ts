@@ -13,6 +13,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
   logger.debug('Calling Create itn endpoint');
   try {
+    console.log(req.body)
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const itn = await ItineraryServiceInstance.create({
@@ -25,8 +26,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_ip_adr: req.headers.origin,
     });
     for (let entry of customers) {
-      entry = { customerId: entry, itineraryId: itn.id };
-      await CustomerItineraryServiceInstance.create(entry);
+      entry = { customer_code: entry.customer_code, itinerary_code: itinerary.itinerary_code };
+      await CustomerItineraryServiceInstance.create({...entry});
     }
     return res.status(201).json({ message: 'created succesfully', data: { itn } });
   } catch (e) {
@@ -42,7 +43,8 @@ const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const { id } = req.params;
   
-    const itn = await ItineraryServiceInstance.findOne({ itinerary_code: id });
+    const itn = await ItineraryServiceInstance.findOne({  id });
+    
     return res.status(200).json({ message: 'fetched succesfully', data: itn });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -97,6 +99,21 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findByOne = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all itn endpoint');
+
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const ItineraryServiceInstance = Container.get(ItineraryService);
+    const itn = await ItineraryServiceInstance.findOne({ ...req.body, domain: user_domain });
+    return res.status(200).json({ message: 'fetched succesfully', data: itn });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findByCust = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find by  all itn endpoint');
@@ -138,15 +155,19 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     const ItineraryServiceInstance = Container.get(ItineraryService);
     const CustomerItineraryServiceInstance = Container.get(CustomerItineraryService);
     const { id } = req.params;
+    console.log(req.body.customers.length)
     const itn = await ItineraryServiceInstance.update(
       { ...req.body.itinerary, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { itinerary_code: id },
     );
     const dl = await CustomerItineraryServiceInstance.delete({ itinerary_code: id });
     const newCustomers = req.body.customers;
+    let i = 1
     for (let entry of newCustomers) {
-      entry = { customer_code: newCustomers.customer_code, itinerary_code: itn.id };
-      await CustomerItineraryServiceInstance.create({ entry });
+      console.log(i)
+       entry = { customer_code: entry.customer_code, itinerary_code: id , rank:i};
+      await CustomerItineraryServiceInstance.create({...entry });
+      i++
     }
     return res.status(200).json({ message: 'fetched succesfully', data: true });
   } catch (e) {
@@ -174,6 +195,7 @@ export default {
   findAll,
   getAllServices,
   findBy,
+  findByOne,
   findByCust,
   update,
   deleteOne,
