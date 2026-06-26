@@ -313,7 +313,8 @@ const{user_domain} = req.headers
       });
       for (const location of locationDetails) {
         await locationDetailServiceInstance.update(
-          { ld_qty_frz: location.ld_qty_oh, ld_date_frz: new Date(), last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
+          { 
+             ld_qty_frz: location.ld_qty_oh, ld_date_frz: new Date(), last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
           { id: location.id },
         );
       }
@@ -370,13 +371,14 @@ const{user_domain} = req.headers
           loc_site: tag.tag_site,
           loc_loc: tag.tag_loc,
         });  
-      
+      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STD-CG' });
+     
         await locationDetailServiceInstance.create(
-          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_ref: tag_ref,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,ld_rev:pt_rev,ld__chr02:pt_part_type,ld__chr03:pt_article,chr01:pt_draw,chr02:pt_break_cat,chr03:pt_group,chr05:pt_prod_line,int01:int01,int02:int02,int03:pt_size }
+          { ld_domain:user_domain,ld_date: new Date,ld_status: loc.loc_status, ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, ld_site:tag_site,ld_loc:tag_loc,ld_lot: tag_serial,ld_ref: tag_ref,ld_part:tag_part, created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin,ld_rev:pt_rev,ld__chr02:pt_part_type,ld__chr03:pt_article,chr01:pt_draw,chr02:pt_break_cat,chr03:pt_group,chr05:pt_prod_line,int01:int01,int02:int02,int03:pt_size, dec01:sct_cst_tot,
+          dec02:sct_cst_tot * (tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty), }
         )
       }
-      const { sct_cst_tot } = await costSimulationServiceInstance.findOne({ sct_domain: user_domain,sct_site:tag_site,sct_part: pt_part, sct_sim: 'STD-CG' });
-     // console.log({ ...tag.dataValues,tag_posted: true })
+      // console.log({ ...tag.dataValues,tag_posted: true })
       await tagServiceInstance.update({ ...tag.dataValues,tag_posted: true, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin }, { id: tag.id });
       /*onst {
         ld_qty_frz,
@@ -404,7 +406,9 @@ const{user_domain} = req.headers
      // console.log(ld.ld_lot)
       
       await locationDetailServiceInstance.update(
-        { ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
+        { dec01:ld.dec01,
+          dec02:ld.dec01 * (tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty),
+           ld_qty_oh: tag_rcnt_qty ? tag_rcnt_qty : tag_cnt_qty, ld_qty_frz: null, ld_date_frz: null, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin },
         { id: ld.id }
       );
       

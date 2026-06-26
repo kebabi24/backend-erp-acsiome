@@ -58,6 +58,7 @@ export default (app: Router) => {
   route.post('/findgroupemp', controller.findByGroupEmp); 
   route.post('/findref', controller.findByRef); 
   route.post('/findrefs', controller.findByRefs); 
+  route.post('/findexs', controller.findByExs); 
   route.post('/findactivity', controller.findByActivity);  
   route.post('/updateprice', controller.updatePrice);
   route.post('/findiss', controller.findByIss);

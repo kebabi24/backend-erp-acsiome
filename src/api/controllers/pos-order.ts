@@ -78,7 +78,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     // console.log(total);
     if (editCart) {
       // console.log(cart);
-      console.log('bizzare');
+    
       update = true;
       // console.log(update);
       const it = await inventoryTransactionServiceInstance.findSpecial({
@@ -103,6 +103,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             await locationDetailServiceInstance.update(
               {
                 ld_qty_oh: Number(ld.ld_qty_oh) - 1 * Number(i.tr_qty_chg),
+                 dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - 1 * Number(i.tr_qty_chg)),
                 last_modified_by: user_code,
                 last_modified_ip_adr: req.headers.origin,
               },
@@ -423,7 +425,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           );
         }
       }
-      console.log('detail', detail);
+      
       for (const item of detail) {
         const sct = await costSimulationServiceInstance.findOne({
           sct_domain: user_domain,
@@ -444,6 +446,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           await locationDetailServiceInstance.update(
             {
               ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.wod_qty_req),
+               dec01:sct.sct_mtl_tl,
+          dec02:sct.sct_mtl_tl * (Number(ld.ld_qty_oh) - Number(item.wod_qty_req)),
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
             },

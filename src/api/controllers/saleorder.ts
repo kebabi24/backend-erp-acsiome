@@ -11,6 +11,9 @@ import AddressService from '../../services/address';
 import itemService from '../../services/item';
 import locationDetailService from '../../services/location-details';
 import inventoryTransactionService from '../../services/inventory-transaction';
+
+import BankDetailService from '../../services/bank-detail';
+
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { QueryTypes } from 'sequelize';
@@ -306,6 +309,7 @@ const createSoMobile = async (req: Request, res: Response, next: NextFunction) =
           if (ld){
             await locationDetailServiceInstance.update(
               {
+                 
                 ld_qty_all: Number(ld.ld_qty_all) + Number(entry.sod_qty_ord) ,
                 last_modified_by: user_code,
                 last_modified_ip_adr: req.headers.origin,
@@ -456,7 +460,7 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
     
     const so = await saleOrderServiceInstance.create({
       ...saleOrder,
-      so_domain: user_domain,
+      so_domain: user_domain, 
       created_by: user_code,
       created_ip_adr: req.headers.origin,
       last_modified_by: user_code,
@@ -472,7 +476,7 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       ao_effdate: saleOrder.so_ord_date,
       ao_type:"I",
       ao_amt:Number(saleOrder.so_amt) + Number(saleOrder.so_tax_amt) + Number(saleOrder.so_trl1_amt), 
-
+      ao_applied:Number(accountOrder.ao_amt),
       ao_po : saleOrder.so_po,
 
       ao_rmks : saleOrder.so_rmks,
@@ -514,6 +518,7 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       if (ld){
         await locationDetailServiceInstance.update(
           {
+           
             ld_qty_all: Number(ld.ld_qty_all) + Number(entry.sod_qty_ord) ,
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
@@ -541,6 +546,7 @@ const createceram = async (req: Request, res: Response, next: NextFunction) => {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    
   
 
   const banks = await bankServiceInstance.findOne({ bk_code: accountOrder.ao_bank, bk_domain: user_domain });
@@ -725,6 +731,8 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
         if (ld)
           await locationDetailServiceInstance.update(
             {
+               dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(remain.sod_qty_ord) * Number(remain.sod_um_conv)),
               ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.sod_qty_ord) * Number(remain.sod_um_conv),
               ld_expire: remain.sod_expire,
               last_modified_by: user_code,
@@ -753,6 +761,8 @@ const createdirect = async (req: Request, res: Response, next: NextFunction) => 
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * (-(Number(remain.sod_qty_ord) * Number(remain.sod_um_conv))),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -1450,6 +1460,8 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
           if (ld)
             await locationDetailServiceInstance.update(
               {
+                 dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(details.sod_qty_ord) * Number(1)),
                 ld_qty_oh: Number(ld.ld_qty_oh) - Number(details.sod_qty_ord) * Number(1),
                 ld_expire: details.sod_expire,
                 last_modified_by: user_code,
@@ -1477,6 +1489,8 @@ const updateSod = async (req: Request, res: Response, next: NextFunction) => {
               chr05:pt.pt_prod_line,
               ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * (-(Number(details.sod_qty_ord) * Number(1))),
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -1658,6 +1672,7 @@ const deleteOne = async (req: Request, res: Response, next: NextFunction) => {
         if (ld)
           await locationDetailServiceInstance.update(
             {
+               
               ld_qty_all: Number(ld.ld_qty_all) - Number(sods.sod_qty_ord) * Number(sods.sod_um_conv),
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,

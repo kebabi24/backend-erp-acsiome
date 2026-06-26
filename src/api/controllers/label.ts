@@ -316,6 +316,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     for (let item of items){desc = item.pt_desc1,
       draw = item.pt_draw
     }
+    console.log(draw)
     if(draw == 'SQUELETTE'){
       test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'SQUELETTE', seq_type: 'PL' });
       if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
@@ -334,7 +335,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     }
     else{
       if(draw == 'COLORANT'){
-      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'COL', seq_type: 'PL' });}
+      test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'COL', seq_type: 'PL' });
       if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
       else {labelId = req.body.lb_ref}
       if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
@@ -350,17 +351,35 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     
        }
       else{
-      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+        if(draw == 'BOBINE'){
+      test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'U1', seq_type: 'PL' });
       if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
       else {labelId = req.body.lb_ref}
-      if(test == true){await sequenceServiceInstance.update(
-        { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-        { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
-      );}
-      else{await sequenceServiceInstance.update(
-        { seq_curr_val: Number(seq.seq_curr_val) + 1 },
-        { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
-      
+      if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+    if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+    else {labelId = req.body.lb_ref}
+    if(test == true){await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: 'U1', seq_domain: user_domain },
+    );}
+    else{await sequenceServiceInstance.update(
+      { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+      { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
+    
+        }
+        else{
+                    
+                  if (seq==null){test = true; seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: 'PL', seq_type: 'PL' });}
+                  if(req.body.lb_ref == null){labelId = `${seq.seq_prefix}-${Number(seq.seq_curr_val) + 1}`;}
+                  else {labelId = req.body.lb_ref}
+                  if(test == true){await sequenceServiceInstance.update(
+                    { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+                    { seq_type: 'PL', seq_seq: 'PL', seq_domain: user_domain },
+                  );}
+                  else{await sequenceServiceInstance.update(
+                    { seq_curr_val: Number(seq.seq_curr_val) + 1 },
+                    { seq_type: 'PL', seq_seq: req.body.lb_cust, seq_domain: user_domain })}
+        }          
       }
     }
     

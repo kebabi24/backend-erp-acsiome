@@ -115,6 +115,10 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const locationDetails = await locationDetailServiceInstance.find({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
+    let data = []
+    for (let ld of locationDetails){
+      
+    }
     console.log("locationDetails")
   
    {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
@@ -623,7 +627,9 @@ const updateS = async (req: Request, res: Response, next: NextFunction) => {
 for (let ld of req.body.details) {
   const ref = await locationDetailServiceInstance.findOne({ ld_domain:user_domain,ld_ref:ld.ld_ref });
      locationDetail = await locationDetailServiceInstance.update(
-      { ld_user1:ld.ld_user1,ld_user2:ld.ld_user2,ld_status: ld.ld_status, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+      { dec01:ld.dec01,
+          dec02:ld.dec01 * ld.ld_qty_oh,
+         ld_user1:ld.ld_user1,ld_user2:ld.ld_user2,ld_status: ld.ld_status, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id : ld.id},
       
     );

@@ -205,6 +205,28 @@ const findemballage = async (req: Request, res: Response, next: NextFunction) =>
     return next(e);
   }
 };
+const findliaison = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.findsome({ code_domain:user_domain,code_fldname: req.query.var1 });
+
+    var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_cmmt });
+    }
+    //data);
+    return res.status(200).json(data);
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
 const findpostes = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all code endpoint');
@@ -543,8 +565,62 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const codeServiceInstance = Container.get(CodeService);
     const codes = await codeServiceInstance.find({ ...req.body ,code_domain:user_domain});
-    console.log(req.body)
+    
+    
     return res.status(200).json({ message: 'fetched succesfully', data: codes });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findOrganigramme = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const strs = await codeServiceInstance.find({ ...req.body ,code_fldname:'emp_upper',code_domain:user_domain});
+    let data = []
+    for (let str of strs){
+      let i = 0
+      console.log(str.code_value,'structure')
+
+      const jobs = await codeServiceInstance.find({ ...req.body ,code_fldname:'emp_job',chr01:str.code_value,code_domain:user_domain});
+      for(let job of jobs){
+      console.log(str.code_value,job.code_value,'job')  
+      const levels = await codeServiceInstance.find({ ...req.body ,code_fldname:'emp_level',chr01:job.code_value,code_domain:user_domain});
+      for(let level of levels){
+        console.log(str.code_value,job.code_value,level.code_value,'level')
+      const specs = await codeServiceInstance.find({ ...req.body ,code_fldname:'emp_spec',chr01:level.code_value,code_domain:user_domain});
+      for(let spec of specs){
+        console.log(str.code_value,job.code_value,level.code_value,spec.code_value,'spec')
+        data.push({id:spec.id, str: str.code_cmmt, job: job.code_cmmt,level:level.code_cmmt,spec:spec.code_cmmt });
+      
+      }}}
+    i = i + 1}
+
+    return res.status(200).json({ message: 'fetched succesfully', data: data });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByField = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by field  all code endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  try {
+    const codeServiceInstance = Container.get(CodeService);
+    const codes = await codeServiceInstance.find({ ...req.body ,code_domain:user_domain});
+    console.log(req.body)
+     var data = [];
+    for (let code of codes) {
+      data.push({ value: code.code_value, label: code.code_value });
+    }
+    console.log('data')
+    return res.status(200).json(data);
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -810,6 +886,7 @@ export default {
   findAct,
   findwostatus,
   findemballage,
+  findliaison,
   findpostes,
   findreptype,
   findrepjob,
@@ -826,6 +903,8 @@ export default {
   findColors,
   finddisease,
   findBy,
+  findOrganigramme,
+  findByField,
   findByOne,
   update,
   deleteOne,

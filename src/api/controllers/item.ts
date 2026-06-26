@@ -5,7 +5,8 @@ import FraisService from "../../services/frais"
 import FraisDetailService from "../../services/frais-detail"
 import CostSimulationService from "../../services/cost-simulation"
 import InventoryTransactionService from '../../services/inventory-transaction';
-
+import SequenceService from "../../services/sequence"
+import SequenceServiceService from "../../services/sequence-service"
 import { Router, Request, Response, NextFunction } from 'express';
 import { Container } from 'typedi';
 import { DATE, Op, Sequelize } from 'sequelize';
@@ -75,117 +76,118 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     //   }
     // };
     
-const it = {
+// const it = {
 
-  pt_part : jsonData['pt_part'],
-  pt_desc1 : jsonData['pt_desc1'],
-  pt_desc2 : jsonData['pt_desc2'],
-  pt_um : jsonData['pt_um'],
-  pt_prod_line : jsonData['pt_prod_line'],
-  pt_part_type : jsonData['pt_part_type'],
-  pt_draw : jsonData['pt_draw'],
-  pt_status : jsonData['pt_status'],
-  pt_rev : jsonData['pt_rev'],
-  pt_dsgn_grp : jsonData['pt_dsgn_grp'],
-  pt_group : jsonData['pt_group'],
- // pt_drwg_loc = jsonData['pt_drwg_loc'],
-  pt_drwg_size : jsonData['pt_drwg_size'],
-  pt_promo : jsonData['pt_promo'],
-  pt_break_cat : jsonData['pt_break_cat'],
-  pt_abc : jsonData['pt_abc'],
-  pt_avg_int : jsonData['pt_avg_int'],
-  pt_lot_ser : jsonData['pt_lot_ser'],
-  pt_cyc_int : jsonData['pt_cyc_int'],
-  pt_site : jsonData['pt_site'],
-  pt_shelflife : jsonData['pt_shelflife'],
-  pt_loc : jsonData['pt_loc'],
-  pt_sngl_lot : jsonData['pt_sngl_lot'],
-  pt_loc_type : jsonData['pt_loc_type'],
-  pt_critical : jsonData['pt_critical'],
-  pt_auto_lot : jsonData['pt_auto_lot'],
-  pt_rctpo_status : jsonData['pt_rctpo_status'],
-  pt_rctpo_active : jsonData['pt_rctpo_active'],
-  pt_lot_grp : jsonData['pt_lot_grp'],
-  pt_rctwo_status : jsonData['pt_rctwo_status'],
-  pt_rctwo_active : jsonData['pt_rctwo_active'],
-  pt_article : jsonData['pt_article'],
+//   pt_part : jsonData['pt_part'],
+//   pt_desc1 : jsonData['pt_desc1'],
+//   pt_desc2 : jsonData['pt_desc2'],
+//   pt_um : jsonData['pt_um'],
+//   pt_prod_line : jsonData['pt_prod_line'],
+//   pt_part_type : jsonData['pt_part_type'],
+//   pt_draw : jsonData['pt_draw'],
+//   pt_status : jsonData['pt_status'],
+//   pt_rev : jsonData['pt_rev'],
+//   pt_dsgn_grp : jsonData['pt_dsgn_grp'],
+//   pt_group : jsonData['pt_group'],
+//  // pt_drwg_loc = jsonData['pt_drwg_loc'],
+//   pt_drwg_size : jsonData['pt_drwg_size'],
+//   pt_promo : jsonData['pt_promo'],
+//   pt_break_cat : jsonData['pt_break_cat'],
+//   pt_abc : jsonData['pt_abc'],
+//   pt_avg_int : jsonData['pt_avg_int'],
+//   pt_lot_ser : jsonData['pt_lot_ser'],
+//   pt_cyc_int : jsonData['pt_cyc_int'],
+//   pt_site : jsonData['pt_site'],
+//   pt_shelflife : jsonData['pt_shelflife'],
+//   pt_loc : jsonData['pt_loc'],
+//   pt_sngl_lot : jsonData['pt_sngl_lot'],
+//   pt_loc_type : jsonData['pt_loc_type'],
+//   pt_critical : jsonData['pt_critical'],
+//   pt_auto_lot : jsonData['pt_auto_lot'],
+//   pt_rctpo_status : jsonData['pt_rctpo_status'],
+//   pt_rctpo_active : jsonData['pt_rctpo_active'],
+//   pt_lot_grp : jsonData['pt_lot_grp'],
+//   pt_rctwo_status : jsonData['pt_rctwo_status'],
+//   pt_rctwo_active : jsonData['pt_rctwo_active'],
+//   pt_article : jsonData['pt_article'],
 
-  pt_ship_wt : jsonData['pt_ship_wt'],
-  pt_ship_wt_um : jsonData['pt_ship_wt_um'],
-  pt_net_wt : jsonData['pt_net_wt'],
-  pt_net_wt_um : jsonData['pt_net_wt_um'],
-  pt_fr_class : jsonData['pt_fr_class'],
-  pt_size : jsonData['pt_size'],
-  pt_size_um : jsonData['pt_size_um'],
+//   pt_ship_wt : jsonData['pt_ship_wt'],
+//   pt_ship_wt_um : jsonData['pt_ship_wt_um'],
+//   pt_net_wt : jsonData['pt_net_wt'],
+//   pt_net_wt_um : jsonData['pt_net_wt_um'],
+//   pt_fr_class : jsonData['pt_fr_class'],
+//   pt_size : jsonData['pt_size'],
+//   pt_size_um : jsonData['pt_size_um'],
 
-  pt_ms : jsonData['pt_ms'],
-  pt_buyer : jsonData['pt_buyer'],
-  pt_phantom : jsonData['pt_phantom'],
-  pt_plan_ord : jsonData['pt_plan_ord'],
-  pt_vend : jsonData['pt_vend'],
+//   pt_ms : jsonData['pt_ms'],
+//   pt_buyer : jsonData['pt_buyer'],
+//   pt_phantom : jsonData['pt_phantom'],
+//   pt_plan_ord : jsonData['pt_plan_ord'],
+//   pt_vend : jsonData['pt_vend'],
 
-  pt_ord_min : jsonData['pt_ord_min'],
-  pt_timefence : jsonData['pt_timefence'],
-  pt_po_site : jsonData['pt_po_site'],
-  pt_ord_max : jsonData['pt_ord_max'],
-  pt_pm_code : jsonData['pt_pm_code'],
-  pt_ord_mult : jsonData['pt_ord_mult'],
-  pt_ord_pol : jsonData['pt_ord_pol'],
-  pt_cfg_type : jsonData['pt_cfg_type'],
-  pt_op_yield : jsonData['pt_op_yield'],
-  pt_ord_qty : jsonData['pt_ord_qty'],
-  pt_insp_rqd : jsonData['pt_insp_rqd'],
-  pt_yield_pct : jsonData['pt_yield_pct'],
-  pt_insp_lead : jsonData['pt_insp_lead'],
-  pt_run : jsonData['pt_run'],
-  pt_ord_per : jsonData['pt_ord_per'],
-  pt_mfg_lead : jsonData['pt_mfg_lead'],
-  pt_pur_lead : jsonData['pt_pur_lead'],
-  pt_setup : jsonData['pt_setup'],
-  pt_sfty_stk : jsonData['pt_sfty_stk'],
-  pt_sfty_time : jsonData['pt_sfty_time'],
-  pt_rop : jsonData['pt_rop'],
-  pt_atp_family : jsonData['pt_atp_family'],
-  pt_network : jsonData['pt_network'],
-  pt_run_seq1 : jsonData['pt_run_seq1'],
-  pt_routing : jsonData['pt_routing'],
-  // pt_iss_pol = jsonData['pt_iss_pol'],
-  pt_run_seq2 : jsonData['pt_run_seq2'],
-  pt_bom_code : jsonData['pt_bom_code'],
+//   pt_ord_min : jsonData['pt_ord_min'],
+//   pt_timefence : jsonData['pt_timefence'],
+//   pt_po_site : jsonData['pt_po_site'],
+//   pt_ord_max : jsonData['pt_ord_max'],
+//   pt_pm_code : jsonData['pt_pm_code'],
+//   pt_ord_mult : jsonData['pt_ord_mult'],
+//   pt_ord_pol : jsonData['pt_ord_pol'],
+//   pt_cfg_type : jsonData['pt_cfg_type'],
+//   pt_op_yield : jsonData['pt_op_yield'],
+//   pt_ord_qty : jsonData['pt_ord_qty'],
+//   pt_insp_rqd : jsonData['pt_insp_rqd'],
+//   pt_yield_pct : jsonData['pt_yield_pct'],
+//   pt_insp_lead : jsonData['pt_insp_lead'],
+//   pt_run : jsonData['pt_run'],
+//   pt_ord_per : jsonData['pt_ord_per'],
+//   pt_mfg_lead : jsonData['pt_mfg_lead'],
+//   pt_pur_lead : jsonData['pt_pur_lead'],
+//   pt_setup : jsonData['pt_setup'],
+//   pt_sfty_stk : jsonData['pt_sfty_stk'],
+//   pt_sfty_time : jsonData['pt_sfty_time'],
+//   pt_rop : jsonData['pt_rop'],
+//   pt_atp_family : jsonData['pt_atp_family'],
+//   pt_network : jsonData['pt_network'],
+//   pt_run_seq1 : jsonData['pt_run_seq1'],
+//   pt_routing : jsonData['pt_routing'],
+//   // pt_iss_pol = jsonData['pt_iss_pol'],
+//   pt_run_seq2 : jsonData['pt_run_seq2'],
+//   pt_bom_code : jsonData['pt_bom_code'],
 
-  pt_pur_price : jsonData['pt_pur_price'],
-  pt_price : jsonData['pt_price'],
-  pt_taxable : jsonData['pt_taxable'],
-  pt_taxc : jsonData['pt_taxc'],
+//   pt_pur_price : jsonData['pt_pur_price'],
+//   pt_price : jsonData['pt_price'],
+//   pt_taxable : jsonData['pt_taxable'],
+//   pt_taxc : jsonData['pt_taxc'],
 
 
-  pt_iss_pol   : jsonData['pt_iss_pol'],
-  pt_length    : jsonData['pt_length'],
-  pt_height    : jsonData['pt_height'],
-  pt_width     : jsonData['pt_width'],
-  pt_origin    : jsonData['pt_origin'],
+//   pt_iss_pol   : jsonData['pt_iss_pol'],
+//   pt_length    : jsonData['pt_length'],
+//   pt_height    : jsonData['pt_height'],
+//   pt_width     : jsonData['pt_width'],
+//   pt_origin    : jsonData['pt_origin'],
  
-  pt_model     : jsonData['pt_model'],
+//   pt_model     : jsonData['pt_model'],
   
-  int01        : jsonData['int01'],
-  int02        : jsonData['int02'],
+//   int01        : jsonData['int01'],
+//   int02        : jsonData['int02'],
 
 
 
-  pt_salable : jsonData['pt_salable'],
-  pt_inventoryable : jsonData['pt_inventoryable'],
-  pt_consignable : jsonData['pt_consignable'],
-  pt_returnable : jsonData['pt_returnable'],
-  pt_orderable : jsonData['pt_orderable'],
-  pt_loadable : jsonData['pt_loadable'],
-  pt_promotion : jsonData['pt_promotion'],
+//   pt_salable : jsonData['pt_salable'],
+//   pt_inventoryable : jsonData['pt_inventoryable'],
+//   pt_consignable : jsonData['pt_consignable'],
+//   pt_returnable : jsonData['pt_returnable'],
+//   pt_orderable : jsonData['pt_orderable'],
+//   pt_loadable : jsonData['pt_loadable'],
+//   pt_promotion : jsonData['pt_promotion'],
 
-  pt_loadpacking : jsonData['pt_loadpacking'],
-  pt_salepacking : jsonData['pt_salepacking'],
+//   pt_loadpacking : jsonData['pt_loadpacking'],
+//   pt_salepacking : jsonData['pt_salepacking'],
 
-}
+// }
+ 
     const item = await itemServiceInstance.create({
-      ...it,
+      ...it, 
       pt_drwg_loc: (req.file) ? req.file.originalname : null,
       pt_domain: user_domain,
       created_by: user_code,
@@ -193,9 +195,39 @@ const it = {
       last_modified_by: user_code,
       last_modified_ip_adr: req.headers.origin,
     });
+    
     return res.status(201).json({ message: 'created succesfully', data: {item} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const alter = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create item endpoint ');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    let dsgn_grp=req.body.pt_dsgn_grp
+    if(req.body.pt_dsgn_grp == 'N/BROY' && req.body.pt_group !='NON BROYE' ){dsgn_grp=''}
+   const data = req.body.data;
+    
+ console.log(req.body)
+    const item = await itemServiceInstance.update({
+      ...req.body,
+      // pt_drwg_loc:req.file.originalname,
+      pt_dsgn_grp :dsgn_grp,
+      pt_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    },{pt_part:req.body.pt_part});
+    
+    return res.status(201).json({ message: 'created succesfully', data: {item} });
+  } catch (e) {
+    logger.error('🔥 error: %o');
     return next(e);
   }
 };
@@ -273,6 +305,49 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     
     
     return res.status(200).json({ message: 'fetched succesfully', data: items });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByseq = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all item endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    const sequenceServiceInstance = Container.get(SequenceService)
+    const sequenceServiceServiceInstance = Container.get(SequenceServiceService)
+    const items = await itemServiceInstance.find({pt_domain:user_domain });
+    let result = []
+    for (let det of items){
+      const sequencesServices = await sequenceServiceServiceInstance.find({usgseq_code:req.body.seq,usgseq_service:det.pt_part,usgseq_domain:user_domain})
+      for (let seq of sequencesServices)
+        {let result_body={
+        id:det.id,
+        pt_part:det.pt_part,
+        pt_desc1:det.pt_desc1,
+        pt_um:det.pt_um,
+        pt_site:det.pt_site,
+        pt_loc:det.pt_loc,
+        pt_prod_line:det.pt_prod_line,
+        pt_part_type:det.pt_part_type,
+        pt_draw:det.pt_draw,
+        pt_group:det.pt_group,
+        pt_rev:det.pt_rev,
+        pt_break_cat:det.pt_break_cat,
+        pt_dsgn_grp:det.pt_dsgn_grp,
+
+
+      }
+      result.push(result_body)
+    }
+    }
+    
+    
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);
@@ -1445,8 +1520,10 @@ console.log(req.body)
 };
 export default {
   create,
+  alter,
   findBySpec,
   findBy,
+  findByseq,
   findBytaille,
   findByPurchase,
   findBywithperte,

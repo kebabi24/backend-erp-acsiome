@@ -582,7 +582,7 @@ const inv = await inventoryTransactionServiceInstance.find({
         //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
         const effdate = new Date(tr.tr_effdate);
         result.push({
-          id: i,
+          id: tr.id,
           tr_line:inv[inv.length-1].tr_line,
           tr_part:inv[inv.length-1].tr_part,
           tr_desc:inv[inv.length-1].tr_desc,
@@ -715,6 +715,204 @@ const inv = await inventoryTransactionServiceInstance.find({
          
     }
     }
+    return res.status(200).json({ message: 'fetched succesfully', data: result });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+const findByExs = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find by  all code endpoint');
+  const{user_code} = req.headers 
+  const{user_domain} = req.headers
+  try {
+    const {date1,date2,time1,time2} = req.body
+    
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const trs = await inventoryTransactionServiceInstance.findSpecial({
+      where: {
+        tr_domain:user_domain,
+        tr_addr:'U1',
+        tr_effdate : { [Op.between]: [date1, date2]},
+        
+      },
+      attributes: [
+        
+        'tr_lot',
+        'tr_effdate',
+        'tr_ref',
+        'tr_type',
+        'tr_site',
+        'tr_loc',
+        'createdAt',
+        'tr_part',
+        'tr_qty_loc',
+        
+      ],
+      group: ['tr_effdate', 'tr_lot','tr_qty_loc', 'tr_ref','tr_type','tr_site', 'tr_loc','createdAt','tr_part'],
+      raw: true,
+    });
+    
+    let result = [];
+    var i = 1;
+    for (let tr of trs) {
+      i = i + 1;
+
+      
+const inv = await inventoryTransactionServiceInstance.find({
+          tr_ref:tr.tr_ref,
+          tr_effdate:tr.tr_effdate,
+          tr_type:tr.tr_type,
+          tr_lot:tr.tr_lot,
+          tr_site:tr.tr_site,
+          tr_loc:tr.tr_loc,
+          tr_domain:user_domain
+        });
+      if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString())
+      { 
+
+       
+        //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+        const effdate = new Date(tr.tr_effdate);
+        result.push({
+          id: i,
+          tr_type:inv[inv.length-1].tr_type,
+          tr_line:inv[inv.length-1].tr_line,
+          tr_part:inv[inv.length-1].tr_part,
+          tr_desc:inv[inv.length-1].tr_desc,
+          tr_effdate: tr.tr_effdate,
+          tr_lot: tr.tr_lot,
+          tr_site: tr.tr_site,
+          tr_loc : tr.tr_loc,
+          tr_rmks: inv[inv.length-1].tr_rmks,
+          tr_addr: inv[inv.length-1].tr_addr,
+          tr_ref_site: inv[inv.length-1].tr_ref_site,
+          tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+          tr_user1:inv[inv.length-1].tr_user1,
+          tr_user2:inv[inv.length-1].tr_user2,
+          tr_qty_loc: inv[inv.length-1].tr_qty_loc,
+          tr_ref: tr.tr_ref,
+          tr_nbr:inv[inv.length-1].tr_nbr,
+          tr_um:inv[inv.length-1].tr_um,
+          tr_um_conv:inv[inv.length-1].tr_um_conv,
+          tr_price:inv[inv.length-1].tr_price,
+          tr_status:inv[inv.length-1].tr_status,
+          tr_expire:inv[inv.length-1].tr_expire,
+          tr_serial:inv[inv.length-1].tr_serial,
+          tr_program:inv[0].tr_program,
+        });
+       
+      }
+      
+        if(new Date(date1).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString() && new Date(inv[0].createdAt).toLocaleTimeString() >= time1 && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
+        { 
+
+         
+          //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+          const effdate = new Date(tr.tr_effdate);
+          result.push({
+            id:i,
+            tr_type:inv[inv.length-1].tr_type,
+            tr_line:inv[inv.length-1].tr_line,
+            tr_part:inv[inv.length-1].tr_part,
+            tr_desc:inv[inv.length-1].tr_desc,
+            tr_effdate: tr.tr_effdate,
+            tr_lot: tr.tr_lot,
+            tr_site: tr.tr_site,
+            tr_loc : tr.tr_loc,
+            tr_rmks: inv[inv.length-1].tr_rmks,
+            tr_addr: inv[inv.length-1].tr_addr,
+            tr_ref_site: inv[inv.length-1].tr_ref_site,
+            tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+            tr_user1:inv[inv.length-1].tr_user1,
+            tr_user2:inv[inv.length-1].tr_user2,
+            tr_qty_loc: inv[inv.length-1].tr_qty_loc,
+            tr_ref: tr.tr_ref,
+            tr_nbr:inv[inv.length-1].tr_nbr,
+            tr_um:inv[inv.length-1].tr_um,
+            tr_um_conv:inv[inv.length-1].tr_um_conv,
+            tr_price:inv[inv.length-1].tr_price,
+            tr_status:inv[inv.length-1].tr_status,
+            tr_expire:inv[inv.length-1].tr_expire,
+            tr_serial:inv[inv.length-1].tr_serial,
+            tr_program:inv[0].tr_program,
+          });
+          
+        }
+          if(new Date(tr.tr_effdate).toLocaleDateString() < new Date(date2).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date1).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() >= time1)
+          { 
+
+           
+            //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+            const effdate = new Date(tr.tr_effdate);
+            result.push({
+              id: i,
+              tr_type:inv[inv.length-1].tr_type,
+              tr_line:inv[inv.length-1].tr_line,
+              tr_part:inv[inv.length-1].tr_part,
+              tr_desc:inv[inv.length-1].tr_desc,
+              tr_effdate: tr.tr_effdate,
+              tr_lot: tr.tr_lot,
+              tr_site: tr.tr_site,
+              tr_loc : tr.tr_loc,
+              tr_rmks: inv[inv.length-1].tr_rmks,
+              tr_addr: inv[inv.length-1].tr_addr,
+              tr_ref_site: inv[inv.length-1].tr_ref_site,
+              tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+              tr_user1:inv[inv.length-1].tr_user1,
+              tr_user2:inv[inv.length-1].tr_user2,
+              tr_qty_loc: inv[inv.length-1].tr_qty_loc,
+              tr_ref: tr.tr_ref,
+            tr_nbr:inv[inv.length-1].tr_nbr,
+              tr_um:inv[inv.length-1].tr_um,
+              tr_um_conv:inv[inv.length-1].tr_um_conv,
+              tr_price:inv[inv.length-1].tr_price,
+              tr_status:inv[inv.length-1].tr_status,
+              tr_expire:inv[inv.length-1].tr_expire,
+              tr_serial:inv[inv.length-1].tr_serial,
+              tr_program:inv[0].tr_program,
+            });
+                      }
+            if(new Date(tr.tr_effdate).toLocaleDateString() > new Date(date1).toLocaleDateString()  && new Date(tr.tr_effdate).toLocaleDateString() == new Date(date2).toLocaleDateString()  && new Date(inv[0].createdAt).toLocaleTimeString() <= time2)
+              {
+          
+
+                //const items = await itemServiceInstance.findOnedesc({ pt_part: tr.tr_part,pt_domain:user_domain });
+                const effdate = new Date(tr.tr_effdate);
+                result.push({
+                  id: i,
+                  tr_type:inv[inv.length-1].tr_type,
+                  tr_line:inv[inv.length-1].tr_line,
+                  tr_part:inv[inv.length-1].tr_part,
+                  tr_desc:inv[inv.length-1].tr_desc,
+                  tr_effdate: tr.tr_effdate,
+                  tr_lot: tr.tr_lot,
+                  tr_site: tr.tr_site,
+                  tr_loc : tr.tr_loc,
+                  tr_rmks: inv[inv.length-1].tr_rmks,
+                  tr_addr: inv[inv.length-1].tr_addr,
+                  tr_ref_site: inv[inv.length-1].tr_ref_site,
+                  tr_ref_loc: inv[inv.length-1].tr_ref_loc,
+                  tr_user1:inv[inv.length-1].tr_user1,
+                  tr_user2:inv[inv.length-1].tr_user2,
+                  tr_qty_loc: inv[inv.length-1].tr_qty_loc,
+                  tr_ref: tr.tr_ref,
+                  tr_nbr:inv[inv.length-1].tr_nbr,
+                  tr_um:inv[inv.length-1].tr_um,
+                  tr_um_conv:inv[inv.length-1].tr_um_conv,
+                  tr_price:inv[inv.length-1].tr_price,
+                  tr_status:inv[inv.length-1].tr_status,
+                  tr_expire:inv[inv.length-1].tr_expire,
+                  tr_serial:inv[inv.length-1].tr_serial,
+                  tr_program:inv[0].tr_program,
+                });
+              
+              }
+         
+    
+    }
+    
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -983,6 +1181,8 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1019,6 +1219,8 @@ const rctUnp = async (req: Request, res: Response, next: NextFunction) => {
           int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
+          dec01:new_price,
+          dec02:new_price * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -1120,6 +1322,8 @@ const issUnp = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1265,6 +1469,8 @@ const rctEpi = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1301,6 +1507,8 @@ const rctEpi = async (req: Request, res: Response, next: NextFunction) => {
           int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
+          dec01:new_price,
+          dec02:new_price * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -1401,6 +1609,8 @@ const issEpi = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+            
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1506,6 +1716,8 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+             
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1559,6 +1771,8 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+          
+          dec02:ld1.dec01 * Number(ld1.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1597,6 +1811,8 @@ const issTr = async (req: Request, res: Response, next: NextFunction) => {
           ld__chr01: (ld) ? ld.ld__chr01 : null,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+          dec01:ld.dec01,
+          dec02:ld.dec01 * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
         });
       }
       await inventoryTransactionServiceInstance.create({
@@ -1742,6 +1958,8 @@ const issChl = async (req: Request, res: Response, next: NextFunction) => {
           ld__log01: status.is_nettable,
           ld_user1:it.tr_user1,
           ld_user2:it.tr_rmks,
+           
+          
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
         },
@@ -2297,11 +2515,19 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_ref: item.tr_ref,
         
       });
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
+        sct_part: it.tr_part,
+        sct_site: it.tr_site,
+        sct_sim: 'STD-CG',
+      });
       if (ld)
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+            
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2337,6 +2563,8 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
           int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
+           dec01:sct.sct_mtl_tl,
+          dec02:sct.sct_mtl_tl * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -2350,12 +2578,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
       } else {
         qtyoh = 0;
       }
-      const sct = await costSimulationServiceInstance.findOne({
-        sct_domain:user_domain,
-        sct_part: it.tr_part,
-        sct_site: it.tr_site,
-        sct_sim: 'STD-CG',
-      });
+      
       
       const wo = await workOrderServiceInstance.findOne({ wo_nbr: it.tr_nbr });
         let routing : any;
@@ -2454,11 +2677,18 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
         ld_ref: item.tr_ref,
         
       });
+      const sct = await costSimulationServiceInstance.findOne({
+        sct_domain:user_domain,
+        sct_part: it.tr_part,
+        sct_site: item.tr_site,
+        sct_sim: 'STD-CG',
+      });
       if (ld)
         await locationDetailServiceInstance.update(
-          {
+          {dec02:ld.dec01 * Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2494,6 +2724,8 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
           int03:pt.pt_size,
           chr04:it.tr_addr,
           chr05:pt.pt_prod_line,
+           dec01:sct.sct_mtl_tl,
+          dec02:sct.sct_mtl_tl * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -2506,12 +2738,7 @@ const rjctWo = async (req: Request, res: Response, next: NextFunction) => {
       } else {
         qtyoh = 0;
       }
-      const sct = await costSimulationServiceInstance.findOne({
-        sct_domain:user_domain,
-        sct_part: it.tr_part,
-        sct_site: item.tr_site,
-        sct_sim: 'STD-CG',
-      });
+      
       const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
       let routing : any;
       let emp: any;
@@ -2617,7 +2844,8 @@ const issWoD = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
-           
+            
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2887,7 +3115,8 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
             await locationDetailServiceInstance.update(
               {
                 ld_qty_oh: Number(qty),
-
+ 
+          dec02:ld.dec01 * Number(qty),
                 last_modified_by: user_code,
                 last_modified_ip_adr: req.headers.origin,
               },
@@ -2916,6 +3145,8 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * Number(qty),
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -2934,7 +3165,7 @@ const cycCnt = async (req: Request, res: Response, next: NextFunction) => {
             await locationDetailServiceInstance.update(
               {
                 ld_qty_frz: Number(remain.tr_qty_chg),
-
+ 
                 last_modified_by: user_code,
                 last_modified_ip_adr: req.headers.origin,
               },
@@ -3055,6 +3286,7 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
               {
                 ld_qty_oh: Number(qty),
 
+          dec02:ld.dec01 * Number(qty),
                 last_modified_by: user_code,
                 last_modified_ip_adr: req.headers.origin,
               },
@@ -3083,6 +3315,8 @@ const cycRcnt = async (req: Request, res: Response, next: NextFunction) => {
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * Number(qty),
               created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -3898,12 +4132,14 @@ const issWo = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
           { id: ld.id },
         );
-        const wo = await workOrderServiceInstance.findOne({ id: item.tr_lot });
+        const wo = await workOrderServiceInstance.findOne({ id: it.tr_lot });
         let routing : any;
         let emp: any;
         let locbegin : any;
@@ -4074,6 +4310,8 @@ const retissWo = async (req: Request, res: Response, next: NextFunction) => {
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sct.sct_mtl_tl,
+          dec02:sct.sct_mtl_tl * (Number(item.tr_qty_loc) * Number(item.tr_um_conv) * -1),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -4889,6 +5127,8 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             
+          dec02:ld.dec01 * Number(ld.ld_qty_oh) + Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -4958,6 +5198,8 @@ const rctUnpCab = async (req: Request, res: Response, next: NextFunction) => {
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
@@ -5043,7 +5285,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
       });
       
       
-    
+    console.log(item)
       const ld = await locationDetailServiceInstance.findOne({
         ld_part: item.tr_part,
         ld_lot: item.tr_serial,
@@ -5109,6 +5351,7 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
             ld_rev:pt.pt_rev,
+            
             created_by: user_code,
                 created_ip_adr: req.headers.origin,
                 last_modified_by: user_code,
@@ -5183,80 +5426,82 @@ const rctPoCab = async (req: Request, res: Response, next: NextFunction) => {
           chr05:pt.pt_prod_line,
           ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * Number(item.tr_qty_loc) * Number(item.tr_um_conv),
           created_by: user_code,
               created_ip_adr: req.headers.origin,
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
         });
       }
-      const pl = await productLineServiceInstance.findOne({pl_domain : user_domain,pl_prod_line: pt.pt_prod_line})
+    //   const pl = await productLineServiceInstance.findOne({pl_domain : user_domain,pl_prod_line: pt.pt_prod_line})
                         
-                        const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: new Date()})
-                        if(gl) {
-                          var seqgl =  gl.glt_ref.substring(10, 18)
-                       var d = Number(seqgl) + 1
+    //                     const gl = await generalLedgerServiceInstance.findLastId({glt_domain : user_domain,glt_date: new Date()})
+    //                     if(gl) {
+    //                       var seqgl =  gl.glt_ref.substring(10, 18)
+    //                    var d = Number(seqgl) + 1
                        
-                       var seqchar = ("000000" + d).slice(-6);
+    //                    var seqchar = ("000000" + d).slice(-6);
                        
-                       var ref = "ST" + moment().format('YYYYMMDD') + seqchar ;
-                       } else {
+    //                    var ref = "ST" + moment().format('YYYYMMDD') + seqchar ;
+    //                    } else {
                 
                            
-                           var ref = "ST"  + moment().format('YYYYMMDD') + "000001" ;
-                          // return year +  month + day;
+    //                        var ref = "ST"  + moment().format('YYYYMMDD') + "000001" ;
+    //                       // return year +  month + day;
                          
                 
-                       }
-                       const effdate = new Date(item.tr_effdate)
+    //                    }
+    //                    const effdate = new Date(item.tr_effdate)
                        
                        
                       
-                        await generalLedgerServiceInstance.create({glt_ref: ref,
-                          glt_line:1,
-                            glt_domain: user_domain,
-                            glt_addr: item.tr_vend,
-                            glt_curr: 'DA',
-                            glt_tr_type: 'TR',
-                            glt_dy_code: 'TR',
-                            glt_ex_rate: 1,
-                            glt_ex_rate2: 1,
-                            glt_doc: nlot,
-                            glt_doc_type:'RC',
-                            glt_effdate: new Date(item.tr_effdate),
-                            glt_entity: item.tr_site,
-                            glt_year: new Date(item.tr_effdate).getFullYear(),
-                            gl_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                            glt_curr_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                            glt_acct:pl.pl_inv_acct,
-                            glt_desc:'STOCK MARCHANDISE',
-                            glt_src_desc:'',
-                            dec01:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                            dec02:0,
-                            //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
-                            glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
-                        await generalLedgerServiceInstance.create({glt_ref: ref,
-                              glt_line:2,
-                                glt_domain: user_domain,
-                                glt_addr: item.tr_vend,
-                                glt_curr: 'DA',
-                                glt_tr_type: 'TR',
-                                glt_dy_code: 'TR',
-                                glt_ex_rate: 1,
-                                glt_ex_rate2: 1,
-                                glt_doc: nlot,
-                                glt_doc_type:'RC',
-                                glt_effdate: new Date(item.tr_effdate),
-                                glt_entity: item.tr_site,
-                                glt_year: new Date(item.tr_effdate).getFullYear(),
-                                gl_amt: - Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                                glt_curr_amt:- Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                                glt_acct:pl.pl_pur_acct,
-                                glt_desc:'ACHAT MARCHANDISE STOCKEES',
-                                glt_src_desc:'',
-                                dec01:0,
-                                dec02:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
-                                //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
-                                glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
+    //                     await generalLedgerServiceInstance.create({glt_ref: ref,
+    //                       glt_line:1,
+    //                         glt_domain: user_domain,
+    //                         glt_addr: item.tr_vend,
+    //                         glt_curr: 'DA',
+    //                         glt_tr_type: 'TR',
+    //                         glt_dy_code: 'TR',
+    //                         glt_ex_rate: 1,
+    //                         glt_ex_rate2: 1,
+    //                         glt_doc: nlot,
+    //                         glt_doc_type:'RC',
+    //                         glt_effdate: new Date(item.tr_effdate),
+    //                         glt_entity: item.tr_site,
+    //                         glt_year: new Date(item.tr_effdate).getFullYear(),
+    //                         gl_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                         glt_curr_amt:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                         glt_acct:pl.pl_inv_acct,
+    //                         glt_desc:'STOCK MARCHANDISE',
+    //                         glt_src_desc:'',
+    //                         dec01:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                         dec02:0,
+    //                         //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+    //                         glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
+    //                     await generalLedgerServiceInstance.create({glt_ref: ref,
+    //                           glt_line:2,
+    //                             glt_domain: user_domain,
+    //                             glt_addr: item.tr_vend,
+    //                             glt_curr: 'DA',
+    //                             glt_tr_type: 'TR',
+    //                             glt_dy_code: 'TR',
+    //                             glt_ex_rate: 1,
+    //                             glt_ex_rate2: 1,
+    //                             glt_doc: nlot,
+    //                             glt_doc_type:'RC',
+    //                             glt_effdate: new Date(item.tr_effdate),
+    //                             glt_entity: item.tr_site,
+    //                             glt_year: new Date(item.tr_effdate).getFullYear(),
+    //                             gl_amt: - Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                             glt_curr_amt:- Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                             glt_acct:pl.pl_pur_acct,
+    //                             glt_desc:'ACHAT MARCHANDISE STOCKEES',
+    //                             glt_src_desc:'',
+    //                             dec01:0,
+    //                             dec02:Number(item.tr_qty_loc) * Number(item.tr_um_conv) * Number(item.tr_price),
+    //                             //glt_curr_amt: (Number(entry.glt_amt)) * Number(accountPayable.ap_ex_rate2) /  Number(accountPayable.ap_ex_rate)   ,
+    //                             glt_date: new Date(), created_by: user_code, last_modified_by: user_code})
                            
                        
                             
@@ -5318,6 +5563,8 @@ const issTrV = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             chr04:it.tr_addr,
+             
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -5804,6 +6051,7 @@ export default {
   findByGroupEpi,
   findByRef,
   findByRefs,
+  findByExs,
   findByActivity,
   updatePrice,
   rctUnpCab,

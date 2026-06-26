@@ -102,6 +102,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await locationDetailServiceInstance.update(
           {
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
+             dec01:ld.dec01,
+          dec02:ld.dec01 *(Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },

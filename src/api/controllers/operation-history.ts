@@ -92,7 +92,7 @@ let total_days = Math.abs(new Date(last_date).getTime() - new Date(first_date).g
                 last_modified_ip_adr: req.headers.origin,
                 },{id:op1.id});
         }
-        else{   if(elapsed < 0){elapsed = 0}
+        else{   elapsed = 0
                 await operationHistoryServiceInstance.create({
                 ...down,
                 ...op,

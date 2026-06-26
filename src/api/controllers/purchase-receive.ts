@@ -119,9 +119,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       ].prh_rcvd += value.prh_rcvd;
       return res;
     }, {});
-    console.log('here CREATE');
-    console.log(result);
-    console.log('here CREATE END');
+    
 
     var i = 1;
     for (const arr of result) {
@@ -265,7 +263,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           (qty + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
         2,
       );
-      console.log(new_price)
+     
       await costSimulationServiceInstance.update(
         {
           sct_mtl_tl: new_price,
@@ -302,6 +300,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -329,6 +329,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price * Number(remain.prh_rcvd) ,
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -737,7 +739,7 @@ console.log(req.body.as)
           (qty + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
         2,
       );
-      console.log(new_price)
+    
       await costSimulationServiceInstance.update(
         {
           sct_mtl_tl: new_price,
@@ -774,6 +776,8 @@ console.log(req.body.as)
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -787,7 +791,7 @@ console.log(req.body.as)
           ld_lot: remain.prh_serial,
           ld_site: req.body.pr.prh_site,
           ld_loc: remain.prh_loc,
-          ld_qty_oh: Number(remain.prh_rcvd),
+          ld_qty_oh: Number(remain.prh_rcvd) * Number(remain.prh_um_conv) ,
           ld_expire: tr_expire,
           ld_status: tr_status,
           ld__log01: status.is_nettable,
@@ -801,6 +805,8 @@ console.log(req.body.as)
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price * Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -1240,6 +1246,8 @@ console.log(req.body)
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1267,6 +1275,8 @@ console.log(req.body)
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price * Number(remain.prh_rcvd),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -1607,6 +1617,8 @@ console.log(req.body)
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.tr_qty_loc) * Number(remain.tr_um_conv),
             ld_expire: remain.tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.tr_qty_loc) * Number(remain.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1634,6 +1646,8 @@ console.log(req.body)
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price *  Number(remain.prh_rcvd),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -1909,6 +1923,8 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -1938,6 +1954,8 @@ const createCabDet = async (req: Request, res: Response, next: NextFunction) => 
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price * Number(remain.prh_rcvd),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
@@ -2132,6 +2150,8 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           {
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(po.pod_qty_rcvd),
             ld__log01: true,
+             dec01:new_price,
+          dec02:new_price * Number(ld.ld_qty_oh) + Number(po.pod_qty_rcvd),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2158,6 +2178,8 @@ const rctPo = async (req: Request, res: Response, next: NextFunction) => {
           ld__chr02:po.item.pt_part_type,
           ld_rev:po.item.pt_rev,
           created_by: user_code,
+           dec01:new_price,
+          dec02:new_price * Number(po.pod_qty_rcvd),
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
@@ -2582,6 +2604,8 @@ const { prhnbr } = req.params;
             ld_qty_oh: Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price *(Number(ld.ld_qty_oh) - Number(item.tr_qty_loc) * Number(item.tr_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2610,6 +2634,8 @@ const { prhnbr } = req.params;
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
           created_by: user_code,
+           dec01:new_price,
+          dec02:new_price * (-Number(item.tr_qty_loc)),
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,
           last_modified_ip_adr: req.headers.origin,
@@ -2851,6 +2877,8 @@ const createPrhCab = async (req: Request, res: Response, next: NextFunction) => 
             ld_qty_oh: Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv),
             ld_expire: tr_expire,
             ld__log01: status.is_nettable,
+             dec01:new_price,
+          dec02:new_price * (Number(ld.ld_qty_oh) + Number(remain.prh_rcvd) * Number(remain.prh_um_conv)),
             last_modified_by: user_code,
             last_modified_ip_adr: req.headers.origin,
           },
@@ -2878,6 +2906,8 @@ const createPrhCab = async (req: Request, res: Response, next: NextFunction) => 
           chr05:part.pt_prod_line,
           ld__chr02:part.pt_part_type,
           ld_rev:part.pt_rev,
+           dec01:new_price,
+          dec02:new_price * Number(remain.prh_rcvd),
           created_by: user_code,
           created_ip_adr: req.headers.origin,
           last_modified_by: user_code,

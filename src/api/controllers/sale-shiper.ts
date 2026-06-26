@@ -139,7 +139,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
         if (ld)
           await locationDetailServiceInstance.update(
-            {
+            { dec01:ld.dec01,
+          dec02:ld.dec01 * Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_qty_all: Number(ld.ld_qty_all) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_expire: remain.psh_expire,
@@ -452,6 +453,8 @@ const createImmob = async (req: Request, res: Response, next: NextFunction) => {
               ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_qty_all: Number(ld.ld_qty_all) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_expire: remain.psh_expire,
+               dec01:ld.dec01,
+          dec02:ld.dec01 * (Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv)),
               last_modified_by: user_code,
               last_modified_ip_adr: req.headers.origin,
             },
@@ -477,6 +480,8 @@ const createImmob = async (req: Request, res: Response, next: NextFunction) => {
             chr05:pt.pt_prod_line,
             ld__chr02:pt.pt_part_type,
           ld_rev:pt.pt_rev,
+           dec01:sctdet.sct_mtl_tl,
+          dec02:sctdet.sct_mtl_tl * (Number(remain.psh_qty_ship) * Number(remain.psh_um_conv)),
             created_by: user_code,
             created_ip_adr: req.headers.origin,
             last_modified_by: user_code,
@@ -1009,11 +1014,11 @@ const findBydet = async (req: Request, res: Response, next: NextFunction) => {
     const inventoryTransactionServiceInstance = Container.get(inventoryTransactionService);
     
 
-    const shiper = await saleShiperServiceInstance.find({ ...req.body, psh_domain: user_domain });
+    const shiper = await saleShiperServiceInstance.find({  psh_domain: user_domain });
     
     let result = [];
     let i = 1;
-    
+    console.log('psh')
     for(let emp of shiper)
       {const item = await itemServiceInstance.findOne({pt_domain:user_domain, pt_part:emp.psh_part}) 
        const addresse = await addressServiceInstance.findOne({ad_domain:user_domain, ad_addr:emp.psh_cust})

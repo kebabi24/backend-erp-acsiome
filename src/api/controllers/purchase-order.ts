@@ -42,7 +42,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     });
     for (let entry of purchaseOrderDetail) {
       console.log(entry)
-      entry = { ...entry, pod_domain: user_domain, pod_nbr: po.po_nbr };
+
+      entry = { ...entry,pod_um_conv:1, pod_domain: user_domain, pod_nbr: po.po_nbr };
       await purchaseOrderDetailServiceInstance.create(entry);
     }
     const requisition = await requisitionServiceInstance.findOne({

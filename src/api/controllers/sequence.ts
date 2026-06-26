@@ -45,6 +45,33 @@ const createS = async (req: Request, res: Response, next: NextFunction) => {
         return next(e)
     }
 }
+const createSpt = async (req: Request, res: Response, next: NextFunction) => {
+    const logger = Container.get("logger")
+    const{user_code} = req.headers 
+    const{user_domain} = req.headers
+
+    logger.debug("Calling Create sequence endpoint")
+    try {
+        const sequenceServiceInstance = Container.get(SequenceService)
+        const sequenceServiceServiceInstance = Container.get(SequenceServiceService)
+        console.log(req.body)
+        const {seq,details,parts} = req.body
+        const sequence = await sequenceServiceInstance.create({...seq, seq_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+       for(let entry of details) {
+        const sequenceService = await sequenceServiceServiceInstance.create({...entry, usgseq_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+       }
+       for(let entrypt of parts) {
+        const sequenceService = await sequenceServiceServiceInstance.create({...entrypt, usgseq_domain: user_domain,created_by:user_code,created_ip_adr: req.headers.origin, last_modified_by:user_code,last_modified_ip_adr: req.headers.origin})
+       }
+        return res
+            .status(201)
+            .json({ message: "created succesfully", data:  sequence })
+    } catch (e) {
+        //#
+        logger.error("🔥 error: %o", e)
+        return next(e)
+    }
+}
 
 const findOne = async (req: Request, res: Response, next: NextFunction) => {
     const logger = Container.get("logger")
@@ -242,6 +269,7 @@ const findBySequence = async (req: Request, res: Response, next: NextFunction) =
 export default {
     create,
     createS,
+    createSpt,
     findOne,
     findOneService,
     findAll,

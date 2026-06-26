@@ -27,7 +27,9 @@ export default (app: Router) => {
   route.get('/training/', controller.findAllTraining);
   route.post('/findprodimg', controller.findProdImg);
   route.post('/', upload.single('file'), controller.create);
+  route.post('/alter', upload.single('file'), controller.alter);
   route.post('/find', controller.findBy);
+  route.post('/findseq', controller.findByseq);
   route.post('/findtaille', controller.findBytaille);
   route.post('/findpurchasing', controller.findByPurchase);
   route.post('/findwithperte', controller.findBywithperte);

@@ -103,7 +103,7 @@ else{let revision = 1
   revision = Number(wos.wo_rev) + 1
   console.log(revision)
   await workOrderServiceInstance.update(
-  { wo_rev:revision, wo_queue_eff: item.line,wo_status:item.wo_status, wo_rel_date:item.wo_rel_date,wo_due_date:item.wo_due_date,wo_qty_ord:item.wo_qty_ord,wo_bo_chg:item.wo_bo_chg,chr01:item.chr01,chr02:item.chr02,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
+  { wo_part:item.wo_part,wo_rev:revision, wo_queue_eff: item.line,wo_status:item.wo_status, wo_rel_date:item.wo_rel_date,wo_due_date:item.wo_due_date,wo_qty_ord:item.wo_qty_ord,wo_bo_chg:item.wo_bo_chg,chr01:item.chr01,chr02:item.chr02,last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
   { id : item.woid,wo_domain: user_domain},
 );} 
 if(item.woid == null || item.woid == "")
