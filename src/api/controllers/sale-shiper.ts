@@ -17,7 +17,7 @@ import addressService from '../../services/address';
 import { Op, Sequelize } from 'sequelize';
 
 import CodeService from '../../services/code';
-import saleShiperService from '../../services/sale-shiper';
+
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -139,8 +139,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         });
         if (ld)
           await locationDetailServiceInstance.update(
-            { dec01:ld.dec01,
-          dec02:ld.dec01 * Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
+            { //dec01:ld.dec01,
+          //dec02:ld.dec01 * Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_qty_oh: Number(ld.ld_qty_oh) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_qty_all: Number(ld.ld_qty_all) - Number(remain.psh_qty_ship) * Number(remain.psh_um_conv),
               ld_expire: remain.psh_expire,

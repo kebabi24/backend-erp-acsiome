@@ -26,8 +26,10 @@ const connectionString = 'DSN=mfgprod;UID=rpt;PWD=rpt;';
 //     const result = await connection.query("SELECT tr_part, tr_effdate,tr_type,tr_loc,tr_site,tr_qty_loc, tr_serial,tr_nbr, tr_lot,tr_addr,tr_trnbr FROM MFGPROD.PUB.tr_hist where  ((tr_type = 'rct-wo' or tr_type = 'rct-po') and  tr_domain = 'prima' and tr_effdate>={d '2026-01-01'})") ;
      const result = await connection.query("SELECT tr_part, tr_effdate,tr_type,tr_loc,tr_site,tr_qty_loc, tr_serial,tr_nbr, tr_lot,tr_addr,tr_trnbr FROM MFGPROD.PUB.tr_hist where  ((tr_type = 'rct-wo' or tr_type = 'rct-po') and  tr_domain = 'prima' and tr_effdate =SYSDATE())") ;
 
+     const res = result[0]
 for (let res of result) {
      console.log(res);
+     const employe = await this.local.query("SELECT * FROM pt_mstr  where pt_part = " + "'" + res.tr_part + "'" + "");
      await this.local.query("INSERT INTO  tr_hist(tr_part,tr_effdate,tr_type,tr_loc,tr_site,tr_qty_loc,tr_serial,tr_nbr,tr_lot,tr_addr,tr_trnbr,tr_domain,chr01) VALUES ('" + res.tr_part + "', '" + res.tr_effdate + "', '" + res.tr_type + "','" + res.tr_loc + "', '" + res.tr_site + "', '" + res.tr_qty_loc + "', '" + res.tr_serial + "', '" + res.tr_nbr + "', '" + res.tr_lot + "' , '" + res.tr_addr  + "' , '" + res.tr_trnbr + "' , '" + "prima"  + "import" +"')") 
 }
 

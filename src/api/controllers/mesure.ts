@@ -60,6 +60,7 @@ const findBy = async (req: Request, res: Response, next: NextFunction) => {
     const{user_domain} = req.headers
     try {
         const mesureServiceInstance = Container.get(MesureService)
+        console.log(req.body)
         const mesures = await mesureServiceInstance.findOne({...req.body,um_domain:user_domain})
         return res
             .status(200)
