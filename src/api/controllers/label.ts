@@ -307,7 +307,7 @@ const createlAB = async (req: Request, res: Response, next: NextFunction) => {
     const pageHeight = 284; // Height of the page in points
     var labelId = null;
     let test = false;
-    console.log(req.body)
+    
     let seq = await sequenceServiceInstance.findOne({ seq_domain: user_domain, seq_seq: req.body.lb_cust, seq_type: 'PL' });
     const itemServiceInstance = Container.get(ItemService);
     const items = await itemServiceInstance.find({ pt_part:req.body.lb_part,pt_domain:user_domain });
@@ -854,6 +854,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const labelServiceInstance = Container.get(LabelService);
     const { id } = req.params;
+    console.log(req.params)
     const label = await labelServiceInstance.update(
       { ...req.body, last_modified_by: user_code, last_modified_ip_adr: req.headers.origin },
       { id },

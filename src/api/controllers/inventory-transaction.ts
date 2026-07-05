@@ -3777,13 +3777,13 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   logger.debug('Calling find by  all saleOrder endpoint');
   const { user_domain } = req.headers;
   try {
-   console.log(user_domain)
+   console.log(req.body)
     const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
     const tr = await inventoryTransactionServiceInstance.findSpec1({
       where : {
       tr_domain:user_domain,
       tr_effdate:{ [Op.between]: [req.body.date, req.body.date1] },
-      tr_rev : { [Op.ne]: 'CHANGED' },
+      tr_rev : null,
       },
       attributes: [
         'id',
@@ -3854,7 +3854,7 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   //   i = i + 1
   // }
   // }
-  // console.log(tr)
+   console.log("tr",tr)
     return res.status(201).json({ message: 'created succesfully', data: tr });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
