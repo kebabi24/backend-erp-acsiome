@@ -764,8 +764,16 @@ const findBybroyage = async (req: Request, res: Response, next: NextFunction) =>
   logger.debug('Calling find by  SOME wo endpoint');
   const { user_domain } = req.headers;
   try {
+    console.log(req.body)
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.find({ wo_routing:{[Op.startsWith]:'B'} , wo_domain: user_domain});
+    const wos = await workOrderServiceInstance.findS({
+      where : {
+      wo_routing:{[Op.startsWith]:'B'} , 
+      
+      wo_ord_date:{ [Op.between]: [req.body.date, req.body.date1] },
+      wo_domain: user_domain,
+      }
+    });
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -778,7 +786,14 @@ const findByextrusion = async (req: Request, res: Response, next: NextFunction) 
   const { user_domain } = req.headers;
   try {
     const workOrderServiceInstance = Container.get(WorkOrderService);
-    const wos = await workOrderServiceInstance.find({ wo_routing:{[Op.startsWith]:'U'} , wo_domain: user_domain});
+    const wos = await workOrderServiceInstance.findS({ 
+      where : {
+        wo_routing:{[Op.startsWith]:'U'} , 
+        
+        wo_ord_date:{ [Op.between]: [req.body.date, req.body.date1] },
+        wo_domain: user_domain,
+        }
+    });
     return res.status(200).json({ message: 'fetched succesfully', data: wos });
   } catch (e) {
     logger.error('🔥 error: %o', e);
@@ -803,16 +818,24 @@ const findByPrograms = async (req: Request, res: Response, next: NextFunction) =
   logger.debug('Calling find by  SOME wo endpoint');
   const { user_domain } = req.headers;
   try {
+    console.log(req.body)
         const workOrderServiceInstance = Container.get(WorkOrderService);
-        const wos = await workOrderServiceInstance.find({ ...req.body,wo_queue_eff: 1 , wo_domain: user_domain});
+        const wos = await workOrderServiceInstance.findS({ 
+          where :{
+            wo_routing : req.body.wo_routing,
+            wo_rel_date:{ [Op.between]: [req.body.date, req.body.date1] },
+            wo_queue_eff: 1 , wo_domain: user_domain
+          }
+          });
+        
         let result= []
         let obj
         let i = 0
         for (let wo of wos){
-          console.log('wo',wo.wo_so_job,wos.length)
+         // console.log('wo',wo.wo_so_job,wos.length)
           const ofs = await workOrderServiceInstance.find({wo_so_job:wo.wo_so_job , wo_domain: user_domain});
           const firstof = await workOrderServiceInstance.findOne({wo_so_job:wo.wo_so_job ,wo_queue_eff:1, wo_domain: user_domain});
-          console.log(new Date(firstof.wo_rel_date).toLocaleTimeString())
+         // console.log(new Date(firstof.wo_rel_date).toLocaleTimeString())
           let qty_ord = 0
           let qty_comp = 0
           let qty_rjct = 0
@@ -830,7 +853,7 @@ const findByPrograms = async (req: Request, res: Response, next: NextFunction) =
           i = i + 1
         }
         
-      
+      console.log(result)
     return res.status(200).json({ message: 'fetched succesfully', data: result });
   } catch (e) {
     logger.error('🔥 error: %o', e);

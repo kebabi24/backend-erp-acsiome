@@ -1293,6 +1293,17 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
           raw: true,
          
              });
+          const virements = await bkhServiceInstance.findbetween({
+          where: { bkh_type:'P',bkh_terms:'CODPM2',bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
+          attributes: 
+          [ [Sequelize.fn('sum', Sequelize.col('bkh_amt')), 'virement' ]],
+          raw: true,
+          
+              });     
+
+
+
+
          const dep = await bkhServiceInstance.findbetween({
           where: { bkh_type:'ISS', bkh_code:{[Op.like]:'DP%'},bkh_effdate: { [Op.between]: [req.body.date, req.body.date1]}, bkh_domain: user_domain},
           attributes: 
@@ -1306,15 +1317,17 @@ const findBKHTRGRP = async (req: Request, res: Response, next: NextFunction) => 
     // bkhs.push({chr01:"Dépense",Montant:dep[0].Montant})} 
     // else {bkhs.push({chr01:"Dépense",Montant:0})}
     let cheque = 0
+    let virement = 0
     let depence = 0
     if (cheques[0].cheque !=0) {cheque = Number(cheques[0].cheque)}
+    if (virements[0].virement !=0) {virement = Number(virements[0].virement)}
     if (dep[0].Montant !=0) {depence = Number(-dep[0].Montant)}
     console.log(bkhs)
     console.log(cheques)
     console.log(dep[0].Montant)
       return res.status(200).json({
         message: 'fetched succesfully',
-        data:  {bkhs,depence,cheque} ,
+        data:  {bkhs,depence,cheque,virement} ,
       });
    
   } catch (e) {

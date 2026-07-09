@@ -44,6 +44,21 @@ export default class workOrderService {
       throw e;
     }
   }
+
+   public async findS(query: any): Promise<any> {
+    try {
+      const workOrders = await this.workOrderModel.findAll(
+         query, {
+          include:this.itemModel,
+      order: [['wo_so_job', 'DESC'],['wo_queue_eff', 'ASC']]},
+      );
+      this.logger.silly('find All workOrders mstr');
+      return workOrders;
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
   public async findSpecial(query: any): Promise<any> {
     try {
         const workOrders = await this.workOrderModel.findAll( query )

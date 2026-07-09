@@ -138,7 +138,7 @@ export default class EndlocationDetailService {
     try {
       const endlocationDetail = await this.endlocationDetailModel.findAll(query,{include: this.itemModel},);
       this.logger.silly('find All inventoryTransactions mstr');
-      return locationDetail;
+      return endlocationDetail;
     } catch (e) {
       this.logger.error(e);
       throw e;

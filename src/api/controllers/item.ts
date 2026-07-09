@@ -202,6 +202,42 @@ const it = {
     return next(e);
   }
 };
+
+
+
+
+const createModel = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  logger.debug('Calling Create item endpoint ');
+  try {
+    const itemServiceInstance = Container.get(ItemService);
+    
+   console.log("herrrrrrrrrrre")
+    console.log('req.body',req.body)
+   
+
+    const item = await itemServiceInstance.create({
+      ...req.body, 
+      pt_drwg_loc: (req.file) ? req.file.originalname : null,
+      pt_domain: user_domain,
+      created_by: user_code,
+      created_ip_adr: req.headers.origin,
+      last_modified_by: user_code,
+      last_modified_ip_adr: req.headers.origin,
+    });
+    
+    return res.status(201).json({ message: 'created succesfully', data: {item} });
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
+
+
+
 const alter = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -1520,6 +1556,7 @@ console.log(req.body)
 };
 export default {
   create,
+  createModel,
   alter,
   findBySpec,
   findBy,

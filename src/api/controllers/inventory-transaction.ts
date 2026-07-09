@@ -3854,7 +3854,7 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
   //   i = i + 1
   // }
   // }
-   console.log("tr",tr)
+   
     return res.status(201).json({ message: 'created succesfully', data: tr });
     //return res2.status(201).json({ message: 'created succesfully', data: results_body });
   } catch (e) {
@@ -6287,7 +6287,14 @@ const getDashboardData = async (req: Request, res: Response, next: NextFunction)
  let Prod_amt = 0 
  let Achat_qty = 0
  let Achat_amt = 0 
-    var prod  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-WO' and  tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ?" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+
+ let Prod_qty_MG = 0
+ let Prod_amt_MG = 0
+
+ let Prod_qty_LOTUS = 0
+ let Prod_amt_LOTUS = 0
+ 
+    var prod  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-WO' and public.tr_hist.chr01 = 'import' and  tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? and pt_rev = 'PRIMA'" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
     if(prod[0].qty == null) { Prod_qty = 0} else {  Prod_qty =  Number(prod[0].qty)}
     if(prod[0].amt == null) { Prod_amt = 0} else {  Prod_amt =  Number(Math.round(prod[0].amt))}
 
@@ -6299,9 +6306,19 @@ const getDashboardData = async (req: Request, res: Response, next: NextFunction)
     var Gachat  = await Sequelize.query("select  tr_addr,ad_name,sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.ad_mstr, public.pt_mstr  where tr_part = pt_part and  tr_type = 'RCT-PO' and public.tr_hist.chr01 = 'import' and tr_addr = ad_addr and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? group by tr_addr, ad_name" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
 
    var GAtype  = await Sequelize.query("select  pt_part_type,code_cmmt,sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist ,  public.pt_mstr, public.code_mstr  where tr_part = pt_part and  tr_type = 'RCT-PO' and code_fldname = 'pt_part_type' and code_value = pt_part_type and public.tr_hist.chr01 = 'import' and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? group by pt_part_type , code_cmmt" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
-   console.log(GAtype)
-  
-    return res.status(200).json({ message: 'fetched succesfully', data:{Prod_qty,Prod_amt,Achat_qty,Achat_amt,Gachat,GAtype} });
+   
+   var prod_mg  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-WO' and public.tr_hist.chr01 = 'import' and  tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? and pt_rev = 'MAGIC'" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+    if(prod_mg[0].qty == null) { Prod_qty_MG = 0} else {  Prod_qty_MG =  Number(prod_mg[0].qty)}
+    if(prod_mg[0].amt == null) { Prod_amt_MG = 0} else {  Prod_amt_MG =  Number(Math.round(prod_mg[0].amt))}
+
+    var prod_lt  = await Sequelize.query("select  sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist , public.pt_mstr  where tr_type = 'RCT-WO' and  tr_part = pt_part and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? and pt_rev = 'LOTUS'" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+    if(prod_lt[0].qty == null) { Prod_qty_LOTUS = 0} else {  Prod_qty_LOTUS =  Number(prod_lt[0].qty)}
+    if(prod_lt[0].amt == null) { Prod_amt_LOTUS = 0} else {  Prod_amt_LOTUS =  Number(Math.round(prod_lt[0].amt))}
+
+
+    var GPtype  = await Sequelize.query("select  pt_rev,code_cmmt,sum(tr_qty_loc) as qty,  sum(tr_qty_loc * pt_price) as amt from public.tr_hist ,  public.pt_mstr, public.code_mstr  where tr_part = pt_part and  tr_type = 'RCT-WO' and code_fldname = 'pt_rev' and code_value = pt_rev and public.tr_hist.chr01 = 'import' and tr_effdate >= ? and tr_effdate <= ?  and tr_domain = ? group by pt_rev , code_cmmt" , {replacements: [req.body.start_date,req.body.end_date,user_domain],type: QueryTypes.SELECT });
+    
+    return res.status(200).json({ message: 'fetched succesfully', data:{Prod_qty,Prod_amt,Achat_qty,Achat_amt,Gachat,GAtype,Prod_qty_MG,Prod_amt_MG,Prod_qty_LOTUS,Prod_amt_LOTUS,GPtype} });
   } catch (e) {
     logger.error('🔥 error: %o', e);
     return next(e);

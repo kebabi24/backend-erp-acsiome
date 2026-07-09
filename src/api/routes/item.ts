@@ -28,6 +28,7 @@ export default (app: Router) => {
   route.post('/findprodimg', controller.findProdImg);
   route.post('/', upload.single('file'), controller.create);
   route.post('/alter', upload.single('file'), controller.alter);
+  route.post('/model', upload.single('file'), controller.createModel);
   route.post('/find', controller.findBy);
   route.post('/findseq', controller.findByseq);
   route.post('/findtaille', controller.findBytaille);
