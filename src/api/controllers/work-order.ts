@@ -823,7 +823,7 @@ const findByPrograms = async (req: Request, res: Response, next: NextFunction) =
         const wos = await workOrderServiceInstance.findS({ 
           where :{
             wo_routing : req.body.wo_routing,
-            wo_rel_date:{ [Op.between]: [req.body.date, req.body.date1] },
+            wo_ord_date:{ [Op.between]: [req.body.date, req.body.date1] },
             wo_queue_eff: 1 , wo_domain: user_domain
           }
           });

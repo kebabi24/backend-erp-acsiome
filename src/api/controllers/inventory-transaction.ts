@@ -2504,6 +2504,7 @@ const rctWo = async (req: Request, res: Response, next: NextFunction) => {
     
     for (const data of detail) {
       const { desc, ...item } = data;
+      console.log(data)
       const pt = await itemServiceInstance.findOne({ pt_part: it.tr_part , pt_domain:user_domain});
 
       const ld = await locationDetailServiceInstance.findOne({
@@ -3785,34 +3786,41 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
       tr_effdate:{ [Op.between]: [req.body.date, req.body.date1] },
       tr_rev : null,
       },
-      attributes: [
-        'id',
-        'dec01',
-        'dec02',
-        'tr_addr',
-        'tr_part',
-        'tr_desc',
-        'tr__chr01',
-        'tr__chr02',
-        'tr__chr03',
-        'int03',
-        'tr_serial',
-        'tr_um',
-        'tr_qty_loc',
-        'tr_price',
-        'tr__dec02',
-        'tr_status',
-        'tr_ref',
-        'tr_effdate',
-        'tr_program',
-        'tr_so_job',
-        'tr_type',
-        'tr_nbr',
-        'tr_lot',
-        'tr_rmks',
-        'last_modified_by',      
-       
-      ],
+      attributes: {
+        // 'id',
+        // 'dec01',
+        // 'dec02',
+        // 'tr_addr',
+        // 'tr_part',
+        // 'tr_desc',
+        // 'tr__chr01',
+        // 'tr__chr02',
+        // 'tr__chr03',
+        // 'int03',
+        // 'tr_serial',
+        // 'tr_um',
+        // 'tr_qty_loc',
+        // 'tr_qty_chg'
+        // 'tr_price',
+        // 'tr__dec02',
+        // 'tr_status',
+        // 'tr_ref',
+        // 'tr_effdate',
+        // 'tr_program',
+        // 'tr_so_job',
+        // 'tr_type',
+        // 'tr_nbr',
+        // 'tr_lot',
+        // 'tr_rmks',
+        // 'last_modified_by',  
+        // 'tr_site',   
+        // 'tr_loc',
+        include: [
+        [Sequelize.literal('tr_part'), 'tr_oldpart'], 
+        [Sequelize.literal('tr_addr'), 'tr_oldaddr'], 
+        [Sequelize.literal('tr_serial'), 'tr_oldserial'], 
+        ]
+      },
     });
     // const tr =await sequelize.query("SELECT * from PUBLIC.tr_hist where PUBLIC.tr_hist.tr_effdate >= ? and PUBLIC.tr_hist.tr_effdate <= ? and PUBLIC.tr_hist.tr_domain = ? and PUBLIC.tr_hist.tr_rev != 'CHANGED'  ORDER BY PUBLIC.tr_hist.id DESC", { replacements: [req.body.date,req.body.date1,user_domain], type: QueryTypes.SELECT });
  
@@ -3864,6 +3872,38 @@ const findtrDate = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findtrDateTr = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  const sequelize = Container.get("sequelize")
+  logger.debug('Calling find by  all saleOrder endpoint');
+  const { user_domain } = req.headers;
+  try {
+   console.log(req.body)
+    const inventoryTransactionServiceInstance = Container.get(InventoryTransactionService);
+    const tr = await inventoryTransactionServiceInstance.findSpec1({
+      where : {
+      tr_domain:user_domain,
+      tr_effdate:{ [Op.between]: [req.body.date, req.body.date1] },
+      },
+      attributes: {
+        include: [
+        [Sequelize.literal('tr_part'), 'tr_oldpart'], 
+        [Sequelize.literal('tr_addr'), 'tr_oldaddr'], 
+        [Sequelize.literal('tr_serial'), 'tr_oldserial'], 
+        ]
+      },
+    });
+   
+    return res.status(201).json({ message: 'created succesfully', data: tr });
+    //return res2.status(201).json({ message: 'created succesfully', data: results_body });
+  } catch (e) {
+    //#
+    
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findtrDateAddr = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   
@@ -6352,6 +6392,7 @@ export default {
   issWoD,
   //issSo,
   findtrDate,
+  findtrDateTr,
   findtrDateAddr,
   findTrType,
   cycCnt,

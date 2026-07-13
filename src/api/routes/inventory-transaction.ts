@@ -40,6 +40,7 @@ export default (app: Router) => {
   route.post('/updateTr', controller.updateTrans);
   // route.post('/iss-so', controller.issSo);
   route.post('/findtrdate', controller.findtrDate);
+  route.post('/findtrdateTr', controller.findtrDateTr);
   route.post('/findtrdateaddr', controller.findtrDateAddr);
   route.post('/findtrtype', controller.findTrType);
   route.post('/cyc-cnt', controller.cycCnt);

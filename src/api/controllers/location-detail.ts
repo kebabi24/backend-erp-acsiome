@@ -18,7 +18,7 @@ import locationService from '../../services/location';
 import SaleOrderDetailService from '../../services/saleorder-detail';
 import SaleOrderService from '../../services/saleorder';
 import AccountShiperService from '../../services/account-shiper';
-import addressService from '../../services/address';
+import AddressService from '../../services/address';
 const create = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   const { user_code } = req.headers;
@@ -115,10 +115,7 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const locationDetailServiceInstance = Container.get(LocationDetailService);
     const locationDetails = await locationDetailServiceInstance.find({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
-    let data = []
-    for (let ld of locationDetails){
-      
-    }
+   
     console.log("locationDetails")
   
    {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
@@ -128,6 +125,33 @@ const findAll = async (req: Request, res: Response, next: NextFunction) => {
     return next(e);
   }
 };
+const findAllEdel = async (req: Request, res: Response, next: NextFunction) => {
+  const logger = Container.get('logger');
+  logger.debug('Calling find all locationDetail endpoint');
+  const { user_code } = req.headers;
+  const { user_domain } = req.headers;
+  
+  try {
+    const locationDetailServiceInstance = Container.get(LocationDetailService);
+    const addressServiceInstance = Container.get(AddressService);
+    const locationDetails = await locationDetailServiceInstance.find({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
+   for (let ld of locationDetails) {
+    const addr = await addressServiceInstance.findOne({ad_addr:ld.chr04,ad_domain:user_domain,});
+    if (addr) {
+      ld.ld__chr03 = addr.ad_name
+    }
+    
+   }
+    console.log("locationDetails")
+  
+   {return res.status(200).json({ message: 'fetched succesfully', data: locationDetails });}
+ 
+  } catch (e) {
+    logger.error('🔥 error: %o', e);
+    return next(e);
+  }
+};
+
 const findAllCos = async (req: Request, res: Response, next: NextFunction) => {
   const logger = Container.get('logger');
   logger.debug('Calling find all locationDetail endpoint');
@@ -142,7 +166,7 @@ const findAllCos = async (req: Request, res: Response, next: NextFunction) => {
     const saleOrderDetailServiceInstance = Container.get(SaleOrderDetailService)
     const saleOrderServiceInstance = Container.get(SaleOrderService)
     const accountShiper = Container.get(AccountShiperService)
-    const addressServiceInstance = Container.get(addressService)
+    const addressServiceInstance = Container.get(AddressService)
     const locationDetails = await locationDetailServiceInstance.findall({ld_domain:user_domain, ld_qty_oh: {[Op.gt]: 0}});
        
     //  console.log(locationDetails)
@@ -931,6 +955,7 @@ export default {
   createldpos,
   findOne,
   findAll,
+  findAllEdel,
   findAllCos,
   findBy,
   findByOne,

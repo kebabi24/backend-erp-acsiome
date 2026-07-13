@@ -5,7 +5,7 @@ const route = Router();
 
 export default (app: Router) => {
   app.use('/location-details', route);
-
+  route.get('/edel', controller.findAllEdel);
   route.get('/', controller.findAll);
   route.post('/', controller.create);
   route.post('/createldpos', controller.createldpos);
@@ -25,6 +25,7 @@ export default (app: Router) => {
   route.post('/findinstance', controller.findStatusInstance);
   route.post('/findbyprice', controller.findByPrice);
   route.post('/findbypricerole', controller.findByPriceRole);
+ 
   
   
 };
